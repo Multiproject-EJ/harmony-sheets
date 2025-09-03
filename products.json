@@ -1,56 +1,64 @@
 [
   {
+    "id": "smart-savings-tracker",
+    "name": "Smart Savings Tracker (Feminine)",
+    "tagline": "Savings challenge with a motivating visual grid.",
+    "price": "£15",
+    "category": "finance",
+    "style": "pink",
+    "image": "assets/placeholder-1.jpg",
+    "images": ["assets/placeholder-1.jpg","assets/placeholder-2.jpg","assets/placeholder-3.jpg"],
+    "etsy_url": "https://www.etsy.com/no-en/listing/1693934066/smart-savings-tracker-savings-challenge",
+    "stripe_link": "",
+    "featured": true,
+    "keywords": ["savings","finance","challenge","tracker","budget"],
+    "features": [
+      "Visual coin/grid savings system",
+      "Flexible goal amounts",
+      "Printable & friendly layout"
+    ],
+    "reviews": [
+      { "author": "Buyer", "text": "So motivating and actually fun to use!" }
+    ],
+    "description_html": "<h2>Save with momentum</h2><p>Track your progress with a clean, gamified savings grid. Designed to keep you motivated and consistent.</p><h2>What you get</h2><p>Spreadsheet file + quick start guide.</p><h2>Compatibility</h2><p>Google Sheets (best). Excel compatible.</p>"
+  },
+  {
+    "id": "timetrack-assistant",
+    "name": "TimeTrack Assistant — Time Tracker (Feminine)",
+    "tagline": "Log your time with clarity — see where your day goes.",
+    "price": "£14",
+    "category": "productivity",
+    "style": "pink",
+    "image": "assets/placeholder-2.jpg",
+    "images": ["assets/placeholder-2.jpg","assets/placeholder-1.jpg"],
+    "etsy_url": "https://www.etsy.com/no-en/listing/1665892770/timetrack-assistant-time-tracker",
+    "stripe_link": "",
+    "featured": true,
+    "keywords": ["time tracking","productivity","planner","log"],
+    "features": [
+      "Quick entry with dropdowns",
+      "Daily/weekly summaries",
+      "Simple dashboards"
+    ],
+    "reviews": [
+      { "author": "Customer", "text": "Exactly what I needed to understand my time." }
+    ],
+    "description_html": "<h2>Track with zero friction</h2><p>Fast, friendly time tracking that rolls up into clear daily and weekly views.</p><h2>What you get</h2><p>Spreadsheet + setup guide.</p>"
+  },
+  {
     "id": "annual-budget-neutral",
     "name": "Annual Budget (Neutral)",
     "tagline": "Yearly budgeting with calm dashboards.",
     "price": "£19",
     "category": "finance",
     "style": "neutral",
-    "image": "assets/placeholder-1.jpg",
-    "images": ["assets/placeholder-1.jpg","assets/placeholder-2.jpg","assets/placeholder-3.jpg"],
-    "etsy_url": "https://www.etsy.com/listing/XXXXXXXX",
-    "stripe_link": "https://buy.stripe.com/test_xxxxxxxxx",
-    "featured": true,
-    "keywords": ["budget","finance","cashflow","savings"],
-    "features": ["12 months","Categories & rollups","Cashflow & goals","Printable monthly sheets"],
-    "youtube_id": "dQw4w9WgXcQ",
-    "reviews": [
-      { "author": "Sophie", "text": "Beautiful and so easy to use. Exactly what I needed." },
-      { "author": "Mark", "text": "Clean design and powerful features. Great value!" }
-    ],
-    "description_html": "<h2>Overview</h2><p>A friendly, powerful yearly budget that feels like an app but stays a spreadsheet you own.</p><h2>What you get</h2><p>Spreadsheet + setup guide.</p><h2>Compatibility</h2><p>Google Sheets (best). Excel compatible.</p>"
-  },
-  {
-    "id": "pomodoro-pink",
-    "name": "Pomodoro Productivity (Pink)",
-    "tagline": "Focus sprints with auto-logging and clean visuals.",
-    "price": "£12",
-    "category": "productivity",
-    "style": "pink",
-    "image": "assets/placeholder-2.jpg",
-    "images": ["assets/placeholder-2.jpg","assets/placeholder-1.jpg"],
-    "etsy_url": "https://www.etsy.com/listing/YYYYYYYY",
-    "stripe_link": "https://buy.stripe.com/test_yyyyyyyy",
-    "featured": true,
-    "keywords": ["pomodoro","timer","focus"],
-    "features": ["Custom durations","Auto-start options","Daily/session counters","Sheets logging"],
-    "youtube_id": "",
-    "reviews": [{ "author": "Alex", "text": "Looks great and keeps me on track!" }],
-    "description_html": "<p>Stay in flow with short work sprints and quick breaks. Minimal UI, maximum clarity.</p>"
-  },
-  {
-    "id": "meal-planner",
-    "name": "Weekly Meal Planner",
-    "tagline": "Plan meals, auto-build grocery lists.",
-    "price": "£14",
-    "category": "food",
-    "style": "colorful",
     "image": "assets/placeholder-3.jpg",
-    "etsy_url": "https://www.etsy.com/listing/ZZZZZZZZ",
+    "images": ["assets/placeholder-3.jpg","assets/placeholder-1.jpg"],
+    "etsy_url": "https://www.etsy.com/shop/HarmonySheets",
     "stripe_link": "",
     "featured": false,
-    "keywords": ["meal","food","groceries"],
-    "features": ["Drag-and-drop meals","Auto grocery list","Budget view"],
-    "description_html": "<p>Keep food planning simple and on budget.</p>"
+    "keywords": ["budget","cashflow","savings","finance","planner"],
+    "features": ["12 months with rollups","Categories & tags","Cashflow & savings goals"],
+    "description_html": "<p>A friendly, powerful yearly budget that feels like an app but remains a spreadsheet you own.</p>"
   }
 ]
