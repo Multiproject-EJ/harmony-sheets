@@ -1,0 +1,40 @@
+[
+  {
+    "id": "annual-budget-neutral",
+    "name": "Annual Budget (Neutral)",
+    "tagline": "A calm, powerful yearly budget with dashboards.",
+    "price": "£19",
+    "category": "Budget",
+    "style": "neutral",
+    "image": "assets/mock-cover.jpg",
+    "etsy_url": "https://www.etsy.com/listing/XXXXXXXX",
+    "featured": true,
+    "keywords": ["budget","finance","annual","dashboard"],
+    "features": [
+      "12 months with rollups",
+      "Income/expense categorization",
+      "Cashflow & savings goals",
+      "Printable monthly sheets"
+    ],
+    "description_html": "<h2>Overview</h2><p>This is your all-in-one yearly budget designed to be fast and friendly. Track income, spending, and goals with an app-like UI on top of a spreadsheet database.</p><h2>What you get</h2><p>1× spreadsheet file + setup guide.</p>"
+  },
+  {
+    "id": "pomodoro-pink",
+    "name": "Pomodoro Productivity (Pink)",
+    "tagline": "Focus sprints with auto-logging and clean visuals.",
+    "price": "£12",
+    "category": "Pomodoro",
+    "style": "pink",
+    "image": "assets/mock-cover.jpg",
+    "etsy_url": "https://www.etsy.com/listing/YYYYYYYY",
+    "featured": true,
+    "keywords": ["pomodoro","productivity","timer"],
+    "features": [
+      "Custom durations & sounds",
+      "Auto-start options",
+      "Daily/Session counters",
+      "Google Sheets logging"
+    ],
+    "description_html": "<h2>Focus without fuss</h2><p>Stay in flow with short sprints and quick breaks, designed to feel calm and friendly.</p>"
+  }
+]
