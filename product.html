@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title id="p-title">Product — Harmony Sheets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-neutral">
+<header class="site-header">
+  <a class="brand" href="/"><img src="assets/logo.svg" alt="Logo"><span>Harmony Sheets</span></a>
+  <nav><a href="products.html">Shop</a><a href="about.html">About</a></nav>
+</header>
+
+<main class="product-page">
+  <div class="p-hero">
+    <img id="p-image" src="assets/mock-cover.jpg" alt="">
+    <div class="p-info">
+      <h1 id="p-name">Loading…</h1>
+      <p id="p-tagline"></p>
+      <p class="price" id="p-price"></p>
+      <div class="p-cta">
+        <a id="p-buy" class="btn primary" target="_blank" rel="noopener">Buy on Etsy</a>
+      </div>
+      <p class="one-time">One-time purchase. No subscriptions. You own the tool.</p>
+      <div class="style-switch small">
+        <button data-theme="theme-pink">Pink</button>
+        <button data-theme="theme-masculine">Masculine</button>
+        <button data-theme="theme-neutral" class="active">Neutral</button>
+        <button data-theme="theme-colorful">Colorful</button>
+      </div>
+    </div>
+  </div>
+
+  <article id="p-description" class="prose"></article>
+
+  <section class="specs">
+    <h2>What’s inside</h2>
+    <ul id="p-features"></ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>© <span id="year"></span> Harmony Sheets</p>
+</footer>
+
+<script src="app.js"></script>
+<script>App.initProduct()</script>
+</body>
+</html>
