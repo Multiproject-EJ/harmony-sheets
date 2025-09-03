@@ -2,39 +2,55 @@
   {
     "id": "annual-budget-neutral",
     "name": "Annual Budget (Neutral)",
-    "tagline": "A calm, powerful yearly budget with dashboards.",
+    "tagline": "Yearly budgeting with calm dashboards.",
     "price": "£19",
-    "category": "Budget",
+    "category": "finance",
     "style": "neutral",
-    "image": "assets/mock-cover.jpg",
+    "image": "assets/placeholder-1.jpg",
+    "images": ["assets/placeholder-1.jpg","assets/placeholder-2.jpg","assets/placeholder-3.jpg"],
     "etsy_url": "https://www.etsy.com/listing/XXXXXXXX",
+    "stripe_link": "https://buy.stripe.com/test_xxxxxxxxx",
     "featured": true,
-    "keywords": ["budget","finance","annual","dashboard"],
-    "features": [
-      "12 months with rollups",
-      "Income/expense categorization",
-      "Cashflow & savings goals",
-      "Printable monthly sheets"
+    "keywords": ["budget","finance","cashflow","savings"],
+    "features": ["12 months","Categories & rollups","Cashflow & goals","Printable monthly sheets"],
+    "youtube_id": "dQw4w9WgXcQ",
+    "reviews": [
+      { "author": "Sophie", "text": "Beautiful and so easy to use. Exactly what I needed." },
+      { "author": "Mark", "text": "Clean design and powerful features. Great value!" }
     ],
-    "description_html": "<h2>Overview</h2><p>This is your all-in-one yearly budget designed to be fast and friendly. Track income, spending, and goals with an app-like UI on top of a spreadsheet database.</p><h2>What you get</h2><p>1× spreadsheet file + setup guide.</p>"
+    "description_html": "<h2>Overview</h2><p>A friendly, powerful yearly budget that feels like an app but stays a spreadsheet you own.</p><h2>What you get</h2><p>Spreadsheet + setup guide.</p><h2>Compatibility</h2><p>Google Sheets (best). Excel compatible.</p>"
   },
   {
     "id": "pomodoro-pink",
     "name": "Pomodoro Productivity (Pink)",
     "tagline": "Focus sprints with auto-logging and clean visuals.",
     "price": "£12",
-    "category": "Pomodoro",
+    "category": "productivity",
     "style": "pink",
-    "image": "assets/mock-cover.jpg",
+    "image": "assets/placeholder-2.jpg",
+    "images": ["assets/placeholder-2.jpg","assets/placeholder-1.jpg"],
     "etsy_url": "https://www.etsy.com/listing/YYYYYYYY",
+    "stripe_link": "https://buy.stripe.com/test_yyyyyyyy",
     "featured": true,
-    "keywords": ["pomodoro","productivity","timer"],
-    "features": [
-      "Custom durations & sounds",
-      "Auto-start options",
-      "Daily/Session counters",
-      "Google Sheets logging"
-    ],
-    "description_html": "<h2>Focus without fuss</h2><p>Stay in flow with short sprints and quick breaks, designed to feel calm and friendly.</p>"
+    "keywords": ["pomodoro","timer","focus"],
+    "features": ["Custom durations","Auto-start options","Daily/session counters","Sheets logging"],
+    "youtube_id": "",
+    "reviews": [{ "author": "Alex", "text": "Looks great and keeps me on track!" }],
+    "description_html": "<p>Stay in flow with short work sprints and quick breaks. Minimal UI, maximum clarity.</p>"
+  },
+  {
+    "id": "meal-planner",
+    "name": "Weekly Meal Planner",
+    "tagline": "Plan meals, auto-build grocery lists.",
+    "price": "£14",
+    "category": "food",
+    "style": "colorful",
+    "image": "assets/placeholder-3.jpg",
+    "etsy_url": "https://www.etsy.com/listing/ZZZZZZZZ",
+    "stripe_link": "",
+    "featured": false,
+    "keywords": ["meal","food","groceries"],
+    "features": ["Drag-and-drop meals","Auto grocery list","Budget view"],
+    "description_html": "<p>Keep food planning simple and on budget.</p>"
   }
 ]
