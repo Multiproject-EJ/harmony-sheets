@@ -1,64 +1,65 @@
-[
-  {
-    "id": "smart-savings-tracker",
-    "name": "Smart Savings Tracker (Feminine)",
-    "tagline": "Savings challenge with a motivating visual grid.",
-    "price": "£15",
-    "category": "finance",
-    "style": "pink",
-    "image": "assets/placeholder-1.jpg",
-    "images": ["assets/placeholder-1.jpg","assets/placeholder-2.jpg","assets/placeholder-3.jpg"],
-    "etsy_url": "https://www.etsy.com/no-en/listing/1693934066/smart-savings-tracker-savings-challenge",
-    "stripe_link": "",
-    "featured": true,
-    "keywords": ["savings","finance","challenge","tracker","budget"],
-    "features": [
-      "Visual coin/grid savings system",
-      "Flexible goal amounts",
-      "Printable & friendly layout"
-    ],
-    "reviews": [
-      { "author": "Buyer", "text": "So motivating and actually fun to use!" }
-    ],
-    "description_html": "<h2>Save with momentum</h2><p>Track your progress with a clean, gamified savings grid. Designed to keep you motivated and consistent.</p><h2>What you get</h2><p>Spreadsheet file + quick start guide.</p><h2>Compatibility</h2><p>Google Sheets (best). Excel compatible.</p>"
-  },
-  {
-    "id": "timetrack-assistant",
-    "name": "TimeTrack Assistant — Time Tracker (Feminine)",
-    "tagline": "Log your time with clarity — see where your day goes.",
-    "price": "£14",
-    "category": "productivity",
-    "style": "pink",
-    "image": "assets/placeholder-2.jpg",
-    "images": ["assets/placeholder-2.jpg","assets/placeholder-1.jpg"],
-    "etsy_url": "https://www.etsy.com/no-en/listing/1665892770/timetrack-assistant-time-tracker",
-    "stripe_link": "",
-    "featured": true,
-    "keywords": ["time tracking","productivity","planner","log"],
-    "features": [
-      "Quick entry with dropdowns",
-      "Daily/weekly summaries",
-      "Simple dashboards"
-    ],
-    "reviews": [
-      { "author": "Customer", "text": "Exactly what I needed to understand my time." }
-    ],
-    "description_html": "<h2>Track with zero friction</h2><p>Fast, friendly time tracking that rolls up into clear daily and weekly views.</p><h2>What you get</h2><p>Spreadsheet + setup guide.</p>"
-  },
-  {
-    "id": "annual-budget-neutral",
-    "name": "Annual Budget (Neutral)",
-    "tagline": "Yearly budgeting with calm dashboards.",
-    "price": "£19",
-    "category": "finance",
-    "style": "neutral",
-    "image": "assets/placeholder-3.jpg",
-    "images": ["assets/placeholder-3.jpg","assets/placeholder-1.jpg"],
-    "etsy_url": "https://www.etsy.com/shop/HarmonySheets",
-    "stripe_link": "",
-    "featured": false,
-    "keywords": ["budget","cashflow","savings","finance","planner"],
-    "features": ["12 months with rollups","Categories & tags","Cashflow & savings goals"],
-    "description_html": "<p>A friendly, powerful yearly budget that feels like an app but remains a spreadsheet you own.</p>"
-  }
-]
+{
+  "id": "pomodoro-timer",
+  "name": "Pomodoro — Productivity & Study Timer",
+  "tagline": "Stay focused with structured 25/5 cycles.",
+  "price": "75 NOK",
+  "category": "productivity",
+  "style": "neutral",
+  "image": "assets/pomodoro-placeholder.jpg",
+  "images": ["assets/pomodoro-placeholder.jpg"],
+  "etsy_url": "",
+  "stripe_link": "https://buy.stripe.com/test_pomodoro", 
+  "featured": true,
+  "keywords": ["pomodoro","focus","study","productivity","timer"],
+  "features": [
+    "Customizable focus & break lengths",
+    "Auto-start options",
+    "Daily session counter",
+    "Designed for productivity & study"
+  ],
+  "reviews": [],
+  "description_html": "<h2>Focus without distractions</h2><p>Use the Pomodoro method (25/5) to build sustainable focus habits. Track your study or work sessions easily.</p>"
+},
+{
+  "id": "study-session-logger",
+  "name": "Study Session Logger",
+  "tagline": "Log study sessions with clarity and insight.",
+  "price": "75 NOK",
+  "category": "productivity",
+  "style": "neutral",
+  "image": "assets/study-placeholder.jpg",
+  "images": ["assets/study-placeholder.jpg"],
+  "etsy_url": "",
+  "stripe_link": "https://buy.stripe.com/test_studylogger",
+  "featured": false,
+  "keywords": ["study","tracker","logger","time tracking"],
+  "features": [
+    "Log study sessions quickly",
+    "Daily & weekly totals",
+    "Exportable records"
+  ],
+  "reviews": [],
+  "description_html": "<h2>Track your learning time</h2><p>Keep consistent records of your study hours. Great for students and lifelong learners who want visibility into their time investment.</p>"
+},
+{
+  "id": "all-in-one-dashboard",
+  "name": "All-in-One Productivity Dashboard",
+  "tagline": "Pomodoro + Study Logger with integrated dashboard.",
+  "price": "129 NOK",
+  "category": "productivity",
+  "style": "neutral",
+  "image": "assets/all-in-one-placeholder.jpg",
+  "images": ["assets/all-in-one-placeholder.jpg"],
+  "etsy_url": "",
+  "stripe_link": "https://buy.stripe.com/test_allinone",
+  "featured": true,
+  "keywords": ["dashboard","productivity","pomodoro","study"],
+  "features": [
+    "Pomodoro Timer included",
+    "Study Session Logger included",
+    "Combined dashboard view",
+    "One-time purchase"
+  ],
+  "reviews": [],
+  "description_html": "<h2>Two tools in one</h2><p>Get both the Pomodoro Timer and Study Session Logger bundled together. Manage your time and focus from one central dashboard.</p>"
+}
