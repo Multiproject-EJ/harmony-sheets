@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FAQ / Support — Harmony Sheets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-neutral">
+<header class="site-header">
+  <a class="brand" href="/"><img src="assets/logo.svg" alt=""><span>Harmony Sheets</span></a>
+  <nav class="main-nav">
+    <a href="products.html">Shop</a>
+    <a href="bundles.html">Bundles</a>
+    <a class="active" href="faq.html">FAQ / Support</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main class="faq">
+  <h1>FAQ / Support</h1>
+  <details open><summary>Do I need a subscription?</summary><p>No. All products are a one-time purchase. You own the files.</p></details>
+  <details><summary>Which apps do these spreadsheets use?</summary><p>Google Sheets first; many also work in Excel. Each product page lists compatibility.</p></details>
+  <details><summary>Can I get updates?</summary><p>Yes. Minor updates are free. We email buyers or post on product pages.</p></details>
+  <details><summary>Refunds?</summary><p>If a product doesn’t work as described and we can’t fix it, we’ll make it right.</p></details>
+
+  <h2>Contact</h2>
+  <form id="support-form" class="support">
+    <input name="name" placeholder="Your name">
+    <input name="email" type="email" required placeholder="Email">
+    <input name="order" placeholder="Order # (optional)">
+    <textarea name="message" rows="4" required placeholder="How can we help?"></textarea>
+    <button class="btn primary">Send</button>
+    <p id="support-status" class="muted"></p>
+  </form>
+</main>
+
+<footer class="site-footer"><p>© <span id="year"></span> Harmony Sheets</p></footer>
+<script src="app.js"></script>
+<script>App.initFAQ()</script>
+</body>
+</html>
