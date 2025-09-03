@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Starter Pack",
+    "tagline": "Budget + Pomodoro — get started fast.",
+    "price": "£27",
+    "savings": "£4",
+    "category": "planning",
+    "image": "assets/placeholder-1.jpg",
+    "stripe_link": "https://buy.stripe.com/test_bundleAAA"
+  },
+  {
+    "name": "Productivity Pack",
+    "tagline": "Pomodoro + Project Planner.",
+    "price": "£22",
+    "savings": "£3",
+    "category": "productivity",
+    "image": "assets/placeholder-2.jpg",
+    "stripe_link": "https://buy.stripe.com/test_bundleBBB"
+  }
+]
