@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Bundles — Harmony Sheets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-neutral">
+<header class="site-header">
+  <a class="brand" href="/"><img src="assets/logo.svg" alt=""><span>Harmony Sheets</span></a>
+  <nav class="main-nav">
+    <a href="products.html">Shop</a>
+    <a class="active" href="bundles.html">Bundles</a>
+    <a href="faq.html">FAQ / Support</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<main class="grid">
+  <h1>Save with bundles</h1>
+  <div id="bundles-grid" class="cards"></div>
+</main>
+
+<footer class="site-footer"><p>© <span id="year"></span> Harmony Sheets</p></footer>
+<script src="app.js"></script>
+<script>App.initBundles()</script>
+</body>
+</html>
