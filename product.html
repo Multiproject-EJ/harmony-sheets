@@ -1,79 +1,67 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8"/>
   <title>Product — Harmony Sheets</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
-<body class="theme-neutral">
-<header class="site-header">
-  <a class="brand" href="/"><img src="assets/logo.svg" alt=""><span>Harmony Sheets</span></a>
-  <nav class="main-nav">
-    <a href="products.html?cat=finance" data-cat="finance">Budgets & Personal Finance</a>
-    <a href="products.html?cat=productivity" data-cat="productivity">Productivity & Projects</a>
-    <a href="products.html?cat=health" data-cat="health">Health & Fitness</a>
-    <a href="products.html?cat=food" data-cat="food">Food & Nutrition</a>
-    <a href="products.html?cat=creative" data-cat="creative">Creative & Learning</a>
-    <a href="products.html?cat=planning" data-cat=planning>Planning & Calendars</a>
-    <a href="bundles.html">Bundles</a>
-    <a href="faq.html">FAQ / Support</a>
-    <a href="about.html">About</a>
-  </nav>
-</header>
+<body class="page-product">
+  <header class="site-header">
+    <a class="brand" href="/"><img src="assets/logo.svg" alt=""><span>Harmony Sheets</span></a>
+    <nav class="main-nav">
+      <a href="products.html?cat=finance">Budgets & Personal Finance</a>
+      <a href="products.html?cat=productivity">Productivity & Projects</a>
+      <a href="products.html?cat=health">Health & Fitness</a>
+      <a href="products.html?cat=food">Food & Nutrition</a>
+      <a href="products.html?cat=creative">Creative & Learning</a>
+      <a href="products.html?cat=planning">Planning & Calendars</a>
+      <a href="bundles.html">Bundles</a>
+      <a href="faq.html">FAQ / Support</a>
+      <a href="about.html">About</a>
+    </nav>
+  </header>
 
-<main class="product-page">
-  <div class="p-hero">
-    <div class="slider" id="p-slider">
-      <!-- slides injected -->
-      <button class="nav prev" aria-label="Previous">‹</button>
-      <button class="nav next" aria-label="Next">›</button>
-    </div>
-    <div class="p-info">
-      <h1 id="p-name">Loading…</h1>
-      <p id="p-tagline" class="tagline"></p>
-      <p id="p-price" class="price"></p>
-      <div class="p-cta">
-        <a id="p-etsy" class="btn ghost" target="_blank" rel="noopener">Buy on Etsy</a>
-        <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy Direct</a>
+  <main class="product">
+    <section class="product-hero">
+      <div class="gallery" id="p-slider">
+        <button class="prev" aria-label="Previous">‹</button>
+        <button class="next" aria-label="Next">›</button>
+        <!-- slides injected by app.js -->
       </div>
-      <p class="one-time">One-time purchase. No subscriptions. You own the tool.</p>
-      <ul id="p-features" class="bullets"></ul>
-    </div>
-  </div>
 
-  <article id="p-description" class="prose"></article>
+      <div class="info">
+        <h1 id="p-name"></h1>
+        <p id="p-tagline" class="tagline"></p>
+        <p id="p-price" class="price"></p>
 
-  <section class="video" id="p-video"></section>
+        <div class="actions">
+          <!-- IMPORTANT: no placeholder href -->
+          <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy now</a>
+          <a id="p-etsy" class="btn ghost" target="_blank" rel="noopener">Buy on Etsy</a>
+        </div>
 
-  <section class="reviews">
-    <h2>What buyers say</h2>
-    <div id="p-reviews" class="reviews-wrap"></div>
-  </section>
+        <ul id="p-features" class="features"></ul>
+        <div id="p-description" class="desc"></div>
+        <div id="p-video" class="video"></div>
+        <div id="p-reviews" class="reviews"></div>
 
-  <section class="suggest">
-    <h2>Suggest a feature / Ask for help</h2>
-    <form id="suggest-form">
-      <input type="hidden" name="product_id" id="product_id">
-      <div class="two">
-        <input name="name" placeholder="Your name">
-        <input name="email" type="email" required placeholder="Email (for reply)">
+        <!-- Suggestion form (works with your existing app.js) -->
+        <form id="suggest-form" class="suggest">
+          <input type="hidden" name="type" value="Suggestion">
+          <input type="hidden" id="product_id" name="product_id" value="">
+          <label>Your idea <textarea name="message" required></textarea></label>
+          <button type="submit" class="btn">Send suggestion</button>
+          <span id="suggest-status" class="muted"></span>
+        </form>
       </div>
-      <select name="type">
-        <option>Feature request</option>
-        <option>Question</option>
-        <option>Bug report</option>
-      </select>
-      <textarea name="message" rows="4" placeholder="Your message…" required></textarea>
-      <button class="btn primary">Send</button>
-      <p id="suggest-status" class="muted"></p>
-    </form>
-  </section>
-</main>
+    </section>
+  </main>
 
-<footer class="site-footer"><p>© <span id="year"></span> Harmony Sheets</p></footer>
-<script src="app.js"></script>
-<script>App.initProduct()</script>
+  <footer class="site-footer"><p>© <span id="year"></span> Harmony Sheets</p></footer>
+
+  <script src="app.js"></script>
+  <script>App.initProduct();</script>
 </body>
 </html>
