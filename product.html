@@ -44,6 +44,20 @@
 
         <ul id="p-features" class="features"></ul>
         <div id="p-description" class="desc"></div>
+
+        <!-- Color variations image (static asset) -->
+        <div id="p-color-variations" class="desc" style="margin-top:1rem;">
+          <h3 style="margin:0 0 .5rem 0;">Color variations</h3>
+          <picture>
+            <!-- WebP first; add a PNG/JPG fallback later if you want -->
+            <source srcset="assets/pomodoro-colors.webp" type="image/webp">
+            <img src="assets/pomodoro-colors.webp"
+                 alt="Pomodoro Timer color variations"
+                 style="max-width:100%;height:auto;border-radius:8px;display:block;">
+          </picture>
+          <p class="muted" style="margin-top:.5rem;">Preview of available themes for the Pomodoro timer.</p>
+        </div>
+
         <div id="p-video" class="video"></div>
         <div id="p-reviews" class="reviews"></div>
 
