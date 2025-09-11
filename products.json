@@ -1,104 +1,145 @@
 [
   {
-    "id": "smart-savings-tracker",
-    "name": "Smart Savings Tracker (Feminine)",
-    "tagline": "Savings challenge with a motivating visual grid.",
-    "price": "75 NOK",
-    "category": "finance",
-    "style": "pink",
-    "image": "assets/placeholder-1.jpg",
-    "images": ["assets/placeholder-1.jpg","assets/placeholder-2.jpg","assets/placeholder-3.jpg"],
-    "etsy_url": "https://www.etsy.com/no-en/listing/1693934066/smart-savings-tracker-savings-challenge",
-    "stripe_link": "",
-    "featured": true,
-    "keywords": ["savings","finance","challenge","tracker","budget"],
-    "features": ["Visual coin/grid savings system","Flexible goal amounts","Printable & friendly layout"],
-    "reviews": [{ "author": "Buyer", "text": "So motivating and actually fun to use!" }],
-    "description_html": "<h2>Save with momentum</h2><p>Track your progress with a clean, gamified savings grid. Designed to keep you motivated and consistent.</p><h2>What you get</h2><p>Spreadsheet file + quick start guide.</p><h2>Compatibility</h2><p>Google Sheets (best). Excel compatible.</p>"
-  },
-  {
-    "id": "timetrack-assistant",
-    "name": "TimeTrack Assistant — Time Tracker (Feminine)",
-    "tagline": "Log your time with clarity — see where your day goes.",
-    "price": "75 NOK",
-    "category": "productivity",
-    "style": "pink",
-    "image": "assets/placeholder-2.jpg",
-    "images": ["assets/placeholder-2.jpg","assets/placeholder-1.jpg"],
-    "etsy_url": "https://www.etsy.com/no-en/listing/1665892770/timetrack-assistant-time-tracker",
-    "stripe_link": "",
-    "featured": true,
-    "keywords": ["time tracking","productivity","planner","log"],
-    "features": ["Quick entry with dropdowns","Daily/weekly summaries","Simple dashboards"],
-    "reviews": [{ "author": "Customer", "text": "Exactly what I needed to understand my time." }],
-    "description_html": "<h2>Track with zero friction</h2><p>Fast, friendly time tracking that rolls up into clear daily and weekly views.</p><h2>What you get</h2><p>Spreadsheet + setup guide.</p>"
-  },
-  {
-    "id": "annual-budget-neutral",
-    "name": "Annual Budget (Neutral)",
-    "tagline": "Yearly budgeting with calm dashboards.",
-    "price": "19 £",
-    "category": "finance",
-    "style": "neutral",
-    "image": "assets/placeholder-3.jpg",
-    "images": ["assets/placeholder-3.jpg","assets/placeholder-1.jpg"],
-    "etsy_url": "https://www.etsy.com/shop/HarmonySheets",
-    "stripe_link": "",
-    "featured": false,
-    "keywords": ["budget","cashflow","savings","finance","planner"],
-    "features": ["12 months with rollups","Categories & tags","Cashflow & savings goals"],
-    "reviews": [],
-    "description_html": "<p>A friendly, powerful yearly budget that feels like an app but remains a spreadsheet you own.</p>"
-  },
-  {
-    "id": "pomodoro-timer",
+    "id": "pomodoro",
     "name": "Pomodoro — Productivity & Study Timer",
-    "tagline": "Stay focused with structured 25/5 cycles.",
-    "price": "125 NOK",
-    "category": "productivity",
-    "style": "neutral",
-    "image": "assets/pomodoro-placeholder.jpg",
-    "images": ["assets/pomodoro-placeholder.jpg"],
-    "etsy_url": "",
-    "stripe_link": "https://buy.stripe.com/test_bJeeVdeew1z2def7N40gw00",
-    "featured": true,
-    "keywords": ["pomodoro","focus","study","productivity","timer"],
-    "features": ["Customizable focus & break lengths","Auto-start options","Daily session counter","Designed for productivity & study"],
-    "reviews": [],
-    "description_html": "<h2>Focus without distractions</h2><p>Use the Pomodoro method (25/5) to build sustainable focus habits. Track your study or work sessions easily.</p>"
+    "tagline": "Focus faster with structured 25–5 cycles. Calm visuals, zero clutter.",
+    "price": "$9",
+    "badges": [
+      "One-time purchase",
+      "No login",
+      "Instant download",
+      "Google Sheets compatible"
+    ],
+    "features": [
+      "Auto-start Pomodoros and breaks",
+      "10+ color themes",
+      "Today & Session counters",
+      "Optional session logging"
+    ],
+    "description": "<p>This Pomodoro timer helps you <strong>start fast and stay consistent</strong>. Auto-start cycles keep you in flow, optional sound alerts give gentle nudges, and counters track your daily focus without effort.</p>",
+    "colorImage": "assets/pomodoro-colors.webp",
+    "colorCaption": "Pick a theme that feels calm and keeps you focused.",
+    "demoVideo": "assets/pomodoro-demo.mp4",
+    "demoPoster": "assets/pomodoro-demo-poster.jpg",
+    "included": [
+      "Pomodoro Timer (Web + Google Sheets sidebar compatible)",
+      "Free updates",
+      "Quick-start guide",
+      "Email support"
+    ],
+    "faqs": [
+      { "q": "Can I change Pomodoro and break lengths?", "a": "Yes, fully customizable." },
+      { "q": "Does it require a subscription?", "a": "No. One-time purchase only." },
+      { "q": "Does it work offline?", "a": "Yes, once loaded in your browser or Sheets sidebar." }
+    ],
+    "pricingTitle": "Get the Pomodoro Timer",
+    "pricingSub": "One-time purchase. Instant access.",
+    "stripe": "https://buy.stripe.com/test_pomodoro_example",
+    "etsy": "https://etsy.com/listing/pomodoro-example",
+    "socialProof": {
+      "stars": "★★★★★",
+      "quote": "Loved by busy students, makers, and teams. 'It gets me started in 10 seconds.'"
+    },
+    "benefits": [
+      { "title": "Beat procrastination", "desc": "Structured cycles make the first step effortless." },
+      { "title": "Stay in flow", "desc": "Auto-start Pomodoros and breaks keep you moving." },
+      { "title": "Feel calm", "desc": "Minimal UI and gentle alerts keep focus first." }
+    ]
   },
+
   {
-    "id": "study-session-logger",
-    "name": "Study Session Logger",
-    "tagline": "Log study sessions with clarity and insight.",
-    "price": "75 NOK",
-    "category": "productivity",
-    "style": "neutral",
-    "image": "assets/study-placeholder.jpg",
-    "images": ["assets/study-placeholder.jpg"],
-    "etsy_url": "",
-    "stripe_link": "https://buy.stripe.com/test_studylogger",
-    "featured": false,
-    "keywords": ["study","tracker","logger","time tracking"],
-    "features": ["Log study sessions quickly","Daily & weekly totals","Exportable records"],
-    "reviews": [],
-    "description_html": "<h2>Track your learning time</h2><p>Keep consistent records of your study hours. Great for students and lifelong learners who want visibility into their time investment.</p>"
+    "id": "budget-dashboard",
+    "name": "Budget Dashboard — Personal Finance Tracker",
+    "tagline": "Take control of your money with clarity and confidence.",
+    "price": "$19",
+    "badges": [
+      "One-time purchase",
+      "Instant Google Sheets setup",
+      "Track income & expenses",
+      "Visual dashboards"
+    ],
+    "features": [
+      "Monthly income & expense tracking",
+      "Smart budget categories",
+      "Visual dashboards & charts",
+      "Annual overview"
+    ],
+    "description": "<p>The <strong>Budget Dashboard</strong> helps you clearly see where your money goes. Track spending, savings, and debt repayments in one place with automatic charts and reports.</p>",
+    "colorImage": "assets/budget-colors.webp",
+    "colorCaption": "Choose a theme that fits your financial journey.",
+    "demoVideo": "assets/budget-demo.mp4",
+    "demoPoster": "assets/budget-demo-poster.jpg",
+    "included": [
+      "Budget Dashboard Google Sheet",
+      "Setup guide",
+      "Email support",
+      "Lifetime access"
+    ],
+    "faqs": [
+      { "q": "Can I use this with multiple accounts?", "a": "Yes, you can track any number of accounts." },
+      { "q": "Do I need Excel?", "a": "No, it’s designed for Google Sheets." },
+      { "q": "Does it auto-import bank transactions?", "a": "Not yet — but CSV imports are supported." }
+    ],
+    "pricingTitle": "Get the Budget Dashboard",
+    "pricingSub": "One-time purchase. Lifetime updates.",
+    "stripe": "https://buy.stripe.com/test_budget_example",
+    "etsy": "https://etsy.com/listing/budget-example",
+    "socialProof": {
+      "stars": "★★★★★",
+      "quote": "Used by 1,000+ people to master their personal finances."
+    },
+    "benefits": [
+      { "title": "Know where your money goes", "desc": "Automatic charts and breakdowns." },
+      { "title": "Plan with confidence", "desc": "Track savings goals and debt repayments." },
+      { "title": "Stay motivated", "desc": "Visual dashboards keep you engaged." }
+    ]
   },
+
   {
-    "id": "all-in-one-dashboard",
-    "name": "All-in-One Productivity Dashboard",
-    "tagline": "Pomodoro + Study Logger with integrated dashboard.",
-    "price": "129 NOK",
-    "category": "productivity",
-    "style": "neutral",
-    "image": "assets/all-in-one-placeholder.jpg",
-    "images": ["assets/all-in-one-placeholder.jpg"],
-    "etsy_url": "",
-    "stripe_link": "https://buy.stripe.com/test_allinone",
-    "featured": true,
-    "keywords": ["dashboard","productivity","pomodoro","study"],
-    "features": ["Pomodoro Timer included","Study Session Logger included","Combined dashboard view","One-time purchase"],
-    "reviews": [],
-    "description_html": "<h2>Two tools in one</h2><p>Get both the Pomodoro Timer and Study Session Logger bundled together. Manage your time and focus from one central dashboard.</p>"
+    "id": "pomodoro-pro",
+    "name": "Pomodoro Pro — Advanced Productivity System",
+    "tagline": "The upgraded Pomodoro with analytics, goals, and smart focus tools.",
+    "price": "$29",
+    "badges": [
+      "Advanced features",
+      "Goal tracking",
+      "Focus analytics",
+      "Google Sheets + Web"
+    ],
+    "features": [
+      "Session analytics & history",
+      "Custom goals & streak tracking",
+      "Integrates with Google Calendar",
+      "Extended theme pack"
+    ],
+    "description": "<p><strong>Pomodoro Pro</strong> is built for power users. Track your focus over weeks and months, set custom goals, and review analytics that show your most productive times of day.</p>",
+    "colorImage": "assets/pomodoro-pro-colors.webp",
+    "colorCaption": "Premium themes and advanced layouts included.",
+    "demoVideo": "assets/pomodoro-pro-demo.mp4",
+    "demoPoster": "assets/pomodoro-pro-demo-poster.jpg",
+    "included": [
+      "Pomodoro Pro app (Web + Sheets sidebar)",
+      "Analytics dashboard",
+      "Extended theme pack",
+      "Priority support"
+    ],
+    "faqs": [
+      { "q": "How is Pro different from the regular Pomodoro?", "a": "Pro adds analytics, goals, integrations, and premium themes." },
+      { "q": "Can I upgrade from the standard Pomodoro?", "a": "Yes — email us for an upgrade discount." },
+      { "q": "Does it sync with Google Calendar?", "a": "Yes, optional integration is included." }
+    ],
+    "pricingTitle": "Get Pomodoro Pro",
+    "pricingSub": "One-time purchase. Includes future Pro updates.",
+    "stripe": "https://buy.stripe.com/test_pomodoro_pro_example",
+    "etsy": "https://etsy.com/listing/pomodoro-pro-example",
+    "socialProof": {
+      "stars": "★★★★★",
+      "quote": "“Pomodoro Pro changed how I study and work — the analytics are gold.”"
+    },
+    "benefits": [
+      { "title": "Track progress over time", "desc": "Analytics dashboard reveals your productivity patterns." },
+      { "title": "Stay accountable", "desc": "Custom goals and streaks keep you consistent." },
+      { "title": "Focus with style", "desc": "Unlock premium themes and layouts." }
+    ]
   }
 ]
