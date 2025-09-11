@@ -1,178 +1,185 @@
-const App = (() => {
-  const $ = s => document.querySelector(s);
-  const $$ = s => [...document.querySelectorAll(s)];
-  const setYear = () => $$("#year").forEach(el => el.textContent = new Date().getFullYear());
+const App = {};
 
-  // YOUR live webhook (Apps Script Web App → /exec)
-  const SUPPORT_ENDPOINT = "https://script.google.com/macros/s/AKfycbzsf5Y3HhbaiwM69rk4McIbJBUf6dIhHmtuzjas2zAfPKLbHAMgcCVkYm1YZd1T7OQB/exec";
+/*****************************************************
+ * Product page logic
+ *****************************************************/
+App.initProduct = async function() {
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get("id");
+  if (!productId) return;
 
-  // helper: map category to accent class
-  const catToClass = c => ({
-    finance: "cat-finance",
-    productivity: "cat-productivity",
-    health: "cat-health",
-    food: "cat-food",
-    creative: "cat-creative",
-    planning: "cat-planning"
-  }[c] || "");
+  try {
+    const res = await fetch("products.json");
+    const products = await res.json();
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
 
-  // product card
-  const card = p => `
-    <a class="card ${catToClass(p.category)}" href="product.html?id=${encodeURIComponent(p.id)}">
-      <img src="${p.images?.[0] || p.image}" alt="${p.name}">
-      <div class="content">
-        <h3>${p.name}</h3>
-        <p class="tagline">${p.tagline}</p>
-        <p class="price">${p.price}</p>
-        ${p.style ? `<div class="style-dots"><span class="dot dot-${p.style}"></span></div>` : ""}
-      </div>
-    </a>`;
+    // Title + name
+    document.title = product.name + " — Harmony Sheets";
+    const nameEl = document.getElementById("p-name");
+    if (nameEl) nameEl.textContent = product.name;
+    const titleEl = document.getElementById("p-title");
+    if (titleEl) titleEl.textContent = product.name;
+    const stickyName = document.getElementById("p-sticky-name");
+    if (stickyName) stickyName.textContent = product.name;
 
-  // data loaders
-  async function loadProducts(){ const r = await fetch('products.json'); return r.json(); }
-  async function loadBundles(){ const r = await fetch('bundles.json').catch(()=>({json:async()=>[]})); return r.ok ? r.json() : []; }
+    // Tagline
+    const taglineEl = document.getElementById("p-tagline");
+    if (taglineEl && product.tagline) taglineEl.textContent = product.tagline;
 
-  // HOME
-  async function initHome(){
-    setYear();
-    const data = await loadProducts();
-    const best = data.filter(p => p.featured).slice(0,6);
-    $("#home-grid").innerHTML = best.map(card).join("");
-  }
-
-  // PRODUCTS
-  async function initProducts(){
-    setYear();
-    const params = new URLSearchParams(location.search);
-    const cat = params.get('cat') || "";
-    if (cat) document.body.classList.add(catToClass(cat));
-
-    const data = await loadProducts();
-    const grid = $("#products-grid");
-    const q = $("#q"), style = $("#style");
-
-    const render = () => {
-      const query = (q.value||"").toLowerCase();
-      const filtered = data.filter(p =>
-        (!cat || p.category===cat) &&
-        (!style.value || p.style===style.value) &&
-        (!query || (p.name + " " + p.tagline + " " + (p.keywords||[]).join(" ")).toLowerCase().includes(query))
-      );
-      grid.innerHTML = filtered.map(card).join("") || "<p>No results.</p>";
-    };
-
-    q.addEventListener('input', render);
-    style.addEventListener('change', render);
-    render();
-  }
-
-  // PRODUCT
-  async function initProduct(){
-    setYear();
-    const params = new URLSearchParams(location.search);
-    const id = params.get('id');
-    const products = await loadProducts();
-    const p = products.find(x => x.id===id) || products[0];
-
-    document.body.classList.add(catToClass(p.category));
-    document.title = `${p.name} — Harmony Sheets`;
-
-    // header info
-    $("#p-name").textContent = p.name;
-    $("#p-tagline").textContent = p.tagline || "";
-    $("#p-price").textContent = p.price || "";
-    $("#p-etsy").href = p.etsy_url;
-    const stripeBtn = $("#p-stripe");
-    if (p.stripe_link) { stripeBtn.href = p.stripe_link; } else { stripeBtn.style.display = "none"; }
-
-    // features + description
-    $("#p-features").innerHTML = (p.features||[]).map(f => `<li>${f}</li>`).join("");
-    $("#p-description").innerHTML = p.description_html || "";
-
-    // slider
-    const slider = $("#p-slider");
-    const imgs = (p.images?.length ? p.images : [p.image]);
-    const slides = imgs.map(src => `<div class="slide"><img src="${src}" alt=""></div>`);
-    slider.insertAdjacentHTML('afterbegin', slides.join(""));
-    let idx = 0;
-    const show = i => $$(".slide").forEach((s,j)=> s.classList.toggle('active', j===i));
-    show(0);
-    slider.querySelector('.prev').onclick = () => { idx = (idx-1 + imgs.length)%imgs.length; show(idx); };
-    slider.querySelector('.next').onclick = () => { idx = (idx+1)%imgs.length; show(idx); };
-
-    // video
-    if (p.youtube_id){
-      $("#p-video").innerHTML = `<iframe src="https://www.youtube.com/embed/${p.youtube_id}" allowfullscreen title="How to use ${p.name}"></iframe>`;
+    // Badges
+    const badgeBox = document.getElementById("p-badges");
+    if (badgeBox && product.badges) {
+      badgeBox.innerHTML = product.badges
+        .map(b => `<span class="badge">${b}</span>`)
+        .join("");
     }
 
-    // reviews
-    const revWrap = $("#p-reviews");
-    if (p.reviews?.length){
-      revWrap.innerHTML = p.reviews.map(r => `
-        <div class="review">
-          <div class="stars">★★★★★</div>
-          <p>${r.text}</p>
-          <p class="muted">— ${r.author}</p>
-        </div>`).join("");
-    } else {
-      revWrap.innerHTML = `<p class="muted">Reviews coming soon.</p>`;
+    // Price
+    const priceEl = document.getElementById("p-price");
+    if (priceEl && product.price) priceEl.textContent = product.price;
+
+    // Features
+    const featBox = document.getElementById("p-features");
+    if (featBox && product.features) {
+      featBox.innerHTML = product.features.map(f => `<li>${f}</li>`).join("");
     }
 
-    // suggestion form → Apps Script
-    const form = $("#suggest-form");
-    const status = $("#suggest-status");
-    $("#product_id").value = p.id;
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault(); status.textContent = "Sending…";
-      const fd = new FormData(form);
-      fd.append('user_agent', navigator.userAgent); // helpful for debugging
-      fd.append('hp', ''); // honeypot (bots will fill)
-      try{
-        const res = await fetch(SUPPORT_ENDPOINT, { method:'POST', body: fd, mode:'cors' });
-        status.textContent = res.ok ? "Thanks! We got it." : "Couldn’t send — try again.";
-        if (res.ok) form.reset();
-      }catch(err){
-        status.textContent = "Network error — try again later.";
-      }
-    });
-  }
+    // Description
+    const descEl = document.getElementById("p-description");
+    if (descEl && product.description) descEl.innerHTML = product.description;
 
-  // BUNDLES (safe if file missing)
-  async function initBundles(){
-    setYear();
-    const bundles = await loadBundles();
-    const grid = $("#bundles-grid");
-    grid.innerHTML = (bundles||[]).map(b => `
-      <div class="card ${catToClass(b.category)}">
-        <img src="${b.image}" alt="${b.name}">
-        <div class="content">
-          <h3>${b.name}</h3>
-          <p class="tagline">${b.tagline}</p>
-          <p class="price">${b.price} <span class="muted">${b.savings ? `(${b.savings} off)` : ""}</span></p>
-          <a class="btn primary" href="${b.stripe_link}" target="_blank" rel="noopener">Buy Bundle</a>
+    // Social proof
+    const social = document.getElementById("p-social");
+    if (social && product.socialProof) {
+      social.innerHTML = `
+        <div class="social-proof">
+          <div class="stars">${product.socialProof.stars || ""}</div>
+          <div class="muted">${product.socialProof.quote || ""}</div>
         </div>
-      </div>`).join("");
-  }
+      `;
+    }
 
-  // FAQ / contact form
-  function initFAQ(){
-    setYear();
-    const form = $("#support-form"), status = $("#support-status");
-    form?.addEventListener('submit', async (e)=>{
-      e.preventDefault(); status.textContent = "Sending…";
-      const fd = new FormData(form);
-      fd.append('type','Support');
-      fd.append('user_agent', navigator.userAgent);
-      fd.append('hp','');
-      try{
-        const res = await fetch(SUPPORT_ENDPOINT, { method:'POST', body: fd, mode:'cors' });
-        status.textContent = res.ok ? "Thanks! We’ll get back to you." : "Couldn’t send — try again.";
-        if (res.ok) form.reset();
-      }catch(err){ status.textContent = "Network error — try again later."; }
+    // Benefits
+    const benefits = document.getElementById("p-benefits");
+    if (benefits && product.benefits) {
+      benefits.innerHTML = `
+        <div class="features-grid">
+          ${product.benefits
+            .map(
+              b => `
+            <div class="feature-card">
+              <h4>${b.title}</h4>
+              <p>${b.desc}</p>
+            </div>`
+            )
+            .join("")}
+        </div>
+      `;
+    }
+
+    // Color variations
+    if (product.colorImage) {
+      const img = document.getElementById("p-color-image");
+      if (img) img.src = product.colorImage;
+      const caption = document.getElementById("p-color-caption");
+      if (caption) caption.textContent = product.colorCaption || "";
+    } else {
+      const section = document.getElementById("p-colors");
+      if (section) section.style.display = "none";
+    }
+
+    // Demo video
+    const demoBox = document.getElementById("p-demo");
+    if (demoBox && product.demoVideo) {
+      demoBox.innerHTML = `
+        <video controls muted playsinline width="100%" height="100%" ${
+          product.demoPoster ? `poster="${product.demoPoster}"` : ""
+        }>
+          <source src="${product.demoVideo}" type="video/mp4">
+        </video>
+      `;
+    } else {
+      const section = document.getElementById("p-demo-section");
+      if (section) section.style.display = "none";
+    }
+
+    // Included
+    const incl = document.getElementById("p-included");
+    if (incl && product.included) {
+      incl.innerHTML = `
+        <h3>What you get</h3>
+        <ul>${product.included.map(i => `<li>${i}</li>`).join("")}</ul>
+      `;
+    }
+
+    // FAQs
+    const faqs = document.getElementById("p-faqs");
+    if (faqs && product.faqs) {
+      faqs.innerHTML = `
+        <h3>FAQs</h3>
+        ${product.faqs
+          .map(
+            f => `
+          <details class="faq">
+            <summary>${f.q}</summary>
+            <p>${f.a}</p>
+          </details>`
+          )
+          .join("")}
+      `;
+    }
+
+    // Pricing
+    const pt = document.getElementById("p-pricing-title");
+    if (pt && product.pricingTitle) pt.textContent = product.pricingTitle;
+    const ps = document.getElementById("p-pricing-sub");
+    if (ps && product.pricingSub) ps.textContent = product.pricingSub;
+
+    // Links
+    ["p-stripe", "p-stripe-2", "p-stripe-sticky"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && product.stripe) el.href = product.stripe;
     });
+    ["p-etsy", "p-etsy-2", "p-etsy-sticky"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && product.etsy) el.href = product.etsy;
+    });
+
+    // Suggestion form product_id
+    const pid = document.getElementById("product_id");
+    if (pid) pid.value = product.id;
+  } catch (err) {
+    console.error("Error loading product:", err);
   }
+};
 
-  function initStatic(){ setYear(); }
+/*****************************************************
+ * Products listing page logic (if needed)
+ *****************************************************/
+App.initProducts = async function() {
+  const container = document.getElementById("products-list");
+  if (!container) return;
 
-  return { initHome, initProducts, initProduct, initBundles, initFAQ, initStatic };
-})();
+  try {
+    const res = await fetch("products.json");
+    const products = await res.json();
+
+    container.innerHTML = products
+      .map(
+        p => `
+      <div class="product-card">
+        <a href="product.html?id=${p.id}">
+          <div class="thumb"><img src="${p.colorImage || "assets/placeholder.png"}" alt=""></div>
+          <h3>${p.name}</h3>
+          <p class="muted">${p.tagline || ""}</p>
+          <p class="price">${p.price || ""}</p>
+        </a>
+      </div>
+    `
+      )
+      .join("");
+  } catch (err) {
+    console.error("Error loading products:", err);
+  }
+};
