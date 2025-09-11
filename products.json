@@ -46,7 +46,6 @@
       { "title": "Feel calm", "desc": "Minimal UI and gentle alerts keep focus first." }
     ]
   },
-
   {
     "id": "budget-dashboard",
     "name": "Budget Dashboard — Personal Finance Tracker",
@@ -94,7 +93,6 @@
       { "title": "Stay motivated", "desc": "Visual dashboards keep you engaged." }
     ]
   },
-
   {
     "id": "pomodoro-pro",
     "name": "Pomodoro Pro — Advanced Productivity System",
