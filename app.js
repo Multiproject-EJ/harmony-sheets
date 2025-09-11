@@ -1,7 +1,68 @@
+/*****************************************************
+ * Harmony Sheets — App.js (full replacement)
+ *****************************************************/
+
 const App = {};
 
 /*****************************************************
- * Product page logic
+ * Utils
+ *****************************************************/
+App.qs = sel => document.querySelector(sel);
+App.qsa = sel => Array.from(document.querySelectorAll(sel));
+
+/*****************************************************
+ * Init
+ *****************************************************/
+App.init = function() {
+  // Update footer year
+  const yearEl = App.qs("#year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // Highlight active nav item
+  const path = window.location.pathname;
+  App.qsa(".main-nav a").forEach(a => {
+    if (a.href.includes(path)) a.classList.add("active");
+  });
+
+  // Auto-detect page
+  if (App.qs("body.page-products")) App.initProducts();
+  if (App.qs("body.page-product")) App.initProduct();
+};
+
+/*****************************************************
+ * Products listing (products.html)
+ *****************************************************/
+App.initProducts = async function() {
+  const container = App.qs("#products-list");
+  if (!container) return;
+
+  try {
+    const res = await fetch("products.json");
+    const products = await res.json();
+
+    container.innerHTML = products
+      .map(
+        p => `
+        <div class="product-card">
+          <a href="product.html?id=${p.id}">
+            <div class="thumb">
+              <img src="${p.colorImage || "assets/placeholder.png"}" alt="">
+            </div>
+            <h3>${p.name}</h3>
+            <p class="muted">${p.tagline || ""}</p>
+            <p class="price">${p.price || ""}</p>
+          </a>
+        </div>
+      `
+      )
+      .join("");
+  } catch (err) {
+    console.error("Error loading products:", err);
+  }
+};
+
+/*****************************************************
+ * Product detail (product.html)
  *****************************************************/
 App.initProduct = async function() {
   const params = new URLSearchParams(window.location.search);
@@ -16,170 +77,157 @@ App.initProduct = async function() {
 
     // Title + name
     document.title = product.name + " — Harmony Sheets";
-    const nameEl = document.getElementById("p-name");
-    if (nameEl) nameEl.textContent = product.name;
-    const titleEl = document.getElementById("p-title");
-    if (titleEl) titleEl.textContent = product.name;
-    const stickyName = document.getElementById("p-sticky-name");
-    if (stickyName) stickyName.textContent = product.name;
+    App.qs("#p-name").textContent = product.name;
+    if (App.qs("#p-title")) App.qs("#p-title").textContent = product.name;
+    if (App.qs("#p-sticky-name")) App.qs("#p-sticky-name").textContent = product.name;
 
     // Tagline
-    const taglineEl = document.getElementById("p-tagline");
-    if (taglineEl && product.tagline) taglineEl.textContent = product.tagline;
+    if (product.tagline) App.qs("#p-tagline").textContent = product.tagline;
 
     // Badges
-    const badgeBox = document.getElementById("p-badges");
-    if (badgeBox && product.badges) {
-      badgeBox.innerHTML = product.badges
-        .map(b => `<span class="badge">${b}</span>`)
-        .join("");
+    if (product.badges && App.qs("#p-badges")) {
+      App.qs("#p-badges").innerHTML = product.badges.map(b => `<span class="badge">${b}</span>`).join("");
     }
 
     // Price
-    const priceEl = document.getElementById("p-price");
-    if (priceEl && product.price) priceEl.textContent = product.price;
+    if (product.price && App.qs("#p-price")) App.qs("#p-price").textContent = product.price;
 
     // Features
-    const featBox = document.getElementById("p-features");
-    if (featBox && product.features) {
-      featBox.innerHTML = product.features.map(f => `<li>${f}</li>`).join("");
+    if (product.features && App.qs("#p-features")) {
+      App.qs("#p-features").innerHTML = product.features.map(f => `<li>${f}</li>`).join("");
     }
 
     // Description
-    const descEl = document.getElementById("p-description");
-    if (descEl && product.description) descEl.innerHTML = product.description;
+    if (product.description && App.qs("#p-description")) {
+      App.qs("#p-description").innerHTML = product.description;
+    }
 
     // Social proof
-    const social = document.getElementById("p-social");
-    if (social && product.socialProof) {
-      social.innerHTML = `
+    if (product.socialProof && App.qs("#p-social")) {
+      App.qs("#p-social").innerHTML = `
         <div class="social-proof">
           <div class="stars">${product.socialProof.stars || ""}</div>
           <div class="muted">${product.socialProof.quote || ""}</div>
-        </div>
-      `;
+        </div>`;
     }
 
     // Benefits
-    const benefits = document.getElementById("p-benefits");
-    if (benefits && product.benefits) {
-      benefits.innerHTML = `
+    if (product.benefits && App.qs("#p-benefits")) {
+      App.qs("#p-benefits").innerHTML = `
         <div class="features-grid">
-          ${product.benefits
-            .map(
-              b => `
+          ${product.benefits.map(b => `
             <div class="feature-card">
               <h4>${b.title}</h4>
               <p>${b.desc}</p>
-            </div>`
-            )
-            .join("")}
-        </div>
-      `;
+            </div>`).join("")}
+        </div>`;
     }
 
     // Color variations
-    if (product.colorImage) {
-      const img = document.getElementById("p-color-image");
-      if (img) img.src = product.colorImage;
-      const caption = document.getElementById("p-color-caption");
-      if (caption) caption.textContent = product.colorCaption || "";
-    } else {
-      const section = document.getElementById("p-colors");
-      if (section) section.style.display = "none";
+    if (product.colorImage && App.qs("#p-color-image")) {
+      App.qs("#p-color-image").src = product.colorImage;
+      if (product.colorCaption) App.qs("#p-color-caption").textContent = product.colorCaption;
+    } else if (App.qs("#p-colors")) {
+      App.qs("#p-colors").style.display = "none";
     }
 
     // Demo video
-    const demoBox = document.getElementById("p-demo");
-    if (demoBox && product.demoVideo) {
-      demoBox.innerHTML = `
-        <video controls muted playsinline width="100%" height="100%" ${
-          product.demoPoster ? `poster="${product.demoPoster}"` : ""
-        }>
+    if (product.demoVideo && App.qs("#p-demo")) {
+      App.qs("#p-demo").innerHTML = `
+        <video controls muted playsinline width="100%" height="100%" ${product.demoPoster ? `poster="${product.demoPoster}"` : ""}>
           <source src="${product.demoVideo}" type="video/mp4">
-        </video>
-      `;
-    } else {
-      const section = document.getElementById("p-demo-section");
-      if (section) section.style.display = "none";
+        </video>`;
+    } else if (App.qs("#p-demo-section")) {
+      App.qs("#p-demo-section").style.display = "none";
     }
 
     // Included
-    const incl = document.getElementById("p-included");
-    if (incl && product.included) {
-      incl.innerHTML = `
+    if (product.included && App.qs("#p-included")) {
+      App.qs("#p-included").innerHTML = `
         <h3>What you get</h3>
-        <ul>${product.included.map(i => `<li>${i}</li>`).join("")}</ul>
-      `;
+        <ul>${product.included.map(i => `<li>${i}</li>`).join("")}</ul>`;
     }
 
     // FAQs
-    const faqs = document.getElementById("p-faqs");
-    if (faqs && product.faqs) {
-      faqs.innerHTML = `
+    if (product.faqs && App.qs("#p-faqs")) {
+      App.qs("#p-faqs").innerHTML = `
         <h3>FAQs</h3>
-        ${product.faqs
-          .map(
-            f => `
+        ${product.faqs.map(f => `
           <details class="faq">
             <summary>${f.q}</summary>
             <p>${f.a}</p>
-          </details>`
-          )
-          .join("")}
-      `;
+          </details>`).join("")}`;
     }
 
     // Pricing
-    const pt = document.getElementById("p-pricing-title");
-    if (pt && product.pricingTitle) pt.textContent = product.pricingTitle;
-    const ps = document.getElementById("p-pricing-sub");
-    if (ps && product.pricingSub) ps.textContent = product.pricingSub;
+    if (product.pricingTitle && App.qs("#p-pricing-title")) App.qs("#p-pricing-title").textContent = product.pricingTitle;
+    if (product.pricingSub && App.qs("#p-pricing-sub")) App.qs("#p-pricing-sub").textContent = product.pricingSub;
 
     // Links
     ["p-stripe", "p-stripe-2", "p-stripe-sticky"].forEach(id => {
-      const el = document.getElementById(id);
+      const el = App.qs("#" + id);
       if (el && product.stripe) el.href = product.stripe;
     });
     ["p-etsy", "p-etsy-2", "p-etsy-sticky"].forEach(id => {
-      const el = document.getElementById(id);
+      const el = App.qs("#" + id);
       if (el && product.etsy) el.href = product.etsy;
     });
 
     // Suggestion form product_id
-    const pid = document.getElementById("product_id");
+    const pid = App.qs("#product_id");
     if (pid) pid.value = product.id;
+
+    // Init gallery slider
+    App.initGallery();
   } catch (err) {
     console.error("Error loading product:", err);
   }
 };
 
 /*****************************************************
- * Products listing page logic (if needed)
+ * Suggestion form
  *****************************************************/
-App.initProducts = async function() {
-  const container = document.getElementById("products-list");
-  if (!container) return;
-
-  try {
-    const res = await fetch("products.json");
-    const products = await res.json();
-
-    container.innerHTML = products
-      .map(
-        p => `
-      <div class="product-card">
-        <a href="product.html?id=${p.id}">
-          <div class="thumb"><img src="${p.colorImage || "assets/placeholder.png"}" alt=""></div>
-          <h3>${p.name}</h3>
-          <p class="muted">${p.tagline || ""}</p>
-          <p class="price">${p.price || ""}</p>
-        </a>
-      </div>
-    `
-      )
-      .join("");
-  } catch (err) {
-    console.error("Error loading products:", err);
-  }
+App.initSuggestForm = function() {
+  const form = App.qs("#suggest-form");
+  if (!form) return;
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const status = App.qs("#suggest-status");
+    if (status) status.textContent = "Sending...";
+    try {
+      // Here you could POST to a backend/email service
+      await new Promise(res => setTimeout(res, 600));
+      if (status) status.textContent = "Thanks for your idea!";
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      if (status) status.textContent = "Error, try again later.";
+    }
+  });
 };
+
+/*****************************************************
+ * Simple gallery slider
+ *****************************************************/
+App.initGallery = function() {
+  const gallery = App.qs("#p-slider");
+  if (!gallery) return;
+
+  const slides = App.qsa("#p-slider .slide");
+  let idx = 0;
+  const show = i => slides.forEach((s, n) => s.style.display = n === i ? "block" : "none");
+  if (slides.length) show(idx);
+
+  const prev = gallery.querySelector(".prev");
+  const next = gallery.querySelector(".next");
+  if (prev) prev.addEventListener("click", () => { idx = (idx - 1 + slides.length) % slides.length; show(idx); });
+  if (next) next.addEventListener("click", () => { idx = (idx + 1) % slides.length; show(idx); });
+};
+
+/*****************************************************
+ * DOM ready
+ *****************************************************/
+document.addEventListener("DOMContentLoaded", () => {
+  App.init();
+  App.initSuggestForm();
+});
