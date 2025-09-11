@@ -1,5 +1,5 @@
 /*****************************************************
- * Harmony Sheets — App.js (full replacement)
+ * Harmony Sheets — App.js v2.0
  *****************************************************/
 
 const App = {};
@@ -27,6 +27,9 @@ App.init = function() {
   // Auto-detect page
   if (App.qs("body.page-products")) App.initProducts();
   if (App.qs("body.page-product")) App.initProduct();
+
+  // Init suggest form everywhere
+  App.initSuggestForm();
 };
 
 /*****************************************************
@@ -195,7 +198,7 @@ App.initSuggestForm = function() {
     const status = App.qs("#suggest-status");
     if (status) status.textContent = "Sending...";
     try {
-      // Here you could POST to a backend/email service
+      // Fake send
       await new Promise(res => setTimeout(res, 600));
       if (status) status.textContent = "Thanks for your idea!";
       form.reset();
@@ -207,7 +210,7 @@ App.initSuggestForm = function() {
 };
 
 /*****************************************************
- * Simple gallery slider
+ * Gallery slider
  *****************************************************/
 App.initGallery = function() {
   const gallery = App.qs("#p-slider");
@@ -229,5 +232,4 @@ App.initGallery = function() {
  *****************************************************/
 document.addEventListener("DOMContentLoaded", () => {
   App.init();
-  App.initSuggestForm();
 });
