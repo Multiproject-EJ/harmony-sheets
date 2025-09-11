@@ -2,26 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Product — Harmony Sheets</title>
+  <title id="p-title">Product — Harmony Sheets</title>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-
-  <!-- SEO schema (safe defaults) -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"Product",
-    "name":"Pomodoro — Productivity & Study Timer",
-    "brand":{"@type":"Brand","name":"Harmony Sheets"},
-    "description":"Lightweight Pomodoro timer with auto-start cycles, themes, and optional logging. One-time purchase.",
-    "image":[
-      "https://picsum.photos/id/1050/1200/800",   /* hero img placeholder */
-      "https://picsum.photos/id/1047/1200/800",
-      "https://picsum.photos/id/1039/1200/800"
-    ]
-  }
-  </script>
 </head>
 
 <body class="page-product">
@@ -43,39 +27,22 @@
   <main>
     <!-- ============ HERO ============ -->
     <section class="container hero">
-      <!-- Left: media (slider or demo) -->
+      <!-- Left: media (slider / demo) -->
       <div class="media hero-media">
-        <div class="gallery" id="p-slider" aria-label="Screenshots">
+        <div class="gallery" id="p-slider">
           <button class="prev" aria-label="Previous">‹</button>
           <button class="next" aria-label="Next">›</button>
-
-          <!-- OPTIONAL static fallbacks (remove if app.js injects slides) -->
-          <div class="slide"><img src="https://picsum.photos/id/1050/1200/800" alt="App preview 1"></div>
-          <div class="slide"><img src="https://picsum.photos/id/1047/1200/800" alt="App preview 2"></div>
-          <div class="slide"><img src="https://picsum.photos/id/1039/1200/800" alt="App preview 3"></div>
-
-          <!-- Demo video container (app.js can also use #p-video) -->
-          <div id="p-video" class="video">
-            <!-- Placeholder demo (swap to your own mp4/webm) -->
-            <video controls muted playsinline width="100%" height="100%" poster="https://picsum.photos/id/1011/1200/675">
-              <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/webm">
-              <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
-            </video>
-          </div>
+          <!-- slides injected by app.js -->
         </div>
+        <div id="p-video" class="video"><!-- demo video injected here --></div>
       </div>
 
-      <!-- Right: copy & CTAs -->
+      <!-- Right: info & CTAs -->
       <div class="info">
-        <h1 id="p-name">Pomodoro — Productivity & Study Timer</h1>
-        <p id="p-tagline" class="tagline">Focus faster with structured 25–5 cycles. Calm visuals, zero clutter.</p>
+        <h1 id="p-name"></h1>
+        <p id="p-tagline" class="tagline"></p>
 
-        <div class="badges">
-          <span class="badge">One-time purchase</span>
-          <span class="badge">No login</span>
-          <span class="badge">Instant download</span>
-          <span class="badge">Google Sheets compatible</span>
-        </div>
+        <div id="p-badges" class="badges"></div>
 
         <p id="p-price" class="price"></p>
 
@@ -86,136 +53,66 @@
 
         <ul id="p-features" class="features"></ul>
 
-        <div id="p-description" class="desc">
-          <p>Start a session in one click. Auto-start breaks, optional sound alerts, and a Today/Session counter help you keep momentum without micromanaging the timer.</p>
-        </div>
+        <div id="p-description" class="desc"></div>
       </div>
     </section>
 
     <!-- ============ SOCIAL PROOF ============ -->
-    <section class="container section">
-      <div class="social-proof">
-        <div class="stars" aria-label="5 star rating">★★★★★</div>
-        <div class="muted">Loved by busy students, makers, and teams. “It gets me started in 10 seconds.”</div>
-      </div>
+    <section class="container section" id="p-social">
+      <!-- optional: stars + testimonial injected -->
     </section>
 
-    <!-- ============ PROBLEM → OUTCOME ============ -->
-    <section class="container section">
-      <div class="features-grid">
-        <div class="feature-card">
-          <h4>Beat procrastination</h4>
-          <p>Structured cycles make the first step effortless—no tabs stealing attention.</p>
-        </div>
-        <div class="feature-card">
-          <h4>Stay in flow</h4>
-          <p>Auto-start Pomodoros and breaks so you don’t renegotiate every 25 minutes.</p>
-        </div>
-        <div class="feature-card">
-          <h4>Feel calm</h4>
-          <p>Pick a theme that feels right. Minimal UI, gentle alerts, focus-first design.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ VISUAL TOUR ============ -->
-    <section class="container section">
-      <h3>What makes it different</h3>
-      <div class="features-grid">
-        <div class="feature-card">
-          <h4>Auto-start cycles</h4>
-          <p>Pomodoro → Break → Long Break logic, with optional auto-start for each step.</p>
-        </div>
-        <div class="feature-card">
-          <h4>Themes you’ll enjoy</h4>
-          <p>Switch colors anytime. A pleasant workspace keeps you coming back.</p>
-        </div>
-        <div class="feature-card">
-          <h4>Today & Session counters</h4>
-          <p>See your progress at a glance. Stay motivated during longer study blocks.</p>
-        </div>
-        <div class="feature-card">
-          <h4>Optional logging</h4>
-          <p>Log sessions to a sheet to review habits and streaks over time.</p>
-        </div>
-      </div>
+    <!-- ============ BENEFITS GRID ============ -->
+    <section class="container section" id="p-benefits">
+      <!-- injected as feature cards -->
     </section>
 
     <!-- ============ COLOR STRIP ============ -->
-    <section class="container section color-strip" aria-label="Color variations">
+    <section class="container section color-strip" id="p-colors">
       <h3>Color variations</h3>
       <picture>
-        <!-- Swap to: assets/pomodoro-colors.webp when uploaded -->
-        <source srcset="https://picsum.photos/seed/pomocolors/1000/600.webp" type="image/webp">
-        <img src="https://picsum.photos/seed/pomocolors/1000/600" alt="Pomodoro Timer color variations">
+        <img id="p-color-image" src="" alt="Product color variations">
       </picture>
-      <p class="muted" style="margin-top:.5rem">Pick a theme that feels calm and keeps you focused.</p>
+      <p id="p-color-caption" class="muted"></p>
     </section>
 
-    <!-- ============ DEMO (45–60s) ============ -->
-    <section class="container section">
-      <h3>See it in action (60 seconds)</h3>
-      <div id="p-demo" class="video">
-        <!-- Swap to your own file(s) -->
-        <video controls muted playsinline width="100%" height="100%" poster="https://picsum.photos/id/1011/1200/675">
-          <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/webm">
-          <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
-        </video>
-      </div>
+    <!-- ============ DEMO ============ -->
+    <section class="container section" id="p-demo-section">
+      <h3>See it in action</h3>
+      <div id="p-demo" class="video"><!-- injected demo video --></div>
     </section>
 
     <!-- ============ WHAT YOU GET ============ -->
     <section class="container section">
-      <div class="whats-included">
-        <h3>What you get</h3>
-        <ul>
-          <li>Pomodoro Timer (web + Google Sheets sidebar compatible)</li>
-          <li>Free updates to minor versions</li>
-          <li>Quick-start guide</li>
-          <li>Email support</li>
-          <li>License: Personal use (contact us for team licensing)</li>
-        </ul>
+      <div class="whats-included" id="p-included">
+        <!-- list injected -->
       </div>
     </section>
 
     <!-- ============ FAQ ============ -->
-    <section class="container section">
+    <section class="container section" id="p-faqs">
       <h3>FAQs</h3>
-      <details class="faq"><summary>Can I change the Pomodoro and break lengths?</summary>
-        <p>Yes. You can set custom durations and toggle auto-start behaviors for Pomodoros and breaks.</p>
-      </details>
-      <details class="faq"><summary>Does it require an account or subscription?</summary>
-        <p>No accounts, no subscriptions—just a one-time purchase.</p>
-      </details>
-      <details class="faq"><summary>Does it store data?</summary>
-        <p>By default, no. You can optionally log sessions to a sheet to track streaks.</p>
-      </details>
-      <details class="faq"><summary>Does it work offline?</summary>
-        <p>Once loaded in your browser or sheet sidebar, it continues running your session timers.</p>
-      </details>
-      <details class="faq"><summary>Refund policy?</summary>
-        <p>Try it for 14 days. If it doesn’t help you focus, email us for a full refund.</p>
-      </details>
+      <!-- details injected -->
     </section>
 
     <!-- ============ PRICING ============ -->
     <section class="container section">
       <div class="pricing">
-        <h3>Get the Pomodoro Timer</h3>
-        <p class="muted">One-time purchase. Instant access. No subscriptions.</p>
+        <h3 id="p-pricing-title">Get this product</h3>
+        <p id="p-pricing-sub" class="muted"></p>
         <div class="actions" style="margin-top:.5rem">
-          <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy now</a>
-          <a id="p-etsy" class="btn ghost" target="_blank" rel="noopener">Buy on Etsy</a>
+          <a id="p-stripe-2" class="btn primary" target="_blank" rel="noopener">Buy now</a>
+          <a id="p-etsy-2" class="btn ghost" target="_blank" rel="noopener">Buy on Etsy</a>
         </div>
       </div>
     </section>
 
-    <!-- Reviews (keeps app.js compatibility) -->
+    <!-- Reviews -->
     <section class="container section">
       <div id="p-reviews" class="reviews"></div>
     </section>
 
-    <!-- Suggestions (keeps app.js compatibility) -->
+    <!-- Suggestions -->
     <section class="container section">
       <form id="suggest-form" class="suggest">
         <input type="hidden" name="type" value="Suggestion">
@@ -230,10 +127,10 @@
   <!-- Sticky CTA -->
   <div class="sticky-cta">
     <div class="bar">
-      <span class="muted">Pomodoro — Productivity & Study Timer</span>
+      <span class="muted" id="p-sticky-name"></span>
       <div class="actions" style="margin:0">
-        <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy now</a>
-        <a id="p-etsy" class="btn ghost" target="_blank" rel="noopener">Etsy</a>
+        <a id="p-stripe-sticky" class="btn primary" target="_blank" rel="noopener">Buy now</a>
+        <a id="p-etsy-sticky" class="btn ghost" target="_blank" rel="noopener">Etsy</a>
       </div>
     </div>
   </div>
@@ -243,11 +140,12 @@
   <script src="app.js"></script>
   <script>
     App.initProduct();
-    // Mirror H1 into sticky bar (if app.js changes it later)
+
+    // sync name into sticky bar
     (function(){
       const nameEl = document.getElementById('p-name');
-      const sticky = document.querySelector('.sticky-cta .bar .muted');
-      if(nameEl && sticky) sticky.textContent = nameEl.textContent || sticky.textContent;
+      const sticky = document.getElementById('p-sticky-name');
+      if(nameEl && sticky) sticky.textContent = nameEl.textContent;
     })();
   </script>
 </body>
