@@ -11,7 +11,8 @@
 .cat-creative, .categories .creative{ --brand:#db2777;}
 .cat-planning, .categories .planning{ --brand:#0ea5e9;}
 
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto}
 a{color:var(--brand);text-decoration:none}
 img{max-width:100%;display:block}
 
@@ -76,6 +77,31 @@ img{max-width:100%;display:block}
 .muted{color:var(--muted)}
 .site-footer{border-top:1px solid var(--border);padding:16px 24px;color:var(--muted);text-align:center}
 
+/* === Product listing grid (products.html) === */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin: 2rem 0;
+}
+.product-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.product-card:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+.product-card a { display: block; padding: 16px; color: inherit; text-decoration: none; }
+.product-card .thumb {
+  width: 100%; aspect-ratio: 4/3; background: #f8f8f8;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px; border-radius: 8px; overflow: hidden;
+}
+.product-card h3 { margin: 0 0 6px; font-size: 1.1rem; font-weight: 600; }
+.product-card p.muted { margin: 0 0 8px; color: #666; font-size: .9rem; }
+.product-card p.price { margin: 0; font-weight: 600; }
 
 /* === Product page upgrade (lightweight, theme-friendly) === */
 .container{max-width:1080px;margin:0 auto;padding:0 1rem}
@@ -108,4 +134,3 @@ details.faq summary{cursor:pointer;font-weight:600}
 .sticky-cta{position:sticky;bottom:0;z-index:50;border-top:1px solid #eee;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(8px)}
 .sticky-cta .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:.75rem 1rem}
 .muted{color:#777;font-size:.9rem}
-
