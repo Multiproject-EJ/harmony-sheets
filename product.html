@@ -25,25 +25,21 @@
   </header>
 
   <main>
-    <!-- ============ HERO ============ -->
+    <!-- HERO -->
     <section class="container hero">
-      <!-- Left: media (slider / demo) -->
       <div class="media hero-media">
         <div class="gallery" id="p-slider">
           <button class="prev" aria-label="Previous">‹</button>
           <button class="next" aria-label="Next">›</button>
-          <!-- slides injected by app.js -->
         </div>
-        <div id="p-video" class="video"><!-- demo video injected here --></div>
+        <div id="p-video" class="video"></div>
       </div>
 
-      <!-- Right: info & CTAs -->
       <div class="info">
         <h1 id="p-name"></h1>
         <p id="p-tagline" class="tagline"></p>
 
         <div id="p-badges" class="badges"></div>
-
         <p id="p-price" class="price"></p>
 
         <div class="actions">
@@ -52,22 +48,13 @@
         </div>
 
         <ul id="p-features" class="features"></ul>
-
         <div id="p-description" class="desc"></div>
       </div>
     </section>
 
-    <!-- ============ SOCIAL PROOF ============ -->
-    <section class="container section" id="p-social">
-      <!-- optional: stars + testimonial injected -->
-    </section>
+    <section class="container section" id="p-social"></section>
+    <section class="container section" id="p-benefits"></section>
 
-    <!-- ============ BENEFITS GRID ============ -->
-    <section class="container section" id="p-benefits">
-      <!-- injected as feature cards -->
-    </section>
-
-    <!-- ============ COLOR STRIP ============ -->
     <section class="container section color-strip" id="p-colors">
       <h3>Color variations</h3>
       <picture>
@@ -76,26 +63,19 @@
       <p id="p-color-caption" class="muted"></p>
     </section>
 
-    <!-- ============ DEMO ============ -->
     <section class="container section" id="p-demo-section">
       <h3>See it in action</h3>
-      <div id="p-demo" class="video"><!-- injected demo video --></div>
+      <div id="p-demo" class="video"></div>
     </section>
 
-    <!-- ============ WHAT YOU GET ============ -->
     <section class="container section">
-      <div class="whats-included" id="p-included">
-        <!-- list injected -->
-      </div>
+      <div class="whats-included" id="p-included"></div>
     </section>
 
-    <!-- ============ FAQ ============ -->
     <section class="container section" id="p-faqs">
       <h3>FAQs</h3>
-      <!-- details injected -->
     </section>
 
-    <!-- ============ PRICING ============ -->
     <section class="container section">
       <div class="pricing">
         <h3 id="p-pricing-title">Get this product</h3>
@@ -107,12 +87,8 @@
       </div>
     </section>
 
-    <!-- Reviews -->
-    <section class="container section">
-      <div id="p-reviews" class="reviews"></div>
-    </section>
+    <section class="container section"><div id="p-reviews" class="reviews"></div></section>
 
-    <!-- Suggestions -->
     <section class="container section">
       <form id="suggest-form" class="suggest">
         <input type="hidden" name="type" value="Suggestion">
@@ -124,7 +100,6 @@
     </section>
   </main>
 
-  <!-- Sticky CTA -->
   <div class="sticky-cta">
     <div class="bar">
       <span class="muted" id="p-sticky-name"></span>
@@ -136,17 +111,6 @@
   </div>
 
   <footer class="site-footer"><p>© <span id="year"></span> Harmony Sheets</p></footer>
-
   <script src="app.js"></script>
-  <script>
-    App.initProduct();
-
-    // sync name into sticky bar
-    (function(){
-      const nameEl = document.getElementById('p-name');
-      const sticky = document.getElementById('p-sticky-name');
-      if(nameEl && sticky) sticky.textContent = nameEl.textContent;
-    })();
-  </script>
 </body>
 </html>
