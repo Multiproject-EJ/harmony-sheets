@@ -6,7 +6,56 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+  <!-- Minimal additive styles (keeps your existing theme intact) -->
+  <style>
+    .container{max-width:1080px;margin:0 auto;padding:0 1rem}
+    .hero{display:grid;grid-template-columns:minmax(0,1fr) 480px;gap:28px;align-items:start;padding:24px 0}
+    @media (max-width:960px){.hero{grid-template-columns:1fr}}
+    .hero .media{border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.08);overflow:hidden}
+    .hero .media .gallery{position:relative;background:#fff}
+    .hero .info h1{margin:0 0 .25rem 0;font-size:clamp(1.5rem,2.5vw,2rem)}
+    .tagline{margin:.25rem 0 1rem 0;color:#555}
+    .price{font-weight:700;margin:.25rem 0 1rem 0}
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin:.5rem 0 1rem 0}
+    .badge{font-size:.85rem;padding:.25rem .5rem;border:1px solid #e8e8e8;border-radius:999px;background:#fafafa}
+    .actions{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0 1.25rem 0}
+    .features{list-style:none;padding:0;margin:0 0 1.25rem 0;display:grid;gap:.5rem}
+    .section{padding:28px 0;border-top:1px solid #f0f0f0}
+    .social-proof{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+    .stars{color:#ffb400}
+    .features-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    .feature-card{border:1px solid #eee;border-radius:12px;padding:14px;background:#fff}
+    .feature-card h4{margin:.25rem 0 .25rem 0;font-size:1rem}
+    .feature-card p{margin:0;color:#555;font-size:.95rem}
+    .color-strip{text-align:center}
+    .color-strip picture,.color-strip img{max-width:520px;width:100%;height:auto;border-radius:12px;display:inline-block}
+    .whats-included,.pricing{border:1px solid #eee;border-radius:14px;padding:16px;background:#fff}
+    details.faq{border:1px solid #eee;border-radius:10px;padding:12px;background:#fff}
+    details.faq+details.faq{margin-top:10px}
+    details.faq summary{cursor:pointer;font-weight:600}
+    .sticky-cta{position:sticky;bottom:0;z-index:50;border-top:1px solid #eee;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(8px)}
+    .sticky-cta .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:.75rem 1rem}
+    .muted{color:#777;font-size:.9rem}
+    .video{aspect-ratio:16/9;background:#f7f7f7;border-radius:12px;overflow:hidden}
+    /* Buttons – rely on your existing .btn styles; these are safe nudges */
+    .btn.primary{font-weight:600}
+    .btn.ghost{opacity:.9}
+  </style>
+
+  <!-- Simple Product schema for SEO (safe defaults; price is filled by page text) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Product",
+    "name":"Pomodoro — Productivity & Study Timer",
+    "brand":{"@type":"Brand","name":"Harmony Sheets"},
+    "description":"Lightweight Pomodoro timer with auto-start cycles, themes, and optional logging. One-time purchase.",
+    "image":["/assets/pomodoro-colors.webp"]
+  }
+  </script>
 </head>
+
 <body class="page-product">
   <header class="site-header">
     <a class="brand" href="/"><img src="assets/logo.svg" alt=""><span>Harmony Sheets</span></a>
@@ -23,59 +72,211 @@
     </nav>
   </header>
 
-  <main class="product">
-    <section class="product-hero">
-      <div class="gallery" id="p-slider">
-        <button class="prev" aria-label="Previous">‹</button>
-        <button class="next" aria-label="Next">›</button>
-        <!-- slides injected by app.js -->
+  <main>
+    <!-- HERO -->
+    <section class="container hero">
+      <!-- Left: media (slider or demo video) -->
+      <div class="media">
+        <div class="gallery" id="p-slider">
+          <button class="prev" aria-label="Previous">‹</button>
+          <button class="next" aria-label="Next">›</button>
+          <!-- app.js injects slides; below is an optional static demo fallback -->
+          <div id="p-video" class="video" aria-label="Product demo video"></div>
+        </div>
       </div>
 
+      <!-- Right: info & CTAs -->
       <div class="info">
-        <h1 id="p-name"></h1>
-        <p id="p-tagline" class="tagline"></p>
+        <h1 id="p-name">Pomodoro — Productivity & Study Timer</h1>
+        <p id="p-tagline" class="tagline">Focus faster with structured 25–5 cycles. Calm visuals, zero clutter.</p>
+
+        <div class="badges">
+          <span class="badge">One-time purchase</span>
+          <span class="badge">No login</span>
+          <span class="badge">Instant download</span>
+          <span class="badge">Google Sheets compatible</span>
+        </div>
+
         <p id="p-price" class="price"></p>
 
         <div class="actions">
-          <!-- IMPORTANT: no placeholder href -->
           <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy now</a>
           <a id="p-etsy" class="btn ghost" target="_blank" rel="noopener">Buy on Etsy</a>
         </div>
 
         <ul id="p-features" class="features"></ul>
-        <div id="p-description" class="desc"></div>
 
-        <!-- Color variations image (static asset) -->
-        <div id="p-color-variations" class="desc" style="margin-top:1rem;">
-          <h3 style="margin:0 0 .5rem 0;">Color variations</h3>
-          <picture>
-            <!-- WebP first; add a PNG/JPG fallback later if you want -->
-            <source srcset="assets/pomodoro-colors.webp" type="image/webp">
-            <img src="assets/pomodoro-colors.webp"
-                 alt="Pomodoro Timer color variations"
-                 style="max-width:100%;height:auto;border-radius:8px;display:block;">
-          </picture>
-          <p class="muted" style="margin-top:.5rem;">Preview of available themes for the Pomodoro timer.</p>
+        <!-- Short outcome copy -->
+        <div id="p-description" class="desc">
+          <p>Start a session in one click. Auto-start breaks, optional sound alerts, and a Today/Session counter help you keep momentum without micromanaging the timer.</p>
         </div>
-
-        <div id="p-video" class="video"></div>
-        <div id="p-reviews" class="reviews"></div>
-
-        <!-- Suggestion form (works with your existing app.js) -->
-        <form id="suggest-form" class="suggest">
-          <input type="hidden" name="type" value="Suggestion">
-          <input type="hidden" id="product_id" name="product_id" value="">
-          <label>Your idea <textarea name="message" required></textarea></label>
-          <button type="submit" class="btn">Send suggestion</button>
-          <span id="suggest-status" class="muted"></span>
-        </form>
       </div>
     </section>
+
+    <!-- SOCIAL PROOF -->
+    <section class="container section">
+      <div class="social-proof">
+        <div class="stars" aria-label="5 star rating">★★★★★</div>
+        <div class="muted">Loved by busy students, makers, and teams. “It gets me started in 10 seconds.”</div>
+      </div>
+    </section>
+
+    <!-- PROBLEM → OUTCOME -->
+    <section class="container section">
+      <div class="features-grid">
+        <div class="feature-card">
+          <h4>Beat procrastination</h4>
+          <p>Structured cycles make the first step effortless—no tabs stealing attention.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Stay in flow</h4>
+          <p>Auto-start Pomodoros and breaks so you don’t negotiate with yourself every 25 minutes.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Feel calm</h4>
+          <p>Pick a theme that feels right. Minimal UI, gentle alerts, and focus-first design.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISUAL TOUR (benefit tiles) -->
+    <section class="container section">
+      <h3>What makes it different</h3>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h4>Auto-start cycles</h4>
+          <p>Pomodoro → Break → Long Break logic, with optional auto-start for each step.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Themes you’ll enjoy</h4>
+          <p>Switch colors anytime. A pleasant workspace keeps you coming back.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Today & Session counters</h4>
+          <p>See your progress at a glance. Stay motivated during longer study blocks.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Optional logging</h4>
+          <p>Log sessions to a sheet to review habits and streaks over time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLOR STRIP (your WebP) -->
+    <section class="container section color-strip" aria-label="Color variations">
+      <h3>Color variations</h3>
+      <picture>
+        <source srcset="assets/pomodoro-colors.webp" type="image/webp">
+        <img src="assets/pomodoro-colors.webp" alt="Pomodoro Timer color variations">
+      </picture>
+      <p class="muted" style="margin-top:.5rem">Pick a theme that feels calm and keeps you focused.</p>
+    </section>
+
+    <!-- 45–60s DEMO (app.js can also inject into #p-video in hero) -->
+    <section class="container section">
+      <h3>See it in action (60 seconds)</h3>
+      <div id="p-demo" class="video">
+        <!-- Optional: drop in a lightweight MP4/WEBM tag or GIF here.
+             Example:
+             <video controls muted playsinline width="100%" height="100%">
+               <source src="assets/pomodoro-demo.webm" type="video/webm">
+               <source src="assets/pomodoro-demo.mp4" type="video/mp4">
+             </video>
+        -->
+      </div>
+    </section>
+
+    <!-- WHAT YOU GET -->
+    <section class="container section">
+      <div class="whats-included">
+        <h3>What you get</h3>
+        <ul>
+          <li>Pomodoro Timer (web + Google Sheets sidebar compatible)</li>
+          <li>Free updates to minor versions</li>
+          <li>Quick-start guide</li>
+          <li>Email support</li>
+          <li>License: Personal use (contact us for team licensing)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container section">
+      <h3>FAQs</h3>
+      <details class="faq">
+        <summary>Can I change the Pomodoro and break lengths?</summary>
+        <p>Yes. You can set custom durations and toggle auto-start behaviors for Pomodoros and breaks.</p>
+      </details>
+      <details class="faq">
+        <summary>Does it require an account or subscription?</summary>
+        <p>No accounts, no subscriptions—just a one-time purchase.</p>
+      </details>
+      <details class="faq">
+        <summary>Does it store data?</summary>
+        <p>By default, no. You can optionally log sessions to a sheet to track streaks.</p>
+      </details>
+      <details class="faq">
+        <summary>Does it work offline?</summary>
+        <p>Once loaded in your browser or sheet sidebar, it continues running your session timers.</p>
+      </details>
+      <details class="faq">
+        <summary>Refund policy?</summary>
+        <p>Try it for 14 days. If it doesn’t help you focus, email us for a full refund.</p>
+      </details>
+    </section>
+
+    <!-- PRICING -->
+    <section class="container section">
+      <div class="pricing">
+        <h3>Get the Pomodoro Timer</h3>
+        <p class="muted">One-time purchase. Instant access. No subscriptions.</p>
+        <div class="actions" style="margin-top:.5rem">
+          <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy now</a>
+          <a id="p-etsy" class="btn ghost" target="_blank" rel="noopener">Buy on Etsy</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews block stays compatible with your app.js -->
+    <section class="container section">
+      <div id="p-reviews" class="reviews"></div>
+    </section>
+
+    <!-- Suggestion form (unchanged ids for your app.js) -->
+    <section class="container section">
+      <form id="suggest-form" class="suggest">
+        <input type="hidden" name="type" value="Suggestion">
+        <input type="hidden" id="product_id" name="product_id" value="">
+        <label>Your idea <textarea name="message" required></textarea></label>
+        <button type="submit" class="btn">Send suggestion</button>
+        <span id="suggest-status" class="muted"></span>
+      </form>
+    </section>
   </main>
+
+  <!-- Sticky CTA -->
+  <div class="sticky-cta">
+    <div class="bar">
+      <span class="muted">Pomodoro — Productivity & Study Timer</span>
+      <div class="actions" style="margin:0">
+        <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy now</a>
+        <a id="p-etsy" class="btn ghost" target="_blank" rel="noopener">Etsy</a>
+      </div>
+    </div>
+  </div>
 
   <footer class="site-footer"><p>© <span id="year"></span> Harmony Sheets</p></footer>
 
   <script src="app.js"></script>
-  <script>App.initProduct();</script>
+  <script>
+    App.initProduct();
+
+    // Optional: copy main H1 into sticky label if app.js overwrites content later
+    (function(){
+      const nameEl = document.getElementById('p-name');
+      const sticky = document.querySelector('.sticky-cta .bar .muted');
+      if(nameEl && sticky) sticky.textContent = nameEl.textContent || sticky.textContent;
+    })();
+  </script>
 </body>
 </html>
