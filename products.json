@@ -4,6 +4,7 @@
     "name": "Pomodoro — Productivity & Study Timer",
     "tagline": "Focus faster with structured 25–5 cycles. Calm visuals, zero clutter.",
     "price": "$9",
+    "lifeAreas": ["career", "health", "fun", "spirituality"],
     "badges": [
       "One-time purchase",
       "No login",
@@ -51,6 +52,7 @@
     "name": "Budget Dashboard — Personal Finance Tracker",
     "tagline": "Take control of your money with clarity and confidence.",
     "price": "$19",
+    "lifeAreas": ["finances", "family", "environment", "love"],
     "badges": [
       "One-time purchase",
       "Instant Google Sheets setup",
@@ -98,6 +100,7 @@
     "name": "Pomodoro Pro — Advanced Productivity System",
     "tagline": "The upgraded Pomodoro with analytics, goals, and smart focus tools.",
     "price": "$29",
+    "lifeAreas": ["career", "health", "fun", "family", "spirituality"],
     "badges": [
       "Advanced features",
       "Goal tracking",

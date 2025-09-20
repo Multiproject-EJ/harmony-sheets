@@ -4,6 +4,73 @@
 
 const App = {};
 
+App.LIFE_AREAS = {
+  love: {
+    title: "Love & Romantic Relationships",
+    short: "Love",
+    description: "Create rituals and check-ins that nurture meaningful partnerships.",
+    link: "products.html?area=love",
+    cta: "Explore relationship tools",
+    empty: "We're crafting dedicated templates for Love & Romantic Relationships. In the meantime, explore all Life Harmony tools."
+  },
+  career: {
+    title: "Career, Growth & Learning",
+    short: "Career",
+    description: "Stay organized, track goals, and keep moving toward your next milestone.",
+    link: "products.html?area=career",
+    cta: "Stay on track with career tools",
+    empty: "We're designing more templates for Career, Growth & Learning. Browse all tools while we build."
+  },
+  health: {
+    title: "Health & Fitness",
+    short: "Health",
+    description: "Build calm routines for movement, rest, and mindful habits.",
+    link: "products.html?area=health",
+    cta: "See wellness templates",
+    empty: "We're creating new wellness planners for this area. Explore all Life Harmony tools to get started."
+  },
+  finances: {
+    title: "Finances",
+    short: "Finances",
+    description: "See your money clearly and plan budgets that match your values.",
+    link: "products.html?area=finances",
+    cta: "Review finance planners",
+    empty: "More money clarity tools are coming soon. Until then, browse the full collection."
+  },
+  fun: {
+    title: "Fun & Recreation",
+    short: "Fun",
+    description: "Plan adventures, hobbies, and creative breaks that refill your energy.",
+    link: "products.html?area=fun",
+    cta: "Find fun & recreation ideas",
+    empty: "We're crafting playful planners for Fun & Recreation. Explore all tools while we finish them."
+  },
+  family: {
+    title: "Family & Friends",
+    short: "Family",
+    description: "Coordinate family schedules and stay connected with the people who matter most.",
+    link: "products.html?area=family",
+    cta: "Coordinate with family tools",
+    empty: "We're building new ways to support Family & Friends. Browse all tools to see what's ready now."
+  },
+  environment: {
+    title: "Physical Environment",
+    short: "Environment",
+    description: "Design supportive spaces, tidy routines, and home projects with clarity.",
+    link: "products.html?area=environment",
+    cta: "Design your ideal space",
+    empty: "Fresh templates for your environment are on the way. Check out the full library in the meantime."
+  },
+  spirituality: {
+    title: "Spirituality & Community",
+    short: "Spirituality",
+    description: "Cultivate reflection, service, and community practices that ground you.",
+    link: "products.html?area=spirituality",
+    cta: "Discover community & reflection tools",
+    empty: "We're preparing new resources for Spirituality & Community. Explore all tools while we build."
+  }
+};
+
 /*****************************************************
  * Utils
  *****************************************************/
@@ -27,6 +94,7 @@ App.init = function() {
   // Auto-detect page
   if (App.qs("body.page-products")) App.initProducts();
   if (App.qs("body.page-product")) App.initProduct();
+  if (App.qs("#life-wheel")) App.initHome();
 
   // Init suggest form everywhere
   App.initSuggestForm();
@@ -39,13 +107,50 @@ App.initProducts = async function() {
   const container = App.qs("#products-list");
   if (!container) return;
 
+  const params = new URLSearchParams(window.location.search);
+  const areaSlug = params.get("area");
+  const areaInfo = areaSlug ? App.LIFE_AREAS[areaSlug] : null;
+  const heading = App.qs("#products-heading");
+  const intro = App.qs("#products-intro");
+
   try {
     const res = await fetch("products.json");
     const products = await res.json();
 
-    container.innerHTML = products
+    if (areaInfo) {
+      if (heading) heading.textContent = areaInfo.title;
+      if (intro) intro.textContent = areaInfo.description;
+      document.title = `${areaInfo.title} — Harmony Sheets`;
+    }
+
+    let list = products;
+    if (areaInfo) {
+      list = products.filter(p => Array.isArray(p.lifeAreas) && p.lifeAreas.includes(areaSlug));
+    }
+
+    if (!list.length) {
+      const emptyMessage = areaInfo?.empty || "We're crafting new tools for this area. Explore all Life Harmony templates in the meantime.";
+      container.innerHTML = `
+        <div class="products-empty">
+          <p>${emptyMessage}</p>
+          <a href="products.html">Browse all tools</a>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = list
       .map(
-        p => `
+        p => {
+          const tags = Array.isArray(p.lifeAreas)
+            ? p.lifeAreas
+                .map(tag => App.LIFE_AREAS[tag]?.short)
+                .filter(Boolean)
+                .map(t => `<span>${t}</span>`)
+                .join("")
+            : "";
+
+          return `
         <div class="product-card">
           <a href="product.html?id=${p.id}">
             <div class="thumb">
@@ -54,14 +159,96 @@ App.initProducts = async function() {
             <h3>${p.name}</h3>
             <p class="muted">${p.tagline || ""}</p>
             <p class="price">${p.price || ""}</p>
+            ${tags ? `<div class="product-tags">${tags}</div>` : ""}
           </a>
         </div>
-      `
+      `;
+        }
       )
       .join("");
   } catch (err) {
     console.error("Error loading products:", err);
   }
+};
+
+/*****************************************************
+ * Home page life wheel (index.html)
+ *****************************************************/
+App.initHome = function() {
+  const details = App.qs("#life-wheel-details");
+  const slices = App.qsa(".life-wheel__slice-link");
+  if (!details || !slices.length) return;
+
+  const defaultState = {
+    title: details.dataset.defaultTitle || "Explore the Life Harmony Wheel",
+    description: details.dataset.defaultDescription || "",
+    link: details.dataset.defaultLink || "products.html",
+    cta: details.dataset.defaultCta || "Browse all Life Harmony tools"
+  };
+
+  const render = (state, isActive = false) => {
+    const { title, description, link, cta } = state;
+    details.innerHTML = `
+      <h3>${title}</h3>
+      <p>${description}</p>
+      <a class="life-wheel__cta" href="${link}">${cta}</a>
+    `;
+    details.classList.toggle("is-active", isActive);
+  };
+
+  let activeSlice = null;
+  let resetTimer = null;
+
+  const setActive = slice => {
+    const area = slice.dataset.area;
+    const info = App.LIFE_AREAS[area];
+    if (!info) return;
+    clearTimeout(resetTimer);
+    if (activeSlice && activeSlice !== slice) {
+      activeSlice.classList.remove("is-active");
+    }
+    activeSlice = slice;
+    slice.classList.add("is-active");
+    render(info, true);
+  };
+
+  const reset = () => {
+    clearTimeout(resetTimer);
+    if (activeSlice) {
+      activeSlice.classList.remove("is-active");
+      activeSlice = null;
+    }
+    render(defaultState, false);
+  };
+
+  const scheduleReset = () => {
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(() => {
+      if (details.matches(":hover")) return;
+      reset();
+    }, 140);
+  };
+
+  details.addEventListener("mouseenter", () => clearTimeout(resetTimer));
+  details.addEventListener("mouseleave", reset);
+  details.addEventListener("blur", reset, true);
+
+  slices.forEach(slice => {
+    const area = slice.dataset.area;
+    const info = App.LIFE_AREAS[area];
+    if (info) {
+      slice.setAttribute("aria-label", info.title);
+      const title = slice.querySelector("title");
+      if (title) title.textContent = info.title;
+    }
+
+    slice.addEventListener("mouseenter", () => setActive(slice));
+    slice.addEventListener("focus", () => setActive(slice));
+    slice.addEventListener("mouseleave", scheduleReset);
+    slice.addEventListener("blur", reset);
+  });
+
+  render(defaultState, false);
 };
 
 /*****************************************************
