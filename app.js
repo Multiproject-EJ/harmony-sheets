@@ -81,6 +81,8 @@ App.qsa = sel => Array.from(document.querySelectorAll(sel));
  * Init
  *****************************************************/
 App.init = function() {
+  App.initNav();
+
   // Update footer year
   const yearEl = App.qs("#year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -98,6 +100,52 @@ App.init = function() {
 
   // Init suggest form everywhere
   App.initSuggestForm();
+};
+
+/*****************************************************
+ * Navigation toggle
+ *****************************************************/
+App.initNav = function() {
+  const toggle = App.qs(".nav-toggle");
+  const nav = App.qs(".main-nav");
+  if (!toggle || !nav) return;
+
+  const closeMenu = () => {
+    nav.classList.remove("is-open");
+    toggle.classList.remove("is-open");
+    toggle.setAttribute("aria-expanded", "false");
+  };
+
+  const handleToggle = () => {
+    const isOpen = nav.classList.toggle("is-open");
+    toggle.classList.toggle("is-open", isOpen);
+    toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  };
+
+  const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
+
+  toggle.addEventListener("click", () => {
+    handleToggle();
+  });
+
+  App.qsa(".main-nav a").forEach(link => {
+    link.addEventListener("click", () => {
+      if (isMobile()) closeMenu();
+    });
+  });
+
+  window.addEventListener("resize", () => {
+    if (!isMobile()) closeMenu();
+  });
+
+  window.addEventListener("keydown", event => {
+    if (event.key === "Escape" && nav.classList.contains("is-open")) {
+      closeMenu();
+      toggle.focus();
+    }
+  });
+
+  closeMenu();
 };
 
 /*****************************************************
