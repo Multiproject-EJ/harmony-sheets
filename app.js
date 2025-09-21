@@ -360,6 +360,14 @@ App.initHome = function() {
 
   const iconLayer = App.qs(".life-wheel__icons");
 
+  const iconData = [];
+
+  const sliceIndices = new Map();
+  slices.forEach((slice, index) => {
+    if (slice.dataset.area) sliceIndices.set(slice.dataset.area, index);
+  });
+
+
   const hexToRgba = (hex, alpha = 1) => {
     if (!hex) return "";
     let value = hex.replace("#", "");
@@ -385,6 +393,14 @@ App.initHome = function() {
       const info = App.LIFE_AREAS[area];
       if (!info) return;
 
+
+      const icon = document.createElement("div");
+      icon.className = "life-wheel__icon";
+      icon.dataset.area = area;
+      icon.style.setProperty("--area-color", info.color);
+      icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
+      icon.dataset.index = String(index);
+
       const angle = -90 + index * 45;
 
       const icon = document.createElement("div");
@@ -395,6 +411,7 @@ App.initHome = function() {
       icon.style.setProperty("--area-color", info.color);
       icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
 
+
       const inner = document.createElement("span");
       inner.className = "life-wheel__icon-inner";
       inner.innerHTML = info.icon || "";
@@ -402,12 +419,63 @@ App.initHome = function() {
       icon.appendChild(inner);
       iconLayer.appendChild(icon);
       iconLookup.set(area, icon);
+
+      iconData.push({ icon, index });
+    });
+  } else {
+    App.qsa(".life-wheel__icon").forEach(icon => {
+      const area = icon.dataset.area;
+      if (!area) return;
+      const index = sliceIndices.has(area) ? sliceIndices.get(area) : 0;
+      icon.dataset.index = String(index ?? 0);
+      iconLookup.set(area, icon);
+      iconData.push({ icon, index: index ?? 0 });
+    });
+  }
+
+  const graphic = iconLayer ? iconLayer.closest(".life-wheel__graphic") : null;
+
+  const updateIconPositions = () => {
+    if (!iconData.length) return;
+    const boundsSource = graphic || iconLayer || App.qs(".life-wheel__graphic");
+    if (!boundsSource) return;
+    const size = boundsSource.getBoundingClientRect().width;
+    if (!size) return;
+
+    const iconSize = Math.max(Math.min(size * 0.16, 68), 44);
+    const outerRadius = size * (160 / 360);
+    const radius = Math.max(outerRadius - iconSize * 0.5 - size * 0.015, outerRadius * 0.58);
+    const center = size / 2;
+
+    iconData.forEach(({ icon, index }) => {
+      const angleDeg = -90 + index * 45;
+      const angleRad = (Math.PI / 180) * angleDeg;
+      const x = center + Math.cos(angleRad) * radius;
+      const y = center + Math.sin(angleRad) * radius;
+      icon.style.setProperty("--icon-x", `${x}px`);
+      icon.style.setProperty("--icon-y", `${y}px`);
+      icon.style.setProperty("--icon-size", `${iconSize}px`);
+    });
+  };
+
+  updateIconPositions();
+
+  let resizeFrame = null;
+  const handleResize = () => {
+    if (resizeFrame) cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(updateIconPositions);
+  };
+
+  window.addEventListener("resize", handleResize);
+
+
     });
   } else {
     App.qsa(".life-wheel__icon").forEach(icon => {
       if (icon.dataset.area) iconLookup.set(icon.dataset.area, icon);
     });
   }
+
 
   const defaultState = {
     title: details.dataset.defaultTitle || "Explore the Life Harmony Wheel",
