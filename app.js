@@ -208,6 +208,36 @@ App.LIFE_AREAS = {
 App.qs = sel => document.querySelector(sel);
 App.qsa = sel => Array.from(document.querySelectorAll(sel));
 
+App.hexToRgba = function(hex, alpha = 1) {
+  if (!hex) return "";
+  let value = hex.replace("#", "");
+  if (value.length === 3) {
+    value = value
+      .split("")
+      .map(ch => ch + ch)
+      .join("");
+  }
+  const int = parseInt(value, 16);
+  if (Number.isNaN(int)) return "";
+  const r = (int >> 16) & 255;
+  const g = (int >> 8) & 255;
+  const b = int & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+App.productsPromise = null;
+App.loadProducts = function() {
+  if (!App.productsPromise) {
+    App.productsPromise = fetch("products.json")
+      .then(res => res.json())
+      .catch(err => {
+        App.productsPromise = null;
+        throw err;
+      });
+  }
+  return App.productsPromise;
+};
+
 /*****************************************************
  * Init
  *****************************************************/
@@ -220,9 +250,21 @@ App.init = function() {
 
   // Highlight active nav item
   const path = window.location.pathname;
-  App.qsa(".main-nav a").forEach(a => {
-    if (a.href.includes(path)) a.classList.add("active");
+  const filename = path === "/" ? "index.html" : path.split("/").pop();
+  const topLinks = App.qsa(".main-nav > a.nav-link, .main-nav > .nav-item > a.nav-link");
+  topLinks.forEach(link => {
+    const href = link.getAttribute("href");
+    if (!href) return;
+    const linkUrl = new URL(href, window.location.origin);
+    const linkFile = linkUrl.pathname.split("/").pop();
+    const isProductsLink = linkFile === "products.html";
+    if (linkFile === filename || (isProductsLink && (filename === "products.html" || filename === "product.html"))) {
+      link.classList.add("active");
+    }
   });
+
+  // Build enhanced browse menu
+  App.initNavDropdown();
 
   // Auto-detect page
   if (App.qs("body.page-products")) App.initProducts();
@@ -236,6 +278,7 @@ App.init = function() {
 /*****************************************************
  * Navigation toggle
  *****************************************************/
+App.closeBrowseMenu = null;
 App.initNav = function() {
   const toggle = App.qs(".nav-toggle");
   const nav = App.qs(".main-nav");
@@ -245,12 +288,18 @@ App.initNav = function() {
     nav.classList.remove("is-open");
     toggle.classList.remove("is-open");
     toggle.setAttribute("aria-expanded", "false");
+    if (typeof App.closeBrowseMenu === "function") {
+      App.closeBrowseMenu();
+    }
   };
 
   const handleToggle = () => {
     const isOpen = nav.classList.toggle("is-open");
     toggle.classList.toggle("is-open", isOpen);
     toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    if (!isOpen && typeof App.closeBrowseMenu === "function") {
+      App.closeBrowseMenu();
+    }
   };
 
   const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
@@ -280,6 +329,124 @@ App.initNav = function() {
 };
 
 /*****************************************************
+ * Browse mega menu
+ *****************************************************/
+App.initNavDropdown = function() {
+  const browseItem = App.qs(".nav-item--browse");
+  const browseLink = browseItem?.querySelector(".nav-link--browse");
+  const mega = browseItem?.querySelector(".nav-mega");
+  const content = browseItem?.querySelector("[data-nav-mega-content]");
+
+  if (!browseItem || !browseLink || !mega || !content) {
+    App.closeBrowseMenu = null;
+    return;
+  }
+
+  const setOpen = open => {
+    browseItem.classList.toggle("is-open", open);
+    browseLink.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+
+  const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
+  const close = () => setOpen(false);
+  App.closeBrowseMenu = close;
+  close();
+
+  browseItem.addEventListener("mouseenter", () => {
+    if (!isMobile()) setOpen(true);
+  });
+
+  browseItem.addEventListener("mouseleave", () => {
+    if (!isMobile()) close();
+  });
+
+  browseLink.addEventListener("focus", () => setOpen(true));
+
+  browseItem.addEventListener("focusout", event => {
+    if (!browseItem.contains(event.relatedTarget)) close();
+  });
+
+  browseItem.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      close();
+      browseLink.focus();
+    }
+  });
+
+  browseLink.addEventListener("click", event => {
+    if (!isMobile()) return;
+    if (!browseItem.classList.contains("is-open")) {
+      event.preventDefault();
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (!isMobile()) close();
+  });
+
+  const render = products => {
+    const byArea = {};
+    Object.keys(App.LIFE_AREAS).forEach(key => {
+      byArea[key] = [];
+    });
+
+    products.forEach(product => {
+      if (!Array.isArray(product.lifeAreas)) return;
+      product.lifeAreas.forEach(area => {
+        if (byArea[area]) byArea[area].push(product);
+      });
+    });
+
+    Object.values(byArea).forEach(list => {
+      list.sort((a, b) => a.name.localeCompare(b.name));
+    });
+
+    const groups = Object.entries(App.LIFE_AREAS)
+      .map(([key, info]) => {
+        const items = byArea[key] || [];
+        const productMarkup = items.length
+          ? items
+              .map(p => `<li><a href="product.html?id=${p.id}">${p.name}</a></li>`)
+              .join("")
+          : '<li class="nav-mega__empty">Tools coming soon</li>';
+        const soft = App.hexToRgba(info.color, 0.12);
+        const border = App.hexToRgba(info.color, 0.24);
+        const ink = App.hexToRgba(info.color, 0.7);
+        return `
+          <section class="nav-mega__group" style="--area-color:${info.color};--area-soft:${soft};--area-border:${border};--area-ink:${ink};">
+            <header class="nav-mega__heading">
+              <span class="nav-mega__badge">${info.short || info.title}</span>
+              <span class="nav-mega__label">${info.title}</span>
+            </header>
+            <ul class="nav-mega__products">${productMarkup}</ul>
+            <a class="nav-mega__area-link" href="${info.link}">Open ${info.short || info.title} tools</a>
+          </section>
+        `;
+      })
+      .join("");
+
+    content.innerHTML = `
+      <div class="nav-mega__grid">
+        ${groups}
+      </div>
+      <div class="nav-mega__footer"><a href="products.html">Browse all Harmony tools</a></div>
+    `;
+  };
+
+  App.loadProducts()
+    .then(products => {
+      render(products);
+    })
+    .catch(err => {
+      console.error("Error building browse menu:", err);
+      content.innerHTML = '<p class="nav-mega__placeholder">Unable to load tools right now.</p>';
+    });
+};
+
+/*****************************************************
  * Products listing (products.html)
  *****************************************************/
 App.initProducts = async function() {
@@ -293,8 +460,7 @@ App.initProducts = async function() {
   const intro = App.qs("#products-intro");
 
   try {
-    const res = await fetch("products.json");
-    const products = await res.json();
+    const products = await App.loadProducts();
 
     if (areaInfo) {
       if (heading) heading.textContent = areaInfo.title;
@@ -369,23 +535,6 @@ App.initHome = function() {
     if (slice.dataset.area) sliceIndices.set(slice.dataset.area, index);
   });
 
-
-  const hexToRgba = (hex, alpha = 1) => {
-    if (!hex) return "";
-    let value = hex.replace("#", "");
-    if (value.length === 3) {
-      value = value
-        .split("")
-        .map(ch => ch + ch)
-        .join("");
-    }
-    const int = parseInt(value, 16);
-    const r = (int >> 16) & 255;
-    const g = (int >> 8) & 255;
-    const b = int & 255;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  };
-
   const iconLookup = new Map();
   const labelLookup = new Map();
 
@@ -412,7 +561,7 @@ App.initHome = function() {
       icon.dataset.area = area;
       icon.dataset.index = String(index);
       icon.style.setProperty("--area-color", info.color);
-      icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
+      icon.style.setProperty("--area-glow", App.hexToRgba(info.color, 0.34));
 
       const inner = document.createElement("span");
       inner.className = "life-wheel__icon-inner";
@@ -431,7 +580,7 @@ App.initHome = function() {
         label.dataset.index = String(index);
         label.textContent = info.short || info.title || "";
         label.style.setProperty("--area-color", info.color);
-        label.style.setProperty("--area-glow", hexToRgba(info.color, 0.26));
+        label.style.setProperty("--area-glow", App.hexToRgba(info.color, 0.26));
         labelLayer.appendChild(label);
         labelLookup.set(area, label);
         labelData.push({ label, index });
@@ -448,7 +597,7 @@ App.initHome = function() {
       if (!Number.isFinite(index)) index = 0;
       if (info) {
         icon.style.setProperty("--area-color", info.color);
-        icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
+        icon.style.setProperty("--area-glow", App.hexToRgba(info.color, 0.34));
       }
       icon.dataset.index = String(index);
       iconLookup.set(area, icon);
@@ -461,7 +610,7 @@ App.initHome = function() {
         label.dataset.index = String(index);
         label.textContent = info.short || info.title || "";
         label.style.setProperty("--area-color", info.color);
-        label.style.setProperty("--area-glow", hexToRgba(info.color, 0.26));
+        label.style.setProperty("--area-glow", App.hexToRgba(info.color, 0.26));
         labelLayer.appendChild(label);
         labelLookup.set(area, label);
         labelData.push({ label, index });
@@ -479,7 +628,7 @@ App.initHome = function() {
     const iconSize = Math.max(Math.min(size * 0.16, 68), 44);
     const outerRadius = size * (160 / 360);
     const radius = Math.max(outerRadius - iconSize * 0.5 - size * 0.015, outerRadius * 0.58);
-    const labelRadius = outerRadius + Math.max(size * 0.06, iconSize * 0.38);
+    const labelRadius = outerRadius + Math.max(size * 0.085, iconSize * 0.5) + size * 0.008;
     const labelFont = Math.max(Math.min(size * 0.045, 18), 12);
     const center = size / 2;
 
@@ -534,8 +683,8 @@ App.initHome = function() {
   const setAccent = color => {
     if (color) {
       details.style.setProperty("--detail-color", color);
-      details.style.setProperty("--detail-glow", hexToRgba(color, 0.24));
-      details.style.setProperty("--detail-sheen", hexToRgba(color, 0.14));
+      details.style.setProperty("--detail-glow", App.hexToRgba(color, 0.24));
+      details.style.setProperty("--detail-sheen", App.hexToRgba(color, 0.14));
     } else {
       details.style.removeProperty("--detail-color");
       details.style.removeProperty("--detail-glow");
@@ -712,8 +861,7 @@ App.initProduct = async function() {
   if (!productId) return;
 
   try {
-    const res = await fetch("products.json");
-    const products = await res.json();
+    const products = await App.loadProducts();
     const product = products.find(p => p.id === productId);
     if (!product) return;
 

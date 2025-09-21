@@ -10,16 +10,23 @@
 
 <body class="page-product">
   <header class="site-header">
-    <a class="brand" href="/"><img src="assets/logo.svg" alt=""><span>Harmony Sheets</span></a>
+    <a class="brand" href="/">Harmony Sheets</a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
       <span class="sr-only">Toggle navigation</span>
       <span class="nav-toggle__icon" aria-hidden="true"></span>
     </button>
     <nav class="main-nav" id="site-menu">
-      <a href="products.html">Browse Life Harmony Apps/Tools</a>
-      <a href="bundles.html">Bundles</a>
-      <a href="faq.html">FAQ / Support</a>
-      <a href="about.html">About</a>
+      <div class="nav-item nav-item--browse">
+        <a class="nav-link nav-link--browse" href="products.html" aria-haspopup="true" aria-expanded="false">Browse Life Harmony Apps/Tools</a>
+        <div class="nav-mega" role="menu" aria-label="Life Harmony categories">
+          <div class="nav-mega__content" data-nav-mega-content>
+            <p class="nav-mega__placeholder">Loading Life Harmony areas…</p>
+          </div>
+        </div>
+      </div>
+      <a class="nav-link" href="bundles.html">Bundles</a>
+      <a class="nav-link" href="faq.html">FAQ / Support</a>
+      <a class="nav-link" href="about.html">About</a>
     </nav>
   </header>
 
