@@ -342,12 +342,58 @@ App.initNavDropdown = function() {
     return;
   }
 
+  const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
+
+  const resetMegaPosition = () => {
+    mega.style.left = "";
+    mega.style.right = "";
+  };
+
+  const repositionMega = () => {
+    resetMegaPosition();
+    if (isMobile()) return;
+
+    const margin = 20;
+    const rect = mega.getBoundingClientRect();
+    const itemRect = browseItem.getBoundingClientRect();
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+
+    let offset = rect.left - itemRect.left;
+    let shift = 0;
+
+    if (rect.left < margin) {
+      shift = margin - rect.left;
+    } else if (rect.right > viewportWidth - margin) {
+      shift = viewportWidth - margin - rect.right;
+    }
+
+    if (Math.abs(shift) > 0.5) {
+      offset += shift;
+      mega.style.left = `${offset}px`;
+    }
+  };
+
+  let repositionFrame = null;
+  const scheduleReposition = () => {
+    if (repositionFrame) cancelAnimationFrame(repositionFrame);
+    repositionFrame = requestAnimationFrame(() => {
+      repositionFrame = null;
+      repositionMega();
+    });
+  };
+
   const setOpen = open => {
+    if (isMobile()) {
+      open = false;
+    } else if (open) {
+      scheduleReposition();
+    }
+    if (!open) {
+      resetMegaPosition();
+    }
     browseItem.classList.toggle("is-open", open);
     browseLink.setAttribute("aria-expanded", open ? "true" : "false");
   };
-
-  const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
   const close = () => setOpen(false);
   App.closeBrowseMenu = close;
   close();
@@ -373,18 +419,13 @@ App.initNavDropdown = function() {
     }
   });
 
-  browseLink.addEventListener("click", event => {
-    if (!isMobile()) return;
-    if (!browseItem.classList.contains("is-open")) {
-      event.preventDefault();
-      setOpen(true);
-    } else {
-      setOpen(false);
-    }
+  browseLink.addEventListener("click", () => {
+    if (isMobile()) setOpen(false);
   });
 
   window.addEventListener("resize", () => {
-    if (!isMobile()) close();
+    scheduleReposition();
+    close();
   });
 
   const render = products => {
@@ -434,6 +475,7 @@ App.initNavDropdown = function() {
       </div>
       <div class="nav-mega__footer"><a href="products.html">Browse all Harmony tools</a></div>
     `;
+    scheduleReposition();
   };
 
   App.loadProducts()
@@ -443,6 +485,7 @@ App.initNavDropdown = function() {
     .catch(err => {
       console.error("Error building browse menu:", err);
       content.innerHTML = '<p class="nav-mega__placeholder">Unable to load tools right now.</p>';
+      scheduleReposition();
     });
 };
 
@@ -531,8 +574,12 @@ App.initHome = function() {
   const labelData = [];
 
   const sliceIndices = new Map();
+  const sliceLookup = new Map();
   slices.forEach((slice, index) => {
-    if (slice.dataset.area) sliceIndices.set(slice.dataset.area, index);
+    if (slice.dataset.area) {
+      sliceIndices.set(slice.dataset.area, index);
+      sliceLookup.set(slice.dataset.area, slice);
+    }
   });
 
   const iconLookup = new Map();
@@ -542,7 +589,6 @@ App.initHome = function() {
   if (!labelLayer && graphic) {
     labelLayer = document.createElement("div");
     labelLayer.className = "life-wheel__labels";
-    labelLayer.setAttribute("aria-hidden", "true");
     graphic.appendChild(labelLayer);
   }
   if (labelLayer) {
@@ -574,16 +620,32 @@ App.initHome = function() {
       iconData.push({ icon, index });
 
       if (labelLayer) {
-        const label = document.createElement("div");
+        const label = document.createElement("a");
         label.className = "life-wheel__label";
         label.dataset.area = area;
         label.dataset.index = String(index);
         label.textContent = info.short || info.title || "";
         label.style.setProperty("--area-color", info.color);
         label.style.setProperty("--area-glow", App.hexToRgba(info.color, 0.26));
+        const sliceEl = sliceLookup.get(area);
+        const areaLink = info.link || sliceEl?.getAttribute("href") || `products.html?area=${area}`;
+        label.href = areaLink;
+        if (info.title) label.setAttribute("aria-label", info.title);
         labelLayer.appendChild(label);
         labelLookup.set(area, label);
         labelData.push({ label, index });
+
+        if (sliceEl) {
+          label.addEventListener("mouseenter", () => setActive(sliceEl));
+          label.addEventListener("focus", () => setActive(sliceEl));
+          label.addEventListener("pointerdown", event => {
+            if (event.pointerType === "touch" || event.pointerType === "pen") {
+              setActive(sliceEl);
+            }
+          });
+        }
+        label.addEventListener("mouseleave", () => scheduleReset());
+        label.addEventListener("blur", () => reset());
       }
     });
   } else {
@@ -604,16 +666,32 @@ App.initHome = function() {
       iconData.push({ icon, index });
 
       if (labelLayer && info) {
-        const label = document.createElement("div");
+        const label = document.createElement("a");
         label.className = "life-wheel__label";
         label.dataset.area = area;
         label.dataset.index = String(index);
         label.textContent = info.short || info.title || "";
         label.style.setProperty("--area-color", info.color);
         label.style.setProperty("--area-glow", App.hexToRgba(info.color, 0.26));
+        const sliceEl = sliceLookup.get(area);
+        const areaLink = info.link || sliceEl?.getAttribute("href") || `products.html?area=${area}`;
+        label.href = areaLink;
+        if (info.title) label.setAttribute("aria-label", info.title);
         labelLayer.appendChild(label);
         labelLookup.set(area, label);
         labelData.push({ label, index });
+
+        if (sliceEl) {
+          label.addEventListener("mouseenter", () => setActive(sliceEl));
+          label.addEventListener("focus", () => setActive(sliceEl));
+          label.addEventListener("pointerdown", event => {
+            if (event.pointerType === "touch" || event.pointerType === "pen") {
+              setActive(sliceEl);
+            }
+          });
+        }
+        label.addEventListener("mouseleave", () => scheduleReset());
+        label.addEventListener("blur", () => reset());
       }
     });
   }
