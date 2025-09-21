@@ -359,12 +359,14 @@ App.initHome = function() {
   if (!details || !slices.length) return;
 
   const iconLayer = App.qs(".life-wheel__icons");
+
   const iconData = [];
 
   const sliceIndices = new Map();
   slices.forEach((slice, index) => {
     if (slice.dataset.area) sliceIndices.set(slice.dataset.area, index);
   });
+
 
   const hexToRgba = (hex, alpha = 1) => {
     if (!hex) return "";
@@ -391,12 +393,24 @@ App.initHome = function() {
       const info = App.LIFE_AREAS[area];
       if (!info) return;
 
+
       const icon = document.createElement("div");
       icon.className = "life-wheel__icon";
       icon.dataset.area = area;
       icon.style.setProperty("--area-color", info.color);
       icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
       icon.dataset.index = String(index);
+
+      const angle = -90 + index * 45;
+
+      const icon = document.createElement("div");
+      icon.className = "life-wheel__icon";
+      icon.dataset.area = area;
+      icon.style.setProperty("--angle", `${angle}deg`);
+      icon.style.setProperty("--angle-inverse", `${-angle}deg`);
+      icon.style.setProperty("--area-color", info.color);
+      icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
+
 
       const inner = document.createElement("span");
       inner.className = "life-wheel__icon-inner";
@@ -405,6 +419,7 @@ App.initHome = function() {
       icon.appendChild(inner);
       iconLayer.appendChild(icon);
       iconLookup.set(area, icon);
+
       iconData.push({ icon, index });
     });
   } else {
@@ -452,6 +467,15 @@ App.initHome = function() {
   };
 
   window.addEventListener("resize", handleResize);
+
+
+    });
+  } else {
+    App.qsa(".life-wheel__icon").forEach(icon => {
+      if (icon.dataset.area) iconLookup.set(icon.dataset.area, icon);
+    });
+  }
+
 
   const defaultState = {
     title: details.dataset.defaultTitle || "Explore the Life Harmony Wheel",
