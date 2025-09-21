@@ -4,10 +4,127 @@
 
 const App = {};
 
+App.createIcon = function(content) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${content}</svg>`;
+};
+
+App.LIFE_ICONS = {
+  love: App.createIcon(`
+    <g
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <circle cx="9.5" cy="10" r="3.2" />
+      <circle cx="14.5" cy="10" r="3.2" />
+      <path d="M6.2 13.8c1.5 2.7 3.5 4.8 5.8 6.4 2.3 -1.6 4.3 -3.7 5.8 -6.4" />
+    </g>
+  `),
+  career: App.createIcon(`
+    <g
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M8 7V6a4 4 0 0 1 4-4 4 4 0 0 1 4 4v1" />
+      <rect x="4" y="7" width="16" height="12" rx="2.5" />
+      <path d="M4 12h16" />
+      <path d="M12 11.7v2.6" />
+    </g>
+  `),
+  health: App.createIcon(`
+    <g
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <circle cx="12" cy="12" r="7.5" />
+      <path d="M12 8.5v7" />
+      <path d="M8.5 12h7" />
+    </g>
+  `),
+  finances: App.createIcon(`
+    <g
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <ellipse cx="12" cy="8.5" rx="4.5" ry="2.5" />
+      <path d="M7.5 8.5v7c0 1.5 2 2.5 4.5 2.5s4.5 -1 4.5 -2.5v-7" />
+      <path d="M7.5 12c0 1.5 2 2.5 4.5 2.5s4.5 -1 4.5 -2.5" />
+    </g>
+  `),
+  fun: App.createIcon(`
+    <g
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polygon points="12 4.5 14.1 9 19 9.6 15.6 12.7 16.7 17.4 12 14.9 7.3 17.4 8.4 12.7 5 9.6 9.9 9" />
+    </g>
+  `),
+  family: App.createIcon(`
+    <g
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M4.5 18c0-2.2 1.8-4 4-4h7c2.2 0 4 1.8 4 4" />
+      <circle cx="8.5" cy="10" r="3" />
+      <circle cx="15.5" cy="11.5" r="2.5" />
+    </g>
+  `),
+  environment: App.createIcon(`
+    <g
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M18.5 5.5c-6.7 -.8 -13 4.3 -13 10.4 0 1.9 1.4 3.5 3.2 3.7 2.1 .3 4.4 -1.4 6 -3.1l3.8 -4.1 -5.4 1.5 -3.6 3.2" />
+      <path d="M11 9.5c0 3 1.2 6 3.5 8.5" />
+    </g>
+  `),
+  spirituality: App.createIcon(`
+    <g
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M12 5V3" />
+      <path d="M12 21v-2" />
+      <path d="M5 12H3" />
+      <path d="M21 12h-2" />
+      <path d="M6.8 6.8L5.4 5.4" />
+      <path d="M17.2 17.2L18.6 18.6" />
+      <path d="M6.8 17.2L5.4 18.6" />
+      <path d="M17.2 6.8L18.6 5.4" />
+    </g>
+  `)
+};
+
 App.LIFE_AREAS = {
   love: {
     title: "Love & Romantic Relationships",
     short: "Love",
+    color: "#F471B5",
+    icon: App.LIFE_ICONS.love,
     description: "Create rituals and check-ins that nurture meaningful partnerships.",
     link: "products.html?area=love",
     cta: "Explore relationship tools",
@@ -16,6 +133,8 @@ App.LIFE_AREAS = {
   career: {
     title: "Career, Growth & Learning",
     short: "Career",
+    color: "#A855F7",
+    icon: App.LIFE_ICONS.career,
     description: "Stay organized, track goals, and keep moving toward your next milestone.",
     link: "products.html?area=career",
     cta: "Stay on track with career tools",
@@ -24,6 +143,8 @@ App.LIFE_AREAS = {
   health: {
     title: "Health & Fitness",
     short: "Health",
+    color: "#22C55E",
+    icon: App.LIFE_ICONS.health,
     description: "Build calm routines for movement, rest, and mindful habits.",
     link: "products.html?area=health",
     cta: "See wellness templates",
@@ -32,6 +153,8 @@ App.LIFE_AREAS = {
   finances: {
     title: "Finances",
     short: "Finances",
+    color: "#FACC15",
+    icon: App.LIFE_ICONS.finances,
     description: "See your money clearly and plan budgets that match your values.",
     link: "products.html?area=finances",
     cta: "Review finance planners",
@@ -40,6 +163,8 @@ App.LIFE_AREAS = {
   fun: {
     title: "Fun & Recreation",
     short: "Fun",
+    color: "#FB923C",
+    icon: App.LIFE_ICONS.fun,
     description: "Plan adventures, hobbies, and creative breaks that refill your energy.",
     link: "products.html?area=fun",
     cta: "Find fun & recreation ideas",
@@ -48,6 +173,8 @@ App.LIFE_AREAS = {
   family: {
     title: "Family & Friends",
     short: "Family",
+    color: "#60A5FA",
+    icon: App.LIFE_ICONS.family,
     description: "Coordinate family schedules and stay connected with the people who matter most.",
     link: "products.html?area=family",
     cta: "Coordinate with family tools",
@@ -56,6 +183,8 @@ App.LIFE_AREAS = {
   environment: {
     title: "Physical Environment",
     short: "Environment",
+    color: "#14B8A6",
+    icon: App.LIFE_ICONS.environment,
     description: "Design supportive spaces, tidy routines, and home projects with clarity.",
     link: "products.html?area=environment",
     cta: "Design your ideal space",
@@ -64,6 +193,8 @@ App.LIFE_AREAS = {
   spirituality: {
     title: "Spirituality & Community",
     short: "Spirituality",
+    color: "#6366F1",
+    icon: App.LIFE_ICONS.spirituality,
     description: "Cultivate reflection, service, and community practices that ground you.",
     link: "products.html?area=spirituality",
     cta: "Discover community & reflection tools",
@@ -227,24 +358,147 @@ App.initHome = function() {
   const slices = App.qsa(".life-wheel__slice-link");
   if (!details || !slices.length) return;
 
+  const iconLayer = App.qs(".life-wheel__icons");
+  const iconData = [];
+
+  const sliceIndices = new Map();
+  slices.forEach((slice, index) => {
+    if (slice.dataset.area) sliceIndices.set(slice.dataset.area, index);
+  });
+
+  const hexToRgba = (hex, alpha = 1) => {
+    if (!hex) return "";
+    let value = hex.replace("#", "");
+    if (value.length === 3) {
+      value = value
+        .split("")
+        .map(ch => ch + ch)
+        .join("");
+    }
+    const int = parseInt(value, 16);
+    const r = (int >> 16) & 255;
+    const g = (int >> 8) & 255;
+    const b = int & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
+  const iconLookup = new Map();
+
+  if (iconLayer) {
+    iconLayer.innerHTML = "";
+    slices.forEach((slice, index) => {
+      const area = slice.dataset.area;
+      const info = App.LIFE_AREAS[area];
+      if (!info) return;
+
+      const icon = document.createElement("div");
+      icon.className = "life-wheel__icon";
+      icon.dataset.area = area;
+      icon.style.setProperty("--area-color", info.color);
+      icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
+      icon.dataset.index = String(index);
+
+      const inner = document.createElement("span");
+      inner.className = "life-wheel__icon-inner";
+      inner.innerHTML = info.icon || "";
+
+      icon.appendChild(inner);
+      iconLayer.appendChild(icon);
+      iconLookup.set(area, icon);
+      iconData.push({ icon, index });
+    });
+  } else {
+    App.qsa(".life-wheel__icon").forEach(icon => {
+      const area = icon.dataset.area;
+      if (!area) return;
+      const index = sliceIndices.has(area) ? sliceIndices.get(area) : 0;
+      icon.dataset.index = String(index ?? 0);
+      iconLookup.set(area, icon);
+      iconData.push({ icon, index: index ?? 0 });
+    });
+  }
+
+  const graphic = iconLayer ? iconLayer.closest(".life-wheel__graphic") : null;
+
+  const updateIconPositions = () => {
+    if (!iconData.length) return;
+    const boundsSource = graphic || iconLayer || App.qs(".life-wheel__graphic");
+    if (!boundsSource) return;
+    const size = boundsSource.getBoundingClientRect().width;
+    if (!size) return;
+
+    const iconSize = Math.max(Math.min(size * 0.16, 68), 44);
+    const outerRadius = size * (160 / 360);
+    const radius = Math.max(outerRadius - iconSize * 0.5 - size * 0.015, outerRadius * 0.58);
+    const center = size / 2;
+
+    iconData.forEach(({ icon, index }) => {
+      const angleDeg = -90 + index * 45;
+      const angleRad = (Math.PI / 180) * angleDeg;
+      const x = center + Math.cos(angleRad) * radius;
+      const y = center + Math.sin(angleRad) * radius;
+      icon.style.setProperty("--icon-x", `${x}px`);
+      icon.style.setProperty("--icon-y", `${y}px`);
+      icon.style.setProperty("--icon-size", `${iconSize}px`);
+    });
+  };
+
+  updateIconPositions();
+
+  let resizeFrame = null;
+  const handleResize = () => {
+    if (resizeFrame) cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(updateIconPositions);
+  };
+
+  window.addEventListener("resize", handleResize);
+
   const defaultState = {
     title: details.dataset.defaultTitle || "Explore the Life Harmony Wheel",
     description: details.dataset.defaultDescription || "",
     link: details.dataset.defaultLink || "products.html",
-    cta: details.dataset.defaultCta || "Browse all Life Harmony tools"
+    cta: details.dataset.defaultCta || "Browse all Life Harmony tools",
+    icon: null,
+    color: null,
+    area: null
+  };
+
+  const setAccent = color => {
+    if (color) {
+      details.style.setProperty("--detail-color", color);
+      details.style.setProperty("--detail-glow", hexToRgba(color, 0.24));
+      details.style.setProperty("--detail-sheen", hexToRgba(color, 0.14));
+    } else {
+      details.style.removeProperty("--detail-color");
+      details.style.removeProperty("--detail-glow");
+      details.style.removeProperty("--detail-sheen");
+    }
   };
 
   const render = (state, isActive = false) => {
-    const { title, description, link, cta } = state;
+    const { title, description, link, cta, icon, area } = state;
+    const iconMarkup = icon
+      ? `<span class="life-wheel__detail-icon" aria-hidden="true">${icon}</span>`
+      : "";
     details.innerHTML = `
-      <h3>${title}</h3>
-      <p>${description}</p>
-      <a class="life-wheel__cta" href="${link}">${cta}</a>
+      ${iconMarkup}
+      <div class="life-wheel__detail-copy">
+        <h3>${title}</h3>
+        <p>${description}</p>
+        <a class="life-wheel__cta" href="${link}">${cta}</a>
+      </div>
     `;
+    if (area) {
+      details.dataset.area = area;
+    } else {
+      details.removeAttribute("data-area");
+    }
+    details.classList.toggle("has-icon", Boolean(icon));
     details.classList.toggle("is-active", isActive);
   };
 
   let activeSlice = null;
+  let activeIcon = null;
   let resetTimer = null;
 
   const setActive = slice => {
@@ -255,9 +509,18 @@ App.initHome = function() {
     if (activeSlice && activeSlice !== slice) {
       activeSlice.classList.remove("is-active");
     }
+    const iconEl = iconLookup.get(area);
+    if (activeIcon && activeIcon !== iconEl) {
+      activeIcon.classList.remove("is-active");
+    }
+    if (iconEl) {
+      iconEl.classList.add("is-active");
+    }
     activeSlice = slice;
+    activeIcon = iconEl || null;
     slice.classList.add("is-active");
-    render(info, true);
+    setAccent(info.color);
+    render({ ...info, area }, true);
   };
 
   const reset = () => {
@@ -266,6 +529,11 @@ App.initHome = function() {
       activeSlice.classList.remove("is-active");
       activeSlice = null;
     }
+    if (activeIcon) {
+      activeIcon.classList.remove("is-active");
+      activeIcon = null;
+    }
+    setAccent(null);
     render(defaultState, false);
   };
 
