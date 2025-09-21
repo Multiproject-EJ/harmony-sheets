@@ -713,15 +713,19 @@ App.initNavDropdown = function() {
     if (isMobile()) return;
 
     const margin = 20;
-    const rect = mega.getBoundingClientRect();
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+    const viewportCenter = viewportWidth / 2;
+    const linkRect = browseLink.getBoundingClientRect();
+    const navCenter = linkRect.left + linkRect.width / 2;
 
-    let shift = 0;
+    let shift = viewportCenter - navCenter;
+    mega.style.setProperty("--mega-adjust", `${shift}px`);
 
+    const rect = mega.getBoundingClientRect();
     if (rect.left < margin) {
-      shift = margin - rect.left;
+      shift += margin - rect.left;
     } else if (rect.right > viewportWidth - margin) {
-      shift = viewportWidth - margin - rect.right;
+      shift -= rect.right - (viewportWidth - margin);
     }
 
     if (Math.abs(shift) > 0.5) {
@@ -791,24 +795,28 @@ App.initNavDropdown = function() {
       .map(([, info]) => {
         const highlights = Array.isArray(info.menuHighlights) ? info.menuHighlights : [];
         const highlightMarkup = highlights.length
-          ? highlights.map(item => `<li>${item}</li>`).join("")
+          ? highlights.map(item => `<li>${App.escapeHtml(item)}</li>`).join("")
           : '<li class="nav-mega__empty">Fresh tools coming soon</li>';
         const questionMarkup = info.menuQuestion
-          ? `<p class="nav-mega__question">${info.menuQuestion}</p>`
+          ? `<p class="nav-mega__question">${App.escapeHtml(info.menuQuestion)}</p>`
           : "";
         const soft = App.hexToRgba(info.color, 0.12);
         const border = App.hexToRgba(info.color, 0.24);
         const ink = App.hexToRgba(info.color, 0.7);
+        const title = App.escapeHtml(info.title || "");
+        const link = App.escapeHtml(info.link || "#");
+        const color = App.escapeHtml(info.color || "");
+        const softColor = App.escapeHtml(soft);
+        const borderColor = App.escapeHtml(border);
+        const inkColor = App.escapeHtml(ink);
         return `
-          <section class="nav-mega__group" style="--area-color:${info.color};--area-soft:${soft};--area-border:${border};--area-ink:${ink};">
+          <a class="nav-mega__group" role="menuitem" href="${link}" style="--area-color:${color};--area-soft:${softColor};--area-border:${borderColor};--area-ink:${inkColor};">
             <header class="nav-mega__heading">
-              <span class="nav-mega__badge">${info.short || info.title}</span>
-              <span class="nav-mega__label">${info.title}</span>
+              <span class="nav-mega__badge">${title}</span>
             </header>
             ${questionMarkup}
             <ul class="nav-mega__products">${highlightMarkup}</ul>
-            <a class="nav-mega__area-link" href="${info.link}">Open ${info.short || info.title} tools</a>
-          </section>
+          </a>
         `;
       })
       .join("");
