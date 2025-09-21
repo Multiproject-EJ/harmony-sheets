@@ -128,7 +128,13 @@ App.LIFE_AREAS = {
     description: "Create rituals and check-ins that nurture meaningful partnerships.",
     link: "products.html?area=love",
     cta: "Explore relationship tools",
-    empty: "We're crafting dedicated templates for Love & Romantic Relationships. In the meantime, explore all Life Harmony tools."
+    empty: "We're crafting dedicated templates for Love & Romantic Relationships. In the meantime, explore all Life Harmony tools.",
+    menuQuestion: "Craving more moments that feel close and connected?",
+    menuHighlights: [
+      "Daily affection rituals",
+      "Meaningful check-in prompts",
+      "Shared memory keepers"
+    ]
   },
   career: {
     title: "Career, Growth & Learning",
@@ -138,7 +144,13 @@ App.LIFE_AREAS = {
     description: "Stay organized, track goals, and keep moving toward your next milestone.",
     link: "products.html?area=career",
     cta: "Stay on track with career tools",
-    empty: "We're designing more templates for Career, Growth & Learning. Browse all tools while we build."
+    empty: "We're designing more templates for Career, Growth & Learning. Browse all tools while we build.",
+    menuQuestion: "Trying to stay focused on what moves your career forward?",
+    menuHighlights: [
+      "Skill-building trackers",
+      "Project milestone planners",
+      "Weekly review rituals"
+    ]
   },
   health: {
     title: "Health & Fitness",
@@ -148,7 +160,13 @@ App.LIFE_AREAS = {
     description: "Build calm routines for movement, rest, and mindful habits.",
     link: "products.html?area=health",
     cta: "See wellness templates",
-    empty: "We're creating new wellness planners for this area. Explore all Life Harmony tools to get started."
+    empty: "We're creating new wellness planners for this area. Explore all Life Harmony tools to get started.",
+    menuQuestion: "Wish your wellness routine felt consistent and kind?",
+    menuHighlights: [
+      "Gentle habit loops",
+      "Meal & movement maps",
+      "Rest and recovery check-ins"
+    ]
   },
   finances: {
     title: "Finances",
@@ -158,7 +176,13 @@ App.LIFE_AREAS = {
     description: "See your money clearly and plan budgets that match your values.",
     link: "products.html?area=finances",
     cta: "Review finance planners",
-    empty: "More money clarity tools are coming soon. Until then, browse the full collection."
+    empty: "More money clarity tools are coming soon. Until then, browse the full collection.",
+    menuQuestion: "Always uncertain about how much you have left each month?",
+    menuHighlights: [
+      "Clarity-first budget templates",
+      "Monthly cash-flow snapshots",
+      "Savings goal scorecards"
+    ]
   },
   fun: {
     title: "Fun & Recreation",
@@ -168,7 +192,13 @@ App.LIFE_AREAS = {
     description: "Plan adventures, hobbies, and creative breaks that refill your energy.",
     link: "products.html?area=fun",
     cta: "Find fun & recreation ideas",
-    empty: "We're crafting playful planners for Fun & Recreation. Explore all tools while we finish them."
+    empty: "We're crafting playful planners for Fun & Recreation. Explore all tools while we finish them.",
+    menuQuestion: "Need a nudge to plan joy between the busy weeks?",
+    menuHighlights: [
+      "Weekend adventure planners",
+      "Creative hobby dashboards",
+      "Memory-making bucket lists"
+    ]
   },
   family: {
     title: "Family & Friends",
@@ -178,7 +208,13 @@ App.LIFE_AREAS = {
     description: "Coordinate family schedules and stay connected with the people who matter most.",
     link: "products.html?area=family",
     cta: "Coordinate with family tools",
-    empty: "We're building new ways to support Family & Friends. Browse all tools to see what's ready now."
+    empty: "We're building new ways to support Family & Friends. Browse all tools to see what's ready now.",
+    menuQuestion: "Want everyone's schedules to finally sync up?",
+    menuHighlights: [
+      "Shared family agendas",
+      "Celebration planning notes",
+      "Connection ritual ideas"
+    ]
   },
   environment: {
     title: "Physical Environment",
@@ -188,7 +224,13 @@ App.LIFE_AREAS = {
     description: "Design supportive spaces, tidy routines, and home projects with clarity.",
     link: "products.html?area=environment",
     cta: "Design your ideal space",
-    empty: "Fresh templates for your environment are on the way. Check out the full library in the meantime."
+    empty: "Fresh templates for your environment are on the way. Check out the full library in the meantime.",
+    menuQuestion: "Ready to refresh the spaces you spend the most time in?",
+    menuHighlights: [
+      "Room reset routines",
+      "Seasonal declutter checklists",
+      "Home project planners"
+    ]
   },
   spirituality: {
     title: "Spirituality & Community",
@@ -198,7 +240,13 @@ App.LIFE_AREAS = {
     description: "Cultivate reflection, service, and community practices that ground you.",
     link: "products.html?area=spirituality",
     cta: "Discover community & reflection tools",
-    empty: "We're preparing new resources for Spirituality & Community. Explore all tools while we build."
+    empty: "We're preparing new resources for Spirituality & Community. Explore all tools while we build.",
+    menuQuestion: "Longing for a rhythm that keeps you grounded and giving?",
+    menuHighlights: [
+      "Mindful reflection journals",
+      "Community service trackers",
+      "Gratitude & intention prompts"
+    ]
   }
 };
 
@@ -347,6 +395,7 @@ App.initNavDropdown = function() {
   const resetMegaPosition = () => {
     mega.style.left = "";
     mega.style.right = "";
+    mega.style.removeProperty("--mega-adjust");
   };
 
   const repositionMega = () => {
@@ -355,10 +404,8 @@ App.initNavDropdown = function() {
 
     const margin = 20;
     const rect = mega.getBoundingClientRect();
-    const itemRect = browseItem.getBoundingClientRect();
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
 
-    let offset = rect.left - itemRect.left;
     let shift = 0;
 
     if (rect.left < margin) {
@@ -368,8 +415,9 @@ App.initNavDropdown = function() {
     }
 
     if (Math.abs(shift) > 0.5) {
-      offset += shift;
-      mega.style.left = `${offset}px`;
+      mega.style.setProperty("--mega-adjust", `${shift}px`);
+    } else {
+      mega.style.removeProperty("--mega-adjust");
     }
   };
 
@@ -428,31 +476,16 @@ App.initNavDropdown = function() {
     close();
   });
 
-  const render = products => {
-    const byArea = {};
-    Object.keys(App.LIFE_AREAS).forEach(key => {
-      byArea[key] = [];
-    });
-
-    products.forEach(product => {
-      if (!Array.isArray(product.lifeAreas)) return;
-      product.lifeAreas.forEach(area => {
-        if (byArea[area]) byArea[area].push(product);
-      });
-    });
-
-    Object.values(byArea).forEach(list => {
-      list.sort((a, b) => a.name.localeCompare(b.name));
-    });
-
+  const render = () => {
     const groups = Object.entries(App.LIFE_AREAS)
-      .map(([key, info]) => {
-        const items = byArea[key] || [];
-        const productMarkup = items.length
-          ? items
-              .map(p => `<li><a href="product.html?id=${p.id}">${p.name}</a></li>`)
-              .join("")
-          : '<li class="nav-mega__empty">Tools coming soon</li>';
+      .map(([, info]) => {
+        const highlights = Array.isArray(info.menuHighlights) ? info.menuHighlights : [];
+        const highlightMarkup = highlights.length
+          ? highlights.map(item => `<li>${item}</li>`).join("")
+          : '<li class="nav-mega__empty">Fresh tools coming soon</li>';
+        const questionMarkup = info.menuQuestion
+          ? `<p class="nav-mega__question">${info.menuQuestion}</p>`
+          : "";
         const soft = App.hexToRgba(info.color, 0.12);
         const border = App.hexToRgba(info.color, 0.24);
         const ink = App.hexToRgba(info.color, 0.7);
@@ -462,7 +495,8 @@ App.initNavDropdown = function() {
               <span class="nav-mega__badge">${info.short || info.title}</span>
               <span class="nav-mega__label">${info.title}</span>
             </header>
-            <ul class="nav-mega__products">${productMarkup}</ul>
+            ${questionMarkup}
+            <ul class="nav-mega__products">${highlightMarkup}</ul>
             <a class="nav-mega__area-link" href="${info.link}">Open ${info.short || info.title} tools</a>
           </section>
         `;
@@ -478,15 +512,11 @@ App.initNavDropdown = function() {
     scheduleReposition();
   };
 
-  App.loadProducts()
-    .then(products => {
-      render(products);
-    })
-    .catch(err => {
-      console.error("Error building browse menu:", err);
-      content.innerHTML = '<p class="nav-mega__placeholder">Unable to load tools right now.</p>';
-      scheduleReposition();
-    });
+  render();
+
+  App.loadProducts().catch(err => {
+    console.warn("Unable to preload products:", err);
+  });
 };
 
 /*****************************************************
