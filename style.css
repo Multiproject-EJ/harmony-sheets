@@ -217,8 +217,8 @@ img{max-width:100%;display:block}
 .product-card p.price { margin: 0; font-weight: 600; }
 
 /* === Product page upgrade (lightweight, theme-friendly) === */
-.container{max-width:1080px;margin:0 auto;padding:0 1rem}
-.hero{display:grid;grid-template-columns:minmax(0,1fr) 480px;gap:28px;align-items:start;padding:24px 0}
+.container{max-width:1080px;margin:0 auto;padding:0 1.25rem;padding-inline:clamp(1.25rem,4vw,1.75rem)}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 480px;gap:28px;align-items:start;padding:24px 0;padding-block:24px}
 @media (max-width:960px){.hero{grid-template-columns:1fr}}
 .hero .media{border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.08);overflow:hidden;background:#fff}
 .hero .gallery{position:relative}
@@ -230,7 +230,7 @@ img{max-width:100%;display:block}
 .badge{font-size:.85rem;padding:.25rem .5rem;border:1px solid #e8e8e8;border-radius:999px;background:#fafafa}
 .actions{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0 1.25rem 0}
 .features{list-style:none;padding:0;margin:0 0 1.25rem 0;display:grid;gap:.5rem}
-.section{padding:28px 0;border-top:1px solid #f0f0f0}
+.section{padding:28px 0;border-top:1px solid #f0f0f0;padding-block:28px}
 .social-proof{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
 .stars{color:#ffb400}
 .features-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
