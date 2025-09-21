@@ -584,6 +584,23 @@ App.init = function() {
   const yearEl = App.qs("#year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
+  // Footer newsletter form
+  const newsletterForm = App.qs("#footer-newsletter");
+  if (newsletterForm) {
+    const status = App.qs("#footer-newsletter-status");
+    newsletterForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const formData = new FormData(newsletterForm);
+      const email = formData.get("email");
+      if (status) {
+        status.textContent = email
+          ? `Thanks, ${email}! We'll be in touch soon.`
+          : "Thanks! We'll be in touch soon.";
+      }
+      newsletterForm.reset();
+    });
+  }
+
   // Highlight active nav item
   const path = window.location.pathname;
   const filename = path === "/" ? "index.html" : path.split("/").pop();
