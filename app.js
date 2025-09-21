@@ -393,24 +393,12 @@ App.initHome = function() {
       const info = App.LIFE_AREAS[area];
       if (!info) return;
 
-
       const icon = document.createElement("div");
       icon.className = "life-wheel__icon";
       icon.dataset.area = area;
-      icon.style.setProperty("--area-color", info.color);
-      icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
       icon.dataset.index = String(index);
-
-      const angle = -90 + index * 45;
-
-      const icon = document.createElement("div");
-      icon.className = "life-wheel__icon";
-      icon.dataset.area = area;
-      icon.style.setProperty("--angle", `${angle}deg`);
-      icon.style.setProperty("--angle-inverse", `${-angle}deg`);
       icon.style.setProperty("--area-color", info.color);
       icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
-
 
       const inner = document.createElement("span");
       inner.className = "life-wheel__icon-inner";
@@ -418,18 +406,26 @@ App.initHome = function() {
 
       icon.appendChild(inner);
       iconLayer.appendChild(icon);
-      iconLookup.set(area, icon);
 
+      iconLookup.set(area, icon);
       iconData.push({ icon, index });
     });
   } else {
     App.qsa(".life-wheel__icon").forEach(icon => {
       const area = icon.dataset.area;
       if (!area) return;
-      const index = sliceIndices.has(area) ? sliceIndices.get(area) : 0;
-      icon.dataset.index = String(index ?? 0);
+      const info = App.LIFE_AREAS[area];
+      let index = sliceIndices.has(area)
+        ? sliceIndices.get(area)
+        : parseInt(icon.dataset.index || "0", 10);
+      if (!Number.isFinite(index)) index = 0;
+      if (info) {
+        icon.style.setProperty("--area-color", info.color);
+        icon.style.setProperty("--area-glow", hexToRgba(info.color, 0.34));
+      }
+      icon.dataset.index = String(index);
       iconLookup.set(area, icon);
-      iconData.push({ icon, index: index ?? 0 });
+      iconData.push({ icon, index });
     });
   }
 
@@ -467,14 +463,6 @@ App.initHome = function() {
   };
 
   window.addEventListener("resize", handleResize);
-
-
-    });
-  } else {
-    App.qsa(".life-wheel__icon").forEach(icon => {
-      if (icon.dataset.area) iconLookup.set(icon.dataset.area, icon);
-    });
-  }
 
 
   const defaultState = {
