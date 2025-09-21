@@ -14,20 +14,50 @@
       <span class="sr-only">Toggle navigation</span>
       <span class="nav-toggle__icon" aria-hidden="true"></span>
     </button>
-    <nav class="main-nav" id="site-menu">
-      <div class="nav-item nav-item--browse">
-        <a class="nav-link nav-link--browse" href="products.html" aria-haspopup="true" aria-expanded="false">Browse Life Harmony Apps/Tools</a>
-        <div class="nav-mega" role="menu" aria-label="Life Harmony categories">
-          <div class="nav-mega__content" data-nav-mega-content>
-            <p class="nav-mega__placeholder">Loading Life Harmony areas…</p>
-          </div>
+  <nav class="main-nav" id="site-menu">
+    <div class="nav-item nav-item--browse">
+      <a class="nav-link nav-link--browse" href="products.html" aria-haspopup="true" aria-expanded="false">Browse Life Harmony Apps/Tools</a>
+      <div class="nav-mega" role="menu" aria-label="Life Harmony categories">
+        <div class="nav-mega__content" data-nav-mega-content>
+          <p class="nav-mega__placeholder">Loading Life Harmony areas…</p>
         </div>
       </div>
-      <a class="nav-link" href="bundles.html">Bundles</a>
-      <a class="nav-link" href="faq.html">FAQ / Support</a>
-      <a class="nav-link" href="about.html">About</a>
-    </nav>
-  </header>
+    </div>
+    <a class="nav-link" href="bundles.html">Bundles</a>
+    <a class="nav-link" href="faq.html">FAQ / Support</a>
+    <a class="nav-link" href="about.html">About</a>
+    <button class="nav-link nav-link--icon" type="button" data-cart-toggle aria-expanded="false" aria-controls="cart-panel">
+      <span class="sr-only" data-cart-label>View cart</span>
+      <svg class="nav-link__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3.5 4h2.6l1.6 9.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 .97-.76L20 7.5H7.1"/>
+          <circle cx="10" cy="18.5" r="1.25"/>
+          <circle cx="17" cy="18.5" r="1.25"/>
+        </g>
+      </svg>
+      <span class="cart-count" data-cart-count>0</span>
+    </button>
+  </nav>
+</header>
+
+<div class="cart-overlay" data-cart-overlay></div>
+<aside class="cart-panel" id="cart-panel" aria-hidden="true" aria-labelledby="cart-panel-title" role="dialog" aria-modal="true">
+  <div class="cart-panel__header">
+    <h2 id="cart-panel-title">Your cart</h2>
+    <button class="cart-panel__close" type="button" data-cart-close aria-label="Close cart">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="cart-panel__body" data-cart-items></div>
+  <div class="cart-panel__footer">
+    <div class="cart-panel__total">
+      <span>Total</span>
+      <strong data-cart-total>$0.00</strong>
+    </div>
+    <button class="btn primary cart-panel__checkout" type="button" data-cart-checkout>Checkout</button>
+    <p class="cart-panel__hint muted">Checkout grants instant access to your Harmony Sheets downloads.</p>
+  </div>
+</aside>
 
   <main class="container">
     <h1 id="products-heading">Our Products</h1>
