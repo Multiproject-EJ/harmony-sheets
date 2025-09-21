@@ -359,8 +359,10 @@ App.initHome = function() {
   if (!details || !slices.length) return;
 
   const iconLayer = App.qs(".life-wheel__icons");
+  const graphic = iconLayer ? iconLayer.closest(".life-wheel__graphic") : App.qs(".life-wheel__graphic");
 
   const iconData = [];
+  const labelData = [];
 
   const sliceIndices = new Map();
   slices.forEach((slice, index) => {
@@ -385,6 +387,18 @@ App.initHome = function() {
   };
 
   const iconLookup = new Map();
+  const labelLookup = new Map();
+
+  let labelLayer = graphic ? graphic.querySelector(".life-wheel__labels") : null;
+  if (!labelLayer && graphic) {
+    labelLayer = document.createElement("div");
+    labelLayer.className = "life-wheel__labels";
+    labelLayer.setAttribute("aria-hidden", "true");
+    graphic.appendChild(labelLayer);
+  }
+  if (labelLayer) {
+    labelLayer.innerHTML = "";
+  }
 
   if (iconLayer) {
     iconLayer.innerHTML = "";
@@ -409,6 +423,19 @@ App.initHome = function() {
 
       iconLookup.set(area, icon);
       iconData.push({ icon, index });
+
+      if (labelLayer) {
+        const label = document.createElement("div");
+        label.className = "life-wheel__label";
+        label.dataset.area = area;
+        label.dataset.index = String(index);
+        label.textContent = info.short || info.title || "";
+        label.style.setProperty("--area-color", info.color);
+        label.style.setProperty("--area-glow", hexToRgba(info.color, 0.26));
+        labelLayer.appendChild(label);
+        labelLookup.set(area, label);
+        labelData.push({ label, index });
+      }
     });
   } else {
     App.qsa(".life-wheel__icon").forEach(icon => {
@@ -426,13 +453,24 @@ App.initHome = function() {
       icon.dataset.index = String(index);
       iconLookup.set(area, icon);
       iconData.push({ icon, index });
+
+      if (labelLayer && info) {
+        const label = document.createElement("div");
+        label.className = "life-wheel__label";
+        label.dataset.area = area;
+        label.dataset.index = String(index);
+        label.textContent = info.short || info.title || "";
+        label.style.setProperty("--area-color", info.color);
+        label.style.setProperty("--area-glow", hexToRgba(info.color, 0.26));
+        labelLayer.appendChild(label);
+        labelLookup.set(area, label);
+        labelData.push({ label, index });
+      }
     });
   }
 
-  const graphic = iconLayer ? iconLayer.closest(".life-wheel__graphic") : null;
-
   const updateIconPositions = () => {
-    if (!iconData.length) return;
+    if (!iconData.length && !labelData.length) return;
     const boundsSource = graphic || iconLayer || App.qs(".life-wheel__graphic");
     if (!boundsSource) return;
     const size = boundsSource.getBoundingClientRect().width;
@@ -441,6 +479,8 @@ App.initHome = function() {
     const iconSize = Math.max(Math.min(size * 0.16, 68), 44);
     const outerRadius = size * (160 / 360);
     const radius = Math.max(outerRadius - iconSize * 0.5 - size * 0.015, outerRadius * 0.58);
+    const labelRadius = outerRadius + Math.max(size * 0.06, iconSize * 0.38);
+    const labelFont = Math.max(Math.min(size * 0.045, 18), 12);
     const center = size / 2;
 
     iconData.forEach(({ icon, index }) => {
@@ -451,6 +491,22 @@ App.initHome = function() {
       icon.style.setProperty("--icon-x", `${x}px`);
       icon.style.setProperty("--icon-y", `${y}px`);
       icon.style.setProperty("--icon-size", `${iconSize}px`);
+    });
+
+    labelData.forEach(({ label, index }) => {
+      const angleDeg = -90 + index * 45;
+      const angleRad = (Math.PI / 180) * angleDeg;
+      const x = center + Math.cos(angleRad) * labelRadius;
+      const y = center + Math.sin(angleRad) * labelRadius;
+      label.style.setProperty("--label-x", `${x}px`);
+      label.style.setProperty("--label-y", `${y}px`);
+      label.style.setProperty("--label-font-size", `${labelFont}px`);
+      const alignment = Math.cos(angleRad);
+      if (Math.abs(alignment) > 0.6) {
+        label.dataset.align = alignment > 0 ? "right" : "left";
+      } else {
+        label.dataset.align = "center";
+      }
     });
   };
 
@@ -511,7 +567,57 @@ App.initHome = function() {
 
   let activeSlice = null;
   let activeIcon = null;
+  let activeLabel = null;
   let resetTimer = null;
+
+  const isMobileViewport = () => window.matchMedia("(max-width: 720px)").matches;
+
+  let mobileScrollFrame = null;
+  const ensureMobileView = () => {
+    if (!isMobileViewport() || !graphic) return;
+
+    const wheelRect = graphic.getBoundingClientRect();
+    const detailsRect = details.getBoundingClientRect();
+    const scrollY = window.scrollY || window.pageYOffset;
+    const top = Math.min(wheelRect.top, detailsRect.top) + scrollY;
+    const bottom = Math.max(wheelRect.bottom, detailsRect.bottom) + scrollY;
+    const viewTop = scrollY;
+    const viewBottom = viewTop + window.innerHeight;
+    const padding = 28;
+
+    if (top >= viewTop + padding && bottom <= viewBottom - padding) {
+      return;
+    }
+
+    const combined = bottom - top;
+    const viewport = window.innerHeight;
+    let target = top - padding;
+    if (combined + padding * 2 <= viewport) {
+      const midpoint = top + combined / 2;
+      target = midpoint - viewport / 2;
+    }
+
+    const maxTarget = bottom - viewport + padding;
+    if (Number.isFinite(maxTarget)) {
+      target = Math.min(target, Math.max(0, maxTarget));
+    }
+    target = Math.max(0, target);
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({
+      top: target,
+      behavior: prefersReduced ? "auto" : "smooth"
+    });
+  };
+
+  const scheduleEnsureMobileView = () => {
+    if (!isMobileViewport()) return;
+    if (mobileScrollFrame) cancelAnimationFrame(mobileScrollFrame);
+    mobileScrollFrame = requestAnimationFrame(() => {
+      ensureMobileView();
+      mobileScrollFrame = null;
+    });
+  };
 
   const setActive = slice => {
     const area = slice.dataset.area;
@@ -528,11 +634,20 @@ App.initHome = function() {
     if (iconEl) {
       iconEl.classList.add("is-active");
     }
+    const labelEl = labelLookup.get(area);
+    if (activeLabel && activeLabel !== labelEl) {
+      activeLabel.classList.remove("is-active");
+    }
+    if (labelEl) {
+      labelEl.classList.add("is-active");
+    }
     activeSlice = slice;
     activeIcon = iconEl || null;
+    activeLabel = labelEl || null;
     slice.classList.add("is-active");
     setAccent(info.color);
     render({ ...info, area }, true);
+    scheduleEnsureMobileView();
   };
 
   const reset = () => {
@@ -544,6 +659,10 @@ App.initHome = function() {
     if (activeIcon) {
       activeIcon.classList.remove("is-active");
       activeIcon = null;
+    }
+    if (activeLabel) {
+      activeLabel.classList.remove("is-active");
+      activeLabel = null;
     }
     setAccent(null);
     render(defaultState, false);
@@ -574,6 +693,11 @@ App.initHome = function() {
     slice.addEventListener("focus", () => setActive(slice));
     slice.addEventListener("mouseleave", scheduleReset);
     slice.addEventListener("blur", reset);
+    slice.addEventListener("pointerdown", event => {
+      if (event.pointerType === "touch" || event.pointerType === "pen") {
+        setActive(slice);
+      }
+    });
   });
 
   render(defaultState, false);
