@@ -283,6 +283,16 @@ App.escapeHtml = function(value) {
     .replace(/'/g, "&#39;");
 };
 
+App.slugify = function(value) {
+  if (!value) return "";
+  return String(value)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+};
+
 App.productsPromise = null;
 App.loadProducts = function() {
   if (!App.productsPromise) {
@@ -294,6 +304,22 @@ App.loadProducts = function() {
       });
   }
   return App.productsPromise;
+};
+
+App.bundlesPromise = null;
+App.loadBundles = function() {
+  if (!App.bundlesPromise) {
+    App.bundlesPromise = fetch("bundles.json")
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to load bundles: ${res.status}`);
+        return res.json();
+      })
+      .catch(err => {
+        App.bundlesPromise = null;
+        throw err;
+      });
+  }
+  return App.bundlesPromise;
 };
 
 /*****************************************************
@@ -623,6 +649,7 @@ App.init = function() {
   if (App.qs("body.page-products")) App.initProducts();
   if (App.qs("body.page-product")) App.initProduct();
   if (App.qs("#life-wheel")) App.initHome();
+  if (App.qs("#bundles-grid")) App.initBundles();
 
   // Init suggest form everywhere
   App.initSuggestForm();
@@ -632,6 +659,7 @@ App.init = function() {
  * Navigation toggle
  *****************************************************/
 App.closeBrowseMenu = null;
+App.closeBundlesMenu = null;
 App.closeNavMenu = () => {};
 App.initNav = function() {
   const toggle = App.qs(".nav-toggle");
@@ -645,18 +673,16 @@ App.initNav = function() {
     nav.classList.remove("is-open");
     toggle.classList.remove("is-open");
     toggle.setAttribute("aria-expanded", "false");
-    if (typeof App.closeBrowseMenu === "function") {
-      App.closeBrowseMenu();
-    }
+    if (typeof App.closeBrowseMenu === "function") App.closeBrowseMenu();
+    if (typeof App.closeBundlesMenu === "function") App.closeBundlesMenu();
   };
 
   const handleToggle = () => {
     const isOpen = nav.classList.toggle("is-open");
     toggle.classList.toggle("is-open", isOpen);
     toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    if (!isOpen && typeof App.closeBrowseMenu === "function") {
-      App.closeBrowseMenu();
-    }
+    if (!isOpen && typeof App.closeBrowseMenu === "function") App.closeBrowseMenu();
+    if (!isOpen && typeof App.closeBundlesMenu === "function") App.closeBundlesMenu();
   };
 
   const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
@@ -835,6 +861,255 @@ App.initNavDropdown = function() {
   App.loadProducts().catch(err => {
     console.warn("Unable to preload products:", err);
   });
+
+  const bundleItem = App.qs(".nav-item--bundles");
+  const bundleLink = bundleItem?.querySelector(".nav-link--bundles");
+  const bundleFlyout = bundleItem?.querySelector(".nav-flyout");
+  const bundleContent = bundleItem?.querySelector("[data-nav-bundles]");
+
+  if (!bundleItem || !bundleLink || !bundleFlyout || !bundleContent) {
+    App.closeBundlesMenu = () => {};
+    return;
+  }
+
+  const bundleMatcher = window.matchMedia("(max-width: 720px)");
+  const isBundleMobile = () => bundleMatcher.matches;
+
+  const setBundleOpen = open => {
+    if (isBundleMobile()) open = false;
+    bundleItem.classList.toggle("is-open", open);
+    bundleLink.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+
+  const closeBundles = () => setBundleOpen(false);
+  const openBundles = () => setBundleOpen(true);
+  App.closeBundlesMenu = closeBundles;
+  closeBundles();
+
+  bundleItem.addEventListener("mouseenter", () => {
+    if (!isBundleMobile()) openBundles();
+  });
+
+  bundleItem.addEventListener("mouseleave", () => {
+    if (!isBundleMobile()) closeBundles();
+  });
+
+  bundleLink.addEventListener("focus", openBundles);
+
+  bundleItem.addEventListener("focusout", event => {
+    if (!bundleItem.contains(event.relatedTarget)) closeBundles();
+  });
+
+  bundleItem.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeBundles();
+      bundleLink.focus();
+    }
+  });
+
+  bundleLink.addEventListener("click", () => {
+    if (isBundleMobile()) closeBundles();
+  });
+
+  bundleMatcher.addEventListener("change", closeBundles);
+
+  bundleContent.addEventListener("click", event => {
+    if (event.target.closest("a")) closeBundles();
+  });
+
+  const renderBundlesMenu = (list, fromFallback = false) => {
+    const featured = Array.isArray(list)
+      ? list
+          .filter(item => {
+            if (!item) return false;
+            if (fromFallback) return true;
+            if (item.navFeatured === undefined) return Boolean(item.featuredInNav || item.featured || item.nav_featured);
+            return Boolean(item.navFeatured);
+          })
+          .slice(0, 6)
+      : [];
+
+    if (!featured.length) {
+      bundleContent.innerHTML = '<p class="nav-flyout__placeholder">Visit the bundles page to explore every collection.</p>';
+      return;
+    }
+
+    const markup = featured
+      .map(item => {
+        const slug = App.slugify(item.slug || item.id || item.name || "");
+        const hrefId = slug ? `#bundle-${slug}` : "";
+        const href = App.escapeHtml(`bundles.html${hrefId}`);
+        const name = App.escapeHtml(item.name || item.title || "Bundle");
+        const desc = App.escapeHtml(item.navTagline || item.tagline || "");
+        const baseColor = item.color || item.navColor || "#6366f1";
+        const accent = App.escapeHtml(baseColor);
+        const soft = App.escapeHtml(App.hexToRgba(baseColor, 0.18));
+        return `
+          <a class="nav-bundles__link" role="menuitem" href="${href}" style="--bundle-accent:${accent};--bundle-accent-soft:${soft};">
+            <span class="nav-bundles__title">${name}</span>
+            ${desc ? `<span class="nav-bundles__desc">${desc}</span>` : ""}
+          </a>
+        `;
+      })
+      .join("");
+
+    bundleContent.innerHTML = `
+      <div class="nav-bundles">
+        ${markup}
+      </div>
+      <div class="nav-flyout__footer"><a href="bundles.html">View all bundles</a></div>
+    `;
+  };
+
+  bundleContent.innerHTML = '<p class="nav-flyout__placeholder">Loading bundles…</p>';
+
+  App.loadBundles()
+    .then(bundles => {
+      renderBundlesMenu(bundles);
+    })
+    .catch(err => {
+      console.warn("Unable to load bundle menu:", err);
+      renderBundlesMenu(
+        [
+          {
+            slug: "back-to-school",
+            name: "Back to School Bundle",
+            navTagline: "Class schedules, assignments, and study flow in one dashboard.",
+            color: "#2563eb"
+          },
+          {
+            slug: "premium",
+            name: "Premium Bundle",
+            navTagline: "Unlock the complete toolkit of flagship templates.",
+            color: "#7c3aed"
+          },
+          {
+            slug: "full-life-hack",
+            name: "Full Life Hack Bundle",
+            navTagline: "Transform every area with aligned rituals and dashboards.",
+            color: "#0ea5e9"
+          },
+          {
+            slug: "personal-finance",
+            name: "Personal Finance Bundle",
+            navTagline: "Budgets, debt payoff, and savings snapshots at a glance.",
+            color: "#22c55e"
+          }
+        ],
+        true
+      );
+    });
+};
+
+/*****************************************************
+ * Bundles page (bundles.html)
+ *****************************************************/
+App.initBundles = async function() {
+  const grid = App.qs("#bundles-grid");
+  if (!grid || grid.dataset.bundlesInit === "true") return;
+  grid.dataset.bundlesInit = "true";
+
+  const setStatus = message => {
+    grid.innerHTML = `<p class="bundles-empty">${App.escapeHtml(message)}</p>`;
+  };
+
+  setStatus("Loading bundles…");
+
+  try {
+    const bundles = await App.loadBundles();
+    if (!Array.isArray(bundles) || !bundles.length) {
+      setStatus("Bundle collections are on their way. Check back soon.");
+      return;
+    }
+
+    const cards = bundles
+      .map(bundle => {
+        const slug = App.slugify(bundle.slug || bundle.id || bundle.name || "");
+        const cardId = slug ? `bundle-${slug}` : "";
+        const baseColor = bundle.color || "#6366f1";
+        const accent = App.escapeHtml(baseColor);
+        const soft = App.escapeHtml(App.hexToRgba(baseColor, 0.18));
+        const strong = App.escapeHtml(App.hexToRgba(baseColor, 0.34));
+        const badge = App.escapeHtml(bundle.badge || "Bundle");
+        const name = App.escapeHtml(bundle.name || "Bundle");
+        const tagline = App.escapeHtml(bundle.tagline || "");
+        const price = App.escapeHtml(bundle.price || "");
+        const savings = App.escapeHtml(bundle.savings || "");
+        const includes = Array.isArray(bundle.includes) ? bundle.includes.filter(Boolean) : [];
+        const includeMarkup = includes.length
+          ? `<ul class="bundle-card__includes">${includes.map(item => `<li>${App.escapeHtml(item)}</li>`).join("")}</ul>`
+          : "";
+        const link = bundle.href || bundle.link || bundle.stripe || bundle.stripe_link || "bundles.html";
+        const safeLink = App.escapeHtml(link);
+        const openNew = /^https?:/i.test(link);
+        const targetAttrs = openNew ? ' target="_blank" rel="noopener"' : "";
+        const cta = App.escapeHtml(bundle.cta || "View bundle");
+
+        return `
+          <article class="bundle-card"${cardId ? ` id="${cardId}"` : ""} style="--bundle-accent:${accent};--bundle-accent-soft:${soft};--bundle-accent-strong:${strong};">
+            <span class="bundle-card__badge">${badge}</span>
+            <h3>${name}</h3>
+            ${tagline ? `<p class="tagline">${tagline}</p>` : ""}
+            <div class="bundle-card__pricing">
+              ${price ? `<span class="price">${price}</span>` : ""}
+              ${savings ? `<span class="bundle-card__savings">Save ${savings}</span>` : ""}
+            </div>
+            ${includeMarkup}
+            <div class="bundle-card__actions">
+              <a class="btn primary" href="${safeLink}"${targetAttrs}>${cta}</a>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+
+    grid.innerHTML = cards;
+
+    const preferReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let highlightTimer = null;
+
+    const clearHighlights = () => {
+      if (highlightTimer) {
+        clearTimeout(highlightTimer);
+        highlightTimer = null;
+      }
+      App.qsa(".bundle-card.is-highlighted").forEach(card => card.classList.remove("is-highlighted"));
+    };
+
+    const focusBundleFromHash = () => {
+      const raw = window.location.hash.replace(/^#/, "");
+      if (!raw) return;
+      const normalized = raw.startsWith("bundle-") ? raw.slice(7) : raw;
+      const slug = App.slugify(normalized);
+      if (!slug) return;
+      const id = `bundle-${slug}`;
+      const card = document.getElementById(id);
+      if (!card) return;
+      clearHighlights();
+      card.classList.add("is-highlighted");
+
+      const rect = card.getBoundingClientRect();
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      const headerOffset = 96;
+      const top = Math.max(rect.top + scrollY - headerOffset, 0);
+      window.scrollTo({ top, behavior: preferReducedMotion() ? "auto" : "smooth" });
+
+      highlightTimer = setTimeout(() => {
+        card.classList.remove("is-highlighted");
+        highlightTimer = null;
+      }, 2200);
+    };
+
+    focusBundleFromHash();
+
+    if (!grid.dataset.bundleHashBound) {
+      window.addEventListener("hashchange", focusBundleFromHash);
+      grid.dataset.bundleHashBound = "true";
+    }
+  } catch (err) {
+    console.error("Error loading bundles:", err);
+    setStatus("We had trouble loading bundles. Please refresh and try again.");
+  }
 };
 
 /*****************************************************
