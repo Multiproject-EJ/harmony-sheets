@@ -1,20 +1,83 @@
 [
   {
-    "name": "Starter Pack",
-    "tagline": "Budget + Pomodoro — get started fast.",
-    "price": "£27",
-    "savings": "£4",
+    "slug": "back-to-school",
+    "name": "Back to School Bundle",
+    "badge": "Student Focus",
+    "tagline": "Reset your semester routines with synchronized study, class, and budget trackers.",
+    "navTagline": "Class schedules, assignments, and study flow in one dashboard.",
+    "price": "$49",
+    "savings": "$18",
     "category": "planning",
-    "image": "assets/placeholder-1.jpg",
-    "stripe_link": "https://buy.stripe.com/test_bundleAAA"
+    "color": "#2563eb",
+    "navFeatured": true,
+    "stripe_link": "https://buy.stripe.com/test_backtoschool",
+    "includes": [
+      "Semester Course Planner",
+      "Assignment Tracker Dashboard",
+      "Weekly Study Schedule",
+      "Student Budget Snapshot"
+    ],
+    "cta": "Preview bundle"
   },
   {
-    "name": "Productivity Pack",
-    "tagline": "Pomodoro + Project Planner.",
-    "price": "£22",
-    "savings": "£3",
+    "slug": "premium",
+    "name": "Premium Bundle",
+    "badge": "Pro Essentials",
+    "tagline": "Every flagship Harmony Sheet gathered into a premium toolkit.",
+    "navTagline": "Unlock the complete toolkit of flagship templates.",
+    "price": "$119",
+    "savings": "$42",
     "category": "productivity",
-    "image": "assets/placeholder-2.jpg",
-    "stripe_link": "https://buy.stripe.com/test_bundleBBB"
+    "color": "#7c3aed",
+    "navFeatured": true,
+    "stripe_link": "https://buy.stripe.com/test_premium",
+    "includes": [
+      "Ultimate Habit Operating System",
+      "Project Command Center",
+      "Executive Finance Console",
+      "Deep Work Time Blocking Studio"
+    ],
+    "cta": "Unlock premium bundle"
+  },
+  {
+    "slug": "full-life-hack",
+    "name": "Full Life Hack Bundle",
+    "badge": "Life Harmony",
+    "tagline": "Transform every area of your Life Harmony Wheel with coordinated systems.",
+    "navTagline": "Transform every area with aligned rituals and dashboards.",
+    "price": "$159",
+    "savings": "$58",
+    "category": "lifestyle",
+    "color": "#0ea5e9",
+    "navFeatured": true,
+    "stripe_link": "https://buy.stripe.com/test_fulllifehack",
+    "includes": [
+      "Relationship Ritual Tracker",
+      "Career OKR Planner",
+      "Holistic Health Notebook",
+      "Joy & Recreation Logbook",
+      "Spiritual Reflection Journal"
+    ],
+    "cta": "Explore the full bundle"
+  },
+  {
+    "slug": "personal-finance",
+    "name": "Personal Finance Bundle",
+    "badge": "Money Clarity",
+    "tagline": "Master budgets, goals, and spending with calm, visual dashboards.",
+    "navTagline": "Budgets, debt payoff, and savings snapshots at a glance.",
+    "price": "$69",
+    "savings": "$24",
+    "category": "finance",
+    "color": "#22c55e",
+    "navFeatured": true,
+    "stripe_link": "https://buy.stripe.com/test_personalfinance",
+    "includes": [
+      "Annual Budget HQ",
+      "Monthly Cash Flow Radar",
+      "Savings Goal Tracker",
+      "Debt Payoff Momentum Map"
+    ],
+    "cta": "Start budgeting smarter"
   }
 ]
