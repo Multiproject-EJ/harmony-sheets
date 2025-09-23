@@ -250,6 +250,74 @@ App.LIFE_AREAS = {
   }
 };
 
+App.NAV_PRODUCT_META = {
+  pomodoro: {
+    type: "Focus System",
+    format: "Web App + Sheets",
+    badge: "New"
+  },
+  "budget-dashboard": {
+    type: "Finance Dashboard",
+    format: "Sheets",
+    badge: "Best-Seller"
+  },
+  "pomodoro-pro": {
+    type: "Focus System",
+    format: "Web App + Sheets",
+    badge: "Popular"
+  }
+};
+
+App.NAV_AREA_EXTRAS = {
+  love: [
+    { id: "love-couples-connection", name: "Couples Connection Journal", type: "Journal", format: "PDF", badge: "Popular", price: 19 },
+    { id: "love-daily-ritual", name: "Daily Ritual Prompts", type: "Cards", format: "Printable", badge: "", price: 12 },
+    { id: "love-memory-keeper", name: "Shared Memory Keeper", type: "Template", format: "Sheets", badge: "Best-Seller", price: 24 },
+    { id: "love-date-night", name: "Date Night Generator", type: "Tool", format: "Web App", badge: "New", price: 9 },
+    { id: "love-goals", name: "Love Goals Planner", type: "Planner", format: "Sheets", badge: "", price: 14 }
+  ],
+  career: [
+    { id: "career-skill-tracker", name: "Skill Tracker Pro", type: "Tracker", format: "Sheets", badge: "", price: 18 },
+    { id: "career-milestone", name: "Milestone Planner", type: "Planner", format: "Sheets", badge: "", price: 16 },
+    { id: "career-reflection", name: "Weekly Reflection Guide", type: "Guide", format: "PDF", badge: "New", price: 11 },
+    { id: "career-portfolio", name: "Portfolio Projects Board", type: "Board", format: "Sheets", badge: "", price: 15 },
+    { id: "career-sprints", name: "Learning Sprints", type: "System", format: "Notion", badge: "", price: 17 }
+  ],
+  health: [
+    { id: "health-habit-loop", name: "Habit Loop Tracker", type: "Tracker", format: "Sheets", badge: "", price: 14 },
+    { id: "health-meal-movement", name: "Meal & Movement Planner", type: "Planner", format: "Sheets", badge: "Popular", price: 19 },
+    { id: "health-recovery", name: "Recovery Journal", type: "Journal", format: "PDF", badge: "", price: 9 },
+    { id: "health-sleep", name: "Sleep Routine Builder", type: "Template", format: "Sheets", badge: "", price: 12 }
+  ],
+  finances: [
+    { id: "finance-budget", name: "Budget Blueprint", type: "Budget", format: "Sheets", badge: "Best-Seller", price: 29 },
+    { id: "finance-cashflow", name: "Cash-Flow Dashboard", type: "Dashboard", format: "Sheets", badge: "", price: 24 },
+    { id: "finance-savings", name: "Savings Scorecard", type: "Tracker", format: "Sheets", badge: "", price: 12 },
+    { id: "finance-debt", name: "Debt Snowball Coach", type: "Template", format: "Sheets", badge: "", price: 15 },
+    { id: "finance-investing", name: "Investing Starter Pack", type: "Guide", format: "PDF", badge: "", price: 19 }
+  ],
+  fun: [
+    { id: "fun-weekend", name: "Weekend Adventure Planner", type: "Planner", format: "PDF", badge: "", price: 9 },
+    { id: "fun-hobby", name: "Creative Hobby Dashboard", type: "Dashboard", format: "Sheets", badge: "", price: 12 },
+    { id: "fun-bucket", name: "Bucket List Builder", type: "Template", format: "Sheets", badge: "", price: 8 }
+  ],
+  family: [
+    { id: "family-agenda", name: "Shared Family Agenda", type: "Planner", format: "Sheets", badge: "", price: 12 },
+    { id: "family-celebration", name: "Celebration Planner", type: "Planner", format: "PDF", badge: "", price: 8 },
+    { id: "family-rituals", name: "Connection Rituals", type: "Ideas", format: "PDF", badge: "", price: 6 }
+  ],
+  environment: [
+    { id: "environment-room-reset", name: "Room Reset Routine", type: "Checklist", format: "PDF", badge: "", price: 6 },
+    { id: "environment-declutter", name: "Seasonal Declutter List", type: "Checklist", format: "PDF", badge: "", price: 7 },
+    { id: "environment-home-project", name: "Home Project Planner", type: "Planner", format: "Sheets", badge: "", price: 13 }
+  ],
+  spirituality: [
+    { id: "spirit-reflection", name: "Mindful Reflection Journal", type: "Journal", format: "PDF", badge: "", price: 9 },
+    { id: "spirit-service", name: "Community Service Tracker", type: "Tracker", format: "Sheets", badge: "", price: 7 },
+    { id: "spirit-gratitude", name: "Gratitude & Intention Log", type: "Journal", format: "PDF", badge: "", price: 6 }
+  ]
+};
+
 /*****************************************************
  * Utils
  *****************************************************/
@@ -816,51 +884,441 @@ App.initNavDropdown = function() {
     close();
   });
 
-  const render = () => {
-    const groups = Object.entries(App.LIFE_AREAS)
-      .map(([, info]) => {
-        const highlights = Array.isArray(info.menuHighlights) ? info.menuHighlights : [];
-        const highlightMarkup = highlights.length
-          ? highlights.map(item => `<li>${App.escapeHtml(item)}</li>`).join("")
-          : '<li class="nav-mega__empty">Fresh tools coming soon</li>';
-        const questionMarkup = info.menuQuestion
-          ? `<p class="nav-mega__question">${App.escapeHtml(info.menuQuestion)}</p>`
-          : "";
-        const soft = App.hexToRgba(info.color, 0.12);
-        const border = App.hexToRgba(info.color, 0.24);
-        const ink = App.hexToRgba(info.color, 0.7);
-        const title = App.escapeHtml(info.title || "");
-        const link = App.escapeHtml(info.link || "#");
-        const color = App.escapeHtml(info.color || "");
-        const softColor = App.escapeHtml(soft);
-        const borderColor = App.escapeHtml(border);
-        const inkColor = App.escapeHtml(ink);
+
+  const areaOrder = Object.keys(App.LIFE_AREAS || {});
+  if (!areaOrder.length) {
+    content.innerHTML = '<p class="nav-mega__placeholder">Life Harmony tools are coming soon.</p>';
+    App.loadProducts().catch(err => {
+      console.warn("Unable to preload products:", err);
+    });
+    return;
+  }
+
+  const navAccentMap = {
+    love: "#ef5da8",
+    career: "#7c5cff",
+    health: "#22c55e",
+    finances: "#d97706",
+    fun: "#f59e0b",
+    family: "#60a5fa",
+    environment: "#10b981",
+    spirituality: "#8b5cf6"
+  };
+
+  const navState = {
+    cat: areaOrder[0],
+    q: "",
+    sort: "name",
+    page: 1,
+    pageSize: 6,
+    tinted: true
+  };
+
+  const formatPriceDisplay = value => {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      return trimmed ? (trimmed.startsWith("$") ? trimmed : `$${trimmed}`) : "";
+    }
+    const number = Number(value);
+    if (!Number.isFinite(number)) return "";
+    return number % 1 === 0 ? `$${number.toFixed(0)}` : `$${number.toFixed(2)}`;
+  };
+
+  const normalizeEntry = (areaId, item = {}, index = 0) => {
+    const fallbackId = `${areaId || "area"}-item-${index}`;
+    const id = item.id || fallbackId;
+    const name = item.name || "Harmony Sheets tool";
+    const type = item.type || "Template";
+    const format = item.format || "Sheets";
+    const badge = item.badge || "";
+    const tagline = item.tagline || "";
+    const explicitDisplay = typeof item.priceDisplay === "string" ? item.priceDisplay : "";
+    const computedDisplay =
+      explicitDisplay ||
+      (typeof item.price === "number"
+        ? formatPriceDisplay(item.price)
+        : typeof item.price === "string"
+        ? item.price
+        : "");
+    const priceDisplay = computedDisplay ? formatPriceDisplay(computedDisplay) : "";
+    let priceValue = Number.isFinite(item.priceValue) ? item.priceValue : null;
+    if (priceValue === null) {
+      if (typeof item.price === "number" && Number.isFinite(item.price)) {
+        priceValue = item.price;
+      } else {
+        priceValue = App.parsePrice(priceDisplay);
+      }
+    }
+    if (!Number.isFinite(priceValue)) priceValue = Number.POSITIVE_INFINITY;
+    const href =
+      item.url ||
+      (item.id && typeof item.id === "string" && item.id.startsWith("http")
+        ? item.id
+        : `products.html?area=${encodeURIComponent(areaId)}`);
+    return {
+      id,
+      name,
+      type,
+      format,
+      badge,
+      tagline,
+      priceDisplay,
+      priceValue,
+      url: href
+    };
+  };
+
+  const buildAreaProducts = rawProducts => {
+    const map = {};
+    areaOrder.forEach(id => {
+      map[id] = [];
+    });
+
+    const extras = App.NAV_AREA_EXTRAS || {};
+    Object.entries(extras).forEach(([areaId, items]) => {
+      if (!Array.isArray(items) || !items.length) return;
+      if (!map[areaId]) map[areaId] = [];
+      items.forEach((item, index) => {
+        map[areaId].push(normalizeEntry(areaId, item, index));
+      });
+    });
+
+    if (Array.isArray(rawProducts)) {
+      rawProducts.forEach(product => {
+        if (!product) return;
+        const areas = Array.isArray(product.lifeAreas) ? product.lifeAreas : [];
+        if (!areas.length) return;
+        const meta = (App.NAV_PRODUCT_META && App.NAV_PRODUCT_META[product.id]) || {};
+        const base = {
+          id: product.id,
+          name: product.name,
+          type: meta.type,
+          format: meta.format,
+          badge: meta.badge,
+          priceDisplay: meta.priceDisplay || product.price,
+          priceValue: meta.priceValue,
+          price: meta.price,
+          url: meta.url || `product.html?id=${encodeURIComponent(product.id)}`,
+          tagline: product.tagline
+        };
+        const areaOverrides = meta.areas || {};
+        areas.forEach(areaId => {
+          if (!map[areaId]) map[areaId] = [];
+          const override = areaOverrides[areaId] || {};
+          map[areaId].push(normalizeEntry(areaId, { ...base, ...override }, map[areaId].length));
+        });
+      });
+    }
+
+    Object.keys(map).forEach(areaId => {
+      const seen = new Set();
+      map[areaId] = map[areaId].filter(entry => {
+        const key = entry.id || `${entry.name}-${entry.type}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    });
+
+    return map;
+  };
+
+  let areaProducts = buildAreaProducts([]);
+  let panelEl = null;
+  const catButtonMap = new Map();
+  let pillEl = null;
+  let rowsEl = null;
+  let infoTextEl = null;
+  let prevBtn = null;
+  let nextBtn = null;
+  let searchInput = null;
+  let sortSelect = null;
+  let modeBtn = null;
+
+  const updateCounts = () => {
+    catButtonMap.forEach(({ count }, id) => {
+      if (!count) return;
+      const total = Array.isArray(areaProducts[id]) ? areaProducts[id].length : 0;
+      count.textContent = total;
+    });
+  };
+
+  const badgeWeight = badge => {
+    const value = String(badge || "").toLowerCase();
+    if (!value) return 0;
+    if (value.includes("best")) return 3;
+    if (value.includes("popular")) return 2;
+    if (value.includes("new")) return 1;
+    return 0;
+  };
+
+  const getBadgeType = badge => {
+    const value = String(badge || "").toLowerCase();
+    if (!value) return "";
+    if (value.includes("best")) return "bestseller";
+    if (value.includes("popular")) return "popular";
+    if (value.includes("new")) return "new";
+    return "";
+  };
+
+  const updateActive = () => {
+    if (!panelEl) return;
+    if (!areaOrder.includes(navState.cat)) {
+      navState.cat = areaOrder[0];
+    }
+
+    const info = App.LIFE_AREAS[navState.cat] || {};
+    const accent = navAccentMap[navState.cat] || info.color || "#7c5cff";
+    panelEl.dataset.area = navState.cat;
+    panelEl.style.setProperty("--nav-mega-acc", accent);
+    panelEl.classList.toggle("is-tinted", Boolean(navState.tinted));
+
+    const safeCatClass = navState.cat.replace(/[^a-z0-9-]/g, "");
+    if (pillEl) {
+      pillEl.textContent = info.title || "Life Harmony";
+      pillEl.className = `nav-mega__pill nav-mega__pill--${safeCatClass}`;
+    }
+
+    if (modeBtn) {
+      modeBtn.setAttribute("aria-pressed", navState.tinted ? "true" : "false");
+      modeBtn.textContent = `Color mode: ${navState.tinted ? "On" : "Off"}`;
+    }
+
+    if (searchInput && searchInput.value !== navState.q) {
+      searchInput.value = navState.q;
+    }
+
+    if (sortSelect && sortSelect.value !== navState.sort) {
+      sortSelect.value = navState.sort;
+    }
+
+    catButtonMap.forEach(({ button }, id) => {
+      if (!button) return;
+      const isActive = id === navState.cat;
+      button.setAttribute("aria-current", isActive ? "true" : "false");
+    });
+
+    const baseItems = Array.isArray(areaProducts[navState.cat]) ? areaProducts[navState.cat] : [];
+    const query = (navState.q || "").trim().toLowerCase();
+
+    let filtered = baseItems;
+    if (query) {
+      filtered = baseItems.filter(item => {
+        return [item.name, item.type, item.format, item.badge, item.tagline, item.priceDisplay]
+          .some(value => String(value || "").toLowerCase().includes(query));
+      });
+    }
+
+    const sorted = filtered.slice().sort((a, b) => {
+      if (navState.sort === "price") {
+        return a.priceValue - b.priceValue;
+      }
+      if (navState.sort === "badge") {
+        const diff = badgeWeight(b.badge) - badgeWeight(a.badge);
+        return diff !== 0 ? diff : a.name.localeCompare(b.name);
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    const totalItems = sorted.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / navState.pageSize));
+    if (!Number.isFinite(navState.page) || navState.page < 1) navState.page = 1;
+    if (navState.page > totalPages) navState.page = totalPages;
+    const start = (navState.page - 1) * navState.pageSize;
+    const pageItems = sorted.slice(start, start + navState.pageSize);
+
+    if (rowsEl) {
+      if (!totalItems) {
+        const message = query
+          ? `No matches for “${navState.q}”.`
+          : info.empty || "Fresh tools coming soon.";
+        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="5">${App.escapeHtml(message)}</td></tr>`;
+      } else {
+        const rows = pageItems
+          .map(item => {
+            const badgeType = getBadgeType(item.badge);
+            const badgeMarkup = item.badge
+              ? `<span class="nav-mega__tbadge"${badgeType ? ` data-type="${badgeType}"` : ""}>${App.escapeHtml(item.badge)}</span>`
+              : "";
+            const priceText = item.priceDisplay ? App.escapeHtml(item.priceDisplay) : "—";
+            const tagline = item.tagline ? `<div class="nav-mega__product-sub">${App.escapeHtml(item.tagline)}</div>` : "";
+            const url = App.escapeHtml(item.url || `products.html?area=${encodeURIComponent(navState.cat)}`);
+            const name = App.escapeHtml(item.name || "Harmony Sheets tool");
+            const type = App.escapeHtml(item.type || "Template");
+            const format = App.escapeHtml(item.format || "Sheets");
+            return `<tr><td><a class="nav-mega__product-link" href="${url}">${name}</a>${tagline}</td><td>${type}</td><td>${format}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+          })
+          .join("");
+        rowsEl.innerHTML = rows;
+      }
+    }
+
+    if (infoTextEl) {
+      if (!totalItems) {
+        infoTextEl.textContent = query ? `No matches for “${navState.q}”` : "More tools coming soon";
+      } else {
+        infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool" : "tools"} • Page ${navState.page}/${totalPages}`;
+      }
+    }
+
+    if (prevBtn) prevBtn.disabled = navState.page <= 1 || totalItems === 0;
+    if (nextBtn) nextBtn.disabled = navState.page >= totalPages || totalItems === 0;
+
+    scheduleReposition();
+  };
+
+  const pillId = `nav-mega-pill-${Math.random().toString(36).slice(2, 8)}`;
+  const renderShell = () => {
+    const catItems = areaOrder
+      .map(id => {
+        const info = App.LIFE_AREAS[id];
+        if (!info) return "";
+        const label = App.escapeHtml(info.short || info.title || id);
+        const safeId = App.escapeHtml(id);
+        const count = Array.isArray(areaProducts[id]) ? areaProducts[id].length : 0;
         return `
-          <a class="nav-mega__group" role="menuitem" href="${link}" style="--area-color:${color};--area-soft:${softColor};--area-border:${borderColor};--area-ink:${inkColor};">
-            <header class="nav-mega__heading">
-              <span class="nav-mega__badge">${title}</span>
-            </header>
-            ${questionMarkup}
-            <ul class="nav-mega__products">${highlightMarkup}</ul>
-          </a>
+          <li>
+            <button class="nav-mega__catbtn" type="button" data-nav-cat="${safeId}" aria-current="${id === navState.cat}">
+              <span class="nav-mega__dot nav-mega__dot--${safeId}"></span>
+              <span class="nav-mega__catname">${label}</span>
+              <span class="nav-mega__count" data-nav-count>${count}</span>
+            </button>
+          </li>
         `;
       })
       .join("");
 
     content.innerHTML = `
-      <div class="nav-mega__grid">
-        ${groups}
+      <div class="nav-mega__panel is-tinted" data-nav-panel data-area="${App.escapeHtml(navState.cat)}">
+        <div class="nav-mega__pane">
+          <aside class="nav-mega__cats">
+            <div class="nav-mega__cats-head">Explore</div>
+            <ul class="nav-mega__catlist">
+              ${catItems}
+            </ul>
+          </aside>
+          <div class="nav-mega__prod">
+            <div class="nav-mega__prod-head">
+              <span class="nav-mega__pill nav-mega__pill--${App.escapeHtml(navState.cat)}" id="${pillId}" data-nav-pill>${App.escapeHtml(App.LIFE_AREAS[navState.cat]?.title || "Life Harmony")}</span>
+              <div class="nav-mega__tools">
+                <label class="nav-mega__search">
+                  <span class="sr-only">Search Life Harmony tools</span>
+                  <input type="search" placeholder="Search tools…" value="${App.escapeHtml(navState.q)}" data-nav-search>
+                </label>
+                <select class="nav-mega__select" data-nav-sort>
+                  <option value="name"${navState.sort === "name" ? " selected" : ""}>Sort: Name</option>
+                  <option value="price"${navState.sort === "price" ? " selected" : ""}>Sort: Price</option>
+                  <option value="badge"${navState.sort === "badge" ? " selected" : ""}>Sort: Badge</option>
+                </select>
+                <button class="nav-mega__modebtn" type="button" data-nav-mode aria-pressed="${navState.tinted ? "true" : "false"}">Color mode: ${navState.tinted ? "On" : "Off"}</button>
+              </div>
+            </div>
+            <div class="nav-mega__scroll">
+              <table class="nav-mega__table" aria-describedby="${pillId}">
+                <thead>
+                  <tr>
+                    <th scope="col" style="width:40%">Product</th>
+                    <th scope="col" style="width:18%">Type</th>
+                    <th scope="col" style="width:18%">Format</th>
+                    <th scope="col" style="width:10%">Badge</th>
+                    <th scope="col" style="width:14%">Price</th>
+                  </tr>
+                </thead>
+                <tbody data-nav-rows>
+                  <tr class="nav-mega__empty-row"><td colspan="5">Loading Life Harmony tools…</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="nav-mega__pager">
+              <div class="nav-mega__pager-info">
+                <span data-nav-info>Loading…</span>
+                <a href="products.html">Browse all Harmony tools</a>
+              </div>
+              <button type="button" data-nav-prev disabled>‹ Prev</button>
+              <button type="button" data-nav-next disabled>Next ›</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="nav-mega__footer"><a href="products.html">Browse all Harmony tools</a></div>
     `;
+
+    panelEl = content.querySelector("[data-nav-panel]");
+    pillEl = content.querySelector("[data-nav-pill]");
+    rowsEl = content.querySelector("[data-nav-rows]");
+    infoTextEl = content.querySelector("[data-nav-info]");
+    prevBtn = content.querySelector("[data-nav-prev]");
+    nextBtn = content.querySelector("[data-nav-next]");
+    searchInput = content.querySelector("[data-nav-search]");
+    sortSelect = content.querySelector("[data-nav-sort]");
+    modeBtn = content.querySelector("[data-nav-mode]");
+
+    catButtonMap.clear();
+    content.querySelectorAll("[data-nav-cat]").forEach(btn => {
+      const id = btn.getAttribute("data-nav-cat");
+      const count = btn.querySelector("[data-nav-count]");
+      catButtonMap.set(id, { button: btn, count });
+      btn.addEventListener("click", () => {
+        if (navState.cat === id) return;
+        navState.cat = id;
+        navState.page = 1;
+        updateActive();
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener("input", event => {
+        navState.q = event.target.value || "";
+        navState.page = 1;
+        updateActive();
+      });
+    }
+
+    if (sortSelect) {
+      sortSelect.addEventListener("change", event => {
+        navState.sort = event.target.value || "name";
+        updateActive();
+      });
+    }
+
+    if (modeBtn) {
+      modeBtn.addEventListener("click", () => {
+        navState.tinted = !navState.tinted;
+        updateActive();
+      });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        if (navState.page > 1) {
+          navState.page -= 1;
+          updateActive();
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        navState.page += 1;
+        updateActive();
+      });
+    }
+
     scheduleReposition();
   };
 
-  render();
+  renderShell();
+  updateCounts();
+  updateActive();
 
-  App.loadProducts().catch(err => {
-    console.warn("Unable to preload products:", err);
-  });
+  App.loadProducts()
+    .then(products => {
+      areaProducts = buildAreaProducts(products);
+      updateCounts();
+      updateActive();
+    })
+    .catch(err => {
+      console.warn("Unable to preload products:", err);
+    });
 
   const bundleItem = App.qs(".nav-item--bundles");
   const bundleLink = bundleItem?.querySelector(".nav-link--bundles");
