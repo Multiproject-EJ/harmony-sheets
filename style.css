@@ -115,14 +115,15 @@ body[data-color-scheme="dark"],
 body[class*="theme-dark"],
 body[class*="theme-night"],
 body[class*="theme-midnight"]{
-  --nav-link-ink:#f1f5f9;
-  --nav-link-ink-strong:#fff;
+  /* Keep menu text dark so it remains visible against the light/glassy nav surface */
+  --nav-link-ink:#1f2937;
+  --nav-link-ink-strong:#0f172a;
 }
 
 @media (prefers-color-scheme:dark){
   body:not([data-theme-mode="light"]){
-    --nav-link-ink:#f1f5f9;
-    --nav-link-ink-strong:#fff;
+    --nav-link-ink:#1f2937;
+    --nav-link-ink-strong:#0f172a;
   }
 
   .main-nav{background:rgba(255,255,255,.85);border-color:rgba(148,163,184,.3);box-shadow:0 12px 30px rgba(15,23,42,.25);}
