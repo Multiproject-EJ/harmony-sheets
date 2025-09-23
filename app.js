@@ -909,8 +909,6 @@ App.initNavDropdown = function() {
     cat: areaOrder[0],
     q: "",
     sort: "name",
-    page: 1,
-    pageSize: 6,
     tinted: true
   };
 
@@ -1029,11 +1027,45 @@ App.initNavDropdown = function() {
   let pillEl = null;
   let rowsEl = null;
   let infoTextEl = null;
-  let prevBtn = null;
-  let nextBtn = null;
   let searchInput = null;
   let sortSelect = null;
   let modeBtn = null;
+
+  const collectSearchableItems = () => {
+    const aggregated = [];
+    const seen = new Map();
+
+    areaOrder.forEach(areaId => {
+      const list = Array.isArray(areaProducts[areaId]) ? areaProducts[areaId] : [];
+      if (!list.length) return;
+      const areaInfo = App.LIFE_AREAS[areaId] || {};
+      const areaLabel = areaInfo.short || areaInfo.title || areaId;
+
+      list.forEach(item => {
+        if (!item) return;
+        const key = item.id || item.url || `${item.name}-${item.type}`;
+        const existing = seen.get(key);
+        if (existing) {
+          if (!Array.isArray(existing.lifeAreaIds)) existing.lifeAreaIds = [];
+          if (!existing.lifeAreaIds.includes(areaId)) {
+            existing.lifeAreaIds.push(areaId);
+            existing.lifeAreaLabel = existing.lifeAreaIds
+              .map(id => App.LIFE_AREAS[id]?.short || App.LIFE_AREAS[id]?.title || id)
+              .join(" • ");
+          }
+          return;
+        }
+
+        const clone = { ...item };
+        clone.lifeAreaIds = [areaId];
+        clone.lifeAreaLabel = areaLabel;
+        seen.set(key, clone);
+        aggregated.push(clone);
+      });
+    });
+
+    return aggregated;
+  };
 
   const updateCounts = () => {
     catButtonMap.forEach(({ count }, id) => {
@@ -1098,8 +1130,9 @@ App.initNavDropdown = function() {
       button.setAttribute("aria-current", isActive ? "true" : "false");
     });
 
-    const baseItems = Array.isArray(areaProducts[navState.cat]) ? areaProducts[navState.cat] : [];
     const query = (navState.q || "").trim().toLowerCase();
+
+    const baseItems = query ? collectSearchableItems() : Array.isArray(areaProducts[navState.cat]) ? areaProducts[navState.cat] : [];
 
     let filtered = baseItems;
     if (query) {
@@ -1121,11 +1154,6 @@ App.initNavDropdown = function() {
     });
 
     const totalItems = sorted.length;
-    const totalPages = Math.max(1, Math.ceil(totalItems / navState.pageSize));
-    if (!Number.isFinite(navState.page) || navState.page < 1) navState.page = 1;
-    if (navState.page > totalPages) navState.page = totalPages;
-    const start = (navState.page - 1) * navState.pageSize;
-    const pageItems = sorted.slice(start, start + navState.pageSize);
 
     if (rowsEl) {
       if (!totalItems) {
@@ -1134,19 +1162,24 @@ App.initNavDropdown = function() {
           : info.empty || "Fresh tools coming soon.";
         rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="5">${App.escapeHtml(message)}</td></tr>`;
       } else {
-        const rows = pageItems
+        const rows = sorted
           .map(item => {
             const badgeType = getBadgeType(item.badge);
             const badgeMarkup = item.badge
               ? `<span class="nav-mega__tbadge"${badgeType ? ` data-type="${badgeType}"` : ""}>${App.escapeHtml(item.badge)}</span>`
               : "";
             const priceText = item.priceDisplay ? App.escapeHtml(item.priceDisplay) : "—";
-            const tagline = item.tagline ? `<div class="nav-mega__product-sub">${App.escapeHtml(item.tagline)}</div>` : "";
+            const detailParts = [];
+            if (query && item.lifeAreaLabel) detailParts.push(item.lifeAreaLabel);
+            if (item.tagline) detailParts.push(item.tagline);
+            const detail = detailParts.length
+              ? `<div class="nav-mega__product-sub">${detailParts.map(part => App.escapeHtml(part)).join(" • ")}</div>`
+              : "";
             const url = App.escapeHtml(item.url || `products.html?area=${encodeURIComponent(navState.cat)}`);
             const name = App.escapeHtml(item.name || "Harmony Sheets tool");
             const type = App.escapeHtml(item.type || "Template");
             const format = App.escapeHtml(item.format || "Sheets");
-            return `<tr><td><a class="nav-mega__product-link" href="${url}">${name}</a>${tagline}</td><td>${type}</td><td>${format}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+            return `<tr><td><a class="nav-mega__product-link" href="${url}">${name}</a>${detail}</td><td>${type}</td><td>${format}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
         rowsEl.innerHTML = rows;
@@ -1157,12 +1190,13 @@ App.initNavDropdown = function() {
       if (!totalItems) {
         infoTextEl.textContent = query ? `No matches for “${navState.q}”` : "More tools coming soon";
       } else {
-        infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool" : "tools"} • Page ${navState.page}/${totalPages}`;
+        if (query) {
+          infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool matches" : "tools match"} “${navState.q}” across Life Harmony`;
+        } else {
+          infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool" : "tools"} available`;
+        }
       }
     }
-
-    if (prevBtn) prevBtn.disabled = navState.page <= 1 || totalItems === 0;
-    if (nextBtn) nextBtn.disabled = navState.page >= totalPages || totalItems === 0;
 
     scheduleReposition();
   };
@@ -1230,12 +1264,8 @@ App.initNavDropdown = function() {
               </table>
             </div>
             <div class="nav-mega__pager">
-              <div class="nav-mega__pager-info">
-                <span data-nav-info>Loading…</span>
-                <a href="products.html">Browse all Harmony tools</a>
-              </div>
-              <button type="button" data-nav-prev disabled>‹ Prev</button>
-              <button type="button" data-nav-next disabled>Next ›</button>
+              <span class="nav-mega__pager-info" data-nav-info>Loading…</span>
+              <a class="nav-mega__pager-link" href="products.html">Browse all Harmony tools</a>
             </div>
           </div>
         </div>
@@ -1246,8 +1276,6 @@ App.initNavDropdown = function() {
     pillEl = content.querySelector("[data-nav-pill]");
     rowsEl = content.querySelector("[data-nav-rows]");
     infoTextEl = content.querySelector("[data-nav-info]");
-    prevBtn = content.querySelector("[data-nav-prev]");
-    nextBtn = content.querySelector("[data-nav-next]");
     searchInput = content.querySelector("[data-nav-search]");
     sortSelect = content.querySelector("[data-nav-sort]");
     modeBtn = content.querySelector("[data-nav-mode]");
@@ -1260,7 +1288,6 @@ App.initNavDropdown = function() {
       btn.addEventListener("click", () => {
         if (navState.cat === id) return;
         navState.cat = id;
-        navState.page = 1;
         updateActive();
       });
     });
@@ -1268,7 +1295,6 @@ App.initNavDropdown = function() {
     if (searchInput) {
       searchInput.addEventListener("input", event => {
         navState.q = event.target.value || "";
-        navState.page = 1;
         updateActive();
       });
     }
@@ -1283,22 +1309,6 @@ App.initNavDropdown = function() {
     if (modeBtn) {
       modeBtn.addEventListener("click", () => {
         navState.tinted = !navState.tinted;
-        updateActive();
-      });
-    }
-
-    if (prevBtn) {
-      prevBtn.addEventListener("click", () => {
-        if (navState.page > 1) {
-          navState.page -= 1;
-          updateActive();
-        }
-      });
-    }
-
-    if (nextBtn) {
-      nextBtn.addEventListener("click", () => {
-        navState.page += 1;
         updateActive();
       });
     }
