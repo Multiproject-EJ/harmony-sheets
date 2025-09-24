@@ -250,6 +250,59 @@ App.LIFE_AREAS = {
   }
 };
 
+/*****************************************************
+ * Hero headline rotation (index)
+ *****************************************************/
+App.HERO_ROTATIONS = [
+  { text: "Create Harmony in Your Life", color: "#6366F1" },
+  { text: "From Chaos to Clarity", color: "#14B8A6" },
+  { text: "Bring Balance to Your Day", color: "#F97316" }
+];
+
+App.initHeroRotation = function() {
+  const target = App.qs("[data-hero-rotate]");
+  if (!target || target.dataset.heroRotationInit === "true") return;
+
+  target.dataset.heroRotationInit = "true";
+
+  const phrases = Array.isArray(App.HERO_ROTATIONS)
+    ? App.HERO_ROTATIONS.filter(item => item && item.text)
+    : [];
+  if (!phrases.length) return;
+
+  const applyPhrase = phrase => {
+    target.textContent = phrase.text;
+    if (phrase.color) {
+      target.style.setProperty("--hero-rotate-color", phrase.color);
+    } else {
+      target.style.removeProperty("--hero-rotate-color");
+    }
+  };
+
+  applyPhrase(phrases[0]);
+
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReducedMotion || phrases.length === 1) return;
+
+  let index = 0;
+  const fadeDuration = 260;
+  const intervalDuration = 5200;
+
+  window.setInterval(() => {
+    target.classList.add("is-changing");
+    window.setTimeout(() => {
+      index = (index + 1) % phrases.length;
+      applyPhrase(phrases[index]);
+      window.requestAnimationFrame(() => {
+        target.classList.remove("is-changing");
+      });
+    }, fadeDuration);
+  }, intervalDuration);
+};
+
 App.NAV_PRODUCT_META = {
   pomodoro: {
     type: "Focus System",
@@ -712,6 +765,9 @@ App.init = function() {
 
   // Build enhanced browse menu
   App.initNavDropdown();
+
+  // Hero headline rotation (home page)
+  App.initHeroRotation();
 
   // Auto-detect page
   if (App.qs("body.page-products")) App.initProducts();
