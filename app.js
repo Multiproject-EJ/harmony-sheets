@@ -2143,6 +2143,34 @@ App.initProduct = async function() {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
+    // Gallery images
+    const galleryEl = App.qs("#p-slider");
+    if (galleryEl) {
+      const slides = Array.isArray(product.gallery) ? product.gallery.filter(item => item && item.src) : [];
+      if (!slides.length) {
+        galleryEl.innerHTML = "";
+        galleryEl.style.display = "none";
+      } else {
+        galleryEl.style.removeProperty("display");
+        const fallbackBase = product.name ? `${product.name} preview` : "Product preview";
+        const totalSlides = slides.length;
+        const slidesMarkup = slides
+          .map((item, index) => {
+            const src = App.escapeHtml(item.src);
+            const rawAlt = typeof item.alt === "string" ? item.alt.trim() : "";
+            const altSource = rawAlt || (totalSlides > 1 ? `${fallbackBase} ${index + 1}` : fallbackBase);
+            const alt = App.escapeHtml(altSource);
+            const styleAttr = index === 0 ? ' style="display:block;"' : "";
+            return `<div class="slide"${styleAttr}><img src="${src}" alt="${alt}"></div>`;
+          })
+          .join("\n");
+        const navMarkup = totalSlides > 1
+          ? `\n<button class="prev" aria-label="Previous">‹</button>\n<button class="next" aria-label="Next">›</button>`
+          : "";
+        galleryEl.innerHTML = `${slidesMarkup}${navMarkup}`;
+      }
+    }
+
     // Title + name
     document.title = product.name + " — Harmony Sheets";
     App.qs("#p-name").textContent = product.name;
