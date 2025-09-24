@@ -18,6 +18,9 @@
       "Optional session logging"
     ],
     "description": "<p>This Pomodoro timer helps you <strong>start fast and stay consistent</strong>. Auto-start cycles keep you in flow, optional sound alerts give gentle nudges, and counters track your daily focus without effort.</p>",
+    "gallery": [
+      { "src": "assets/Pomodoro1.webp", "alt": "Screenshot of the Harmony Sheets Pomodoro timer" }
+    ],
     "colorImage": "assets/pomodoro-colors.webp",
     "colorCaption": "Pick a theme that feels calm and keeps you focused.",
     "demoVideo": "assets/pomodoro-demo.mp4",
