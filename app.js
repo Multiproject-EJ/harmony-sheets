@@ -964,8 +964,7 @@ App.initNavDropdown = function() {
   const navState = {
     cat: areaOrder[0],
     q: "",
-    sort: "name",
-    tinted: true
+    sort: "name"
   };
 
   const formatPriceDisplay = value => {
@@ -1085,7 +1084,6 @@ App.initNavDropdown = function() {
   let infoTextEl = null;
   let searchInput = null;
   let sortSelect = null;
-  let modeBtn = null;
 
   const collectSearchableItems = () => {
     const aggregated = [];
@@ -1159,17 +1157,11 @@ App.initNavDropdown = function() {
     const accent = navAccentMap[navState.cat] || info.color || "#7c5cff";
     panelEl.dataset.area = navState.cat;
     panelEl.style.setProperty("--nav-mega-acc", accent);
-    panelEl.classList.toggle("is-tinted", Boolean(navState.tinted));
 
     const safeCatClass = navState.cat.replace(/[^a-z0-9-]/g, "");
     if (pillEl) {
       pillEl.textContent = info.title || "Life Harmony";
       pillEl.className = `nav-mega__pill nav-mega__pill--${safeCatClass}`;
-    }
-
-    if (modeBtn) {
-      modeBtn.setAttribute("aria-pressed", navState.tinted ? "true" : "false");
-      modeBtn.textContent = `Color mode: ${navState.tinted ? "On" : "Off"}`;
     }
 
     if (searchInput && searchInput.value !== navState.q) {
@@ -1216,7 +1208,7 @@ App.initNavDropdown = function() {
         const message = query
           ? `No matches for “${navState.q}”.`
           : info.empty || "Fresh tools coming soon.";
-        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="5">${App.escapeHtml(message)}</td></tr>`;
+        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="4">${App.escapeHtml(message)}</td></tr>`;
       } else {
         const rows = sorted
           .map(item => {
@@ -1225,17 +1217,10 @@ App.initNavDropdown = function() {
               ? `<span class="nav-mega__tbadge"${badgeType ? ` data-type="${badgeType}"` : ""}>${App.escapeHtml(item.badge)}</span>`
               : "";
             const priceText = item.priceDisplay ? App.escapeHtml(item.priceDisplay) : "—";
-            const detailParts = [];
-            if (query && item.lifeAreaLabel) detailParts.push(item.lifeAreaLabel);
-            if (item.tagline) detailParts.push(item.tagline);
-            const detail = detailParts.length
-              ? `<div class="nav-mega__product-sub">${detailParts.map(part => App.escapeHtml(part)).join(" • ")}</div>`
-              : "";
             const url = App.escapeHtml(item.url || `products.html?area=${encodeURIComponent(navState.cat)}`);
             const name = App.escapeHtml(item.name || "Harmony Sheets tool");
             const type = App.escapeHtml(item.type || "Template");
-            const format = App.escapeHtml(item.format || "Sheets");
-            return `<tr><td><a class="nav-mega__product-link" href="${url}">${name}</a>${detail}</td><td>${type}</td><td>${format}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+            return `<tr><td><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
         rowsEl.innerHTML = rows;
@@ -1279,7 +1264,7 @@ App.initNavDropdown = function() {
       .join("");
 
     content.innerHTML = `
-      <div class="nav-mega__panel is-tinted" data-nav-panel data-area="${App.escapeHtml(navState.cat)}">
+      <div class="nav-mega__panel" data-nav-panel data-area="${App.escapeHtml(navState.cat)}">
         <div class="nav-mega__pane">
           <aside class="nav-mega__cats">
             <div class="nav-mega__cats-head">Explore</div>
@@ -1300,22 +1285,20 @@ App.initNavDropdown = function() {
                   <option value="price"${navState.sort === "price" ? " selected" : ""}>Sort: Price</option>
                   <option value="badge"${navState.sort === "badge" ? " selected" : ""}>Sort: Badge</option>
                 </select>
-                <button class="nav-mega__modebtn" type="button" data-nav-mode aria-pressed="${navState.tinted ? "true" : "false"}">Color mode: ${navState.tinted ? "On" : "Off"}</button>
               </div>
             </div>
             <div class="nav-mega__scroll">
               <table class="nav-mega__table" aria-describedby="${pillId}">
                 <thead>
                   <tr>
-                    <th scope="col" style="width:40%">Product</th>
-                    <th scope="col" style="width:18%">Type</th>
-                    <th scope="col" style="width:18%">Format</th>
-                    <th scope="col" style="width:10%">Badge</th>
-                    <th scope="col" style="width:14%">Price</th>
+                    <th scope="col" style="width:54%">Product</th>
+                    <th scope="col" style="width:20%">Type</th>
+                    <th scope="col" style="width:14%">Badge</th>
+                    <th scope="col" style="width:12%">Price</th>
                   </tr>
                 </thead>
                 <tbody data-nav-rows>
-                  <tr class="nav-mega__empty-row"><td colspan="5">Loading Life Harmony tools…</td></tr>
+                  <tr class="nav-mega__empty-row"><td colspan="4">Loading Life Harmony tools…</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1334,7 +1317,6 @@ App.initNavDropdown = function() {
     infoTextEl = content.querySelector("[data-nav-info]");
     searchInput = content.querySelector("[data-nav-search]");
     sortSelect = content.querySelector("[data-nav-sort]");
-    modeBtn = content.querySelector("[data-nav-mode]");
 
     catButtonMap.clear();
     content.querySelectorAll("[data-nav-cat]").forEach(btn => {
@@ -1358,13 +1340,6 @@ App.initNavDropdown = function() {
     if (sortSelect) {
       sortSelect.addEventListener("change", event => {
         navState.sort = event.target.value || "name";
-        updateActive();
-      });
-    }
-
-    if (modeBtn) {
-      modeBtn.addEventListener("click", () => {
-        navState.tinted = !navState.tinted;
         updateActive();
       });
     }
