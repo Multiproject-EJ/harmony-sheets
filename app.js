@@ -1451,24 +1451,43 @@ App.initNavDropdown = function() {
     const markup = featured
       .map(item => {
         const slug = App.slugify(item.slug || item.id || item.name || "");
+        const detailPage = item.page || item.detailPage || item.detail || item.detail_page;
         const hrefId = slug ? `#bundle-${slug}` : "";
-        const href = App.escapeHtml(`bundles.html${hrefId}`);
+        const rawHref = detailPage ? detailPage : `bundles.html${hrefId}`;
+        const href = App.escapeHtml(rawHref);
         const name = App.escapeHtml(item.name || item.title || "Bundle");
         const desc = App.escapeHtml(item.navTagline || item.tagline || "");
+        const badge = App.escapeHtml(item.badge || "Bundle");
+        const price = App.escapeHtml(item.price || "");
+        const savings = App.escapeHtml(item.savings || "");
+        const includes = Array.isArray(item.includes) ? item.includes.filter(Boolean).slice(0, 3) : [];
+        const includeMarkup = includes.length
+          ? `<ul class="nav-bundle-card__includes">${includes
+              .map(include => `<li>${App.escapeHtml(include)}</li>`)
+              .join("")}</ul>`
+          : "";
+        const cta = App.escapeHtml(item.navCta || item.cta || "View bundle");
         const baseColor = item.color || item.navColor || "#6366f1";
         const accent = App.escapeHtml(baseColor);
         const soft = App.escapeHtml(App.hexToRgba(baseColor, 0.18));
         return `
-          <a class="nav-bundles__link" role="menuitem" href="${href}" style="--bundle-accent:${accent};--bundle-accent-soft:${soft};">
-            <span class="nav-bundles__title">${name}</span>
-            ${desc ? `<span class="nav-bundles__desc">${desc}</span>` : ""}
+          <a class="nav-bundle-card" role="menuitem" href="${href}" style="--bundle-accent:${accent};--bundle-accent-soft:${soft};">
+            <span class="nav-bundle-card__badge">${badge}</span>
+            <span class="nav-bundle-card__title">${name}</span>
+            ${desc ? `<span class="nav-bundle-card__tagline">${desc}</span>` : ""}
+            <span class="nav-bundle-card__pricing">
+              ${price ? `<strong>${price}</strong>` : ""}
+              ${savings ? `<em>Save ${savings}</em>` : ""}
+            </span>
+            ${includeMarkup}
+            <span class="nav-bundle-card__cta">${cta}</span>
           </a>
         `;
       })
       .join("");
 
     bundleContent.innerHTML = `
-      <div class="nav-bundles">
+      <div class="nav-bundles-grid">
         ${markup}
       </div>
       <div class="nav-flyout__footer"><a href="bundles.html">View all bundles</a></div>
@@ -1553,7 +1572,15 @@ App.initBundles = async function() {
         const includeMarkup = includes.length
           ? `<ul class="bundle-card__includes">${includes.map(item => `<li>${App.escapeHtml(item)}</li>`).join("")}</ul>`
           : "";
-        const link = bundle.href || bundle.link || bundle.stripe || bundle.stripe_link || "bundles.html";
+        const link =
+          bundle.page ||
+          bundle.detailPage ||
+          bundle.detail_page ||
+          bundle.href ||
+          bundle.link ||
+          bundle.stripe ||
+          bundle.stripe_link ||
+          "bundles.html";
         const safeLink = App.escapeHtml(link);
         const openNew = /^https?:/i.test(link);
         const targetAttrs = openNew ? ' target="_blank" rel="noopener"' : "";
