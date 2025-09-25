@@ -10,6 +10,7 @@
     "category": "planning",
     "color": "#2563eb",
     "navFeatured": true,
+    "page": "bundle-back-to-school.html",
     "stripe_link": "https://buy.stripe.com/test_backtoschool",
     "includes": [
       "Semester Course Planner",
@@ -17,7 +18,7 @@
       "Weekly Study Schedule",
       "Student Budget Snapshot"
     ],
-    "cta": "Preview bundle"
+    "cta": "View bundle details"
   },
   {
     "slug": "premium",
@@ -30,6 +31,7 @@
     "category": "productivity",
     "color": "#7c3aed",
     "navFeatured": true,
+    "page": "bundle-premium.html",
     "stripe_link": "https://buy.stripe.com/test_premium",
     "includes": [
       "Ultimate Habit Operating System",
@@ -37,7 +39,7 @@
       "Executive Finance Console",
       "Deep Work Time Blocking Studio"
     ],
-    "cta": "Unlock premium bundle"
+    "cta": "View bundle details"
   },
   {
     "slug": "full-life-hack",
@@ -50,6 +52,7 @@
     "category": "lifestyle",
     "color": "#0ea5e9",
     "navFeatured": true,
+    "page": "bundle-full-life-hack.html",
     "stripe_link": "https://buy.stripe.com/test_fulllifehack",
     "includes": [
       "Relationship Ritual Tracker",
@@ -58,7 +61,7 @@
       "Joy & Recreation Logbook",
       "Spiritual Reflection Journal"
     ],
-    "cta": "Explore the full bundle"
+    "cta": "View bundle details"
   },
   {
     "slug": "personal-finance",
@@ -71,6 +74,7 @@
     "category": "finance",
     "color": "#22c55e",
     "navFeatured": true,
+    "page": "bundle-personal-finance.html",
     "stripe_link": "https://buy.stripe.com/test_personalfinance",
     "includes": [
       "Annual Budget HQ",
@@ -78,6 +82,6 @@
       "Savings Goal Tracker",
       "Debt Payoff Momentum Map"
     ],
-    "cta": "Start budgeting smarter"
+    "cta": "View bundle details"
   }
 ]

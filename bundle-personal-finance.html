@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Personal Finance Bundle — Harmony Sheets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-neutral page-bundle">
+<header class="site-header">
+  <a class="brand" href="/">
+    <img class="brand__logo" src="assets/logoHarmonySheets.webp" alt="">
+    <span>Harmony Sheets</span>
+  </a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="nav-toggle__icon" aria-hidden="true"></span>
+  </button>
+  <nav class="main-nav" id="site-menu">
+    <div class="nav-item nav-item--browse">
+      <a class="nav-link nav-link--browse" href="products.html" aria-haspopup="true" aria-expanded="false">Discover Life Harmony Apps/Templates</a>
+      <div class="nav-mega" role="menu" aria-label="Life Harmony categories">
+        <div class="nav-mega__content" data-nav-mega-content>
+          <p class="nav-mega__placeholder">Loading Life Harmony areas…</p>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item nav-item--bundles">
+      <a class="nav-link nav-link--bundles" href="bundles.html" aria-haspopup="true" aria-expanded="false">Bundles</a>
+      <div class="nav-flyout" role="menu" aria-label="Featured bundles">
+        <div class="nav-flyout__content" data-nav-bundles>
+          <p class="nav-flyout__placeholder">Loading bundles…</p>
+        </div>
+      </div>
+    </div>
+    <a class="nav-link" href="faq.html">FAQ / Support</a>
+    <a class="nav-link" href="about.html">About</a>
+    <button class="nav-link nav-link--icon" type="button" data-cart-toggle aria-expanded="false" aria-controls="cart-panel">
+      <span class="sr-only" data-cart-label>View cart</span>
+      <svg class="nav-link__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3.5 4h2.6l1.6 9.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 .97-.76L20 7.5H7.1"/>
+          <circle cx="10" cy="18.5" r="1.25"/>
+          <circle cx="17" cy="18.5" r="1.25"/>
+        </g>
+      </svg>
+      <span class="cart-count" data-cart-count>0</span>
+    </button>
+  </nav>
+</header>
+
+<div class="cart-overlay" data-cart-overlay></div>
+<aside class="cart-panel" id="cart-panel" aria-hidden="true" aria-labelledby="cart-panel-title" role="dialog" aria-modal="true">
+  <div class="cart-panel__header">
+    <h2 id="cart-panel-title">Your cart</h2>
+    <button class="cart-panel__close" type="button" data-cart-close aria-label="Close cart">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="cart-panel__body" data-cart-items></div>
+  <div class="cart-panel__footer">
+    <div class="cart-panel__total">
+      <span>Total</span>
+      <strong data-cart-total>$0.00</strong>
+    </div>
+    <button class="btn primary cart-panel__checkout" type="button" data-cart-checkout>Checkout</button>
+    <p class="cart-panel__hint muted">Checkout grants instant access to your Harmony Sheets downloads.</p>
+  </div>
+</aside>
+
+<main>
+  <section class="bundle-hero" style="--bundle-accent:#22c55e;--bundle-accent-soft:rgba(34,197,94,0.22)">
+    <span class="bundle-hero__badge">Money Clarity</span>
+    <h1>Personal Finance Bundle</h1>
+    <p class="bundle-hero__tagline">Master budgets, goals, and spending with calm, visual dashboards.</p>
+    <div class="bundle-hero__meta">
+      <span class="bundle-hero__price">$69</span>
+      <span class="bundle-hero__savings">Save $24</span>
+    </div>
+    <p class="bundle-hero__description">See your entire financial picture in one place. The Personal Finance Bundle unites daily spending, monthly cash flow, long-term goals, and debt payoff into a confident money rhythm.</p>
+    <div class="bundle-hero__cta">
+      <a class="btn primary" href="https://buy.stripe.com/test_personalfinance" target="_blank" rel="noopener">Unlock the bundle</a>
+      <a class="btn ghost" href="bundles.html">Back to all bundles</a>
+    </div>
+  </section>
+
+  <section class="bundle-section">
+    <div class="bundle-section__inner">
+      <div class="bundle-section__main">
+        <h2>What&#8217;s inside</h2>
+        <ul class="bundle-modules">
+          <li>
+            <h3>Annual Budget HQ</h3>
+            <p>Plan your year at a glance with category targets, seasonality adjustments, and progress tracking.</p>
+          </li>
+          <li>
+            <h3>Monthly Cash Flow Radar</h3>
+            <p>Watch income, bills, and variable spending as they land so you never wonder where the money went.</p>
+          </li>
+          <li>
+            <h3>Savings Goal Tracker</h3>
+            <p>Set timelines for emergency funds, travel, or big purchases and watch contributions climb in real time.</p>
+          </li>
+          <li>
+            <h3>Debt Payoff Momentum Map</h3>
+            <p>Visualize balances, snowball/avalanche strategies, and payoff dates to stay motivated.</p>
+          </li>
+        </ul>
+      </div>
+      <aside class="bundle-section__aside">
+        <div class="bundle-highlight">
+          <h3>Perfect for</h3>
+          <ul class="bundle-highlight__list">
+            <li>Households wanting a shared budget that feels calm, not chaotic</li>
+            <li>Early-stage entrepreneurs balancing personal and business expenses</li>
+            <li>Anyone paying down debt while building savings goals</li>
+          </ul>
+        </div>
+        <div class="bundle-highlight">
+          <h3>Bundle savings</h3>
+          <p>Each template purchased alone totals $93. The Personal Finance Bundle wraps them together for $69 so you keep $24 for your next transfer.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="bundle-section">
+    <div class="bundle-section__inner">
+      <div class="bundle-section__main">
+        <h2>Make confident money moves</h2>
+        <p>Whether you&#8217;re mapping the month or forecasting the year, the bundle keeps your data connected so decisions are obvious instead of overwhelming.</p>
+        <ul class="bundle-points">
+          <li>
+            <strong>See cash flow clearly.</strong>
+            Color-coded dashboards flag when spending categories drift so you can rebalance quickly.
+          </li>
+          <li>
+            <strong>Celebrate every milestone.</strong>
+            Watch savings meters fill and debt balances shrink with encouraging visuals that reward consistency.
+          </li>
+          <li>
+            <strong>Plan for what&#8217;s next.</strong>
+            Model scenarios, redirect extra cash, and align your goals with the rest of your Life Harmony systems.
+          </li>
+        </ul>
+      </div>
+      <aside class="bundle-section__aside">
+        <div class="bundle-highlight">
+          <h3>Quick start</h3>
+          <p>Import last month&#8217;s transactions and the dashboards will give you instant insight within minutes.</p>
+        </div>
+        <div class="bundle-highlight">
+          <h3>Formats</h3>
+          <p>Optimized for Google Sheets with automation helpers, smart drop-downs, and tap-friendly mobile layouts.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="bundle-section bundle-section--cta">
+    <div class="bundle-section__inner">
+      <div class="bundle-cta-panel" style="--bundle-accent:#22c55e;--bundle-accent-soft:rgba(34,197,94,0.22)">
+        <div>
+          <h2>Feel calm with every dollar</h2>
+          <p>Bring clarity to your money decisions and build momentum toward the life you want with aligned finance systems.</p>
+        </div>
+        <a class="btn primary" href="https://buy.stripe.com/test_personalfinance" target="_blank" rel="noopener">Unlock Personal Finance Bundle</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__grid">
+      <div class="site-footer__column">
+        <h3 class="site-footer__heading">Customer Support</h3>
+        <ul class="site-footer__links">
+          <li><a href="faq.html#guides">Information Guides</a></li>
+          <li><a href="faq.html">FAQ / Support</a></li>
+          <li><a href="faq.html#contact">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="site-footer__column">
+        <h3 class="site-footer__heading">Policies</h3>
+        <ul class="site-footer__links">
+          <li><a href="policies.html#privacy">Privacy Policy</a></li>
+          <li><a href="policies.html#delivery">Delivery Policy</a></li>
+          <li><a href="policies.html#refund">Refund Policy</a></li>
+          <li><a href="policies.html#terms">Terms of Service</a></li>
+        </ul>
+      </div>
+      <div class="site-footer__column">
+        <h3 class="site-footer__heading">Affiliate</h3>
+        <ul class="site-footer__links">
+          <li><a href="affiliate.html#apply">Become an Affiliate</a></li>
+          <li><a href="affiliate.html#login">Affiliate Login</a></li>
+        </ul>
+      </div>
+      <div class="site-footer__column site-footer__column--newsletter">
+        <h3 class="site-footer__heading">Social &amp; Newsletter</h3>
+        <form id="footer-newsletter" class="footer-form">
+          <label class="sr-only" for="footer-email">Email address</label>
+          <div class="footer-form__controls">
+            <input id="footer-email" type="email" name="email" placeholder="Enter email" required>
+            <button type="submit" class="footer-form__submit">Join</button>
+          </div>
+        </form>
+        <p class="site-footer__note">Subscribe to receive exclusive releases, deals, and event updates.</p>
+        <div class="site-footer__social">
+          <a class="site-footer__social-link" href="https://www.instagram.com/harmonysheets" target="_blank" rel="noopener" aria-label="Instagram">
+            <span aria-hidden="true">IG</span>
+          </a>
+          <a class="site-footer__social-link" href="https://www.youtube.com/@HarmonySheets" target="_blank" rel="noopener" aria-label="YouTube">
+            <span aria-hidden="true">YT</span>
+          </a>
+          <a class="site-footer__social-link" href="https://www.pinterest.com/harmonysheets" target="_blank" rel="noopener" aria-label="Pinterest">
+            <span aria-hidden="true">PI</span>
+          </a>
+          <a class="site-footer__social-link" href="mailto:support@harmony-sheets.com" aria-label="Email Harmony Sheets">
+            <span aria-hidden="true">@</span>
+          </a>
+        </div>
+        <p id="footer-newsletter-status" class="site-footer__status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <div class="site-footer__brand">
+        <a class="brand brand--footer" href="/">Harmony Sheets</a>
+        <p class="site-footer__copy">© <span id="year"></span> Harmony Sheets. All rights reserved.</p>
+        <p class="site-footer__tagline">One-time purchase. No subscriptions.</p>
+      </div>
+      <div class="site-footer__extras">
+        <p class="site-footer__locale">Serving customers worldwide • USD</p>
+        <div class="site-footer__payments">
+          <span class="site-footer__payment">Visa</span>
+          <span class="site-footer__payment">Mastercard</span>
+          <span class="site-footer__payment">Amex</span>
+          <span class="site-footer__payment">PayPal</span>
+          <span class="site-footer__payment">Shop Pay</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
