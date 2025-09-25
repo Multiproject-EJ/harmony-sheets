@@ -852,15 +852,25 @@ App.initNavDropdown = function() {
 
   const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
 
-  const resetMegaPosition = () => {
+  let lastShift = null;
+
+  const resetMegaPosition = (clearStored = false) => {
     mega.style.left = "";
     mega.style.right = "";
     mega.style.removeProperty("--mega-adjust");
+    if (clearStored) lastShift = null;
   };
 
   const repositionMega = () => {
-    resetMegaPosition();
-    if (isMobile()) return;
+    if (isMobile()) {
+      resetMegaPosition(true);
+      return;
+    }
+
+    const previousShift = lastShift;
+    mega.style.left = "";
+    mega.style.right = "";
+    mega.style.removeProperty("--mega-adjust");
 
     const margin = 20;
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
@@ -880,8 +890,13 @@ App.initNavDropdown = function() {
 
     if (Math.abs(shift) > 0.5) {
       mega.style.setProperty("--mega-adjust", `${shift}px`);
+      lastShift = shift;
+    } else if (previousShift !== null && Math.abs(previousShift) > 0.5) {
+      mega.style.setProperty("--mega-adjust", `${previousShift}px`);
+      lastShift = previousShift;
     } else {
       mega.style.removeProperty("--mega-adjust");
+      lastShift = null;
     }
   };
 
@@ -901,7 +916,7 @@ App.initNavDropdown = function() {
       scheduleReposition();
     }
     if (!open) {
-      resetMegaPosition();
+      resetMegaPosition(true);
     }
     browseItem.classList.toggle("is-open", open);
     browseLink.setAttribute("aria-expanded", open ? "true" : "false");
