@@ -1389,10 +1389,57 @@ App.initNavDropdown = function() {
   const bundleMatcher = window.matchMedia("(max-width: 720px)");
   const isBundleMobile = () => bundleMatcher.matches;
 
+  const resetBundlePosition = () => {
+    bundleFlyout.style.left = "";
+    bundleFlyout.style.right = "";
+    bundleFlyout.style.removeProperty("--bundle-adjust");
+  };
+
+  const repositionBundles = () => {
+    if (isBundleMobile()) {
+      resetBundlePosition();
+      return;
+    }
+
+    resetBundlePosition();
+
+    const margin = 20;
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+    const rect = bundleFlyout.getBoundingClientRect();
+
+    let shift = 0;
+
+    if (rect.left < margin) {
+      shift += margin - rect.left;
+    }
+
+    if (rect.right > viewportWidth - margin) {
+      shift -= rect.right - (viewportWidth - margin);
+    }
+
+    if (Math.abs(shift) > 0.5) {
+      bundleFlyout.style.setProperty("--bundle-adjust", `${shift}px`);
+    }
+  };
+
+  let bundleRepositionFrame = null;
+  const scheduleBundleReposition = () => {
+    if (bundleRepositionFrame) cancelAnimationFrame(bundleRepositionFrame);
+    bundleRepositionFrame = requestAnimationFrame(() => {
+      bundleRepositionFrame = null;
+      repositionBundles();
+    });
+  };
+
   const setBundleOpen = open => {
     if (isBundleMobile()) open = false;
     bundleItem.classList.toggle("is-open", open);
     bundleLink.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      scheduleBundleReposition();
+    } else {
+      resetBundlePosition();
+    }
   };
 
   const closeBundles = () => setBundleOpen(false);
@@ -1425,7 +1472,10 @@ App.initNavDropdown = function() {
     if (isBundleMobile()) closeBundles();
   });
 
-  bundleMatcher.addEventListener("change", closeBundles);
+  bundleMatcher.addEventListener("change", () => {
+    resetBundlePosition();
+    closeBundles();
+  });
 
   bundleContent.addEventListener("click", event => {
     if (event.target.closest("a")) closeBundles();
@@ -1445,6 +1495,7 @@ App.initNavDropdown = function() {
 
     if (!featured.length) {
       bundleContent.innerHTML = '<p class="nav-flyout__placeholder">Visit the bundles page to explore every collection.</p>';
+      scheduleBundleReposition();
       return;
     }
 
@@ -1492,6 +1543,7 @@ App.initNavDropdown = function() {
       </div>
       <div class="nav-flyout__footer"><a href="bundles.html">View all bundles</a></div>
     `;
+    scheduleBundleReposition();
   };
 
   bundleContent.innerHTML = '<p class="nav-flyout__placeholder">Loading bundles…</p>';
@@ -1499,6 +1551,7 @@ App.initNavDropdown = function() {
   App.loadBundles()
     .then(bundles => {
       renderBundlesMenu(bundles);
+      scheduleBundleReposition();
     })
     .catch(err => {
       console.warn("Unable to load bundle menu:", err);
@@ -1531,7 +1584,13 @@ App.initNavDropdown = function() {
         ],
         true
       );
+      scheduleBundleReposition();
     });
+
+  window.addEventListener("resize", () => {
+    scheduleBundleReposition();
+    closeBundles();
+  });
 };
 
 /*****************************************************
