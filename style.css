@@ -25,6 +25,12 @@ img{max-width:100%;display:block}
 .brand__text{display:flex;flex-direction:column;gap:2px;line-height:1.05}
 .brand__name{font-size:1.12rem;font-weight:700;color:inherit}
 .brand__notice{font-size:.75rem;font-weight:600;color:#111827;letter-spacing:.08em;text-transform:uppercase}
+
+@media (max-width:640px){
+  .brand{gap:6px}
+  .brand__text{gap:0}
+  .brand__notice{display:none}
+}
 .brand:hover,.brand:focus-visible{color:#1d4ed8}
 .main-nav{display:flex;align-items:center;gap:10px;padding:4.8px 8px;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.22);box-shadow:0 12px 30px rgba(15,23,42,.08);position:relative}
 .nav-item{position:relative}
