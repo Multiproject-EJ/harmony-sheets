@@ -217,14 +217,14 @@ App.LIFE_AREAS = {
     ]
   },
   environment: {
-    title: "Physical Environment",
-    short: "Environment",
+    title: "Living Space",
+    short: "Living Space",
     color: "#14B8A6",
     icon: App.LIFE_ICONS.environment,
     description: "Design supportive spaces, tidy routines, and home projects with clarity.",
     link: "products.html?area=environment",
     cta: "Design your ideal space",
-    empty: "Fresh templates for your environment are on the way. Check out the full library in the meantime.",
+    empty: "Fresh templates for your living space are on the way. Check out the full library in the meantime.",
     menuQuestion: "Ready to refresh the spaces you spend the most time in?",
     menuHighlights: [
       "Room reset routines",
