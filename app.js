@@ -324,6 +324,29 @@ App.initHeroRotation = function() {
 
     const toDisplayChar = char => (char === " " ? "\u00A0" : char || "");
 
+    let currentWord = null;
+    const ensureWord = () => {
+      if (!currentWord) {
+        currentWord = document.createElement("span");
+        currentWord.className = "hero-flip-word";
+      }
+      return currentWord;
+    };
+
+    const commitWord = () => {
+      if (currentWord && currentWord.childNodes.length) {
+        group.appendChild(currentWord);
+      }
+      currentWord = null;
+    };
+
+    const appendSpace = () => {
+      const spacer = document.createElement("span");
+      spacer.className = "hero-letter hero-letter--space";
+      spacer.textContent = " ";
+      group.appendChild(spacer);
+    };
+
     for (let i = 0; i < maxLength; i += 1) {
       const newChar = nextText[i] ?? "";
       const oldChar = previousText[i] ?? "";
@@ -332,17 +355,29 @@ App.initHeroRotation = function() {
         continue;
       }
 
-      if (newChar === oldChar) {
+      const newIsSpace = newChar === " ";
+      const oldIsSpace = oldChar === " ";
+
+      if (newIsSpace && oldIsSpace) {
+        commitWord();
+        appendSpace();
+        continue;
+      }
+
+      if (newChar === oldChar && newChar !== "") {
         const same = document.createElement("span");
         same.className = "hero-letter hero-letter--same";
         same.textContent = toDisplayChar(newChar);
         same.style.animationDelay = `${i * 0.035}s`;
-        group.appendChild(same);
+        ensureWord().appendChild(same);
         continue;
       }
 
       const letter = document.createElement("span");
       letter.className = "hero-letter hero-letter--flip";
+      if (newIsSpace || oldIsSpace || (!newChar && !oldChar)) {
+        letter.classList.add("hero-letter--space");
+      }
 
       const faces = document.createElement("span");
       faces.className = "hero-letter__faces";
@@ -350,27 +385,33 @@ App.initHeroRotation = function() {
 
       const front = document.createElement("span");
       front.className = "hero-letter__face hero-letter__face--front";
-      const displayOld = oldChar || newChar || "";
+      const displayOld = oldChar || (!oldIsSpace && newChar) || "";
       front.textContent = toDisplayChar(displayOld);
-      if (!oldChar) {
+      if (!oldChar || oldIsSpace) {
         front.classList.add("hero-letter__face--blank");
       }
 
       const back = document.createElement("span");
       back.className = "hero-letter__face hero-letter__face--back";
       back.textContent = toDisplayChar(newChar);
-      if (!newChar) {
+      if (!newChar || newIsSpace) {
         back.classList.add("hero-letter__face--blank");
       }
 
       faces.appendChild(front);
       faces.appendChild(back);
       letter.appendChild(faces);
-      group.appendChild(letter);
+      ensureWord().appendChild(letter);
 
       flipIndex += 1;
+
+      if (newIsSpace) {
+        commitWord();
+        appendSpace();
+      }
     }
 
+    commitWord();
     target.appendChild(group);
     target.appendChild(srText);
   };
