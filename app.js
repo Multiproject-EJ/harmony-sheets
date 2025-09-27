@@ -1143,7 +1143,7 @@ App.initNavDropdown = function() {
   const ALL_CATEGORY_INFO = {
     title: "All Life Harmony Tools",
     short: "All Products",
-    color: "#6366f1",
+    color: "#0ea5e9",
     empty: "We're crafting new Life Harmony tools. Explore the rest of the site in the meantime."
   };
   const areaOrder = ["all", ...baseAreaOrder];
@@ -1161,7 +1161,7 @@ App.initNavDropdown = function() {
   }
 
   const navAccentMap = {
-    all: "#6366f1",
+    all: "#0ea5e9",
     love: "#ef5da8",
     career: "#7c5cff",
     health: "#22c55e",
@@ -1649,9 +1649,10 @@ App.initNavDropdown = function() {
         const label = App.escapeHtml(info.short || info.title || id);
         const safeId = App.escapeHtml(id);
         const count = Array.isArray(areaProducts[id]) ? areaProducts[id].length : 0;
+        const extraClass = ` nav-mega__catbtn--${safeId}`;
         return `
           <li>
-            <button class="nav-mega__catbtn" type="button" data-nav-cat="${safeId}" aria-current="${id === navState.cat}">
+            <button class="nav-mega__catbtn${extraClass}" type="button" data-nav-cat="${safeId}" aria-current="${id === navState.cat}">
               <span class="nav-mega__dot nav-mega__dot--${safeId}"></span>
               <span class="nav-mega__catname">${label}</span>
               <span class="nav-mega__count" data-nav-count>${count}</span>
