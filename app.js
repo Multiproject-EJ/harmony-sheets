@@ -254,9 +254,27 @@ App.LIFE_AREAS = {
  * Hero headline rotation (index)
  *****************************************************/
 App.HERO_ROTATIONS = [
-  { text: "Create Harmony in Your Life", color: "#6366F1", animation: "glide" },
-  { text: "From Chaos to Clarity", color: "#14B8A6", animation: "wave" },
-  { text: "Bring Balance to Your Day", color: "#F97316", animation: "flip" }
+  {
+    text: "Create Harmony in Your Life",
+    color: "#6366F1",
+    animation: "glide",
+    illustration: "assets/hero-line-harmony.svg",
+    illustrationAlt: "Abstract concentric lines with sparkles representing harmony"
+  },
+  {
+    text: "From Chaos to Clarity",
+    color: "#14B8A6",
+    animation: "wave",
+    illustration: "assets/hero-line-clarity.svg",
+    illustrationAlt: "Flowing lines gathering into a focused beam"
+  },
+  {
+    text: "Bring Balance to Your Day",
+    color: "#F97316",
+    animation: "flip",
+    illustration: "assets/hero-line-balance.svg",
+    illustrationAlt: "Line art scales balancing sun and moon shapes"
+  }
 ];
 
 App.initHeroRotation = function() {
@@ -265,6 +283,10 @@ App.initHeroRotation = function() {
 
   target.dataset.heroRotationInit = "true";
   target.setAttribute("aria-live", "polite");
+
+  const illustration = App.qs("[data-hero-illustration]");
+  const defaultIllustrationSrc = illustration ? illustration.getAttribute("src") || "" : "";
+  const defaultIllustrationAlt = illustration ? illustration.getAttribute("alt") || "" : "";
 
   const phrases = Array.isArray(App.HERO_ROTATIONS)
     ? App.HERO_ROTATIONS.filter(item => item && item.text)
@@ -351,9 +373,29 @@ App.initHeroRotation = function() {
     target.appendChild(srText);
   };
 
+  const updateIllustration = phrase => {
+    if (!illustration) return;
+
+    if (phrase && phrase.illustration) {
+      const nextSrc = phrase.illustration;
+      if (illustration.getAttribute("src") !== nextSrc) {
+        illustration.setAttribute("src", nextSrc);
+      }
+    } else if (defaultIllustrationSrc) {
+      illustration.setAttribute("src", defaultIllustrationSrc);
+    }
+
+    if (phrase && Object.prototype.hasOwnProperty.call(phrase, "illustrationAlt")) {
+      illustration.setAttribute("alt", phrase.illustrationAlt || "");
+    } else {
+      illustration.setAttribute("alt", defaultIllustrationAlt);
+    }
+  };
+
   const applyPhrase = (phrase, previousPhrase) => {
     target.innerHTML = "";
     target.dataset.text = phrase.text;
+    updateIllustration(phrase);
 
     if (phrase.animation === "flip") {
       createFlipSpan(phrase.text, previousPhrase ? previousPhrase.text : "");

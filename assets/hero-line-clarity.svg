@@ -1,0 +1,27 @@
+<svg width="320" height="200" viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="#14B8A6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M36 148c36-40 84-60 124-60s88 20 124 60" opacity="0.45" />
+    <path d="M60 144c28-28 68-42 100-42s72 14 100 42" opacity="0.45" />
+    <path d="M84 140c22-20 52-30 76-30s54 10 76 30" opacity="0.7" />
+    <path d="M108 136c16-12 36-18 52-18s36 6 52 18" opacity="0.9" />
+    <path d="M152 124c6-4 16-6 24-6s18 2 24 6" opacity="0.9" />
+    <path d="M36 72c24 6 44 20 60 38" opacity="0.45" />
+    <path d="M284 72c-24 6-44 20-60 38" opacity="0.45" />
+    <path d="M160 46c0 30-10 58-30 80" opacity="0.45" />
+    <path d="M160 46c0 30 10 58 30 80" opacity="0.45" />
+  </g>
+  <g stroke="#5EEAD4" stroke-width="2" stroke-linecap="round">
+    <path d="M160 30l-12 18" opacity="0.6" />
+    <path d="M160 30l12 18" opacity="0.6" />
+    <path d="M148 48h24" opacity="0.6" />
+    <path d="M132 174c20-22 40-42 60-60l58-52" opacity="0.7" />
+    <path d="M188 120l36 68" opacity="0.7" />
+    <path d="M124 120l-36 68" opacity="0.4" />
+    <path d="M80 96l12 12" opacity="0.4" />
+    <path d="M240 96l-12 12" opacity="0.4" />
+    <path d="M160 120l100 52" opacity="0.4" />
+    <path d="M160 120L60 172" opacity="0.4" />
+  </g>
+  <path d="M192 128l64 32-64 32-64-32 64-32Z" stroke="#14B8A6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.75" />
+  <path d="M192 128l24 32-24 32-24-32 24-32Z" stroke="#5EEAD4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9" />
+</svg>
