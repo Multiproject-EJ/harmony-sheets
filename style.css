@@ -559,9 +559,6 @@ body.page-bundle main{max-width:1120px;margin:0 auto;padding:48px 18px 80px;disp
 details.faq{border:1px solid #eee;border-radius:10px;padding:12px;background:#fff}
 details.faq+details.faq{margin-top:10px}
 details.faq summary{cursor:pointer;font-weight:600}
-.sticky-cta{position:sticky;bottom:0;z-index:50;border-top:1px solid #eee;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(8px)}
-.sticky-cta .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:.75rem 1rem}
-.sticky-cta .muted{color:#777;font-size:.9rem}
 
 /* === Support & policy pages === */
 .faq{max-width:900px;margin:0 auto;padding:clamp(32px,6vw,60px) clamp(20px,6vw,32px);display:grid;gap:32px}
