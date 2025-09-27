@@ -254,9 +254,9 @@ App.LIFE_AREAS = {
  * Hero headline rotation (index)
  *****************************************************/
 App.HERO_ROTATIONS = [
-  { text: "Create Harmony in Your Life", color: "#6366F1" },
-  { text: "From Chaos to Clarity", color: "#14B8A6" },
-  { text: "Bring Balance to Your Day", color: "#F97316" }
+  { text: "Create Harmony in Your Life", color: "#6366F1", animation: "glide" },
+  { text: "From Chaos to Clarity", color: "#14B8A6", animation: "wave" },
+  { text: "Bring Balance to Your Day", color: "#F97316", animation: "flip" }
 ];
 
 App.initHeroRotation = function() {
@@ -264,18 +264,117 @@ App.initHeroRotation = function() {
   if (!target || target.dataset.heroRotationInit === "true") return;
 
   target.dataset.heroRotationInit = "true";
+  target.setAttribute("aria-live", "polite");
 
   const phrases = Array.isArray(App.HERO_ROTATIONS)
     ? App.HERO_ROTATIONS.filter(item => item && item.text)
     : [];
   if (!phrases.length) return;
 
-  const applyPhrase = phrase => {
-    target.textContent = phrase.text;
-    target.dataset.text = phrase.text;
+  const animationClasses = ["is-wave", "is-glide", "is-flip"];
+
+  const getAnimationClass = phrase => {
+    switch (phrase && phrase.animation) {
+      case "glide":
+        return "is-glide";
+      case "flip":
+        return "is-flip";
+      case "wave":
+        return "is-wave";
+      default:
+        return "";
+    }
   };
 
-  applyPhrase(phrases[0]);
+  const createFlipSpan = (nextText, previousText = "") => {
+    const group = document.createElement("span");
+    group.className = "hero-flip-line";
+    group.setAttribute("aria-hidden", "true");
+
+    const srText = document.createElement("span");
+    srText.className = "sr-only";
+    srText.textContent = nextText;
+
+    const maxLength = Math.max(nextText.length, previousText.length);
+    let flipIndex = 0;
+
+    const toDisplayChar = char => (char === " " ? "\u00A0" : char || "");
+
+    for (let i = 0; i < maxLength; i += 1) {
+      const newChar = nextText[i] ?? "";
+      const oldChar = previousText[i] ?? "";
+
+      if (!newChar && !oldChar) {
+        continue;
+      }
+
+      if (newChar === oldChar) {
+        const same = document.createElement("span");
+        same.className = "hero-letter hero-letter--same";
+        same.textContent = toDisplayChar(newChar);
+        same.style.animationDelay = `${i * 0.035}s`;
+        group.appendChild(same);
+        continue;
+      }
+
+      const letter = document.createElement("span");
+      letter.className = "hero-letter hero-letter--flip";
+
+      const faces = document.createElement("span");
+      faces.className = "hero-letter__faces";
+      faces.style.animationDelay = `${flipIndex * 0.08}s`;
+
+      const front = document.createElement("span");
+      front.className = "hero-letter__face hero-letter__face--front";
+      const displayOld = oldChar || newChar || "";
+      front.textContent = toDisplayChar(displayOld);
+      if (!oldChar) {
+        front.classList.add("hero-letter__face--blank");
+      }
+
+      const back = document.createElement("span");
+      back.className = "hero-letter__face hero-letter__face--back";
+      back.textContent = toDisplayChar(newChar);
+      if (!newChar) {
+        back.classList.add("hero-letter__face--blank");
+      }
+
+      faces.appendChild(front);
+      faces.appendChild(back);
+      letter.appendChild(faces);
+      group.appendChild(letter);
+
+      flipIndex += 1;
+    }
+
+    target.appendChild(group);
+    target.appendChild(srText);
+  };
+
+  const applyPhrase = (phrase, previousPhrase) => {
+    target.innerHTML = "";
+    target.dataset.text = phrase.text;
+
+    if (phrase.animation === "flip") {
+      createFlipSpan(phrase.text, previousPhrase ? previousPhrase.text : "");
+    } else {
+      target.textContent = phrase.text;
+    }
+  };
+
+  const triggerAnimation = phrase => {
+    const animationClass = getAnimationClass(phrase);
+    animationClasses.forEach(cls => target.classList.remove(cls));
+
+    if (!animationClass) return;
+
+    void target.offsetWidth;
+    target.classList.add(animationClass);
+  };
+
+  let previousPhrase = null;
+  applyPhrase(phrases[0], previousPhrase);
+  previousPhrase = phrases[0];
 
   const prefersReducedMotion =
     typeof window !== "undefined" &&
@@ -283,14 +382,7 @@ App.initHeroRotation = function() {
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (prefersReducedMotion) return;
 
-  const triggerWave = () => {
-    target.classList.remove("is-wave");
-    // Force reflow to restart the animation when the class is re-applied
-    void target.offsetWidth;
-    target.classList.add("is-wave");
-  };
-
-  triggerWave();
+  triggerAnimation(phrases[0]);
 
   if (phrases.length === 1) return;
 
@@ -299,8 +391,10 @@ App.initHeroRotation = function() {
 
   window.setInterval(() => {
     index = (index + 1) % phrases.length;
-    applyPhrase(phrases[index]);
-    triggerWave();
+    const nextPhrase = phrases[index];
+    applyPhrase(nextPhrase, previousPhrase);
+    triggerAnimation(nextPhrase);
+    previousPhrase = nextPhrase;
   }, intervalDuration);
 };
 
