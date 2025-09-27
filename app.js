@@ -272,11 +272,7 @@ App.initHeroRotation = function() {
 
   const applyPhrase = phrase => {
     target.textContent = phrase.text;
-    if (phrase.color) {
-      target.style.setProperty("--hero-rotate-color", phrase.color);
-    } else {
-      target.style.removeProperty("--hero-rotate-color");
-    }
+    target.dataset.text = phrase.text;
   };
 
   applyPhrase(phrases[0]);
@@ -285,21 +281,26 @@ App.initHeroRotation = function() {
     typeof window !== "undefined" &&
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (prefersReducedMotion || phrases.length === 1) return;
+  if (prefersReducedMotion) return;
+
+  const triggerWave = () => {
+    target.classList.remove("is-wave");
+    // Force reflow to restart the animation when the class is re-applied
+    void target.offsetWidth;
+    target.classList.add("is-wave");
+  };
+
+  triggerWave();
+
+  if (phrases.length === 1) return;
 
   let index = 0;
-  const fadeDuration = 260;
   const intervalDuration = 5200;
 
   window.setInterval(() => {
-    target.classList.add("is-changing");
-    window.setTimeout(() => {
-      index = (index + 1) % phrases.length;
-      applyPhrase(phrases[index]);
-      window.requestAnimationFrame(() => {
-        target.classList.remove("is-changing");
-      });
-    }, fadeDuration);
+    index = (index + 1) % phrases.length;
+    applyPhrase(phrases[index]);
+    triggerWave();
   }, intervalDuration);
 };
 
