@@ -2649,7 +2649,6 @@ App.initProduct = async function() {
     document.title = product.name + " — Harmony Sheets";
     App.qs("#p-name").textContent = product.name;
     if (App.qs("#p-title")) App.qs("#p-title").textContent = product.name;
-    if (App.qs("#p-sticky-name")) App.qs("#p-sticky-name").textContent = product.name;
 
     // Tagline
     if (product.tagline) App.qs("#p-tagline").textContent = product.tagline;
@@ -2734,11 +2733,11 @@ App.initProduct = async function() {
     if (product.pricingSub && App.qs("#p-pricing-sub")) App.qs("#p-pricing-sub").textContent = product.pricingSub;
 
     // Links
-    ["p-stripe", "p-stripe-2", "p-stripe-sticky"].forEach(id => {
+    ["p-stripe", "p-stripe-2"].forEach(id => {
       const el = App.qs("#" + id);
       if (el && product.stripe) el.href = product.stripe;
     });
-    ["p-etsy", "p-etsy-2", "p-etsy-sticky"].forEach(id => {
+    ["p-etsy", "p-etsy-2"].forEach(id => {
       const el = App.qs("#" + id);
       if (el && product.etsy) el.href = product.etsy;
     });
