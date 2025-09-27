@@ -240,12 +240,13 @@ body[class*="theme-midnight"]{
 .hero h1 .hero-heading__dynamic,.hero h1 .hero-heading__tagline{line-height:1.1}
 .hero-heading__dynamic::after{content:"";display:block;width:100%;height:2px;margin-top:6px;background:linear-gradient(90deg,currentColor 0%,rgba(37,99,235,0) 100%);opacity:.25}
 .hero-heading__dynamic.is-wave{opacity:1;transform:translateY(0)}
+.hero-visual{margin:clamp(24px,6vw,48px) auto 0;display:flex;justify-content:center}
+.hero-visual img{width:min(320px,80vw);height:auto;filter:drop-shadow(0 22px 36px rgba(15,23,42,.12));transition:opacity .3s ease}
 @keyframes heroGlide{0%{opacity:0;transform:translateY(24px)}32%{opacity:1;transform:translateY(0)}100%{opacity:1;transform:translateY(0)}}
 @keyframes heroLetterCalm{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes heroLetterFlip{0%{transform:rotateX(0)}48%{transform:rotateX(88deg)}52%{transform:rotateX(92deg)}100%{transform:rotateX(180deg)}}
 @keyframes heroWaveGlow{0%{opacity:0;transform:translateX(-32%)}18%{opacity:1;transform:translateX(-12%)}45%{transform:translateX(8%);filter:drop-shadow(0 0 .6em rgba(96,165,250,.75))}70%{transform:translateX(24%);filter:drop-shadow(0 0 .45em rgba(96,165,250,.55))}100%{opacity:0;transform:translateX(46%);filter:drop-shadow(0 0 .25em rgba(96,165,250,.35))}}
 .hero p{color:var(--muted)}
-.hero-cta{margin-top:18px;display:flex;gap:10px;justify-content:center}
 .btn{display:inline-block;padding:11px 16px;border:1px solid var(--brand);border-radius:10px;box-shadow:var(--shadow)}
 .btn.primary{background:var(--brand);color:#fff}
 .btn.ghost{background:#eef3ff;color:var(--brand);border-color:#dbe6ff}
