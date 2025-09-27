@@ -1383,10 +1383,6 @@ App.initNavDropdown = function() {
     const safeName = App.escapeHtml(item.name || "Harmony Sheets tool");
     const safeTagline = App.escapeHtml(item.tagline || "");
     const safeUrl = App.escapeHtml(item.url || "#");
-    const badgeText = String(item.badge || "").trim();
-    const badgeMarkup = badgeText
-      ? `<span class="nav-mega__preview-badge">${App.escapeHtml(badgeText)}</span>`
-      : "";
     const fallbackAccent = navAccentMap[navState.cat] || getCategoryInfo(navState.cat)?.color || navAccentMap.all;
     const previewAccent = item.accentColor || fallbackAccent;
     previewEl.style.setProperty("--nav-mega-preview-acc", previewAccent);
@@ -1406,7 +1402,6 @@ App.initNavDropdown = function() {
 
     previewContentEl.innerHTML = `
       ${mediaMarkup}
-      ${badgeMarkup}
       <h3 class="nav-mega__preview-title">${safeName}</h3>
       ${safeTagline ? `<p class="nav-mega__preview-tagline">${safeTagline}</p>` : ""}
       ${factsMarkup ? `<ul class="nav-mega__preview-facts">${factsMarkup}</ul>` : ""}
