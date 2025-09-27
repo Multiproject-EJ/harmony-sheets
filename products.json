@@ -69,6 +69,9 @@
       "Annual overview"
     ],
     "description": "<p>The <strong>Budget Dashboard</strong> helps you clearly see where your money goes. Track spending, savings, and debt repayments in one place with automatic charts and reports.</p>",
+    "gallery": [
+      { "src": "assets/imgBudgetPro1.webp", "alt": "Budget Dashboard overview in Google Sheets" }
+    ],
     "colorImage": "assets/budget-colors.webp",
     "colorCaption": "Choose a theme that fits your financial journey.",
     "demoVideo": "assets/budget-demo.mp4",
@@ -81,7 +84,7 @@
     ],
     "faqs": [
       { "q": "Can I use this with multiple accounts?", "a": "Yes, you can track any number of accounts." },
-      { "q": "Do I need Excel?", "a": "No, it’s designed for Google Sheets." },
+      { "q": "Do I need Excel?", "a": "No, it's designed for Google Sheets." },
       { "q": "Does it auto-import bank transactions?", "a": "Not yet — but CSV imports are supported." }
     ],
     "pricingTitle": "Get the Budget Dashboard",
@@ -144,6 +147,153 @@
       { "title": "Track progress over time", "desc": "Analytics dashboard reveals your productivity patterns." },
       { "title": "Stay accountable", "desc": "Custom goals and streaks keep you consistent." },
       { "title": "Focus with style", "desc": "Unlock premium themes and layouts." }
+    ]
+  },
+  {
+    "id": "ultimate-subscription-tracker",
+    "name": "Ultimate Subscription Tracker",
+    "tagline": "See every recurring charge at a glance and cancel what you don't need.",
+    "price": "$17",
+    "lifeAreas": ["finances", "career", "environment"],
+    "badges": [
+      "One-time purchase",
+      "Track renewals",
+      "Cancel reminders",
+      "Google Sheets compatible"
+    ],
+    "features": [
+      "Automatic monthly & annual cost rollups",
+      "Renewal heat map to forecast cash flow",
+      "Smart reminders for upcoming renewals",
+      "Cancellation checklist & notes"
+    ],
+    "description": "<p><strong>Ultimate Subscription Tracker</strong> brings every recurring charge into one calm workspace. Spot duplicate services, set review cadences, and feel confident about what stays on your card.</p>",
+    "gallery": [
+      { "src": "assets/imgSubscriptions1.webp", "alt": "Overview of the Ultimate Subscription Tracker" }
+    ],
+    "colorImage": "assets/imgSubscriptions1.webp",
+    "colorCaption": "Minimal dashboard view with renewal alerts and spending totals.",
+    "included": [
+      "Subscription Tracker Google Sheet",
+      "Renewal reminder template",
+      "Setup & audit checklist",
+      "Email support"
+    ],
+    "faqs": [
+      { "q": "Can I track both monthly and annual plans?", "a": "Yes, the tracker automatically rolls up any billing cadence." },
+      { "q": "Does it send reminder emails?", "a": "Use the built-in reminder log to copy events into your calendar." },
+      { "q": "Can I share it with my partner or team?", "a": "Yes, invite collaborators just like any Google Sheet." }
+    ],
+    "pricingTitle": "Get the Ultimate Subscription Tracker",
+    "pricingSub": "One-time purchase. Keep lifetime access.",
+    "stripe": "https://buy.stripe.com/test_subscription_tracker",
+    "etsy": "https://etsy.com/listing/ultimate-subscription-tracker",
+    "socialProof": {
+      "stars": "★★★★★",
+      "quote": "Customers trimmed an average of $42/month in unwanted subscriptions."
+    },
+    "benefits": [
+      { "title": "Stop surprise renewals", "desc": "Visual timeline keeps every billing date top of mind." },
+      { "title": "Lower recurring costs", "desc": "Spot duplicate apps and negotiate before renewals hit." },
+      { "title": "Share with confidence", "desc": "Collaborate on household or team subscriptions effortlessly." }
+    ]
+  },
+  {
+    "id": "ultimate-study-planner",
+    "name": "Ultimate Study Planner",
+    "tagline": "Plan deep work, assignments, and exams with a calm weekly rhythm.",
+    "price": "$15",
+    "lifeAreas": ["career", "health", "fun", "spirituality"],
+    "badges": [
+      "One-time purchase",
+      "Focus blocks",
+      "Study analytics",
+      "Google Sheets compatible"
+    ],
+    "features": [
+      "Drag-and-drop weekly planner",
+      "Exam and project countdowns",
+      "Habit & energy check-ins",
+      "Review dashboard for grades and wins"
+    ],
+    "description": "<p>The <strong>Ultimate Study Planner</strong> keeps your semester organized without overwhelm. Map focus blocks, log progress, and reflect on how you feel so you stay motivated the whole term.</p>",
+    "gallery": [
+      { "src": "assets/imgStudyPlanner1.webp", "alt": "Weekly schedule inside the Ultimate Study Planner" }
+    ],
+    "colorImage": "assets/imgStudyPlanner1.webp",
+    "colorCaption": "Weekly view with color-coded focus blocks and energy check-ins.",
+    "included": [
+      "Study Planner Google Sheet",
+      "Semester roadmap template",
+      "Reflection journal prompts",
+      "Email support"
+    ],
+    "faqs": [
+      { "q": "Is it only for college students?", "a": "No, it's flexible for any self-paced learning or certification prep." },
+      { "q": "Can I plan group projects?", "a": "Yes, tag collaborators and track shared milestones." },
+      { "q": "Does it support multiple terms?", "a": "Duplicate the planner for each term and archive past semesters." }
+    ],
+    "pricingTitle": "Get the Ultimate Study Planner",
+    "pricingSub": "One-time purchase. Includes free updates.",
+    "stripe": "https://buy.stripe.com/test_study_planner",
+    "etsy": "https://etsy.com/listing/ultimate-study-planner",
+    "socialProof": {
+      "stars": "★★★★★",
+      "quote": "“I finally feel in control of my course load and downtime.”"
+    },
+    "benefits": [
+      { "title": "Stay on top of deadlines", "desc": "Countdown trackers surface urgent assignments automatically." },
+      { "title": "Protect your energy", "desc": "Balance focus blocks with rest using mood and habit check-ins." },
+      { "title": "Celebrate progress", "desc": "Weekly reviews show wins, grades, and lessons learned." }
+    ]
+  },
+  {
+    "id": "smart-savings-tracker",
+    "name": "Smart Savings Tracker",
+    "tagline": "Turn your savings goals into clear milestones you'll actually reach.",
+    "price": "$14",
+    "lifeAreas": ["finances", "family", "love"],
+    "badges": [
+      "One-time purchase",
+      "Goal tracking",
+      "Progress visuals",
+      "Google Sheets compatible"
+    ],
+    "features": [
+      "Goal-based envelopes with target dates",
+      "Progress bars that update automatically",
+      "Motivation dashboard with wins & notes",
+      "Savings habit tracker and reminders"
+    ],
+    "description": "<p><strong>Smart Savings Tracker</strong> turns every savings target into an encouraging roadmap. See how each contribution moves you forward and stay inspired with a dashboard that celebrates momentum.</p>",
+    "gallery": [
+      { "src": "assets/imgSavings1.webp", "alt": "Savings goals dashboard with progress bars" }
+    ],
+    "colorImage": "assets/imgSavings1.webp",
+    "colorCaption": "Savings goal dashboard with automatic progress tracking.",
+    "included": [
+      "Savings Tracker Google Sheet",
+      "Goal planning mini-guide",
+      "Savings habit prompts",
+      "Email support"
+    ],
+    "faqs": [
+      { "q": "Can I track multiple goals at once?", "a": "Yes, manage unlimited goals with their own timelines." },
+      { "q": "Does it connect to my bank?", "a": "Not automatically, but quick-entry forms make manual updates easy." },
+      { "q": "Can couples share the tracker?", "a": "Yes, invite your partner and update together in Google Sheets." }
+    ],
+    "pricingTitle": "Get the Smart Savings Tracker",
+    "pricingSub": "One-time purchase. Lifetime access.",
+    "stripe": "https://buy.stripe.com/test_savings_tracker",
+    "etsy": "https://etsy.com/listing/smart-savings-tracker",
+    "socialProof": {
+      "stars": "★★★★★",
+      "quote": "Users report hitting savings milestones 27% faster with weekly check-ins."
+    },
+    "benefits": [
+      { "title": "Visualize every deposit", "desc": "Progress bars update instantly to show momentum." },
+      { "title": "Stay motivated", "desc": "Milestone celebrations and note prompts keep you inspired." },
+      { "title": "Plan together", "desc": "Great for households aligning on shared savings goals." }
     ]
   }
 ]
