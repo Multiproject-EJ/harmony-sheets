@@ -487,7 +487,8 @@ App.NAV_PRODUCT_META = {
   pomodoro: {
     type: "Focus System",
     format: "Web App + Sheets",
-    badge: "New"
+    badge: "New",
+    image: "assets/Pomodoro1.webp"
   },
   "budget-dashboard": {
     type: "Finance Dashboard",
@@ -497,7 +498,8 @@ App.NAV_PRODUCT_META = {
   "pomodoro-pro": {
     type: "Focus System",
     format: "Web App + Sheets",
-    badge: "Popular"
+    badge: "Popular",
+    image: "assets/Pomodoro1.webp"
   }
 };
 
@@ -1136,8 +1138,21 @@ App.initNavDropdown = function() {
   });
 
 
-  const areaOrder = Object.keys(App.LIFE_AREAS || {});
-  if (!areaOrder.length) {
+  const baseAreas = App.LIFE_AREAS || {};
+  const baseAreaOrder = Object.keys(baseAreas || {});
+  const ALL_CATEGORY_INFO = {
+    title: "All Life Harmony Tools",
+    short: "All Products",
+    color: "#6366f1",
+    empty: "We're crafting new Life Harmony tools. Explore the rest of the site in the meantime."
+  };
+  const areaOrder = ["all", ...baseAreaOrder];
+  const getCategoryInfo = areaId => {
+    if (areaId === "all") return ALL_CATEGORY_INFO;
+    return baseAreas?.[areaId] || null;
+  };
+
+  if (!baseAreaOrder.length) {
     content.innerHTML = '<p class="nav-mega__placeholder">Life Harmony tools are coming soon.</p>';
     App.loadProducts().catch(err => {
       console.warn("Unable to preload products:", err);
@@ -1146,6 +1161,7 @@ App.initNavDropdown = function() {
   }
 
   const navAccentMap = {
+    all: "#6366f1",
     love: "#ef5da8",
     career: "#7c5cff",
     health: "#22c55e",
@@ -1157,9 +1173,9 @@ App.initNavDropdown = function() {
   };
 
   const navState = {
-    cat: areaOrder[0],
+    cat: areaOrder[0] || "all",
     q: "",
-    sort: "name"
+    sort: "badge"
   };
 
   const formatPriceDisplay = value => {
@@ -1189,6 +1205,9 @@ App.initNavDropdown = function() {
         ? item.price
         : "");
     const priceDisplay = computedDisplay ? formatPriceDisplay(computedDisplay) : "";
+    const accentColor = navAccentMap[areaId] || getCategoryInfo(areaId)?.color || navAccentMap.all;
+    const rawImage = typeof item.image === "string" ? item.image.trim() : "";
+    const image = rawImage || "";
     let priceValue = Number.isFinite(item.priceValue) ? item.priceValue : null;
     if (priceValue === null) {
       if (typeof item.price === "number" && Number.isFinite(item.price)) {
@@ -1212,7 +1231,9 @@ App.initNavDropdown = function() {
       tagline,
       priceDisplay,
       priceValue,
-      url: href
+      url: href,
+      image,
+      accentColor
     };
   };
 
@@ -1226,8 +1247,8 @@ App.initNavDropdown = function() {
     Object.entries(extras).forEach(([areaId, items]) => {
       if (!Array.isArray(items) || !items.length) return;
       if (!map[areaId]) map[areaId] = [];
-      items.forEach((item, index) => {
-        map[areaId].push(normalizeEntry(areaId, item, index));
+      items.forEach(item => {
+        map[areaId].push(normalizeEntry(areaId, item, map[areaId].length));
       });
     });
 
@@ -1247,7 +1268,8 @@ App.initNavDropdown = function() {
           priceValue: meta.priceValue,
           price: meta.price,
           url: meta.url || `product.html?id=${encodeURIComponent(product.id)}`,
-          tagline: product.tagline
+          tagline: product.tagline,
+          image: meta.image
         };
         const areaOverrides = meta.areas || {};
         areas.forEach(areaId => {
@@ -1256,6 +1278,33 @@ App.initNavDropdown = function() {
           map[areaId].push(normalizeEntry(areaId, { ...base, ...override }, map[areaId].length));
         });
       });
+    }
+
+    if (map.all) {
+      const existingAll = Array.isArray(map.all) ? map.all.slice() : [];
+      const seenAll = new Set();
+      const aggregated = [];
+
+      existingAll.forEach(entry => {
+        if (!entry) return;
+        const key = entry.id || `${entry.name}-${entry.type}`;
+        if (seenAll.has(key)) return;
+        seenAll.add(key);
+        aggregated.push(entry);
+      });
+
+      baseAreaOrder.forEach(areaId => {
+        const list = Array.isArray(map[areaId]) ? map[areaId] : [];
+        list.forEach(entry => {
+          if (!entry) return;
+          const key = entry.id || `${entry.name}-${entry.type}`;
+          if (seenAll.has(key)) return;
+          seenAll.add(key);
+          aggregated.push(entry);
+        });
+      });
+
+      map.all = aggregated;
     }
 
     Object.keys(map).forEach(areaId => {
@@ -1274,17 +1323,27 @@ App.initNavDropdown = function() {
   let areaProducts = buildAreaProducts([]);
   let panelEl = null;
   const catButtonMap = new Map();
-  let pillEl = null;
   let rowsEl = null;
   let infoTextEl = null;
   let searchInput = null;
   let sortSelect = null;
   let previewEl = null;
   let previewContentEl = null;
+  let tableEl = null;
   let activePreviewId = null;
   let activePreviewRow = null;
   let hasRowListeners = false;
   const previewItemMap = new Map();
+  const createInitials = value => {
+    const text = String(value || "").trim();
+    if (!text) return "HS";
+    const parts = text.split(/\s+/).filter(Boolean);
+    if (!parts.length) return "HS";
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  };
 
   const setActiveRow = row => {
     if (activePreviewRow === row) return;
@@ -1328,6 +1387,14 @@ App.initNavDropdown = function() {
     const badgeMarkup = badgeText
       ? `<span class="nav-mega__preview-badge">${App.escapeHtml(badgeText)}</span>`
       : "";
+    const fallbackAccent = navAccentMap[navState.cat] || getCategoryInfo(navState.cat)?.color || navAccentMap.all;
+    const previewAccent = item.accentColor || fallbackAccent;
+    previewEl.style.setProperty("--nav-mega-preview-acc", previewAccent);
+    const imageSrc = item.image ? App.escapeHtml(item.image) : "";
+    const initials = App.escapeHtml(createInitials(item.name));
+    const mediaMarkup = imageSrc
+      ? `<div class="nav-mega__preview-media"><img class="nav-mega__preview-img" src="${imageSrc}" alt="${safeName} thumbnail"></div>`
+      : `<div class="nav-mega__preview-media nav-mega__preview-media--placeholder" aria-hidden="true"><span>${initials}</span></div>`;
     const facts = [
       item.type ? { label: "Type", value: item.type } : null,
       item.format ? { label: "Format", value: item.format } : null,
@@ -1338,6 +1405,7 @@ App.initNavDropdown = function() {
       .join("");
 
     previewContentEl.innerHTML = `
+      ${mediaMarkup}
       ${badgeMarkup}
       <h3 class="nav-mega__preview-title">${safeName}</h3>
       ${safeTagline ? `<p class="nav-mega__preview-tagline">${safeTagline}</p>` : ""}
@@ -1394,10 +1462,12 @@ App.initNavDropdown = function() {
     const aggregated = [];
     const seen = new Map();
 
-    areaOrder.forEach(areaId => {
+    areaOrder
+      .filter(areaId => areaId !== "all")
+      .forEach(areaId => {
       const list = Array.isArray(areaProducts[areaId]) ? areaProducts[areaId] : [];
       if (!list.length) return;
-      const areaInfo = App.LIFE_AREAS[areaId] || {};
+      const areaInfo = getCategoryInfo(areaId) || {};
       const areaLabel = areaInfo.short || areaInfo.title || areaId;
 
       list.forEach(item => {
@@ -1409,7 +1479,10 @@ App.initNavDropdown = function() {
           if (!existing.lifeAreaIds.includes(areaId)) {
             existing.lifeAreaIds.push(areaId);
             existing.lifeAreaLabel = existing.lifeAreaIds
-              .map(id => App.LIFE_AREAS[id]?.short || App.LIFE_AREAS[id]?.title || id)
+              .map(id => {
+                const info = getCategoryInfo(id);
+                return info?.short || info?.title || id;
+              })
               .join(" • ");
           }
           return;
@@ -1421,7 +1494,7 @@ App.initNavDropdown = function() {
         seen.set(key, clone);
         aggregated.push(clone);
       });
-    });
+      });
 
     return aggregated;
   };
@@ -1458,15 +1531,18 @@ App.initNavDropdown = function() {
       navState.cat = areaOrder[0];
     }
 
-    const info = App.LIFE_AREAS[navState.cat] || {};
-    const accent = navAccentMap[navState.cat] || info.color || "#7c5cff";
+    const info = getCategoryInfo(navState.cat) || {};
+    const accent = navAccentMap[navState.cat] || info.color || navAccentMap.all;
     panelEl.dataset.area = navState.cat;
     panelEl.style.setProperty("--nav-mega-acc", accent);
 
-    const safeCatClass = navState.cat.replace(/[^a-z0-9-]/g, "");
-    if (pillEl) {
-      pillEl.textContent = info.title || "Life Harmony";
-      pillEl.className = `nav-mega__pill nav-mega__pill--${safeCatClass}`;
+    if (previewEl) {
+      previewEl.style.setProperty("--nav-mega-preview-acc", accent);
+    }
+
+    if (tableEl) {
+      const labelBase = info.title || info.short || "Life Harmony tools";
+      tableEl.setAttribute("aria-label", `${labelBase} list`);
     }
 
     if (searchInput && searchInput.value !== navState.q) {
@@ -1565,11 +1641,10 @@ App.initNavDropdown = function() {
     scheduleReposition();
   };
 
-  const pillId = `nav-mega-pill-${Math.random().toString(36).slice(2, 8)}`;
   const renderShell = () => {
     const catItems = areaOrder
       .map(id => {
-        const info = App.LIFE_AREAS[id];
+        const info = getCategoryInfo(id);
         if (!info) return "";
         const label = App.escapeHtml(info.short || info.title || id);
         const safeId = App.escapeHtml(id);
@@ -1586,6 +1661,9 @@ App.initNavDropdown = function() {
       })
       .join("");
 
+    const currentInfo = getCategoryInfo(navState.cat) || {};
+    const initialLabel = App.escapeHtml(currentInfo.title || currentInfo.short || "Life Harmony tools");
+
     content.innerHTML = `
       <div class="nav-mega__panel" data-nav-panel data-area="${App.escapeHtml(navState.cat)}">
         <div class="nav-mega__pane">
@@ -1597,21 +1675,20 @@ App.initNavDropdown = function() {
           </aside>
           <div class="nav-mega__prod">
             <div class="nav-mega__prod-head">
-              <span class="nav-mega__pill nav-mega__pill--${App.escapeHtml(navState.cat)}" id="${pillId}" data-nav-pill>${App.escapeHtml(App.LIFE_AREAS[navState.cat]?.title || "Life Harmony")}</span>
               <div class="nav-mega__tools">
                 <label class="nav-mega__search">
                   <span class="sr-only">Search Life Harmony tools</span>
                   <input type="search" placeholder="Search tools…" value="${App.escapeHtml(navState.q)}" data-nav-search>
                 </label>
                 <select class="nav-mega__select" data-nav-sort>
+                  <option value="badge"${navState.sort === "badge" ? " selected" : ""}>Sort: Badge</option>
                   <option value="name"${navState.sort === "name" ? " selected" : ""}>Sort: Name</option>
                   <option value="price"${navState.sort === "price" ? " selected" : ""}>Sort: Price</option>
-                  <option value="badge"${navState.sort === "badge" ? " selected" : ""}>Sort: Badge</option>
                 </select>
               </div>
             </div>
             <div class="nav-mega__scroll">
-              <table class="nav-mega__table" aria-describedby="${pillId}">
+              <table class="nav-mega__table" data-nav-table aria-label="${initialLabel} list">
                 <thead>
                   <tr>
                     <th scope="col" style="width:54%">Product</th>
@@ -1640,13 +1717,13 @@ App.initNavDropdown = function() {
     `;
 
     panelEl = content.querySelector("[data-nav-panel]");
-    pillEl = content.querySelector("[data-nav-pill]");
     rowsEl = content.querySelector("[data-nav-rows]");
     infoTextEl = content.querySelector("[data-nav-info]");
     searchInput = content.querySelector("[data-nav-search]");
     sortSelect = content.querySelector("[data-nav-sort]");
     previewEl = content.querySelector("[data-nav-preview]");
     previewContentEl = content.querySelector("[data-nav-preview-content]");
+    tableEl = content.querySelector("[data-nav-table]");
 
     catButtonMap.clear();
     content.querySelectorAll("[data-nav-cat]").forEach(btn => {
@@ -1673,7 +1750,7 @@ App.initNavDropdown = function() {
 
     if (sortSelect) {
       sortSelect.addEventListener("change", event => {
-        navState.sort = event.target.value || "name";
+        navState.sort = event.target.value || "badge";
         updateActive();
       });
     }
