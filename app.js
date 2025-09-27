@@ -260,15 +260,15 @@ App.HERO_ROTATIONS = [
     text: "Create Harmony in Your Life",
     color: "#6366F1",
     animation: "glide",
-    illustration: "assets/hero-line-harmony.svg",
-    illustrationAlt: "Abstract concentric lines with sparkles representing harmony"
+    illustration: "assets/imgIndex1.webp",
+    illustrationAlt: "Preview of Harmony Sheets templates displayed on multiple devices"
   },
   {
     text: "From Chaos to Clarity",
     color: "#14B8A6",
     animation: "wave",
-    illustration: "assets/hero-line-clarity.svg",
-    illustrationAlt: "Flowing lines gathering into a focused beam"
+    illustration: "assets/imgIndex2.webp",
+    illustrationAlt: "Close-up of Harmony Sheets dashboards highlighting clarity tools"
   },
   {
     text: "Bring Balance to Your Day",
@@ -419,20 +419,49 @@ App.initHeroRotation = function() {
   const updateIllustration = phrase => {
     if (!illustration) return;
 
-    if (phrase && phrase.illustration) {
-      const nextSrc = phrase.illustration;
-      if (illustration.getAttribute("src") !== nextSrc) {
-        illustration.setAttribute("src", nextSrc);
+    const nextSrc =
+      phrase && phrase.illustration ? phrase.illustration : defaultIllustrationSrc;
+    const hasCustomAlt =
+      phrase && Object.prototype.hasOwnProperty.call(phrase, "illustrationAlt");
+    const nextAlt = hasCustomAlt ? phrase.illustrationAlt || "" : defaultIllustrationAlt;
+
+    const setAltIfNeeded = () => {
+      if (illustration.getAttribute("alt") !== nextAlt) {
+        illustration.setAttribute("alt", nextAlt);
       }
-    } else if (defaultIllustrationSrc) {
-      illustration.setAttribute("src", defaultIllustrationSrc);
+    };
+
+    if (!nextSrc || illustration.getAttribute("src") === nextSrc) {
+      setAltIfNeeded();
+      return;
     }
 
-    if (phrase && Object.prototype.hasOwnProperty.call(phrase, "illustrationAlt")) {
-      illustration.setAttribute("alt", phrase.illustrationAlt || "");
-    } else {
-      illustration.setAttribute("alt", defaultIllustrationAlt);
-    }
+    const handleLoad = () => {
+      illustration.removeEventListener("load", handleLoad);
+      setAltIfNeeded();
+      window.requestAnimationFrame(() => {
+        illustration.classList.remove("is-fading");
+      });
+    };
+
+    const handleTransitionEnd = event => {
+      if (event.target !== illustration || event.propertyName !== "opacity") {
+        return;
+      }
+
+      illustration.removeEventListener("transitionend", handleTransitionEnd);
+      illustration.addEventListener("load", handleLoad);
+      illustration.setAttribute("src", nextSrc);
+
+      if (illustration.complete && illustration.naturalWidth !== 0) {
+        handleLoad();
+      }
+    };
+
+    illustration.addEventListener("transitionend", handleTransitionEnd);
+    window.requestAnimationFrame(() => {
+      illustration.classList.add("is-fading");
+    });
   };
 
   const applyPhrase = (phrase, previousPhrase) => {

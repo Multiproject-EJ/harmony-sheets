@@ -255,7 +255,8 @@ body[class*="theme-midnight"]{
 .hero-heading__dynamic::after{content:"";display:block;width:100%;height:2px;margin-top:6px;background:linear-gradient(90deg,currentColor 0%,rgba(37,99,235,0) 100%);opacity:.25}
 .hero-heading__dynamic.is-wave{opacity:1;transform:translateY(0)}
 .hero-visual{margin:clamp(24px,6vw,48px) auto 0;display:flex;justify-content:center}
-.hero-visual img{width:min(320px,80vw);height:auto;filter:drop-shadow(0 22px 36px rgba(15,23,42,.12));transition:opacity .3s ease}
+.hero-visual img{width:min(130px,35vw);height:auto;filter:drop-shadow(0 22px 36px rgba(15,23,42,.12));transition:opacity .6s ease;opacity:1}
+.hero-visual img.is-fading{opacity:0}
 @keyframes heroGlide{0%{opacity:0;transform:translateY(24px)}32%{opacity:1;transform:translateY(0)}100%{opacity:1;transform:translateY(0)}}
 @keyframes heroLetterCalm{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes heroLetterFlip{0%{transform:rotateX(0)}48%{transform:rotateX(88deg)}52%{transform:rotateX(92deg)}100%{transform:rotateX(180deg)}}
