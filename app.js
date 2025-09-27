@@ -94,8 +94,10 @@ App.LIFE_ICONS = {
       stroke-linecap="round"
       stroke-linejoin="round"
     >
-      <path d="M18.5 5.5c-6.7 -.8 -13 4.3 -13 10.4 0 1.9 1.4 3.5 3.2 3.7 2.1 .3 4.4 -1.4 6 -3.1l3.8 -4.1 -5.4 1.5 -3.6 3.2" />
-      <path d="M11 9.5c0 3 1.2 6 3.5 8.5" />
+      <path d="M4.5 11.5L12 5l7.5 6.5" />
+      <path d="M6.5 11.5v8h11v-8" />
+      <path d="M11 19.5v-3.5h2v3.5" />
+      <path d="M4 19.5h16" />
     </g>
   `),
   spirituality: App.createIcon(`
