@@ -488,18 +488,33 @@ App.NAV_PRODUCT_META = {
     type: "Focus System",
     format: "Web App + Sheets",
     badge: "New",
-    image: "assets/Pomodoro1.webp"
+    image: "assets/Pomodoro1.webp",
+    previewImages: [
+      "assets/Pomodoro1.webp",
+      "assets/imgStudyPlanner1.webp",
+      "assets/imgSubscriptions1.webp"
+    ]
   },
   "budget-dashboard": {
     type: "Finance Dashboard",
     format: "Sheets",
-    badge: "Best-Seller"
+    badge: "Best-Seller",
+    previewImages: [
+      "assets/imgBudgetPro1.webp",
+      "assets/imgSavings1.webp",
+      "assets/imgSubscriptions1.webp"
+    ]
   },
   "pomodoro-pro": {
     type: "Focus System",
     format: "Web App + Sheets",
     badge: "Popular",
-    image: "assets/Pomodoro1.webp"
+    image: "assets/Pomodoro1.webp",
+    previewImages: [
+      "assets/Pomodoro1.webp",
+      "assets/imgStudyPlanner1.webp",
+      "assets/imgSubscriptions1.webp"
+    ]
   }
 };
 
@@ -1208,6 +1223,11 @@ App.initNavDropdown = function() {
     const accentColor = navAccentMap[areaId] || getCategoryInfo(areaId)?.color || navAccentMap.all;
     const rawImage = typeof item.image === "string" ? item.image.trim() : "";
     const image = rawImage || "";
+    const previewImages = Array.isArray(item.previewImages)
+      ? item.previewImages
+          .map(src => (typeof src === "string" ? src.trim() : ""))
+          .filter(Boolean)
+      : [];
     let priceValue = Number.isFinite(item.priceValue) ? item.priceValue : null;
     if (priceValue === null) {
       if (typeof item.price === "number" && Number.isFinite(item.price)) {
@@ -1233,6 +1253,7 @@ App.initNavDropdown = function() {
       priceValue,
       url: href,
       image,
+      previewImages,
       accentColor
     };
   };
@@ -1269,7 +1290,8 @@ App.initNavDropdown = function() {
           price: meta.price,
           url: meta.url || `product.html?id=${encodeURIComponent(product.id)}`,
           tagline: product.tagline,
-          image: meta.image
+          image: meta.image,
+          previewImages: meta.previewImages
         };
         const areaOverrides = meta.areas || {};
         areas.forEach(areaId => {
@@ -1358,7 +1380,7 @@ App.initNavDropdown = function() {
 
   const resetPreview = () => {
     if (!previewEl || !previewContentEl) return;
-    previewContentEl.innerHTML = '<p class="nav-mega__preview-placeholder">Hover a product to see quick facts.</p>';
+    previewContentEl.innerHTML = '<p class="nav-mega__preview-placeholder">Hover a product to preview images.</p>';
     previewEl.classList.add("is-empty");
     activePreviewId = null;
     setActiveRow(null);
@@ -1380,31 +1402,49 @@ App.initNavDropdown = function() {
       return;
     }
 
-    const safeName = App.escapeHtml(item.name || "Harmony Sheets tool");
-    const safeTagline = App.escapeHtml(item.tagline || "");
+    const rawName = item.name || "Harmony Sheets tool";
     const safeUrl = App.escapeHtml(item.url || "#");
     const fallbackAccent = navAccentMap[navState.cat] || getCategoryInfo(navState.cat)?.color || navAccentMap.all;
     const previewAccent = item.accentColor || fallbackAccent;
     previewEl.style.setProperty("--nav-mega-preview-acc", previewAccent);
     const imageSrc = item.image ? App.escapeHtml(item.image) : "";
-    const initials = App.escapeHtml(createInitials(item.name));
-    const mediaMarkup = imageSrc
-      ? `<div class="nav-mega__preview-media"><img class="nav-mega__preview-img" src="${imageSrc}" alt="${safeName} thumbnail"></div>`
-      : `<div class="nav-mega__preview-media nav-mega__preview-media--placeholder" aria-hidden="true"><span>${initials}</span></div>`;
-    const facts = [
-      item.type ? { label: "Type", value: item.type } : null,
-      item.format ? { label: "Format", value: item.format } : null,
-      item.priceDisplay ? { label: "Price", value: item.priceDisplay } : null
-    ].filter(Boolean);
-    const factsMarkup = facts
-      .map(fact => `<li><span>${App.escapeHtml(fact.label)}</span><strong>${App.escapeHtml(fact.value)}</strong></li>`)
-      .join("");
+    const initials = App.escapeHtml(createInitials(rawName));
+    const imageList = Array.isArray(item.previewImages) ? item.previewImages : [];
+    const cleanedImages = imageList
+      .map(src => (typeof src === "string" ? src.trim() : ""))
+      .filter(Boolean);
+
+    if (!cleanedImages.length && imageSrc) {
+      cleanedImages.push(item.image);
+    }
+
+    if (cleanedImages.length > 3) {
+      cleanedImages.length = 3;
+    }
+
+    if (cleanedImages.length === 1) {
+      cleanedImages.push(cleanedImages[0], cleanedImages[0]);
+    } else if (cleanedImages.length === 2) {
+      cleanedImages.push(cleanedImages[0]);
+    }
+
+    const galleryMarkup = cleanedImages.length
+      ? `<div class="nav-mega__preview-gallery">${cleanedImages
+          .map((src, index) => {
+            const escapedSrc = App.escapeHtml(src);
+            const alt = App.escapeHtml(`${rawName} preview ${index + 1}`);
+            return `<a class="nav-mega__preview-item" href="${safeUrl}"><img class="nav-mega__preview-img" src="${escapedSrc}" alt="${alt}"></a>`;
+          })
+          .join("")}</div>`
+      : `<div class="nav-mega__preview-gallery">${Array.from({ length: 3 })
+          .map(
+            () =>
+              `<a class="nav-mega__preview-item nav-mega__preview-item--placeholder" href="${safeUrl}"><span>${initials}</span></a>`
+          )
+          .join("")}</div>`;
 
     previewContentEl.innerHTML = `
-      ${mediaMarkup}
-      <h3 class="nav-mega__preview-title">${safeName}</h3>
-      ${safeTagline ? `<p class="nav-mega__preview-tagline">${safeTagline}</p>` : ""}
-      ${factsMarkup ? `<ul class="nav-mega__preview-facts">${factsMarkup}</ul>` : ""}
+      ${galleryMarkup}
       <a class="nav-mega__preview-link" href="${safeUrl}">View product</a>
     `;
     previewEl.classList.remove("is-empty");
@@ -1709,7 +1749,7 @@ App.initNavDropdown = function() {
           </div>
           <div class="nav-mega__preview is-empty" data-nav-preview>
             <div class="nav-mega__preview-content" data-nav-preview-content>
-              <p class="nav-mega__preview-placeholder">Hover a product to see quick facts.</p>
+              <p class="nav-mega__preview-placeholder">Hover a product to preview images.</p>
             </div>
           </div>
         </div>
