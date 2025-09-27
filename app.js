@@ -1194,6 +1194,116 @@ App.initNavDropdown = function() {
   let infoTextEl = null;
   let searchInput = null;
   let sortSelect = null;
+  let previewEl = null;
+  let previewContentEl = null;
+  let activePreviewId = null;
+  let activePreviewRow = null;
+  let hasRowListeners = false;
+  const previewItemMap = new Map();
+
+  const setActiveRow = row => {
+    if (activePreviewRow === row) return;
+    if (activePreviewRow) {
+      activePreviewRow.classList.remove("is-active");
+    }
+    activePreviewRow = row || null;
+    if (activePreviewRow) {
+      activePreviewRow.classList.add("is-active");
+    }
+  };
+
+  const resetPreview = () => {
+    if (!previewEl || !previewContentEl) return;
+    previewContentEl.innerHTML = '<p class="nav-mega__preview-placeholder">Hover a product to see quick facts.</p>';
+    previewEl.classList.add("is-empty");
+    activePreviewId = null;
+    setActiveRow(null);
+  };
+
+  const findRowById = id => {
+    if (!rowsEl || !id) return null;
+    const selectorId = String(id);
+    if (window.CSS && typeof window.CSS.escape === "function") {
+      return rowsEl.querySelector(`[data-nav-item="${window.CSS.escape(selectorId)}"]`);
+    }
+    return Array.from(rowsEl.querySelectorAll("[data-nav-item]")).find(row => row.getAttribute("data-nav-item") === selectorId) || null;
+  };
+
+  const renderPreview = (item, row, navIdOverride = null) => {
+    if (!previewEl || !previewContentEl) return;
+    if (!item) {
+      resetPreview();
+      return;
+    }
+
+    const safeName = App.escapeHtml(item.name || "Harmony Sheets tool");
+    const safeTagline = App.escapeHtml(item.tagline || "");
+    const safeUrl = App.escapeHtml(item.url || "#");
+    const badgeText = String(item.badge || "").trim();
+    const badgeMarkup = badgeText
+      ? `<span class="nav-mega__preview-badge">${App.escapeHtml(badgeText)}</span>`
+      : "";
+    const facts = [
+      item.type ? { label: "Type", value: item.type } : null,
+      item.format ? { label: "Format", value: item.format } : null,
+      item.priceDisplay ? { label: "Price", value: item.priceDisplay } : null
+    ].filter(Boolean);
+    const factsMarkup = facts
+      .map(fact => `<li><span>${App.escapeHtml(fact.label)}</span><strong>${App.escapeHtml(fact.value)}</strong></li>`)
+      .join("");
+
+    previewContentEl.innerHTML = `
+      ${badgeMarkup}
+      <h3 class="nav-mega__preview-title">${safeName}</h3>
+      ${safeTagline ? `<p class="nav-mega__preview-tagline">${safeTagline}</p>` : ""}
+      ${factsMarkup ? `<ul class="nav-mega__preview-facts">${factsMarkup}</ul>` : ""}
+      <a class="nav-mega__preview-link" href="${safeUrl}">View product</a>
+    `;
+    previewEl.classList.remove("is-empty");
+    const resolvedId = navIdOverride || item.id || null;
+    activePreviewId = resolvedId;
+    if (row) {
+      setActiveRow(row);
+    } else if (resolvedId) {
+      const foundRow = findRowById(resolvedId);
+      setActiveRow(foundRow || null);
+    } else {
+      setActiveRow(null);
+    }
+  };
+
+  const previewDefault = () => {
+    const first = previewItemMap.keys().next();
+    if (!first || first.done) {
+      resetPreview();
+      return;
+    }
+    const id = first.value;
+    const item = previewItemMap.get(id);
+    const row = findRowById(id);
+    renderPreview(item, row || undefined, id);
+  };
+
+  const handleRowEvent = event => {
+    const row = event.target.closest("[data-nav-item]");
+    if (!row) return;
+    const id = row.getAttribute("data-nav-item");
+    if (!id) return;
+    const item = previewItemMap.get(id);
+    if (!item) return;
+    renderPreview(item, row, id);
+  };
+
+  const attachRowListeners = () => {
+    if (!rowsEl || hasRowListeners) return;
+    rowsEl.addEventListener("mouseover", handleRowEvent);
+    rowsEl.addEventListener("focusin", handleRowEvent);
+    rowsEl.addEventListener("mouseleave", previewDefault);
+    rowsEl.addEventListener("focusout", event => {
+      if (!rowsEl.contains(event.relatedTarget)) previewDefault();
+    });
+    hasRowListeners = true;
+  };
 
   const collectSearchableItems = () => {
     const aggregated = [];
@@ -1313,15 +1423,19 @@ App.initNavDropdown = function() {
 
     const totalItems = sorted.length;
 
+    previewItemMap.clear();
+
     if (rowsEl) {
       if (!totalItems) {
         const message = query
           ? `No matches for “${navState.q}”.`
           : info.empty || "Fresh tools coming soon.";
         rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="4">${App.escapeHtml(message)}</td></tr>`;
+        resetPreview();
       } else {
+        let firstNavId = null;
         const rows = sorted
-          .map(item => {
+          .map((item, index) => {
             const badgeType = getBadgeType(item.badge);
             const badgeMarkup = item.badge
               ? `<span class="nav-mega__tbadge"${badgeType ? ` data-type="${badgeType}"` : ""}>${App.escapeHtml(item.badge)}</span>`
@@ -1330,10 +1444,20 @@ App.initNavDropdown = function() {
             const url = App.escapeHtml(item.url || `products.html?area=${encodeURIComponent(navState.cat)}`);
             const name = App.escapeHtml(item.name || "Harmony Sheets tool");
             const type = App.escapeHtml(item.type || "Template");
-            return `<tr><td><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+            const navId = String(item.id || `${navState.cat}-item-${index}`);
+            if (index === 0) firstNavId = navId;
+            previewItemMap.set(navId, item);
+            return `<tr class="nav-mega__row" data-nav-item="${App.escapeHtml(navId)}"><td><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
         rowsEl.innerHTML = rows;
+        if (firstNavId && previewItemMap.has(firstNavId)) {
+          const firstItem = previewItemMap.get(firstNavId);
+          const firstRow = findRowById(firstNavId);
+          renderPreview(firstItem, firstRow || undefined, firstNavId);
+        } else {
+          previewDefault();
+        }
       }
     }
 
@@ -1347,6 +1471,10 @@ App.initNavDropdown = function() {
           infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool" : "tools"} available`;
         }
       }
+    }
+
+    if (!totalItems) {
+      previewItemMap.clear();
     }
 
     scheduleReposition();
@@ -1417,6 +1545,11 @@ App.initNavDropdown = function() {
               <a class="nav-mega__pager-link" href="products.html">Browse all Harmony tools</a>
             </div>
           </div>
+          <div class="nav-mega__preview is-empty" data-nav-preview>
+            <div class="nav-mega__preview-content" data-nav-preview-content>
+              <p class="nav-mega__preview-placeholder">Hover a product to see quick facts.</p>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -1427,6 +1560,8 @@ App.initNavDropdown = function() {
     infoTextEl = content.querySelector("[data-nav-info]");
     searchInput = content.querySelector("[data-nav-search]");
     sortSelect = content.querySelector("[data-nav-sort]");
+    previewEl = content.querySelector("[data-nav-preview]");
+    previewContentEl = content.querySelector("[data-nav-preview-content]");
 
     catButtonMap.clear();
     content.querySelectorAll("[data-nav-cat]").forEach(btn => {
@@ -1439,6 +1574,10 @@ App.initNavDropdown = function() {
         updateActive();
       });
     });
+
+    if (previewEl && previewContentEl) {
+      resetPreview();
+    }
 
     if (searchInput) {
       searchInput.addEventListener("input", event => {
@@ -1453,6 +1592,8 @@ App.initNavDropdown = function() {
         updateActive();
       });
     }
+
+    attachRowListeners();
 
     scheduleReposition();
   };
