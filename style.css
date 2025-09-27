@@ -196,11 +196,24 @@ body[class*="theme-midnight"]{
 .hero-heading__dynamic{position:relative;display:inline-block;font-weight:700;color:#2563eb;transition:opacity .3s ease,transform .3s ease;will-change:opacity,transform}
 .hero-heading__dynamic::before{content:attr(data-text);position:absolute;inset:0;color:transparent;background:linear-gradient(95deg,rgba(191,219,254,0) 0%,rgba(191,219,254,.75) 18%,rgba(129,199,255,.95) 35%,#60a5fa 56%,#3b82f6 74%,#2563eb 100%);background-size:160% 100%;background-position:0 0;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 .45em rgba(96,165,250,.55));opacity:0;transform:translateX(-28%);pointer-events:none}
 .hero-heading__dynamic.is-wave::before{animation:heroWaveGlow var(--hero-wave-duration,1.35s) ease forwards}
+.hero-heading__dynamic.is-glide{animation:heroGlide var(--hero-glide-duration,1.45s) ease forwards;opacity:1;transform:translateY(0)}
+.hero-heading__dynamic.is-flip{display:inline-flex;flex-wrap:wrap;gap:.05em;align-items:flex-end}
+.hero-heading__dynamic.is-flip .hero-flip-line{display:inline-flex;flex-wrap:wrap;gap:.05em;align-items:flex-end}
+.hero-heading__dynamic.is-flip .hero-letter{display:inline-block;position:relative;font-variant-ligatures:none;min-width:.6ch}
+.hero-heading__dynamic.is-flip .hero-letter--same{opacity:0;animation:heroLetterCalm .5s ease forwards}
+.hero-heading__dynamic.is-flip .hero-letter--flip{perspective:800px}
+.hero-heading__dynamic.is-flip .hero-letter__faces{display:grid;place-items:center;position:relative;transform-style:preserve-3d;transform-origin:center center;animation:heroLetterFlip .7s ease forwards;min-width:.6ch;will-change:transform}
+.hero-heading__dynamic.is-flip .hero-letter__face{display:inline-block;line-height:1;padding:0 .01em;backface-visibility:hidden;transform-style:preserve-3d}
+.hero-heading__dynamic.is-flip .hero-letter__face--blank{color:transparent}
+.hero-heading__dynamic.is-flip .hero-letter__face--back{transform:rotateX(180deg)}
 .hero-heading__tagline{display:inline-flex;align-items:center;gap:.4ch;padding:clamp(.18rem,.7vw,.32rem) clamp(.48rem,1.4vw,.82rem);border-radius:999px;border:1px solid rgba(15,23,42,.14);background:rgba(15,23,42,.06);color:#0f172a;font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:clamp(.52rem,.46rem + .8vw,.9rem);box-shadow:0 14px 34px rgba(15,23,42,.08);white-space:nowrap;line-height:1.3}
 .hero-heading__tagline::before{content:"-";font-size:1.05em;line-height:1;opacity:.7;transform:translateY(-.04em)}
 .hero h1 .hero-heading__dynamic,.hero h1 .hero-heading__tagline{line-height:1.1}
 .hero-heading__dynamic::after{content:"";display:block;width:100%;height:2px;margin-top:6px;background:linear-gradient(90deg,currentColor 0%,rgba(37,99,235,0) 100%);opacity:.25}
 .hero-heading__dynamic.is-wave{opacity:1;transform:translateY(0)}
+@keyframes heroGlide{0%{opacity:0;transform:translateY(24px)}32%{opacity:1;transform:translateY(0)}100%{opacity:1;transform:translateY(0)}}
+@keyframes heroLetterCalm{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes heroLetterFlip{0%{transform:rotateX(0)}48%{transform:rotateX(88deg)}52%{transform:rotateX(92deg)}100%{transform:rotateX(180deg)}}
 @keyframes heroWaveGlow{0%{opacity:0;transform:translateX(-32%)}18%{opacity:1;transform:translateX(-12%)}45%{transform:translateX(8%);filter:drop-shadow(0 0 .6em rgba(96,165,250,.75))}70%{transform:translateX(24%);filter:drop-shadow(0 0 .45em rgba(96,165,250,.55))}100%{opacity:0;transform:translateX(46%);filter:drop-shadow(0 0 .25em rgba(96,165,250,.35))}}
 .hero p{color:var(--muted)}
 .hero-cta{margin-top:18px;display:flex;gap:10px;justify-content:center}
