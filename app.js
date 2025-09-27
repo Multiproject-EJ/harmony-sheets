@@ -1612,13 +1612,17 @@ App.initNavDropdown = function() {
           })
           .join("");
         rowsEl.innerHTML = rows;
-        if (firstNavId && previewItemMap.has(firstNavId)) {
-          const firstItem = previewItemMap.get(firstNavId);
-          const firstRow = findRowById(firstNavId);
-          renderPreview(firstItem, firstRow || undefined, firstNavId);
-        } else {
-          previewDefault();
+
+        if (activePreviewId && previewItemMap.has(activePreviewId)) {
+          const activeItem = previewItemMap.get(activePreviewId);
+          const activeRow = findRowById(activePreviewId);
+          if (activeItem && activeRow) {
+            renderPreview(activeItem, activeRow, activePreviewId);
+            return;
+          }
         }
+
+        resetPreview();
       }
     }
 
