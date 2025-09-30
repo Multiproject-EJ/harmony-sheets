@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>About — Harmony Sheets</title>
+  <title>Editor — Harmony Sheets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
@@ -72,44 +72,59 @@
   </div>
 </aside>
 
-<main class="about-page">
-  <section class="about-hero">
-    <div class="about-hero__content">
-      <span class="about-hero__eyebrow">Inside Harmony Sheets</span>
-      <h1 class="about-hero__title">Calm clarity for every workflow.</h1>
-      <p class="about-hero__lede">We craft serene, high-utility sheets that let your mind focus on meaningful decisions instead of busywork.</p>
-      <div class="about-hero__actions">
-        <a class="btn-pill" href="products.html">Browse templates</a>
-        <a class="btn-ghost" href="#studio">Our rhythm</a>
+<main class="editor-page">
+  <section class="editor-hero">
+    <div class="editor-hero__content">
+      <span class="editor-hero__eyebrow">Harmony Editor</span>
+      <h1 class="editor-hero__title">Compose workflows without friction.</h1>
+      <p class="editor-hero__lede">Layer tasks, rituals, and data modules in a focused canvas designed to evolve as fast as your ideas.</p>
+      <div class="editor-hero__actions">
+        <a class="btn-pill" href="products.html">Start with a template</a>
+        <a class="btn-ghost" href="about.html">Back to about</a>
       </div>
     </div>
-    <div class="about-hero__glow" aria-hidden="true"></div>
-  </section>
-
-  <section class="about-panels" id="studio">
-    <article class="about-panel">
-      <h2 class="about-panel__title">Minimal, on purpose</h2>
-      <p class="about-panel__body">Every layout is distilled to what you need today, with just enough texture to feel inspiring tomorrow.</p>
-    </article>
-    <article class="about-panel">
-      <h2 class="about-panel__title">Built for momentum</h2>
-      <p class="about-panel__body">Harmony Sheets balances guided structure with full spreadsheet control so you can glide from idea to execution.</p>
-    </article>
-    <article class="about-panel">
-      <h2 class="about-panel__title">Yours to keep</h2>
-      <p class="about-panel__body">One download, lifetime access. Customize freely, reuse endlessly, and never worry about another subscription.</p>
-    </article>
-  </section>
-
-  <section class="about-editor">
-    <div class="about-editor__inner">
-      <h2 class="about-editor__title">Design in your own rhythm</h2>
-      <p class="about-editor__body">Tweak colors, duplicate sections, and script new workflows inside our lightweight editor.</p>
-      <a class="btn-outline" href="editor.html">Open the editor</a>
+    <div class="editor-hero__stage" aria-hidden="true">
+      <div class="editor-frame">
+        <header class="editor-frame__bar">
+          <span class="editor-frame__dot"></span>
+          <span class="editor-frame__dot"></span>
+          <span class="editor-frame__dot"></span>
+          <div class="editor-frame__tabs">
+            <span class="editor-frame__tab is-active">Daily view</span>
+            <span class="editor-frame__tab">Planning</span>
+          </div>
+        </header>
+        <div class="editor-frame__body">
+          <aside class="editor-frame__sidebar">
+            <p class="editor-frame__label">Blocks</p>
+            <ul class="editor-frame__list">
+              <li>Focus timer</li>
+              <li>Weekly tracker</li>
+              <li>Priority queue</li>
+              <li>Notes canvas</li>
+            </ul>
+            <p class="editor-frame__hint">Drag to the canvas<br>or duplicate instantly.</p>
+          </aside>
+          <div class="editor-frame__canvas">
+            <div class="editor-card">
+              <p class="editor-card__eyebrow">Morning Ritual</p>
+              <h3 class="editor-card__title">Align + Energize</h3>
+              <ul class="editor-card__list">
+                <li>Top 3 intentions</li>
+                <li>Habit streak</li>
+                <li>Energy check-in</li>
+              </ul>
+            </div>
+            <div class="editor-card editor-card--accent">
+              <p class="editor-card__eyebrow">Momentum</p>
+              <h3 class="editor-card__title">Workflow queue</h3>
+              <p class="editor-card__body">Stage, assign, and track handoffs without leaving the sheet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
-
-  <p class="about-support">Questions? <a href="faq.html">Visit Support</a> or write via the form.</p>
 </main>
 
 <footer class="site-footer">
