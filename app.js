@@ -271,9 +271,65 @@ App.HERO_ROTATIONS = [
     illustrationAlt: "Close-up of Harmony Sheets dashboards highlighting clarity tools"
   },
   {
-    text: "Bring Balance to Your Day",
+    text: "Your Personal Life Toolkit",
+    color: "#2563EB",
+    animation: "glide",
+    illustration: "assets/imgIndex1.webp",
+    illustrationAlt: "Preview of Harmony Sheets templates displayed on multiple devices"
+  },
+  {
+    text: "Easy Life Hack Tools",
+    color: "#0EA5E9",
+    animation: "wave",
+    illustration: "assets/imgIndex2.webp",
+    illustrationAlt: "Close-up of Harmony Sheets dashboards highlighting clarity tools"
+  },
+  {
+    text: "Clever Tools. Simple Life.",
     color: "#F97316",
-    animation: "flip",
+    animation: "glide",
+    illustration: "assets/hero-line-balance.svg",
+    illustrationAlt: "Line art scales balancing sun and moon shapes"
+  },
+  {
+    text: "Life Made Simple with Tools",
+    color: "#2563EB",
+    animation: "wave",
+    illustration: "assets/imgIndex1.webp",
+    illustrationAlt: "Preview of Harmony Sheets templates displayed on multiple devices"
+  },
+  {
+    text: "Freedom Tools for Everyday Wins",
+    color: "#0EA5E9",
+    animation: "glide",
+    illustration: "assets/imgIndex2.webp",
+    illustrationAlt: "Close-up of Harmony Sheets dashboards highlighting clarity tools"
+  },
+  {
+    text: "Tools for Ambitious Doers",
+    color: "#F97316",
+    animation: "wave",
+    illustration: "assets/hero-line-balance.svg",
+    illustrationAlt: "Line art scales balancing sun and moon shapes"
+  },
+  {
+    text: "Power Up Your Life Plan",
+    color: "#6366F1",
+    animation: "glide",
+    illustration: "assets/imgIndex1.webp",
+    illustrationAlt: "Preview of Harmony Sheets templates displayed on multiple devices"
+  },
+  {
+    text: "Design Your Future with Smart Tools",
+    color: "#14B8A6",
+    animation: "wave",
+    illustration: "assets/imgIndex2.webp",
+    illustrationAlt: "Close-up of Harmony Sheets dashboards highlighting clarity tools"
+  },
+  {
+    text: "Creative Solutions. Simple Tools.",
+    color: "#0EA5E9",
+    animation: "glide",
     illustration: "assets/hero-line-balance.svg",
     illustrationAlt: "Line art scales balancing sun and moon shapes"
   }
@@ -295,7 +351,7 @@ App.initHeroRotation = function() {
     : [];
   if (!phrases.length) return;
 
-  const animationClasses = ["is-wave", "is-glide", "is-flip"];
+  const animationClasses = ["is-wave", "is-glide"];
 
   const getAnimationClass = phrase => {
     switch (phrase && phrase.animation) {
