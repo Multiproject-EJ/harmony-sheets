@@ -1,0 +1,560 @@
+const STORAGE_KEY = 'harmony-sheets-admin-v1';
+
+const state = {
+  products: [],
+  baseline: [],
+  selectedId: null,
+  sortKey: 'name',
+  sortDir: 'asc'
+};
+
+const els = {
+  status: document.querySelector('[data-status]'),
+  statusIndicator: document.querySelector('[data-status-indicator]'),
+  tableBody: document.querySelector('[data-products-table]'),
+  tableMeta: document.querySelector('[data-table-meta]'),
+  tableContainer: document.querySelector('[data-table-container]'),
+  search: document.querySelector('[data-search]'),
+  areaFilter: document.querySelector('[data-area-filter]'),
+  addButton: document.querySelector('[data-add-product]'),
+  exportButton: document.querySelector('[data-export]'),
+  resetButton: document.querySelector('[data-reset]'),
+  form: document.querySelector('[data-product-form]'),
+  formTitle: document.querySelector('[data-form-title]'),
+  formMode: document.querySelector('[data-form-mode]'),
+  formPlaceholder: document.querySelector('[data-editor-empty]'),
+  deleteButton: document.querySelector('[data-delete]'),
+  cancelButton: document.querySelector('[data-cancel]')
+};
+
+const formFields = {
+  id: els.form?.elements.namedItem('id'),
+  name: els.form?.elements.namedItem('name'),
+  tagline: els.form?.elements.namedItem('tagline'),
+  price: els.form?.elements.namedItem('price'),
+  lifeAreas: els.form?.elements.namedItem('lifeAreas'),
+  badges: els.form?.elements.namedItem('badges'),
+  description: els.form?.elements.namedItem('description'),
+  features: els.form?.elements.namedItem('features'),
+  included: els.form?.elements.namedItem('included'),
+  gallery: els.form?.elements.namedItem('gallery'),
+  faqs: els.form?.elements.namedItem('faqs'),
+  benefits: els.form?.elements.namedItem('benefits'),
+  pricingTitle: els.form?.elements.namedItem('pricingTitle'),
+  pricingSub: els.form?.elements.namedItem('pricingSub'),
+  stripe: els.form?.elements.namedItem('stripe'),
+  etsy: els.form?.elements.namedItem('etsy'),
+  colorImage: els.form?.elements.namedItem('colorImage'),
+  colorCaption: els.form?.elements.namedItem('colorCaption'),
+  demoVideo: els.form?.elements.namedItem('demoVideo'),
+  demoPoster: els.form?.elements.namedItem('demoPoster'),
+  socialStars: els.form?.elements.namedItem('socialStars'),
+  socialQuote: els.form?.elements.namedItem('socialQuote')
+};
+
+const lifeAreaNames = {
+  love: 'Love',
+  career: 'Career',
+  health: 'Health',
+  finances: 'Finances',
+  fun: 'Fun',
+  family: 'Family',
+  environment: 'Environment',
+  spirituality: 'Spirituality'
+};
+
+function safeParse(json) {
+  try {
+    return JSON.parse(json);
+  } catch (error) {
+    console.warn('Failed to parse saved data', error);
+    return null;
+  }
+}
+
+function setStatus(message, tone = 'neutral') {
+  if (!els.status || !els.statusIndicator) return;
+  els.status.textContent = message;
+  const indicator = els.statusIndicator;
+  indicator.dataset.tone = tone;
+}
+
+function formatLifeAreas(areas) {
+  if (!Array.isArray(areas) || !areas.length) return '—';
+  return areas
+    .map((area) => lifeAreaNames[area] || area)
+    .join(', ');
+}
+
+function formatBadges(badges) {
+  if (!Array.isArray(badges) || !badges.length) return '—';
+  return badges.join(', ');
+}
+
+function priceValue(price) {
+  if (typeof price === 'string') {
+    const match = price.match(/\d+(?:\.\d+)?/);
+    if (match) return Number(match[0]);
+  }
+  return Number(price) || 0;
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function loadFromStorage() {
+  if (!window.localStorage) return null;
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  return stored ? safeParse(stored) : null;
+}
+
+function persist(options = {}) {
+  if (!window.localStorage) return;
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.products));
+  const { message = 'All changes saved locally.', tone = 'success' } = options || {};
+  if (message) {
+    setStatus(message, tone);
+  }
+}
+
+function clearStorage() {
+  if (!window.localStorage) return;
+  window.localStorage.removeItem(STORAGE_KEY);
+}
+
+async function loadProducts() {
+  try {
+    const response = await fetch('products.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Failed to load products');
+    const data = await response.json();
+    state.baseline = clone(data);
+    const stored = loadFromStorage();
+    state.products = stored && Array.isArray(stored) ? stored : clone(data);
+    setStatus(stored ? 'Loaded from local workspace.' : 'Loaded from source JSON.');
+    renderTable();
+  } catch (error) {
+    console.error(error);
+    setStatus('Unable to load products. Refresh to try again.', 'danger');
+    renderErrorRow('Could not load products.');
+  }
+}
+
+function renderErrorRow(message) {
+  if (!els.tableBody) return;
+  els.tableBody.innerHTML = `<tr><td colspan="4" class="admin-table__empty">${message}</td></tr>`;
+  if (els.tableMeta) {
+    els.tableMeta.textContent = '0 products';
+  }
+}
+
+function getFilteredProducts() {
+  const search = (els.search?.value || '').trim().toLowerCase();
+  const area = els.areaFilter?.value || 'all';
+  const products = state.products.slice();
+
+  const filtered = products.filter((product) => {
+    const matchesArea =
+      area === 'all' || (Array.isArray(product.lifeAreas) && product.lifeAreas.includes(area));
+
+    if (!search) return matchesArea;
+
+    const haystack = [product.name, product.tagline, ...(product.badges || [])]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    return matchesArea && haystack.includes(search);
+  });
+
+  const sortKey = state.sortKey;
+  const direction = state.sortDir === 'asc' ? 1 : -1;
+
+  filtered.sort((a, b) => {
+    switch (sortKey) {
+      case 'lifeAreas': {
+        const aCount = a.lifeAreas ? a.lifeAreas.length : 0;
+        const bCount = b.lifeAreas ? b.lifeAreas.length : 0;
+        if (aCount === bCount) {
+          return a.name.localeCompare(b.name) * direction;
+        }
+        return (aCount - bCount) * direction;
+      }
+      case 'badges': {
+        const aCount = a.badges ? a.badges.length : 0;
+        const bCount = b.badges ? b.badges.length : 0;
+        if (aCount === bCount) {
+          return a.name.localeCompare(b.name) * direction;
+        }
+        return (aCount - bCount) * direction;
+      }
+      case 'price':
+        return (priceValue(a.price) - priceValue(b.price)) * direction;
+      case 'name':
+      default:
+        return a.name.localeCompare(b.name) * direction;
+    }
+  });
+
+  return filtered;
+}
+
+function renderTable() {
+  if (!els.tableBody) return;
+  const products = getFilteredProducts();
+
+  if (!products.length) {
+    els.tableBody.innerHTML = '<tr><td colspan="4" class="admin-table__empty">No products found. Adjust your filters or add a new product.</td></tr>';
+  } else {
+    const rows = products
+      .map(
+        (product) => `
+          <tr data-row id="product-row-${product.id}" data-id="${product.id}" ${
+            state.selectedId === product.id ? 'aria-selected="true" class="is-active"' : ''
+          }>
+            <th scope="row">
+              <button type="button" class="admin-table__select" data-id="${product.id}">
+                <span class="admin-table__name">${product.name || 'Untitled product'}</span>
+                <span class="admin-table__tagline">${product.tagline || ''}</span>
+              </button>
+            </th>
+            <td>${formatLifeAreas(product.lifeAreas)}</td>
+            <td>${formatBadges(product.badges)}</td>
+            <td class="admin-table__price">${product.price || '—'}</td>
+          </tr>
+        `
+      )
+      .join('');
+    els.tableBody.innerHTML = rows;
+  }
+
+  if (els.tableMeta) {
+    const total = state.products.length;
+    const filtered = products.length;
+    els.tableMeta.textContent = filtered === total ? `${total} products` : `${filtered} of ${total} products`;
+  }
+}
+
+function selectProduct(id) {
+  if (!els.form || !els.formTitle) return;
+  const product = state.products.find((item) => item.id === id);
+  state.selectedId = product ? product.id : null;
+  renderTable();
+  if (!product) {
+    els.form.hidden = true;
+    if (els.formPlaceholder) {
+      els.formPlaceholder.hidden = false;
+    }
+    return;
+  }
+
+  els.form.reset();
+  if (els.formPlaceholder) {
+    els.formPlaceholder.hidden = true;
+  }
+  els.form.hidden = false;
+  els.formMode.textContent = 'Editing';
+  els.formTitle.textContent = product.name || 'Untitled product';
+
+  formFields.id.value = product.id || '';
+  formFields.name.value = product.name || '';
+  formFields.tagline.value = product.tagline || '';
+  formFields.price.value = product.price || '';
+  formFields.lifeAreas.value = Array.isArray(product.lifeAreas) ? product.lifeAreas.join(', ') : '';
+  formFields.badges.value = Array.isArray(product.badges) ? product.badges.join(', ') : '';
+  formFields.description.value = product.description || '';
+  formFields.features.value = Array.isArray(product.features) ? product.features.join('\n') : '';
+  formFields.included.value = Array.isArray(product.included) ? product.included.join('\n') : '';
+  formFields.gallery.value = Array.isArray(product.gallery)
+    ? product.gallery.map((item) => `${item.src || ''} | ${item.alt || ''}`.trim()).join('\n')
+    : '';
+  formFields.faqs.value = Array.isArray(product.faqs)
+    ? product.faqs.map((item) => `${item.q || ''} | ${item.a || ''}`.trim()).join('\n')
+    : '';
+  formFields.benefits.value = Array.isArray(product.benefits)
+    ? product.benefits.map((item) => `${item.title || ''} | ${item.desc || ''}`.trim()).join('\n')
+    : '';
+  formFields.pricingTitle.value = product.pricingTitle || '';
+  formFields.pricingSub.value = product.pricingSub || '';
+  formFields.stripe.value = product.stripe || '';
+  formFields.etsy.value = product.etsy || '';
+  formFields.colorImage.value = product.colorImage || '';
+  formFields.colorCaption.value = product.colorCaption || '';
+  formFields.demoVideo.value = product.demoVideo || '';
+  formFields.demoPoster.value = product.demoPoster || '';
+  formFields.socialStars.value = product.socialProof?.stars || '';
+  formFields.socialQuote.value = product.socialProof?.quote || '';
+}
+
+function parseList(value) {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseLines(value) {
+  return value
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function parseGallery(value) {
+  return value
+    .split('\n')
+    .map((line) => {
+      const [src, alt] = line.split('|').map((part) => part.trim());
+      if (!src) return null;
+      return { src, alt: alt || '' };
+    })
+    .filter(Boolean);
+}
+
+function parseFaqs(value) {
+  return value
+    .split('\n')
+    .map((line) => {
+      const [q, a] = line.split('|').map((part) => part.trim());
+      if (!q) return null;
+      return { q, a: a || '' };
+    })
+    .filter(Boolean);
+}
+
+function parseBenefits(value) {
+  return value
+    .split('\n')
+    .map((line) => {
+      const [title, desc] = line.split('|').map((part) => part.trim());
+      if (!title) return null;
+      return { title, desc: desc || '' };
+    })
+    .filter(Boolean);
+}
+
+function buildProductPayload() {
+  const payload = {
+    id: formFields.id.value.trim(),
+    name: formFields.name.value.trim(),
+    tagline: formFields.tagline.value.trim(),
+    price: formFields.price.value.trim(),
+    lifeAreas: parseList(formFields.lifeAreas.value.trim()),
+    badges: parseList(formFields.badges.value.trim()),
+    description: formFields.description.value.trim(),
+    features: parseLines(formFields.features.value.trim()),
+    included: parseLines(formFields.included.value.trim()),
+    gallery: parseGallery(formFields.gallery.value.trim()),
+    faqs: parseFaqs(formFields.faqs.value.trim()),
+    benefits: parseBenefits(formFields.benefits.value.trim()),
+    pricingTitle: formFields.pricingTitle.value.trim(),
+    pricingSub: formFields.pricingSub.value.trim(),
+    stripe: formFields.stripe.value.trim(),
+    etsy: formFields.etsy.value.trim(),
+    colorImage: formFields.colorImage.value.trim(),
+    colorCaption: formFields.colorCaption.value.trim(),
+    demoVideo: formFields.demoVideo.value.trim(),
+    demoPoster: formFields.demoPoster.value.trim(),
+    socialProof: {
+      stars: formFields.socialStars.value.trim(),
+      quote: formFields.socialQuote.value.trim()
+    }
+  };
+
+  if (!payload.gallery.length) delete payload.gallery;
+  if (!payload.faqs.length) delete payload.faqs;
+  if (!payload.benefits.length) delete payload.benefits;
+  if (!payload.features.length) delete payload.features;
+  if (!payload.included.length) delete payload.included;
+  if (!payload.lifeAreas.length) delete payload.lifeAreas;
+  if (!payload.badges.length) delete payload.badges;
+  if (!payload.socialProof.stars && !payload.socialProof.quote) delete payload.socialProof;
+
+  return payload;
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+  const productPayload = buildProductPayload();
+
+  if (!productPayload.id) {
+    setStatus('Product ID is required to save.', 'danger');
+    formFields.id.focus();
+    return;
+  }
+
+  const isNew = state.selectedId === null || !state.products.some((item) => item.id === state.selectedId);
+  const idExists = state.products.some((item) => item.id === productPayload.id);
+
+  if (isNew && idExists) {
+    setStatus('A product with that ID already exists. Choose a unique ID.', 'danger');
+    formFields.id.focus();
+    return;
+  }
+
+  if (isNew) {
+    const newProduct = {
+      ...productPayload,
+      gallery: productPayload.gallery || [],
+      faqs: productPayload.faqs || [],
+      benefits: productPayload.benefits || [],
+      features: productPayload.features || [],
+      included: productPayload.included || []
+    };
+    state.products.push(newProduct);
+    state.selectedId = newProduct.id;
+    persist({ message: 'New product saved locally. Download the JSON when you are ready to publish.', tone: 'success' });
+  } else {
+    const index = state.products.findIndex((item) => item.id === state.selectedId);
+    if (index === -1) return;
+    const existing = state.products[index];
+    const merged = {
+      ...existing,
+      ...productPayload
+    };
+    if (!productPayload.socialProof && existing.socialProof) {
+      delete merged.socialProof;
+    }
+    state.products.splice(index, 1, merged);
+    state.selectedId = merged.id;
+    persist({ message: 'Product updated and saved locally.', tone: 'success' });
+  }
+
+  renderTable();
+  selectProduct(state.selectedId);
+}
+
+function handleTableClick(event) {
+  const button = event.target.closest('.admin-table__select');
+  if (!button) return;
+  const { id } = button.dataset;
+  if (id) selectProduct(id);
+}
+
+function handleSort(event) {
+  const button = event.target.closest('[data-sort]');
+  if (!button) return;
+  const key = button.dataset.sort;
+  if (!key) return;
+  if (state.sortKey === key) {
+    state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    state.sortKey = key;
+    state.sortDir = 'asc';
+  }
+  renderTable();
+}
+
+function handleSearch() {
+  renderTable();
+}
+
+function handleAddProduct() {
+  state.selectedId = null;
+  if (els.formPlaceholder) {
+    els.formPlaceholder.hidden = true;
+  }
+  els.form.hidden = false;
+  els.form.reset();
+  els.formMode.textContent = 'New product';
+  els.formTitle.textContent = 'New product';
+  setStatus('Drafting a new product. Complete the form and save to add it to the list.', 'info');
+}
+
+function handleDelete() {
+  if (!state.selectedId) {
+    els.form.reset();
+    els.form.hidden = true;
+    if (els.formPlaceholder) {
+      els.formPlaceholder.hidden = false;
+    }
+    return;
+  }
+  const index = state.products.findIndex((item) => item.id === state.selectedId);
+  if (index === -1) return;
+  const removed = state.products.splice(index, 1);
+  setStatus(`Deleted “${removed[0]?.name || removed[0]?.id}”.`, 'danger');
+  state.selectedId = null;
+  persist({ message: null });
+  renderTable();
+  els.form.reset();
+  els.form.hidden = true;
+  if (els.formPlaceholder) {
+    els.formPlaceholder.hidden = false;
+  }
+}
+
+function handleCancel() {
+  els.form.reset();
+  els.form.hidden = true;
+  state.selectedId = null;
+  renderTable();
+  if (els.formPlaceholder) {
+    els.formPlaceholder.hidden = false;
+  }
+}
+
+function handleExport() {
+  const blob = new Blob([JSON.stringify(state.products, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `harmony-products-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+  setStatus('Download started. Upload the JSON wherever you host your catalog.', 'info');
+}
+
+function handleReset() {
+  state.products = clone(state.baseline);
+  state.selectedId = null;
+  clearStorage();
+  setStatus('Reverted to source JSON.', 'info');
+  renderTable();
+  if (els.formPlaceholder) {
+    els.formPlaceholder.hidden = false;
+  }
+  if (els.form) {
+    els.form.reset();
+    els.form.hidden = true;
+  }
+}
+
+function handleKeyboardNavigation(event) {
+  if (!['ArrowUp', 'ArrowDown'].includes(event.key)) return;
+  const rows = Array.from(els.tableBody?.querySelectorAll('[data-row]') || []);
+  if (!rows.length) return;
+  event.preventDefault();
+  const currentIndex = rows.findIndex((row) => row.dataset.id === state.selectedId);
+  let nextIndex = currentIndex;
+  if (event.key === 'ArrowDown') {
+    nextIndex = currentIndex === -1 ? 0 : Math.min(rows.length - 1, currentIndex + 1);
+  } else if (event.key === 'ArrowUp') {
+    nextIndex = currentIndex <= 0 ? 0 : currentIndex - 1;
+  }
+  const nextRow = rows[nextIndex];
+  if (nextRow) {
+    const nextId = nextRow.dataset.id;
+    selectProduct(nextId);
+    nextRow.querySelector('.admin-table__select')?.focus();
+  }
+}
+
+function registerEvents() {
+  els.tableBody?.addEventListener('click', handleTableClick);
+  document.querySelector('.admin-table thead')?.addEventListener('click', handleSort);
+  els.search?.addEventListener('input', handleSearch);
+  els.areaFilter?.addEventListener('change', handleSearch);
+  els.addButton?.addEventListener('click', handleAddProduct);
+  els.exportButton?.addEventListener('click', handleExport);
+  els.resetButton?.addEventListener('click', handleReset);
+  els.deleteButton?.addEventListener('click', handleDelete);
+  els.cancelButton?.addEventListener('click', handleCancel);
+  els.form?.addEventListener('submit', handleFormSubmit);
+  els.tableContainer?.addEventListener('keydown', handleKeyboardNavigation);
+}
+
+registerEvents();
+loadProducts();
