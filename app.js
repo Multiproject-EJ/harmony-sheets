@@ -1007,6 +1007,7 @@ App.initCart = function() {
  *****************************************************/
 App.init = function() {
   App.initNav();
+  App.initAuthLink();
   App.initCart();
 
   // Update footer year
@@ -1067,6 +1068,28 @@ App.init = function() {
 App.closeBrowseMenu = null;
 App.closeBundlesMenu = null;
 App.closeNavMenu = () => {};
+App.initAuthLink = function() {
+  const nav = App.qs(".main-nav");
+  if (!nav || nav.querySelector("[data-auth-link]")) return;
+
+  const authLink = document.createElement("a");
+  authLink.className = "nav-link nav-link--account";
+  authLink.href = "login.html";
+  authLink.textContent = "Account Login";
+  authLink.setAttribute("data-auth-link", "true");
+
+  if (App.qs("body.page-auth")) {
+    authLink.href = "products.html";
+    authLink.textContent = "Browse templates";
+  }
+
+  const cartToggle = nav.querySelector("[data-cart-toggle]");
+  if (cartToggle) {
+    nav.insertBefore(authLink, cartToggle);
+  } else {
+    nav.appendChild(authLink);
+  }
+};
 App.initNav = function() {
   const toggle = App.qs(".nav-toggle");
   const nav = App.qs(".main-nav");
