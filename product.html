@@ -75,30 +75,25 @@
 
   <main>
     <!-- HERO -->
-    <section class="container hero">
-      <div class="media hero-media">
-        <div class="gallery" id="p-slider">
-          <button class="prev" aria-label="Previous">‹</button>
-          <button class="next" aria-label="Next">›</button>
+    <section class="hero hero--parallax">
+      <div class="hero-parallax__media" id="p-parallax" data-parallax-speed="0.25" aria-hidden="true"></div>
+      <div class="hero__inner container">
+        <div class="info">
+          <h1 id="p-name"></h1>
+          <p id="p-tagline" class="tagline"></p>
+
+          <div id="p-badges" class="badges"></div>
+          <p id="p-price" class="price"></p>
+
+          <div class="actions">
+            <button id="p-add-cart" class="btn ghost" type="button" data-add-to-cart>Add to cart</button>
+            <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy now</a>
+          </div>
+          <p class="muted action-hint">Prefer Etsy? <a id="p-etsy" class="text-link" target="_blank" rel="noopener">Buy on Etsy</a></p>
+
+          <ul id="p-features" class="features"></ul>
+          <div id="p-description" class="desc"></div>
         </div>
-        <div id="p-video" class="video"></div>
-      </div>
-
-      <div class="info">
-        <h1 id="p-name"></h1>
-        <p id="p-tagline" class="tagline"></p>
-
-        <div id="p-badges" class="badges"></div>
-        <p id="p-price" class="price"></p>
-
-        <div class="actions">
-          <button id="p-add-cart" class="btn ghost" type="button" data-add-to-cart>Add to cart</button>
-          <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy now</a>
-        </div>
-        <p class="muted action-hint">Prefer Etsy? <a id="p-etsy" class="text-link" target="_blank" rel="noopener">Buy on Etsy</a></p>
-
-        <ul id="p-features" class="features"></ul>
-        <div id="p-description" class="desc"></div>
       </div>
     </section>
 
