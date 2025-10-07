@@ -39,7 +39,7 @@ This walkthrough covers everything needed to power Harmony Sheets authentication
 
 The authentication flow stores a `plan: "freemium"` value in each new user's metadata. To make that value queryable from Postgres (and enforce row-level security), create a `profiles` table linked to `auth.users`.
 
-Open **SQL Editor** in the Supabase dashboard and run the script below:
+Open **SQL Editor** in the Supabase dashboard and run [`sql/auth-and-profiles.sql`](../sql/auth-and-profiles.sql) (contents also inlined below for convenience):
 
 ```sql
 -- Create a table that mirrors the Supabase auth.users table
