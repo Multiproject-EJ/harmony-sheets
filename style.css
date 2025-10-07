@@ -40,6 +40,8 @@ img{max-width:100%;display:block}
 .nav-link.active{background:rgba(255,255,255,.95);color:var(--nav-link-ink-strong);border-color:#1d4ed8;box-shadow:0 12px 26px rgba(37,99,235,.18)}
 .nav-link--icon{position:relative;padding-right:20px}
 .nav-link--icon.has-items{color:#1d4ed8}
+.nav-link--account{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.18);color:#1d4ed8}
+.nav-link--account:hover,.nav-link--account:focus-visible{background:rgba(59,130,246,.18);color:#1e3a8a;border-color:rgba(59,130,246,.28)}
 button.nav-link{border:0;background:transparent;cursor:pointer;font:inherit}
 .nav-link__icon{width:22px;height:22px;display:block}
 .nav-link--icon .cart-count{position:absolute;top:6px;right:6px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#ef4444;color:#fff;font-size:.7rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 6px 12px rgba(239,68,68,.35);opacity:0;transform:translateY(-6px) scale(.7);transition:opacity .2s ease,transform .2s ease}
@@ -808,4 +810,53 @@ details.faq summary{cursor:pointer;font-weight:600}
   .admin-table__tagline{max-width:none}
   .admin-form__header{flex-direction:column;align-items:flex-start}
   .admin-form__header-actions{width:100%;justify-content:flex-start}
+}
+
+/* -----------------------------------------------------
+   Authentication
+----------------------------------------------------- */
+.page-auth main{min-height:100vh;padding:96px 20px 120px;background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 100%)}
+.auth{display:flex;justify-content:center}
+.auth-card{width:min(760px,100%);background:#fff;border-radius:32px;padding:48px;border:1px solid rgba(148,163,184,.24);box-shadow:0 38px 80px rgba(15,23,42,.12);display:grid;gap:32px}
+.auth-card__intro{display:grid;gap:10px;text-align:left}
+.auth-card__intro h1{margin:0;font-size:2.4rem;line-height:1.08;color:#0f172a}
+.auth-card__intro p{margin:0;color:#475569;font-size:1.05rem}
+.auth-tabs{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.auth-tab{border-radius:14px;border:1px solid rgba(148,163,184,.26);padding:9px 18px;font-size:.95rem;font-weight:600;background:#f8fafc;color:#1f2937;cursor:pointer;transition:background .2s ease,box-shadow .2s ease,color .2s ease;border-bottom:2px solid transparent}
+.auth-tab.is-active,.auth-tab[aria-selected="true"]{background:#eef2ff;color:#1d4ed8;border-color:#c7d2fe;box-shadow:0 12px 24px rgba(99,102,241,.18)}
+.auth-tab.auth-tab--ghost{margin-left:auto;background:transparent;border-style:dashed;color:#64748b}
+.auth-tab.auth-tab--ghost.is-active{background:#fff;border-style:solid;color:#1d4ed8}
+.auth-forms{display:grid;gap:24px}
+.auth-form{display:grid;gap:18px}
+.form-field{display:grid;gap:8px}
+.form-field label{font-weight:600;color:#0f172a}
+.form-field input{border:1px solid rgba(148,163,184,.4);border-radius:12px;padding:12px 14px;font:inherit;background:#f8fafc;transition:border-color .2s ease,box-shadow .2s ease}
+.form-field input:focus-visible{outline:2px solid #6366f1;outline-offset:2px;background:#fff}
+.form-hint{margin:0;font-size:.82rem;color:#64748b}
+.auth-submit{justify-self:flex-start;padding:12px 24px;font-weight:700}
+.auth-status{margin:0;font-weight:600;font-size:.96rem;min-height:1.4em}
+.auth-status[data-state="success"]{color:#16a34a}
+.auth-status[data-state="error"]{color:#dc2626}
+.auth-status[data-state="info"]{color:#2563eb}
+.auth-benefits{padding:26px;border-radius:22px;background:linear-gradient(160deg,rgba(99,102,241,.08),rgba(14,165,233,.08));border:1px solid rgba(99,102,241,.18);display:grid;gap:14px}
+.auth-benefits h2{margin:0;font-size:1.35rem;color:#1e1b4b}
+.auth-benefits ul{margin:0;padding-left:20px;color:#374151;display:grid;gap:8px;font-size:.98rem}
+.auth-benefits__note{margin:0;font-size:.85rem;color:#475569}
+.auth-tab[disabled]{opacity:.4;cursor:not-allowed}
+.auth-form[aria-hidden="true"]{display:none}
+
+@media (max-width:720px){
+  .page-auth main{padding:72px 16px 100px}
+  .auth-card{padding:32px;border-radius:28px}
+  .auth-card__intro h1{font-size:2rem}
+  .auth-tabs{gap:8px}
+  .auth-tab{flex:1 1 calc(50% - 8px);text-align:center}
+  .auth-tab.auth-tab--ghost{flex:1 1 100%;margin-left:0}
+}
+
+@media (max-width:480px){
+  .auth-card{padding:28px;border-radius:24px}
+  .auth-card__intro h1{font-size:1.8rem}
+  .auth-card__intro p{font-size:.98rem}
+  .auth-submit{width:100%}
 }
