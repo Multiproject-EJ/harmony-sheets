@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Editor — Harmony Sheets</title>
+  <title>Product Control Center — Harmony Sheets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
@@ -72,57 +72,227 @@
   </div>
 </aside>
 
-<main class="editor-page">
-  <section class="editor-hero">
-    <div class="editor-hero__content">
-      <span class="editor-hero__eyebrow">Harmony Editor</span>
-      <h1 class="editor-hero__title">Google Sheet 2 GEN Maker</h1>
-      <p class="editor-hero__lede">Layer tasks, rituals, and data modules in a focused canvas designed to evolve as fast as your ideas.</p>
-      <div class="editor-hero__actions">
-        <a class="btn-pill" href="products.html">Start with a template</a>
-        <a class="btn-ghost" href="about.html">Back to about</a>
+<main class="admin">
+  <section class="admin__intro">
+    <div class="admin__headline">
+      <span class="admin__eyebrow">Product Operations</span>
+      <h1 class="admin__title">Harmony Sheets Control Center</h1>
+      <p class="admin__lede">Review every template in one smart table, edit product details on the fly, manage life-area labels, and export an updated catalog for the storefront.</p>
+    </div>
+    <div class="admin__status-card" role="status">
+      <div class="admin__status-indicator" data-status-indicator></div>
+      <div>
+        <p class="admin__status-label">Workspace status</p>
+        <p class="admin__status-value" data-status>Loading products…</p>
       </div>
     </div>
-    <div class="editor-hero__stage" aria-hidden="true">
-      <div class="editor-frame">
-        <header class="editor-frame__bar">
-          <span class="editor-frame__dot"></span>
-          <span class="editor-frame__dot"></span>
-          <span class="editor-frame__dot"></span>
-          <div class="editor-frame__tabs">
-            <span class="editor-frame__tab is-active">Daily view</span>
-            <span class="editor-frame__tab">Planning</span>
-          </div>
-        </header>
-        <div class="editor-frame__body">
-          <aside class="editor-frame__sidebar">
-            <p class="editor-frame__label">Blocks</p>
-            <ul class="editor-frame__list">
-              <li>Focus timer</li>
-              <li>Weekly tracker</li>
-              <li>Priority queue</li>
-              <li>Notes canvas</li>
-            </ul>
-            <p class="editor-frame__hint">Drag to the canvas<br>or duplicate instantly.</p>
-          </aside>
-          <div class="editor-frame__canvas">
-            <div class="editor-card">
-              <p class="editor-card__eyebrow">Morning Ritual</p>
-              <h3 class="editor-card__title">Align + Energize</h3>
-              <ul class="editor-card__list">
-                <li>Top 3 intentions</li>
-                <li>Habit streak</li>
-                <li>Energy check-in</li>
-              </ul>
-            </div>
-            <div class="editor-card editor-card--accent">
-              <p class="editor-card__eyebrow">Momentum</p>
-              <h3 class="editor-card__title">Workflow queue</h3>
-              <p class="editor-card__body">Stage, assign, and track handoffs without leaving the sheet.</p>
-            </div>
-          </div>
+  </section>
+
+  <section class="admin__grid">
+    <div class="admin__panel" aria-labelledby="product-table-title">
+      <div class="admin__panel-head">
+        <div>
+          <h2 id="product-table-title">Product catalog</h2>
+          <p class="admin__panel-sub">Click any row to edit. Changes are saved to your browser so you can export when ready.</p>
+        </div>
+        <div class="admin__panel-actions">
+          <button class="btn-pill admin__btn" type="button" data-add-product>
+            <span aria-hidden="true">＋</span>
+            <span>Add product</span>
+          </button>
+          <button class="btn-ghost admin__btn" type="button" data-export>
+            <span aria-hidden="true">⇩</span>
+            <span>Download JSON</span>
+          </button>
+          <button class="btn-ghost admin__btn" type="button" data-reset>
+            <span aria-hidden="true">⟲</span>
+            <span>Reset data</span>
+          </button>
         </div>
       </div>
+      <div class="admin__toolbar" role="search">
+        <label class="admin__search">
+          <span class="sr-only">Search products</span>
+          <input type="search" placeholder="Search by name, tagline, or label" data-search>
+        </label>
+        <label class="admin__filter">
+          <span class="sr-only">Filter by life area</span>
+          <select data-area-filter>
+            <option value="all">All life areas</option>
+            <option value="love">Love &amp; Romantic Relationships</option>
+            <option value="career">Career, Growth &amp; Learning</option>
+            <option value="health">Health &amp; Fitness</option>
+            <option value="finances">Finances</option>
+            <option value="fun">Fun &amp; Recreation</option>
+            <option value="family">Family</option>
+            <option value="environment">Environment</option>
+            <option value="spirituality">Spirituality</option>
+          </select>
+        </label>
+      </div>
+      <div class="admin__table-wrap" data-table-container>
+        <table class="admin-table" aria-describedby="product-table-title">
+          <thead>
+            <tr>
+              <th scope="col">
+                <button type="button" class="admin-table__sort" data-sort="name">Product</button>
+              </th>
+              <th scope="col">
+                <button type="button" class="admin-table__sort" data-sort="lifeAreas">Life areas</button>
+              </th>
+              <th scope="col">
+                <button type="button" class="admin-table__sort" data-sort="badges">Labels</button>
+              </th>
+              <th scope="col" class="admin-table__price">
+                <button type="button" class="admin-table__sort" data-sort="price">Price</button>
+              </th>
+            </tr>
+          </thead>
+          <tbody data-products-table>
+            <tr>
+              <td colspan="4" class="admin-table__empty">Loading products…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="admin__panel-foot">
+        <p data-table-meta>0 products</p>
+      </footer>
+    </div>
+
+    <div class="admin__editor" aria-live="polite">
+      <div class="admin__editor-placeholder" data-editor-empty>
+        <h2>Choose a product to edit</h2>
+        <p>Select a row from the catalog or create something new. All edits are stored locally until you download the JSON file.</p>
+      </div>
+      <form class="admin-form" data-product-form hidden>
+        <header class="admin-form__header">
+          <div>
+            <span class="admin-form__mode" data-form-mode>Editing</span>
+            <h2 class="admin-form__title" data-form-title>Untitled product</h2>
+          </div>
+          <div class="admin-form__header-actions">
+            <button class="btn-ghost" type="button" data-cancel>Edit another product</button>
+            <button class="btn-ghost danger" type="button" data-delete>Delete</button>
+            <button class="btn primary" type="submit" data-save>Save changes</button>
+          </div>
+        </header>
+
+        <section class="admin-form__grid">
+          <div class="admin-form__field">
+            <label for="product-id">Product ID</label>
+            <input id="product-id" name="id" type="text" required>
+            <p class="admin-form__help">Used in URLs. Lowercase and hyphenated.</p>
+          </div>
+          <div class="admin-form__field">
+            <label for="product-name">Name</label>
+            <input id="product-name" name="name" type="text" required>
+          </div>
+          <div class="admin-form__field">
+            <label for="product-tagline">Tagline</label>
+            <input id="product-tagline" name="tagline" type="text">
+          </div>
+          <div class="admin-form__field">
+            <label for="product-price">Price</label>
+            <input id="product-price" name="price" type="text" placeholder="$29">
+          </div>
+          <div class="admin-form__field">
+            <label for="product-life-areas">Life areas</label>
+            <input id="product-life-areas" name="lifeAreas" type="text" placeholder="career, health, fun">
+            <p class="admin-form__help">Comma separated list. Controls product filtering.</p>
+          </div>
+          <div class="admin-form__field">
+            <label for="product-badges">Labels</label>
+            <input id="product-badges" name="badges" type="text" placeholder="One-time purchase, Instant download">
+            <p class="admin-form__help">Comma separated labels displayed as badges.</p>
+          </div>
+        </section>
+
+        <label class="admin-form__field" for="product-description">
+          <span>Description</span>
+          <textarea id="product-description" name="description" rows="5" placeholder="HTML allowed"></textarea>
+        </label>
+
+        <section class="admin-form__grid">
+          <label class="admin-form__field" for="product-features">
+            <span>Key features</span>
+            <textarea id="product-features" name="features" rows="4" placeholder="One feature per line"></textarea>
+          </label>
+          <label class="admin-form__field" for="product-included">
+            <span>What's included</span>
+            <textarea id="product-included" name="included" rows="4" placeholder="One item per line"></textarea>
+          </label>
+        </section>
+
+        <section class="admin-form__grid">
+          <label class="admin-form__field" for="product-gallery">
+            <span>Gallery</span>
+            <textarea id="product-gallery" name="gallery" rows="4" placeholder="assets/image.webp | Alt text"></textarea>
+            <p class="admin-form__help">One per line. Use <code>path | alt text</code>.</p>
+          </label>
+          <label class="admin-form__field" for="product-faqs">
+            <span>FAQs</span>
+            <textarea id="product-faqs" name="faqs" rows="4" placeholder="Question? | Answer"></textarea>
+            <p class="admin-form__help">One per line using <code>question | answer</code>.</p>
+          </label>
+        </section>
+
+        <section class="admin-form__grid">
+          <label class="admin-form__field" for="product-benefits">
+            <span>Benefits</span>
+            <textarea id="product-benefits" name="benefits" rows="4" placeholder="Title | Description"></textarea>
+            <p class="admin-form__help">One per line using <code>title | description</code>.</p>
+          </label>
+          <div class="admin-form__stack">
+            <label class="admin-form__field" for="product-pricing-title">
+              <span>Pricing title</span>
+              <input id="product-pricing-title" name="pricingTitle" type="text">
+            </label>
+            <label class="admin-form__field" for="product-pricing-sub">
+              <span>Pricing subtitle</span>
+              <input id="product-pricing-sub" name="pricingSub" type="text">
+            </label>
+            <label class="admin-form__field" for="product-price-stripe">
+              <span>Stripe checkout URL</span>
+              <input id="product-price-stripe" name="stripe" type="url" placeholder="https://">
+            </label>
+            <label class="admin-form__field" for="product-price-etsy">
+              <span>Etsy URL</span>
+              <input id="product-price-etsy" name="etsy" type="url" placeholder="https://">
+            </label>
+          </div>
+        </section>
+
+        <section class="admin-form__grid">
+          <label class="admin-form__field" for="product-color-image">
+            <span>Accent image</span>
+            <input id="product-color-image" name="colorImage" type="text" placeholder="assets/example.webp">
+          </label>
+          <label class="admin-form__field" for="product-color-caption">
+            <span>Accent caption</span>
+            <input id="product-color-caption" name="colorCaption" type="text">
+          </label>
+          <label class="admin-form__field" for="product-demo-video">
+            <span>Demo video</span>
+            <input id="product-demo-video" name="demoVideo" type="text" placeholder="assets/demo.mp4">
+          </label>
+          <label class="admin-form__field" for="product-demo-poster">
+            <span>Demo poster</span>
+            <input id="product-demo-poster" name="demoPoster" type="text" placeholder="assets/demo-poster.jpg">
+          </label>
+        </section>
+
+        <section class="admin-form__grid">
+          <label class="admin-form__field" for="product-social-stars">
+            <span>Social proof stars</span>
+            <input id="product-social-stars" name="socialStars" type="text" placeholder="★★★★★">
+          </label>
+          <label class="admin-form__field" for="product-social-quote">
+            <span>Social proof quote</span>
+            <textarea id="product-social-quote" name="socialQuote" rows="3" placeholder="Short testimonial"></textarea>
+          </label>
+        </section>
+      </form>
     </div>
   </section>
 </main>
@@ -158,49 +328,24 @@
         <h3 class="site-footer__heading">Social &amp; Newsletter</h3>
         <form id="footer-newsletter" class="footer-form">
           <label class="sr-only" for="footer-email">Email address</label>
-          <div class="footer-form__controls">
-            <input id="footer-email" type="email" name="email" placeholder="Enter email" required>
-            <button type="submit" class="footer-form__submit">Join</button>
+          <div class="footer-form__row">
+            <input id="footer-email" type="email" placeholder="hello@you.com" required>
+            <button class="btn primary" type="submit">Join</button>
           </div>
+          <p class="footer-form__hint">Stay up to date with new Harmony Sheets releases.</p>
         </form>
-        <p class="site-footer__note">Subscribe to receive exclusive releases, deals, and event updates.</p>
-        <div class="site-footer__social">
-          <a class="site-footer__social-link" href="https://www.instagram.com/harmonysheets" target="_blank" rel="noopener" aria-label="Instagram">
-            <span aria-hidden="true">IG</span>
-          </a>
-          <a class="site-footer__social-link" href="https://www.youtube.com/@HarmonySheets" target="_blank" rel="noopener" aria-label="YouTube">
-            <span aria-hidden="true">YT</span>
-          </a>
-          <a class="site-footer__social-link" href="https://www.pinterest.com/harmonysheets" target="_blank" rel="noopener" aria-label="Pinterest">
-            <span aria-hidden="true">PI</span>
-          </a>
-          <a class="site-footer__social-link" href="mailto:support@harmony-sheets.com" aria-label="Email Harmony Sheets">
-            <span aria-hidden="true">@</span>
-          </a>
-        </div>
-        <p id="footer-newsletter-status" class="site-footer__status" role="status" aria-live="polite"></p>
-      </div>
-    </div>
-    <div class="site-footer__bottom">
-      <div class="site-footer__brand">
-        <a class="brand brand--footer" href="/">Harmony Sheets</a>
-        <p class="site-footer__copy">© <span id="year"></span> Harmony Sheets. All rights reserved.</p>
-        <p class="site-footer__tagline">One-time purchase. No subscriptions.</p>
-      </div>
-      <div class="site-footer__extras">
-        <p class="site-footer__locale">Serving customers worldwide • USD</p>
-        <div class="site-footer__payments">
-          <span class="site-footer__payment">Visa</span>
-          <span class="site-footer__payment">Mastercard</span>
-          <span class="site-footer__payment">Amex</span>
-          <span class="site-footer__payment">PayPal</span>
-          <span class="site-footer__payment">Shop Pay</span>
+        <div class="footer-social">
+          <a href="https://instagram.com" aria-label="Instagram">IG</a>
+          <a href="https://twitter.com" aria-label="Twitter">TW</a>
+          <a href="https://youtube.com" aria-label="YouTube">YT</a>
         </div>
       </div>
     </div>
+    <p class="site-footer__copy">© <span data-year></span> Harmony Sheets. Crafted for life balance.</p>
   </div>
 </footer>
-<script src="app.js"></script>
-<script>App.initStatic()</script>
+
+<script src="app.js" type="module"></script>
+<script src="editor.js" type="module"></script>
 </body>
 </html>
