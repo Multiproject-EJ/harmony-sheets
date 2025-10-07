@@ -696,6 +696,81 @@ App.slugify = function(value) {
     .replace(/^-+|-+$/g, "");
 };
 
+App.getProductHeroImage = function(product) {
+  if (!product) return "";
+  if (typeof product.heroImage === "string" && product.heroImage.trim()) {
+    return product.heroImage.trim();
+  }
+  if (Array.isArray(product.gallery)) {
+    const firstImage = product.gallery.find(item => item && item.src);
+    if (firstImage && typeof firstImage.src === "string" && firstImage.src.trim()) {
+      return firstImage.src.trim();
+    }
+  }
+  return "";
+};
+
+App.parallaxItems = [];
+App.parallaxListener = null;
+App.parallaxRaf = 0;
+
+App.updateParallax = function() {
+  if (!Array.isArray(App.parallaxItems) || !App.parallaxItems.length) {
+    if (App.parallaxListener) {
+      window.removeEventListener("scroll", App.parallaxListener);
+      window.removeEventListener("resize", App.parallaxListener);
+      App.parallaxListener = null;
+    }
+    return;
+  }
+
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+  App.parallaxItems = App.parallaxItems.filter(item => item && item.el && document.body.contains(item.el));
+
+  if (!App.parallaxItems.length) {
+    if (App.parallaxListener) {
+      window.removeEventListener("scroll", App.parallaxListener);
+      window.removeEventListener("resize", App.parallaxListener);
+      App.parallaxListener = null;
+    }
+    return;
+  }
+
+  const viewportCenter = viewportHeight / 2;
+  App.parallaxItems.forEach(item => {
+    const { el, speed } = item;
+    const rect = el.getBoundingClientRect();
+    const elementCenter = rect.top + rect.height / 2;
+    const distance = viewportCenter - elementCenter;
+    const offset = distance * speed;
+    el.style.transform = `translate3d(0, ${offset}px, 0)`;
+  });
+};
+
+App.scheduleParallax = function() {
+  if (App.parallaxRaf) cancelAnimationFrame(App.parallaxRaf);
+  App.parallaxRaf = requestAnimationFrame(App.updateParallax);
+};
+
+App.registerParallax = function(el, speed = 0.25) {
+  if (!el) return;
+  const parsedSpeed = Number.isFinite(parseFloat(speed)) ? parseFloat(speed) : 0.25;
+  const existing = App.parallaxItems.find(item => item.el === el);
+  if (existing) {
+    existing.speed = parsedSpeed;
+  } else {
+    App.parallaxItems.push({ el, speed: parsedSpeed });
+  }
+
+  if (!App.parallaxListener) {
+    App.parallaxListener = () => App.scheduleParallax();
+    window.addEventListener("scroll", App.parallaxListener, { passive: true });
+    window.addEventListener("resize", App.parallaxListener);
+  }
+
+  App.scheduleParallax();
+};
+
 App.productsPromise = null;
 App.loadProducts = function() {
   if (!App.productsPromise) {
@@ -1051,6 +1126,7 @@ App.init = function() {
 
   // Hero headline rotation (home page)
   App.initHeroRotation();
+  if (App.qs("[data-home-parallax]")) App.initHomeParallax();
 
   // Auto-detect page
   if (App.qs("body.page-products")) App.initProducts();
@@ -2700,6 +2776,100 @@ App.initHome = function() {
 };
 
 /*****************************************************
+ * Home parallax feature (index.html)
+ *****************************************************/
+App.initHomeParallax = async function() {
+  const sections = App.qsa("[data-home-parallax]");
+  if (!sections.length) return;
+
+  let productsCache = null;
+  const loadProducts = async () => {
+    if (productsCache) return productsCache;
+    try {
+      productsCache = await App.loadProducts();
+      return productsCache;
+    } catch (err) {
+      console.error("Failed to load products for home parallax", err);
+      return null;
+    }
+  };
+
+  const getProductById = async id => {
+    if (!id) return null;
+    const allProducts = await loadProducts();
+    if (!Array.isArray(allProducts)) return null;
+    return allProducts.find(item => item && item.id === id) || null;
+  };
+
+  for (const section of sections) {
+    try {
+      const productId = section.dataset.featuredProduct;
+      const manualImage = section.dataset.image;
+      const parallaxEl = section.querySelector(".hero-parallax__media");
+
+      let product = null;
+      if (productId) {
+        product = await getProductById(productId);
+      }
+
+      let backgroundImage = "";
+      if (manualImage && manualImage.trim()) {
+        backgroundImage = manualImage.trim();
+      } else if (product) {
+        backgroundImage = App.getProductHeroImage(product);
+      }
+
+      if (parallaxEl) {
+        if (backgroundImage) {
+          const encodedUrl = encodeURI(backgroundImage);
+          parallaxEl.style.backgroundImage = `url("${encodedUrl}")`;
+          parallaxEl.classList.add("is-active");
+          const speedAttr = parseFloat(parallaxEl.dataset.parallaxSpeed || section.dataset.parallaxSpeed || "0.25");
+          App.registerParallax(parallaxEl, Number.isFinite(speedAttr) ? speedAttr : 0.25);
+        } else {
+          parallaxEl.classList.add("is-hidden");
+        }
+      }
+
+      if (!product) continue;
+
+      const nameEl = section.querySelector("[data-home-name]");
+      if (nameEl && product.name) nameEl.textContent = product.name;
+
+      const taglineEl = section.querySelector("[data-home-tagline]");
+      if (taglineEl && product.tagline) taglineEl.textContent = product.tagline;
+
+      const badgesEl = section.querySelector("[data-home-badges]");
+      if (badgesEl && Array.isArray(product.badges) && product.badges.length) {
+        badgesEl.innerHTML = product.badges
+          .slice(0, 4)
+          .map(badge => `<span class="badge">${badge}</span>`)
+          .join("");
+      }
+
+      const featuresEl = section.querySelector("[data-home-features]");
+      if (featuresEl && Array.isArray(product.features) && product.features.length) {
+        featuresEl.innerHTML = product.features
+          .slice(0, 3)
+          .map(feature => `<li>${feature}</li>`)
+          .join("");
+      }
+
+      const priceEl = section.querySelector("[data-home-price]");
+      if (priceEl && product.price) priceEl.textContent = product.price;
+
+      const ctaEl = section.querySelector("[data-home-link]");
+      if (ctaEl) {
+        const productUrl = `product.html?id=${encodeURIComponent(product.id)}`;
+        ctaEl.href = productUrl;
+      }
+    } catch (err) {
+      console.error("Failed to initialize home parallax section", err);
+    }
+  }
+};
+
+/*****************************************************
  * Product cart helpers
  *****************************************************/
 App.prepareProductCart = function(product) {
@@ -2765,31 +2935,18 @@ App.initProduct = async function() {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
-    // Gallery images
-    const galleryEl = App.qs("#p-slider");
-    if (galleryEl) {
-      const slides = Array.isArray(product.gallery) ? product.gallery.filter(item => item && item.src) : [];
-      if (!slides.length) {
-        galleryEl.innerHTML = "";
-        galleryEl.style.display = "none";
+    // Hero background image
+    const parallaxEl = App.qs("#p-parallax");
+    if (parallaxEl) {
+      const heroImageUrl = App.getProductHeroImage(product);
+      if (heroImageUrl) {
+        const encodedUrl = encodeURI(heroImageUrl);
+        parallaxEl.style.backgroundImage = `url("${encodedUrl}")`;
+        parallaxEl.classList.add("is-active");
+        const speedAttr = parseFloat(parallaxEl.dataset.parallaxSpeed || "0.25");
+        App.registerParallax(parallaxEl, Number.isFinite(speedAttr) ? speedAttr : 0.25);
       } else {
-        galleryEl.style.removeProperty("display");
-        const fallbackBase = product.name ? `${product.name} preview` : "Product preview";
-        const totalSlides = slides.length;
-        const slidesMarkup = slides
-          .map((item, index) => {
-            const src = App.escapeHtml(item.src);
-            const rawAlt = typeof item.alt === "string" ? item.alt.trim() : "";
-            const altSource = rawAlt || (totalSlides > 1 ? `${fallbackBase} ${index + 1}` : fallbackBase);
-            const alt = App.escapeHtml(altSource);
-            const styleAttr = index === 0 ? ' style="display:block;"' : "";
-            return `<div class="slide"${styleAttr}><img src="${src}" alt="${alt}"></div>`;
-          })
-          .join("\n");
-        const navMarkup = totalSlides > 1
-          ? `\n<button class="prev" aria-label="Previous">‹</button>\n<button class="next" aria-label="Next">›</button>`
-          : "";
-        galleryEl.innerHTML = `${slidesMarkup}${navMarkup}`;
+        parallaxEl.classList.add("is-hidden");
       }
     }
 
@@ -2896,8 +3053,6 @@ App.initProduct = async function() {
     const pid = App.qs("#product_id");
     if (pid) pid.value = product.id;
 
-    // Init gallery slider
-    App.initGallery();
   } catch (err) {
     console.error("Error loading product:", err);
   }
@@ -2923,24 +3078,6 @@ App.initSuggestForm = function() {
       if (status) status.textContent = "Error, try again later.";
     }
   });
-};
-
-/*****************************************************
- * Gallery slider
- *****************************************************/
-App.initGallery = function() {
-  const gallery = App.qs("#p-slider");
-  if (!gallery) return;
-
-  const slides = App.qsa("#p-slider .slide");
-  let idx = 0;
-  const show = i => slides.forEach((s, n) => s.style.display = n === i ? "block" : "none");
-  if (slides.length) show(idx);
-
-  const prev = gallery.querySelector(".prev");
-  const next = gallery.querySelector(".next");
-  if (prev) prev.addEventListener("click", () => { idx = (idx - 1 + slides.length) % slides.length; show(idx); });
-  if (next) next.addEventListener("click", () => { idx = (idx + 1) % slides.length; show(idx); });
 };
 
 /*****************************************************
