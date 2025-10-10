@@ -1291,15 +1291,44 @@ App.initAuthLink = function() {
 App.initNav = function() {
   const toggle = App.qs(".nav-toggle");
   const nav = App.qs(".main-nav");
+  const siteHeader = App.qs(".site-header");
+
+  const showBrandText = () => {
+    if (siteHeader) siteHeader.classList.add("site-header--brand-text-visible");
+  };
+
+  const hideBrandText = force => {
+    if (!siteHeader || !nav) return;
+    if (force || !nav.classList.contains("is-open")) {
+      siteHeader.classList.remove("site-header--brand-text-visible");
+    }
+  };
+
   if (!toggle || !nav) {
     App.closeNavMenu = () => {};
+    hideBrandText(true);
     return;
   }
+
+  nav.addEventListener("mouseenter", () => showBrandText());
+  nav.addEventListener("mouseleave", () => hideBrandText(false));
+  nav.addEventListener("focusin", () => showBrandText());
+  nav.addEventListener("focusout", event => {
+    if (!nav.contains(event.relatedTarget)) hideBrandText(false);
+  });
+  nav.addEventListener(
+    "touchstart",
+    () => {
+      showBrandText();
+    },
+    { passive: true }
+  );
 
   const closeMenu = () => {
     nav.classList.remove("is-open");
     toggle.classList.remove("is-open");
     toggle.setAttribute("aria-expanded", "false");
+    hideBrandText(true);
     if (typeof App.closeBrowseMenu === "function") App.closeBrowseMenu();
     if (typeof App.closeBundlesMenu === "function") App.closeBundlesMenu();
     if (typeof App.closeAccountMenu === "function") App.closeAccountMenu();
@@ -1309,9 +1338,14 @@ App.initNav = function() {
     const isOpen = nav.classList.toggle("is-open");
     toggle.classList.toggle("is-open", isOpen);
     toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    if (!isOpen && typeof App.closeBrowseMenu === "function") App.closeBrowseMenu();
-    if (!isOpen && typeof App.closeBundlesMenu === "function") App.closeBundlesMenu();
-    if (!isOpen && typeof App.closeAccountMenu === "function") App.closeAccountMenu();
+    if (isOpen) {
+      showBrandText();
+    } else {
+      hideBrandText(true);
+      if (typeof App.closeBrowseMenu === "function") App.closeBrowseMenu();
+      if (typeof App.closeBundlesMenu === "function") App.closeBundlesMenu();
+      if (typeof App.closeAccountMenu === "function") App.closeAccountMenu();
+    }
   };
 
   const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
