@@ -564,6 +564,8 @@ body.page-bundle main{max-width:1120px;margin:0 auto;padding:48px 18px 80px;disp
 .hero--parallax-home .info .price{font-size:1.05rem;color:#0f172a}
 .hero--parallax-home .info .actions{display:flex;flex-wrap:wrap;gap:12px}
 .hero-parallax__media{position:absolute;inset:-8% -4% -12%;background-size:min(1400px,100vw) auto;background-position:center;background-repeat:no-repeat;transform:translate3d(0,0,0);will-change:transform;z-index:0;opacity:0;transition:opacity .6s ease;border-radius:clamp(26px,6vw,38px);overflow:hidden;filter:drop-shadow(0 48px 110px rgba(15,23,42,.16))}
+.page-product .hero--parallax{background:#fff}
+.page-product #p-parallax{background-size:115% auto}
 .hero-parallax__media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.32) 0%,rgba(255,255,255,.24) 38%,rgba(255,255,255,.18) 72%,rgba(248,250,252,.32) 100%)}
 .hero-parallax__media.is-active{opacity:1}
 .hero-parallax__media.is-hidden{display:none}
