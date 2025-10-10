@@ -25,6 +25,7 @@
     "colorCaption": "Pick a theme that feels calm and keeps you focused.",
     "demoVideo": "assets/pomodoro-demo.mp4",
     "demoPoster": "assets/pomodoro-demo-poster.jpg",
+    "virtualDemo": "demos/pomodoro.html",
     "included": [
       "Pomodoro Timer (Web + Google Sheets sidebar compatible)",
       "Free updates",
