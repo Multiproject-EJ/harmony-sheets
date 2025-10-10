@@ -3015,6 +3015,60 @@ App.initProduct = async function() {
       App.qs("#p-demo-section").style.display = "none";
     }
 
+    // Virtual demo
+    const virtualDemoFrame = App.qs('[data-virtual-demo]');
+    if (virtualDemoFrame) {
+      const screen = virtualDemoFrame.querySelector('.device-frame__screen');
+      if (product.virtualDemo && screen) {
+        virtualDemoFrame.setAttribute('data-loading', 'true');
+        screen.innerHTML = `
+          <div class="virtual-demo">
+            <div class="virtual-demo__viewport" data-demo-viewport>
+              <iframe src="${product.virtualDemo}" title="${product.name} interactive demo" loading="lazy"></iframe>
+            </div>
+          </div>`;
+
+        const iframe = screen.querySelector('iframe');
+        const viewport = screen.querySelector('[data-demo-viewport]');
+        const BASE_WIDTH = 1300;
+        const BASE_HEIGHT = 800;
+
+        const scaleFrame = () => {
+          if (!viewport || !iframe) return;
+          const width = viewport.clientWidth;
+          if (!width) return;
+          const scale = width / BASE_WIDTH;
+          iframe.style.width = `${BASE_WIDTH}px`;
+          iframe.style.height = `${BASE_HEIGHT}px`;
+          iframe.style.transform = `scale(${scale})`;
+        };
+
+        if (iframe) {
+          iframe.style.position = 'absolute';
+          iframe.style.left = '0';
+          iframe.style.top = '0';
+          iframe.style.transformOrigin = 'top left';
+          iframe.addEventListener('load', () => {
+            virtualDemoFrame.removeAttribute('data-loading');
+            scaleFrame();
+          });
+        }
+
+        if (typeof ResizeObserver !== 'undefined' && viewport) {
+          const resizeObserver = new ResizeObserver(() => scaleFrame());
+          resizeObserver.observe(viewport);
+        }
+
+        window.addEventListener('resize', scaleFrame);
+        requestAnimationFrame(() => scaleFrame());
+      } else if (screen) {
+        const guideSection = App.qs('#p-virtual-guide');
+        if (guideSection) guideSection.style.display = 'none';
+        virtualDemoFrame.style.display = 'none';
+        screen.innerHTML = '<p>This is where the live product preview will appear.</p>';
+      }
+    }
+
     // Included
     if (product.included && App.qs("#p-included")) {
       App.qs("#p-included").innerHTML = `
