@@ -407,6 +407,7 @@ body[class*="theme-midnight"]{
 .categories .planning{border-left:6px solid #0ea5e9}
 
 .grid{padding:24px;max-width:1100px;margin:0 auto}
+.grid.grid--full{max-width:none;width:100%;margin:0}
 .grid.grid--carousel{overflow:hidden}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
 .cards--carousel{display:flex;flex-wrap:nowrap;gap:16px;overflow-x:auto;padding:8px 0 16px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;scrollbar-width:thin}
