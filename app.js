@@ -366,6 +366,36 @@ App.initHeroRotation = function() {
     }
   };
 
+  const renderHeroText = text => {
+    const value = typeof text === "string" ? text.trim() : "";
+    if (!value) {
+      target.textContent = "";
+      return;
+    }
+
+    const words = value.split(/\s+/);
+    const accentCount = words.length > 1 ? Math.min(2, words.length) : 1;
+    const leadWords = words.slice(0, words.length - accentCount).join(" ");
+    const accentWords = words.slice(-accentCount).join(" ");
+
+    if (leadWords) {
+      const lead = document.createElement("span");
+      lead.className = "hero-heading__lead";
+      lead.textContent = leadWords;
+      target.appendChild(lead);
+    }
+
+    if (accentWords) {
+      if (leadWords) {
+        target.appendChild(document.createTextNode(" "));
+      }
+      const accent = document.createElement("span");
+      accent.className = "hero-heading__accent";
+      accent.textContent = accentWords;
+      target.appendChild(accent);
+    }
+  };
+
   const createFlipSpan = (nextText, previousText = "") => {
     const group = document.createElement("span");
     group.className = "hero-flip-line";
@@ -523,12 +553,13 @@ App.initHeroRotation = function() {
   const applyPhrase = (phrase, previousPhrase) => {
     target.innerHTML = "";
     target.dataset.text = phrase.text;
+    target.setAttribute("aria-label", phrase.text);
     updateIllustration(phrase);
 
     if (phrase.animation === "flip") {
       createFlipSpan(phrase.text, previousPhrase ? previousPhrase.text : "");
     } else {
-      target.textContent = phrase.text;
+      renderHeroText(phrase.text);
     }
   };
 
