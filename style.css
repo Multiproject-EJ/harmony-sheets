@@ -399,7 +399,13 @@ body[class*="theme-midnight"]{
 .categories .planning{border-left:6px solid #0ea5e9}
 
 .grid{padding:24px;max-width:1100px;margin:0 auto}
+.grid.grid--carousel{overflow:hidden}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.cards--carousel{display:flex;flex-wrap:nowrap;gap:16px;overflow-x:auto;padding:8px 0 16px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;scrollbar-width:thin}
+.cards--carousel::-webkit-scrollbar{height:8px}
+.cards--carousel::-webkit-scrollbar-thumb{background:rgba(15,23,42,.2);border-radius:999px}
+.cards--carousel::-webkit-scrollbar-track{background:transparent}
+.cards--carousel .product-card{flex:0 0 clamp(240px,26vw,320px);scroll-snap-align:start}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
 .card .content{padding:12px}
 .card h3{margin:0 0 6px;font-size:18px}

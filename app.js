@@ -2501,6 +2501,56 @@ App.initProducts = async function() {
  * Home page life wheel (index.html)
  *****************************************************/
 App.initHome = function() {
+  const bestsellersGrid = App.qs("#home-grid");
+  if (bestsellersGrid) {
+    App.loadProducts()
+      .then(products => {
+        if (!Array.isArray(products) || !products.length) {
+          bestsellersGrid.innerHTML = "<p class=\"muted\">New templates are on the way. Check back soon!</p>";
+          return;
+        }
+
+        const cards = products
+          .map(product => {
+            const productId = product && product.id ? String(product.id) : "";
+            const link = productId ? `product.html?id=${encodeURIComponent(productId)}` : "products.html";
+            const href = App.escapeHtml(link);
+            const image = App.escapeHtml(product.colorImage || "assets/placeholder.png");
+            const name = App.escapeHtml(product.name || "Harmony Sheets template");
+            const tagline = App.escapeHtml(product.tagline || "");
+            const price = App.escapeHtml(product.price || "");
+            const tags = Array.isArray(product.lifeAreas)
+              ? product.lifeAreas
+                  .map(area => App.LIFE_AREAS[area]?.short)
+                  .filter(Boolean)
+                  .map(label => `<span>${App.escapeHtml(label)}</span>`)
+                  .join("")
+              : "";
+
+            return `
+              <div class="product-card">
+                <a href="${href}">
+                  <div class="thumb">
+                    <img src="${image}" alt="">
+                  </div>
+                  <h3>${name}</h3>
+                  <p class="muted">${tagline}</p>
+                  <p class="price">${price}</p>
+                  ${tags ? `<div class="product-tags">${tags}</div>` : ""}
+                </a>
+              </div>
+            `;
+          })
+          .join("");
+
+        bestsellersGrid.innerHTML = cards;
+      })
+      .catch(err => {
+        console.error("Failed to load products for home bestsellers", err);
+        bestsellersGrid.innerHTML = "<p class=\"muted\">We couldn't load featured templates right now. Please refresh.</p>";
+      });
+  }
+
   const details = App.qs("#life-wheel-details");
   const slices = App.qsa(".life-wheel__slice-link");
   if (!details || !slices.length) return;
