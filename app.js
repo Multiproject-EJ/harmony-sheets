@@ -3061,6 +3061,64 @@ App.initProduct = async function() {
 
         window.addEventListener('resize', scaleFrame);
         requestAnimationFrame(() => scaleFrame());
+
+        if (viewport) {
+          const ensureFocusOverlay = () => {
+            let overlayEl = document.querySelector('.virtual-demo-focus-overlay');
+            if (!overlayEl) {
+              overlayEl = document.createElement('div');
+              overlayEl.className = 'virtual-demo-focus-overlay';
+              overlayEl.setAttribute('aria-hidden', 'true');
+              document.body.appendChild(overlayEl);
+            }
+            return overlayEl;
+          };
+
+          const overlayEl = ensureFocusOverlay();
+          let focusActive = false;
+
+          const exitFocus = () => {
+            if (!focusActive) return;
+            focusActive = false;
+            overlayEl.classList.remove('is-active');
+            document.body.classList.remove('virtual-demo-focus-active');
+            virtualDemoFrame.classList.remove('is-focused');
+            viewport.classList.remove('is-focused');
+            viewport.classList.remove('is-flashing');
+          };
+
+          const triggerFlash = () => {
+            viewport.classList.add('is-flashing');
+            window.setTimeout(() => viewport.classList.remove('is-flashing'), 900);
+          };
+
+          const enterFocus = () => {
+            if (!focusActive) {
+              focusActive = true;
+              overlayEl.classList.add('is-active');
+              document.body.classList.add('virtual-demo-focus-active');
+              virtualDemoFrame.classList.add('is-focused');
+              viewport.classList.add('is-focused');
+            }
+            triggerFlash();
+          };
+
+          if (!overlayEl.dataset.bound) {
+            overlayEl.addEventListener('click', exitFocus);
+            document.addEventListener('keydown', event => {
+              if (event.key === 'Escape') exitFocus();
+            });
+            overlayEl.dataset.bound = 'true';
+          }
+
+          viewport.addEventListener('click', () => {
+            if (focusActive) {
+              exitFocus();
+            } else {
+              enterFocus();
+            }
+          });
+        }
       } else if (screen) {
         const guideSection = App.qs('#p-virtual-guide');
         if (guideSection) guideSection.style.display = 'none';
