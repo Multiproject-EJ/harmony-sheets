@@ -886,10 +886,14 @@ App.getCartTotal = function() {
 };
 
 App.renderCart = function() {
+  const previousCount = typeof App.cartLastCount === "number" ? App.cartLastCount : 0;
   const count = App.getCartCount();
   const toggle = App.cartEls.toggle;
   const countEl = App.cartEls.count;
   const label = App.cartEls.label;
+  const mainNav = App.qs(".main-nav");
+  const siteHeader = App.qs(".site-header");
+  const accountCart = App.qs("[data-account-cart]");
 
   if (countEl) {
     countEl.textContent = count > 9 ? "9+" : String(count);
@@ -897,6 +901,7 @@ App.renderCart = function() {
   }
 
   if (toggle) {
+    toggle.hidden = count === 0;
     toggle.classList.toggle("has-items", count > 0);
     toggle.setAttribute("aria-label", count === 1 ? "View cart (1 item)" : `View cart (${count} items)`);
   }
@@ -904,6 +909,37 @@ App.renderCart = function() {
   if (label) {
     label.textContent = count === 1 ? "View cart (1 item)" : `View cart (${count} items)`;
   }
+
+  if (mainNav) mainNav.classList.toggle("main-nav--cart-active", count > 0);
+  if (siteHeader) siteHeader.classList.toggle("cart-has-items", count > 0);
+
+  if (accountCart) {
+    const disabled = count === 0;
+    accountCart.disabled = disabled;
+    accountCart.setAttribute("aria-disabled", disabled ? "true" : "false");
+    accountCart.classList.toggle("is-disabled", disabled);
+  }
+
+  const shouldAnimate = count > 0 && count > previousCount;
+  const resetAnimation = el => {
+    if (!el) return;
+    el.classList.remove("cart-pop");
+    // eslint-disable-next-line no-unused-expressions
+    void el.offsetWidth;
+    el.classList.add("cart-pop");
+  };
+
+  if (shouldAnimate) {
+    resetAnimation(toggle);
+    resetAnimation(siteHeader);
+  }
+
+  if (count === 0) {
+    if (toggle) toggle.classList.remove("cart-pop");
+    if (siteHeader) siteHeader.classList.remove("cart-pop");
+  }
+
+  App.cartLastCount = count;
 
   const itemsContainer = App.cartEls.items;
   if (itemsContainer) {
@@ -947,6 +983,7 @@ App.renderCart = function() {
 
 App.openCart = function() {
   if (!App.cartEls.panel) return;
+  if (typeof App.closeAccountMenu === "function") App.closeAccountMenu();
   App.cartEls.panel.classList.add("is-open");
   App.cartEls.panel.setAttribute("aria-hidden", "false");
   if (App.cartEls.overlay) App.cartEls.overlay.classList.add("is-active");
@@ -1027,6 +1064,7 @@ App.checkoutCart = function() {
 
 App.initCart = function() {
   App.cart = App.loadCartData();
+  App.cartLastCount = App.getCartCount();
 
   App.cartEls = {
     panel: App.qs("#cart-panel"),
@@ -1143,28 +1181,81 @@ App.init = function() {
  *****************************************************/
 App.closeBrowseMenu = null;
 App.closeBundlesMenu = null;
+App.closeAccountMenu = null;
 App.closeNavMenu = () => {};
 App.initAuthLink = function() {
-  const nav = App.qs(".main-nav");
-  if (!nav || nav.querySelector("[data-auth-link]")) return;
+  const accountItem = App.qs("[data-account-menu]");
+  const toggle = accountItem?.querySelector("[data-account-toggle]");
+  const dropdown = accountItem?.querySelector("[data-account-dropdown]");
 
-  const authLink = document.createElement("a");
-  authLink.className = "nav-link nav-link--account";
-  authLink.href = "login.html";
-  authLink.textContent = "Account Login";
-  authLink.setAttribute("data-auth-link", "true");
-
-  if (App.qs("body.page-auth")) {
-    authLink.href = "products.html";
-    authLink.textContent = "Browse templates";
+  if (!accountItem || !toggle || !dropdown) {
+    App.closeAccountMenu = null;
+    return;
   }
 
-  const cartToggle = nav.querySelector("[data-cart-toggle]");
-  if (cartToggle) {
-    nav.insertBefore(authLink, cartToggle);
-  } else {
-    nav.appendChild(authLink);
+  const accountLink = dropdown.querySelector('[data-account-link="account"]');
+  if (App.qs("body.page-auth") && accountLink) {
+    accountLink.href = "products.html";
+    accountLink.textContent = "Browse templates";
   }
+
+  const setOpen = open => {
+    accountItem.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+
+  const closeMenu = () => setOpen(false);
+  const openMenu = () => setOpen(true);
+
+  const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
+
+  toggle.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    setOpen(!accountItem.classList.contains("is-open"));
+  });
+
+  accountItem.addEventListener("mouseenter", () => {
+    if (!isMobile()) openMenu();
+  });
+
+  accountItem.addEventListener("mouseleave", () => {
+    if (!isMobile()) closeMenu();
+  });
+
+  toggle.addEventListener("focus", () => {
+    if (!isMobile()) openMenu();
+  });
+
+  accountItem.addEventListener("focusout", event => {
+    if (!accountItem.contains(event.relatedTarget)) closeMenu();
+  });
+
+  accountItem.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      closeMenu();
+      toggle.focus();
+    }
+  });
+
+  document.addEventListener("click", event => {
+    if (!accountItem.contains(event.target)) closeMenu();
+  });
+
+  dropdown.addEventListener("click", event => {
+    const actionLink = event.target?.closest(".nav-dropdown__link");
+    if (!actionLink) return;
+    if (actionLink.matches("[data-account-cart]")) {
+      event.preventDefault();
+      if (typeof App.openCart === "function") App.openCart();
+    }
+    closeMenu();
+  });
+
+  window.addEventListener("resize", () => closeMenu());
+
+  App.closeAccountMenu = closeMenu;
+  closeMenu();
 };
 App.initNav = function() {
   const toggle = App.qs(".nav-toggle");
@@ -1180,6 +1271,7 @@ App.initNav = function() {
     toggle.setAttribute("aria-expanded", "false");
     if (typeof App.closeBrowseMenu === "function") App.closeBrowseMenu();
     if (typeof App.closeBundlesMenu === "function") App.closeBundlesMenu();
+    if (typeof App.closeAccountMenu === "function") App.closeAccountMenu();
   };
 
   const handleToggle = () => {
@@ -1188,6 +1280,7 @@ App.initNav = function() {
     toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
     if (!isOpen && typeof App.closeBrowseMenu === "function") App.closeBrowseMenu();
     if (!isOpen && typeof App.closeBundlesMenu === "function") App.closeBundlesMenu();
+    if (!isOpen && typeof App.closeAccountMenu === "function") App.closeAccountMenu();
   };
 
   const isMobile = () => window.matchMedia("(max-width: 720px)").matches;

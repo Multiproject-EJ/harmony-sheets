@@ -22,36 +22,47 @@
     <span class="nav-toggle__icon" aria-hidden="true"></span>
   </button>
   <nav class="main-nav" id="site-menu">
-    <div class="nav-item nav-item--browse">
-      <a class="nav-link nav-link--browse" href="products.html" aria-haspopup="true" aria-expanded="false">Discover Life Harmony Apps/Templates</a>
-      <div class="nav-mega" role="menu" aria-label="Life Harmony categories">
-        <div class="nav-mega__content" data-nav-mega-content>
-          <p class="nav-mega__placeholder">Loading Life Harmony areas…</p>
+      <div class="nav-item nav-item--browse">
+        <a class="nav-link nav-link--browse" href="products.html" aria-haspopup="true" aria-expanded="false">Discover Life Harmony Apps/Templates</a>
+        <div class="nav-mega" role="menu" aria-label="Life Harmony categories">
+          <div class="nav-mega__content" data-nav-mega-content>
+            <p class="nav-mega__placeholder">Loading Life Harmony areas…</p>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="nav-item nav-item--bundles">
-      <a class="nav-link nav-link--bundles" href="bundles.html" aria-haspopup="true" aria-expanded="false">Bundles</a>
-      <div class="nav-flyout" role="menu" aria-label="Featured bundles">
-        <div class="nav-flyout__content" data-nav-bundles>
-          <p class="nav-flyout__placeholder">Loading bundles…</p>
+      <div class="nav-item nav-item--bundles">
+        <a class="nav-link nav-link--bundles" href="bundles.html" aria-haspopup="true" aria-expanded="false">Bundles</a>
+        <div class="nav-flyout" role="menu" aria-label="Featured bundles">
+          <div class="nav-flyout__content" data-nav-bundles>
+            <p class="nav-flyout__placeholder">Loading bundles…</p>
+          </div>
         </div>
       </div>
-    </div>
-    <a class="nav-link" href="faq.html">FAQ / Support</a>
-    <a class="nav-link" href="about.html">About</a>
-    <button class="nav-link nav-link--icon" type="button" data-cart-toggle aria-expanded="false" aria-controls="cart-panel">
-      <span class="sr-only" data-cart-label>View cart</span>
-      <svg class="nav-link__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3.5 4h2.6l1.6 9.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 .97-.76L20 7.5H7.1"/>
-          <circle cx="10" cy="18.5" r="1.25"/>
-          <circle cx="17" cy="18.5" r="1.25"/>
-        </g>
-      </svg>
-      <span class="cart-count" data-cart-count>0</span>
-    </button>
-  </nav>
+      <a class="nav-link" href="faq.html">FAQ / Support</a>
+      <a class="nav-link" href="about.html">About</a>
+      <div class="nav-item nav-item--account" data-account-menu>
+        <button class="nav-link nav-link--account nav-link--menu" type="button" data-account-toggle aria-haspopup="true" aria-expanded="false">
+          Follow / Sign in
+          <span class="nav-link__chevron" aria-hidden="true"></span>
+        </button>
+        <div class="nav-dropdown" data-account-dropdown role="menu" aria-label="Account options">
+          <a class="nav-dropdown__link" href="login.html" data-account-link="account">My account</a>
+          <a class="nav-dropdown__link" href="products.html#my-products" data-account-link="products">My products</a>
+          <button class="nav-dropdown__link nav-dropdown__link--action" type="button" data-account-cart>Shopping cart</button>
+        </div>
+      </div>
+      <button class="nav-link nav-link--icon nav-link--cart" type="button" data-cart-toggle aria-expanded="false" aria-controls="cart-panel" hidden>
+        <span class="sr-only" data-cart-label>View cart</span>
+        <svg class="nav-link__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3.5 4h2.6l1.6 9.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 .97-.76L20 7.5H7.1"/>
+            <circle cx="10" cy="18.5" r="1.25"/>
+            <circle cx="17" cy="18.5" r="1.25"/>
+          </g>
+        </svg>
+        <span class="cart-count" data-cart-count>0</span>
+      </button>
+    </nav>
 </header>
 
 <div class="cart-overlay" data-cart-overlay></div>
