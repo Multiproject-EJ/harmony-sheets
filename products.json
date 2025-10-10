@@ -4,6 +4,7 @@
     "name": "Pomodoro — Productivity & Study Timer",
     "tagline": "Focus faster with structured 25–5 cycles. Calm visuals, zero clutter.",
     "price": "$9",
+    "heroImage": "assets/pomodoro-colors.webp",
     "lifeAreas": ["career", "health", "fun", "spirituality"],
     "badges": [
       "One-time purchase",
