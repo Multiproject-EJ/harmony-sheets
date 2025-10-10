@@ -2412,6 +2412,8 @@ App.initHome = function() {
   const slices = App.qsa(".life-wheel__slice-link");
   if (!details || !slices.length) return;
 
+  const defaultMarkup = details.innerHTML.trim();
+
   const iconLayer = App.qs(".life-wheel__icons");
   const graphic = iconLayer ? iconLayer.closest(".life-wheel__graphic") : App.qs(".life-wheel__graphic");
 
@@ -2600,7 +2602,8 @@ App.initHome = function() {
     cta: details.dataset.defaultCta || "Browse all Life Harmony tools",
     icon: null,
     color: null,
-    area: null
+    area: null,
+    customMarkup: defaultMarkup || null
   };
 
   const setAccent = color => {
@@ -2616,18 +2619,22 @@ App.initHome = function() {
   };
 
   const render = (state, isActive = false) => {
-    const { title, description, link, cta, icon, area } = state;
+    const { title, description, link, cta, icon, area, customMarkup } = state;
     const iconMarkup = icon
       ? `<span class="life-wheel__detail-icon" aria-hidden="true">${icon}</span>`
       : "";
-    details.innerHTML = `
-      ${iconMarkup}
-      <div class="life-wheel__detail-copy">
-        <h3>${title}</h3>
-        <p>${description}</p>
-        <a class="life-wheel__cta" href="${link}">${cta}</a>
-      </div>
-    `;
+    if (customMarkup) {
+      details.innerHTML = customMarkup;
+    } else {
+      details.innerHTML = `
+        ${iconMarkup}
+        <div class="life-wheel__detail-copy">
+          <h3>${title}</h3>
+          <p>${description}</p>
+          <a class="life-wheel__cta" href="${link}">${cta}</a>
+        </div>
+      `;
+    }
     if (area) {
       details.dataset.area = area;
     } else {
@@ -2635,6 +2642,9 @@ App.initHome = function() {
     }
     details.classList.toggle("has-icon", Boolean(icon));
     details.classList.toggle("is-active", isActive);
+    if (customMarkup) {
+      App.initHeroRotation();
+    }
   };
 
   let activeSlice = null;
