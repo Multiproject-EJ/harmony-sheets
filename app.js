@@ -3015,6 +3015,118 @@ App.initProduct = async function() {
       App.qs("#p-demo-section").style.display = "none";
     }
 
+    // Virtual demo
+    const virtualDemoFrame = App.qs('[data-virtual-demo]');
+    if (virtualDemoFrame) {
+      const screen = virtualDemoFrame.querySelector('.device-frame__screen');
+      if (product.virtualDemo && screen) {
+        virtualDemoFrame.setAttribute('data-loading', 'true');
+        screen.innerHTML = `
+          <div class="virtual-demo">
+            <div class="virtual-demo__viewport" data-demo-viewport>
+              <iframe src="${product.virtualDemo}" title="${product.name} interactive demo" loading="lazy"></iframe>
+            </div>
+          </div>`;
+
+        const iframe = screen.querySelector('iframe');
+        const viewport = screen.querySelector('[data-demo-viewport]');
+        const BASE_WIDTH = 1300;
+        const BASE_HEIGHT = 800;
+
+        const scaleFrame = () => {
+          if (!viewport || !iframe) return;
+          const width = viewport.clientWidth;
+          if (!width) return;
+          const scale = width / BASE_WIDTH;
+          iframe.style.width = `${BASE_WIDTH}px`;
+          iframe.style.height = `${BASE_HEIGHT}px`;
+          iframe.style.transform = `scale(${scale})`;
+        };
+
+        if (iframe) {
+          iframe.style.position = 'absolute';
+          iframe.style.left = '0';
+          iframe.style.top = '0';
+          iframe.style.transformOrigin = 'top left';
+          iframe.addEventListener('load', () => {
+            virtualDemoFrame.removeAttribute('data-loading');
+            scaleFrame();
+          });
+        }
+
+        if (typeof ResizeObserver !== 'undefined' && viewport) {
+          const resizeObserver = new ResizeObserver(() => scaleFrame());
+          resizeObserver.observe(viewport);
+        }
+
+        window.addEventListener('resize', scaleFrame);
+        requestAnimationFrame(() => scaleFrame());
+
+        if (viewport) {
+          const ensureFocusOverlay = () => {
+            let overlayEl = document.querySelector('.virtual-demo-focus-overlay');
+            if (!overlayEl) {
+              overlayEl = document.createElement('div');
+              overlayEl.className = 'virtual-demo-focus-overlay';
+              overlayEl.setAttribute('aria-hidden', 'true');
+              document.body.appendChild(overlayEl);
+            }
+            return overlayEl;
+          };
+
+          const overlayEl = ensureFocusOverlay();
+          let focusActive = false;
+
+          const exitFocus = () => {
+            if (!focusActive) return;
+            focusActive = false;
+            overlayEl.classList.remove('is-active');
+            document.body.classList.remove('virtual-demo-focus-active');
+            virtualDemoFrame.classList.remove('is-focused');
+            viewport.classList.remove('is-focused');
+            viewport.classList.remove('is-flashing');
+          };
+
+          const triggerFlash = () => {
+            viewport.classList.add('is-flashing');
+            window.setTimeout(() => viewport.classList.remove('is-flashing'), 900);
+          };
+
+          const enterFocus = () => {
+            if (!focusActive) {
+              focusActive = true;
+              overlayEl.classList.add('is-active');
+              document.body.classList.add('virtual-demo-focus-active');
+              virtualDemoFrame.classList.add('is-focused');
+              viewport.classList.add('is-focused');
+            }
+            triggerFlash();
+          };
+
+          if (!overlayEl.dataset.bound) {
+            overlayEl.addEventListener('click', exitFocus);
+            document.addEventListener('keydown', event => {
+              if (event.key === 'Escape') exitFocus();
+            });
+            overlayEl.dataset.bound = 'true';
+          }
+
+          viewport.addEventListener('click', () => {
+            if (focusActive) {
+              exitFocus();
+            } else {
+              enterFocus();
+            }
+          });
+        }
+      } else if (screen) {
+        const guideSection = App.qs('#p-virtual-guide');
+        if (guideSection) guideSection.style.display = 'none';
+        virtualDemoFrame.style.display = 'none';
+        screen.innerHTML = '<p>This is where the live product preview will appear.</p>';
+      }
+    }
+
     // Included
     if (product.included && App.qs("#p-included")) {
       App.qs("#p-included").innerHTML = `

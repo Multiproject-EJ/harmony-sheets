@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simple Pomodoro Demo</title>
+  <style>
+    :root { --bg-color: #67848a; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: transparent;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .demo-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .demo-scaler {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .demo-root {
+      width: 1300px;
+      height: 800px;
+      transform-origin: top left;
+      background: transparent;
+    }
+
+    .red-bg {
+      background-color: var(--bg-color);
+      color: white;
+      text-align: center;
+      padding: 32px 0 28px 0;
+      border-radius: 32px;
+      margin: 32px 32px 0 32px;
+    }
+
+    .mode-control-group { display:flex; flex-direction:row; align-items:flex-end; justify-content:center; gap:36px; margin-bottom:38px; }
+    .mode-col { display:flex; flex-direction:column; align-items:center; }
+    .mode-col img { width:36px; height:36px; object-fit:contain; margin-bottom:6px; filter:drop-shadow(0 2px 5px rgba(0,0,0,0.06)); user-select:none; pointer-events:none; }
+    .mode-buttons { display: contents; }
+    .mode-buttons button { padding:8px 20px; border:none; background-color:rgba(255,255,255,0.18); color:white; border-radius:10px; cursor:pointer; font-size:17px; min-width:110px; transition:background .2s,color .2s; }
+    .mode-buttons button.active { background:white; color:#222; }
+
+    #timer { font-size:100px; margin:10px 0 20px 0; }
+
+    .control-btn { display:block; margin:0 auto 20px; padding:16px 40px; font-size:23px; border:none; border-radius:12px; background:rgba(255,255,255,0.8); color:#333; cursor:pointer; transition:box-shadow .3s, background .3s; }
+    .control-btn:hover { box-shadow:0 0 12px white; background:white; }
+
+    #taskInput { display:block; margin:20px auto 12px auto; padding:12px 24px; font-size:18px; line-height:1.4; border:none; border-radius:31px; width:65%; outline:none; transition:box-shadow .3s; color:#222; resize:none; overflow-y:hidden; min-height:44px; height:44px; max-height:calc(1.4em * 4 + 24px); }
+    #taskInput:hover { box-shadow:0 0 11px white; }
+
+    #pomoCountDisplay { margin:0 auto 16px auto; font-size:14px; opacity:.9; }
+    .settings-toggle { display:block; margin:0 auto 10px auto; background:none; border:2px solid white; padding:11px 28px; color:white; font-size:17px; border-radius:9px; cursor:pointer; transition:background .2s; }
+    .settings-toggle:hover { background:rgba(255,255,255,0.19); }
+
+    .settings-grid { display:grid; grid-template-columns:1fr; gap:14px; max-width:1000px; margin:0 auto 20px auto; }
+    .settings-section{ background:transparent; color:#fff; border-radius:14px; padding:14px 16px; border:2px solid rgba(255,255,255,0.9);} 
+    .settings-section h3{ margin:0 0 10px 0; font-size:15px; font-weight:700; text-align:center; color:#fff; }
+
+    .settings-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px 20px; align-items:end; justify-items:center; }
+    .settings-row .setting-row{ margin:0; width:100%; max-width:300px; }
+    .setting-row label { display:block; font-size:14px; margin-bottom:6px; color:rgba(255,255,255,0.95); text-align:center; }
+    .setting-row input[type="checkbox"] { transform:scale(1.18); margin-right:10px; accent-color:#ffffff; }
+
+    .setting-row input[type="number"],
+    .setting-row select { font-size:14px; padding:6px 8px; height:36px; border-radius:8px; border:1px solid rgba(255,255,255,0.22); background:#fff; color:#222; width:100%; max-width:200px; }
+
+    .settings-section.timer-lengths input[type="number"] { max-width:96px; height:34px; padding:4px 8px; font-size:16px; text-align:center; }
+
+    .settings-section.timer-lengths .settings-row { grid-template-columns: 1fr 1fr 1fr; align-items: start; }
+    .cycle-summary-panel{ grid-column: 3; grid-row: 1 / span 2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; }
+    .cycle-summary-title{ font-weight:700; font-size:14px; color:#fff; opacity:0.95; }
+    .cycle-summary{ margin-top:0; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    .cycle-chip { display:flex; align-items:center; gap:6px; border:1.6px solid rgba(255,255,255,0.95); color:#fff; padding:6px 10px; border-radius:999px; font-size:13px; }
+    .cycle-chip .chip-label { opacity:.9; }
+    .cycle-chip.total { box-shadow:0 0 0 1px rgba(255,255,255,0.2) inset; }
+
+    .settings-section.autoplay .settings-row { grid-template-columns:1fr; }
+    .autoplay-list { display:grid; grid-template-columns:1fr; justify-items:center; gap:10px; }
+    .autoplay-list .check label { display:flex; align-items:center; gap:10px; font-size:16px; white-space:nowrap; }
+
+    .settings-section.themes select { max-width:180px; }
+    .settings-section.themes .settings-row { align-items:center; }
+    .themes-right { display:grid; gap:14px; }
+
+    .white-bg { background:#fff; color:#331f1f; padding:34px 28px; max-width:800px; margin:28px auto 35px auto; border-radius:28px; box-shadow:0 1px 7px rgba(60,60,60,0.04); }
+    .white-bg h2 { border-bottom:3px solid #d24a4a; display:inline-block; padding-bottom:5px; margin-top:40px; }
+    .white-bg ul { padding-left:20px; }
+    .white-bg ul li { margin-bottom:10px; }
+    table.instructions-table { width:100%; border-collapse:collapse; margin-top:20px; }
+    .instructions-table th, .instructions-table td { border:1px solid #ccc; padding:8px 12px; text-align:center; font-size:14px; }
+    .instructions-table th { background:#f5f5f5; }
+
+    .celebrate-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; z-index:9999; }
+    .celebrate-card { background:#fff; color:#222; padding:24px 28px; border-radius:18px; width:min(92%,460px); text-align:center; box-shadow:0 12px 40px rgba(0,0,0,0.18); position:relative; }
+    .celebrate-emoji { font-size:42px; margin-bottom:8px; }
+    .celebrate-actions { display:flex; gap:12px; justify-content:center; margin-top:14px; }
+    .celebrate-btn { border:1px solid #ddd; background:#f7f7f7; color:#222; padding:10px 16px; border-radius:10px; cursor:pointer; font-size:15px; }
+    .celebrate-btn.primary { background: var(--bg-color); color:#fff; border-color: var(--bg-color); }
+    .celebrate-btn:hover { filter:brightness(1.02); }
+    .confetti-container { pointer-events:none; position:absolute; inset:0; overflow:hidden; }
+    .confetti { position:absolute; top:-10px; will-change: transform, opacity; font-size:18px; animation: confettiFall linear forwards; }
+    @keyframes confettiFall { 0% { transform: translateY(-10px) rotate(0deg); opacity:1; } 100% { transform: translateY(110vh) rotate(540deg); opacity:0.9; } }
+  </style>
+</head>
+<body>
+  <div class="demo-stage">
+    <div class="demo-scaler" id="demoScaler">
+      <div class="demo-root" id="demoRoot">
+        <div class="red-bg" id="pomoSection">
+          <div class="mode-control-group">
+            <div class="mode-col">
+              <img src="https://github.com/HostItSheet/images/blob/main/Pomdoro%20Icon.png?raw=true" alt="Pomodoro">
+              <div class="mode-buttons"><button id="pomodoroBtn" class="active" onclick="switchMode('pomodoro')">Pomodoro</button></div>
+            </div>
+            <div class="mode-col">
+              <img src="https://github.com/HostItSheet/images/blob/main/ShortBreak.png?raw=true" alt="Short Break">
+              <div class="mode-buttons"><button id="shortBreakBtn" onclick="switchMode('short')">Short Break</button></div>
+            </div>
+            <div class="mode-col">
+              <img src="https://github.com/HostItSheet/images/blob/main/LongBreakIcon.png?raw=true" alt="Long Break">
+              <div class="mode-buttons"><button id="longBreakBtn" onclick="switchMode('long')">Long Break</button></div>
+            </div>
+          </div>
+
+          <div id="timer">25:00</div>
+          <button class="control-btn" onclick="toggleTimer()">START</button>
+
+          <textarea id="taskInput" rows="1" placeholder="Add Task..."></textarea>
+
+          <div id="pomoCountDisplay">Pomodoros — This Session: 0</div>
+          <button onclick="toggleSettings()" class="settings-toggle">⚙️ Settings</button>
+
+          <div id="settingsSection" class="settings-grid" style="display:none;">
+
+            <div class="settings-section timer-lengths">
+              <h3>Timer Lengths</h3>
+              <div class="settings-row">
+                <div class="setting-row">
+                  <label>Pomodoro Length (mins)</label>
+                  <input type="number" id="pomodoroLength" value="25" min="1">
+                </div>
+                <div class="setting-row">
+                  <label>Short Break Length (mins)</label>
+                  <input type="number" id="shortBreakLength" value="5" min="1">
+                </div>
+
+                <div class="cycle-summary-panel">
+                  <div class="cycle-summary-title">Cycle Summary</div>
+                  <div class="cycle-summary" aria-live="polite">
+                    <div class="cycle-chip"><span class="chip-label">Focus:</span> <span id="sumFocus">—</span></div>
+                    <div class="cycle-chip"><span class="chip-label">Breaks:</span> <span id="sumBreaks">—</span></div>
+                    <div class="cycle-chip total"><span class="chip-label">Total:</span> <span id="sumTotal">—</span></div>
+                  </div>
+                </div>
+
+                <div class="setting-row">
+                  <label>Long Break Length (mins)</label>
+                  <input type="number" id="longBreakLength" value="15" min="1">
+                </div>
+                <div class="setting-row">
+                  <label>Number of Pomodoro’s before Long Break</label>
+                  <input type="number" id="longBreakInterval" value="4" min="1">
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section autoplay">
+              <h3>Autoplay Settings</h3>
+              <div class="settings-row">
+                <div class="autoplay-list">
+                  <div class="setting-row check"><label><input type="checkbox" id="autoStartBreaks"> Auto Start Breaks</label></div>
+                  <div class="setting-row check"><label><input type="checkbox" id="autoStartPomos"> Auto Start Pomodoros</label></div>
+                  <div class="setting-row check"><label><input type="checkbox" id="autoCycleAfterLong"> Auto start new Pomodoro after Long Break</label></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section sounds">
+              <h3>Sounds</h3>
+              <div class="settings-row">
+                <div class="setting-row" style="grid-column:1 / -1;">
+                  <label>Alert Sound (Session End)</label>
+                  <select id="soundSelect">
+                    <option value="off">🔇 Off</option>
+                    <option value="https://github.com/HostItSheet/audio-files/raw/refs/heads/main/536420__rudmer_rotteveel__electronic-timer-beeping-4x%20(2).wav">Classic Timer</option>
+                    <option value="https://github.com/HostItSheet/audio-files/raw/refs/heads/main/Soft%20alarm%20II.mp3">Soft Alarm</option>
+                    <option value="https://github.com/HostItSheet/audio-files/raw/refs/heads/main/Modern_Biip.mp3">Modern</option>
+                    <option value="https://github.com/HostItSheet/audio-files/raw/refs/heads/main/Cuckoo_clock.mp3">Cuckoo Clock</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section themes">
+              <h3>Themes</h3>
+              <div class="settings-row">
+                <div class="setting-row">
+                  <label>Pomodoro Theme Color</label>
+                  <select id="customColorDropdown" onchange="setCustomColor(this.value)">
+                    <option value="#d24a4a">🔴 Classic Red</option>
+                    <option value="#487d84">🟦 Ocean Teal</option>
+                    <option value="#357865">🟩 Deep Forest</option>
+                    <option value="#4b4e9e">🟪 Indigo Ink</option>
+                    <option value="#e67e22">🟧 Sunset Orange</option>
+                    <option value="#4169e1">🟦 Royal Blue</option>
+                    <option value="#b5179e">🟪 Magenta</option>
+                    <option value="#64748b">⬜ Slate Gray</option>
+                    <option value="#eab308">🟡 Bold Yellow</option>
+                  </select>
+                </div>
+                <div class="themes-right">
+                  <div class="setting-row">
+                    <label>Short Break Theme Color</label>
+                    <select id="shortColorDropdown" onchange="setColor('short', this.value)">
+                      <option value="#487d84">🟦 Ocean Teal</option>
+                      <option value="#d24a4a">🔴 Classic Red</option>
+                      <option value="#357865">🟩 Deep Forest</option>
+                      <option value="#4b4e9e">🟪 Indigo Ink</option>
+                      <option value="#e67e22">🟧 Sunset Orange</option>
+                      <option value="#4169e1">🟦 Royal Blue</option>
+                      <option value="#b5179e">🟪 Magenta</option>
+                      <option value="#64748b">⬜ Slate Gray</option>
+                      <option value="#eab308">🟡 Bold Yellow</option>
+                    </select>
+                  </div>
+                  <div class="setting-row">
+                    <label>Long Break Theme Color</label>
+                    <select id="longColorDropdown" onchange="setColor('long', this.value)">
+                      <option value="#357865">🟩 Deep Forest</option>
+                      <option value="#d24a4a">🔴 Classic Red</option>
+                      <option value="#487d84">🟦 Ocean Teal</option>
+                      <option value="#4b4e9e">🟪 Indigo Ink</option>
+                      <option value="#e67e22">🟧 Sunset Orange</option>
+                      <option value="#4169e1">🟦 Royal Blue</option>
+                      <option value="#b5179e">🟪 Magenta</option>
+                      <option value="#64748b">⬜ Slate Gray</option>
+                      <option value="#eab308">🟡 Bold Yellow</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="white-bg">
+          <h2>What is this?</h2>
+          <p>A simple Pomodoro timer for focused work. Do a work sprint (<strong>Pomodoro</strong>), then a <strong>Short Break</strong>. After several Pomodoros, take a <strong>Long Break</strong>. Your lengths and interval control the rhythm.</p>
+
+          <h2>Quick setup &amp; start (first time)</h2>
+          <ol>
+            <li><strong>Open Settings</strong>
+              <ul>
+                <li><strong>Timer Lengths:</strong> Set <em>Pomodoro</em>, <em>Short Break</em>, <em>Long Break</em>, and <strong>Long break after</strong> (how many Pomodoros before the long break).</li>
+                <li><strong>Autoplay:</strong> Choose whether to auto-start <em>breaks</em>, auto-start <em>Pomodoros</em>, and auto-start a <strong>new Pomodoro after the long break</strong>.</li>
+                <li><strong>Sounds:</strong> Pick an <strong>Alert Sound</strong> — it <strong>previews on select</strong>.</li>
+                <li><strong>Themes:</strong> Choose colors for <strong>Pomodoro</strong>, <strong>Short Break</strong>, and <strong>Long Break</strong>.</li>
+              </ul>
+            </li>
+            <li><strong>Plan time (optional):</strong> In <em>Settings → Timer Lengths</em>, check the <strong>Cycle Summary</strong> chips to see total <strong>Focus</strong>, <strong>Breaks</strong>, and <strong>Total</strong> time for one full cycle.</li>
+            <li><strong>Close Settings.</strong> Type your task (optional) and press <strong>START</strong>.</li>
+          </ol>
+
+          <h2>Everyday use</h2>
+          <ul>
+            <li>Use the top buttons to switch between <strong>Pomodoro</strong>, <strong>Short Break</strong>, or <strong>Long Break</strong> at any time — <strong>switching modes also resets the current countdown to that mode’s full duration</strong>.</li>
+            <li>The task box <strong>expands as you type</strong>.</li>
+            <li>Each completed Pomodoro is logged to <strong>📋 | Pomodoro Log</strong> (date, task, minutes).</li>
+            <li><strong>Pomodoros — This Session</strong> counts how many you’ve finished since opening the timer (resets when you close it).</li>
+            <li>After a long break (if you didn’t enable <em>auto-start new Pomodoro</em>), you’ll see a <strong>celebration</strong> with a <strong>Start New Pomodoro</strong> button.</li>
+          </ul>
+
+          <h2>Auto-start behavior (what happens next)</h2>
+          <ul>
+            <li><strong>Only auto-start breaks:</strong> Work ends → break starts automatically. Next Pomodoro is manual.</li>
+            <li><strong>Only auto-start Pomodoros:</strong> Break ends → Pomodoro starts automatically. Next break is manual.</li>
+            <li><strong>Both enabled:</strong> Fully automatic switching between work and breaks.</li>
+            <li><strong>Both disabled:</strong> Press <strong>START</strong> after every session.</li>
+            <li><strong>Auto-start new Pomodoro after Long Break:</strong> When the <strong>long break ends</strong>, a <strong>fresh Pomodoro</strong> starts automatically (otherwise you’ll see the celebration with a button).</li>
+          </ul>
+
+          <h2>Where to find things later</h2>
+          <ul>
+            <li><strong>Cycle Summary:</strong> <em>Settings → Timer Lengths</em></li>
+            <li><strong>Autoplay toggles:</strong> <em>Settings → Autoplay</em></li>
+            <li><strong>Alert sound &amp; preview:</strong> <em>Settings → Sounds</em></li>
+            <li><strong>Theme colors:</strong> <em>Settings → Themes</em> (separate colors for each mode)</li>
+            <li><strong>Session counter &amp; Settings button:</strong> under the task box on the main timer</li>
+          </ul>
+
+          <h2>Tips</h2>
+          <ul>
+            <li>Scheduling your day? Set lengths and check <strong>Cycle Summary</strong> to estimate a full cycle.</li>
+            <li>Want a continuous loop? Turn on <strong>all three</strong> autoplay options (breaks, Pomodoros, and after-long-break).</li>
+            <li>Prefer manual control? Turn them off and use <strong>START</strong> to pace yourself.</li>
+          </ul>
+        </div>
+
+        <audio id="audio" src=""></audio>
+
+        <div id="celebrateOverlay" class="celebrate-overlay" style="display:none;" aria-hidden="true">
+          <div class="celebrate-card">
+            <div class="celebrate-emoji">🎉</div>
+            <h3>Cycle complete!</h3>
+            <p>Nice work. Take a breath, then jump back in when you're ready.</p>
+            <div class="celebrate-actions">
+              <button id="celebrateStartBtn" class="celebrate-btn primary">Start New Pomodoro</button>
+              <button id="celebrateCloseBtn" class="celebrate-btn">Close</button>
+            </div>
+          </div>
+          <div id="confettiContainer" class="confetti-container" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const BASE_WIDTH = 1300;
+      const BASE_HEIGHT = 800;
+      const root = document.getElementById('demoRoot');
+      const scaler = document.getElementById('demoScaler');
+
+      function resizeDemo() {
+        if (!root || !scaler) return;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const scale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
+        root.style.transform = `scale(${scale})`;
+        scaler.style.width = `${BASE_WIDTH * scale}px`;
+        scaler.style.height = `${BASE_HEIGHT * scale}px`;
+      }
+
+      window.addEventListener('resize', resizeDemo);
+      resizeDemo();
+    })();
+
+    let timer, isRunning = false, currentMode = 'pomodoro', pomodoroCount = 0;
+    let durations = { pomodoro: 25 * 60, short: 5 * 60, long: 15 * 60 };
+    let sessionCount = 0;
+
+    const MAX_TASK_HEIGHT_PX = Math.round(4 * 1.4 * 20 + 24);
+
+    function updateTimerDisplay() {
+      const mins = String(Math.floor(durations[currentMode] / 60)).padStart(2, '0');
+      const secs = String(durations[currentMode] % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = `${mins}:${secs}`;
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      const map = { pomodoro: 'pomodoroLength', short: 'shortBreakLength', long: 'longBreakLength' };
+      durations[mode] = parseInt(document.getElementById(map[mode]).value, 10) * 60;
+      updateTimerDisplay();
+
+      const defaultColors = { pomodoro: '#d24a4a', short: '#487d84', long: '#357865' };
+      const key = (mode === 'pomodoro') ? 'pomoColor' : (mode === 'short' ? 'shortColor' : 'longColor');
+      const color = localStorage.getItem(key) || defaultColors[mode];
+      document.documentElement.style.setProperty('--bg-color', color);
+      document.getElementById('pomoSection').style.backgroundColor = color;
+
+      ['pomodoroBtn', 'shortBreakBtn', 'longBreakBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
+      const buttonIdMap = { pomodoro: 'pomodoroBtn', short: 'shortBreakBtn', long: 'longBreakBtn' };
+      document.getElementById(buttonIdMap[mode]).classList.add('active');
+
+      clearInterval(timer);
+      timerStart = null; timerEnd = null;
+      isRunning = false;
+      document.querySelector('.control-btn').textContent = 'START';
+    }
+
+    let timerStart = null, timerEnd = null;
+
+    function toggleTimer() {
+      if (isRunning) {
+        clearInterval(timer);
+        isRunning = false;
+        document.querySelector('.control-btn').textContent = 'START';
+      } else {
+        timerStart = Date.now();
+        timerEnd = timerStart + durations[currentMode] * 1000;
+        runTimerTick();
+        timer = setInterval(runTimerTick, 1000);
+        isRunning = true;
+        document.querySelector('.control-btn').textContent = 'PAUSE';
+      }
+    }
+
+    function runTimerTick() {
+      let secondsLeft = Math.round((timerEnd - Date.now()) / 1000);
+      if (secondsLeft < 0) secondsLeft = 0;
+      durations[currentMode] = secondsLeft;
+      updateTimerDisplay();
+
+      if (secondsLeft <= 0) {
+        clearInterval(timer);
+        isRunning = false;
+        document.querySelector('.control-btn').textContent = 'START';
+        playSound();
+        onTimerEnd();
+      }
+    }
+
+    function onTimerEnd() {
+      if (currentMode === 'pomodoro') {
+        pomodoroCount++;
+        sessionCount++;
+        updatePomodoroCounter();
+
+        const task = document.getElementById('taskInput').value.trim();
+        const mins = parseInt(document.getElementById('pomodoroLength').value, 10);
+        const interval = parseInt(document.getElementById('longBreakInterval').value, 10);
+        const breakMode = (pomodoroCount % interval === 0) ? 'long' : 'short';
+        const autoStartBreaks = document.getElementById('autoStartBreaks').checked;
+
+        const onLogged = () => {
+          switchMode(breakMode);
+          if (autoStartBreaks) setTimeout(toggleTimer, 0);
+        };
+
+        if (window.google && google.script && google.script.run && typeof google.script.run.withSuccessHandler === 'function') {
+          google.script.run.withSuccessHandler(onLogged).logPomodoro(task, mins, '');
+        } else {
+          console.info('logPomodoro', { task, workMinutes: mins, breakMinutes: '' });
+          onLogged();
+        }
+      } else {
+        const wasLong = (currentMode === 'long');
+        const allowCycle = document.getElementById('autoCycleAfterLong').checked;
+        if (wasLong && !allowCycle) { showCelebration(); return; }
+        switchMode('pomodoro');
+        const autoStartPomos = document.getElementById('autoStartPomos').checked;
+        if (autoStartPomos) setTimeout(toggleTimer, 0);
+      }
+    }
+
+    function updatePomodoroCounter() {
+      document.getElementById('pomoCountDisplay').textContent = `Pomodoros — This Session: ${sessionCount}`;
+    }
+
+    function playSound() {
+      const src = document.getElementById('soundSelect').value;
+      if (src === 'off') return;
+      const audio = document.getElementById('audio');
+      audio.src = src; audio.play();
+    }
+
+    function setCustomColor(hex) { setColor('pomodoro', hex); }
+    function setColor(mode, hex) {
+      const key = (mode === 'pomodoro') ? 'pomoColor' : (mode === 'short' ? 'shortColor' : 'longColor');
+      localStorage.setItem(key, hex);
+      if (currentMode === mode) {
+        document.documentElement.style.setProperty('--bg-color', hex);
+        document.getElementById('pomoSection').style.backgroundColor = hex;
+      }
+    }
+
+    function loadCustomColor() {
+      const defaults = { pomodoro: '#d24a4a', short: '#487d84', long: '#357865' };
+      const p = localStorage.getItem('pomoColor') || defaults.pomodoro;
+      const s = localStorage.getItem('shortColor') || defaults.short;
+      const l = localStorage.getItem('longColor') || defaults.long;
+
+      const pd = document.getElementById('customColorDropdown');
+      const sd = document.getElementById('shortColorDropdown');
+      const ld = document.getElementById('longColorDropdown');
+
+      if (pd) pd.value = p;
+      if (sd) sd.value = s;
+      if (ld) ld.value = l;
+
+      if (currentMode === 'pomodoro') {
+        document.documentElement.style.setProperty('--bg-color', p);
+        document.getElementById('pomoSection').style.backgroundColor = p;
+      }
+    }
+
+    function toggleSettings() {
+      const section = document.getElementById('settingsSection');
+      section.style.display = section.style.display === 'none' ? 'grid' : 'none';
+    }
+
+    function attachDurationListeners() {
+      const map = { pomodoro: 'pomodoroLength', short: 'shortBreakLength', long: 'longBreakLength' };
+      Object.entries(map).forEach(([mode, id]) => {
+        const input = document.getElementById(id);
+        input.addEventListener('input', () => {
+          durations[mode] = parseInt(input.value, 10) * 60;
+          if (currentMode === mode && !isRunning) updateTimerDisplay();
+          computeCycleSummary();
+        });
+      });
+      document.getElementById('longBreakInterval').addEventListener('input', computeCycleSummary);
+    }
+
+    function minutesToStr(mins) {
+      const m = Math.max(0, Math.round(mins || 0));
+      const h = Math.floor(m / 60);
+      const rem = m % 60;
+      if (h > 0 && rem > 0) return `${h} hr ${rem} min`;
+      if (h > 0) return `${h} hr`;
+      return `${rem} min`;
+    }
+
+    function computeCycleSummary() {
+      const p = parseInt(document.getElementById('pomodoroLength').value, 10) || 0;
+      const s = parseInt(document.getElementById('shortBreakLength').value, 10) || 0;
+      const l = parseInt(document.getElementById('longBreakLength').value, 10) || 0;
+      const n = Math.max(1, parseInt(document.getElementById('longBreakInterval').value, 10) || 1);
+
+      const focusTotal = p * n;
+      const breaksTotal = s * Math.max(n - 1, 0) + l;
+      const grandTotal = focusTotal + breaksTotal;
+
+      document.getElementById('sumFocus').textContent = minutesToStr(focusTotal);
+      document.getElementById('sumBreaks').textContent = minutesToStr(breaksTotal);
+      document.getElementById('sumTotal').textContent  = minutesToStr(grandTotal);
+    }
+
+    function showCelebration() {
+      const overlay = document.getElementById('celebrateOverlay');
+      overlay.style.display = 'flex';
+      const container = document.getElementById('confettiContainer');
+      container.innerHTML = '';
+      const pieces = 40, emojis = ['🎉','✨','🎊','⭐','💫'];
+      for (let i = 0; i < pieces; i++) {
+        const span = document.createElement('span');
+        span.className = 'confetti';
+        span.textContent = emojis[i % emojis.length];
+        span.style.left = Math.random() * 100 + 'vw';
+        span.style.animationDuration = (4 + Math.random() * 2) + 's';
+        span.style.animationDelay = (Math.random() * 0.6) + 's';
+        container.appendChild(span);
+      }
+    }
+
+    function hideCelebration() {
+      document.getElementById('celebrateOverlay').style.display = 'none';
+      document.getElementById('confettiContainer').innerHTML = '';
+    }
+
+    function startNewPomodoroFromCelebration() {
+      hideCelebration();
+      switchMode('pomodoro');
+      const autoStartPomos = document.getElementById('autoStartPomos').checked;
+      if (autoStartPomos) setTimeout(toggleTimer, 0);
+    }
+
+    document.addEventListener('input', function (e) {
+      if (e.target && e.target.id === 'taskInput') {
+        const t = e.target;
+        t.style.height = '44px';
+        const max = MAX_TASK_HEIGHT_PX;
+        const newH = Math.min(t.scrollHeight, max);
+        if (newH > 44) t.style.height = newH + 'px';
+        t.style.overflowY = (t.scrollHeight > max) ? 'auto' : 'hidden';
+      }
+    });
+
+    window.onload = () => {
+      loadCustomColor();
+      switchMode('pomodoro');
+      attachDurationListeners();
+      updatePomodoroCounter();
+
+      const t = document.getElementById('taskInput');
+      if (t) t.style.height = '44px';
+
+      document.getElementById('celebrateStartBtn').addEventListener('click', startNewPomodoroFromCelebration);
+      document.getElementById('celebrateCloseBtn').addEventListener('click', hideCelebration);
+
+      const soundSel = document.getElementById('soundSelect');
+      if (soundSel) {
+        soundSel.addEventListener('change', function () {
+          const src = this.value;
+          const audio = document.getElementById('audio');
+          if (!audio) return;
+          if (src === 'off') { audio.pause(); audio.currentTime = 0; return; }
+          audio.pause();
+          audio.currentTime = 0;
+          audio.src = src;
+          audio.play();
+        });
+      }
+
+      computeCycleSummary();
+    };
+  </script>
+</body>
+</html>

@@ -587,10 +587,30 @@ body.page-bundle main{max-width:1120px;margin:0 auto;padding:48px 18px 80px;disp
 .device-frame{display:flex;justify-content:center;margin-top:clamp(18px,4vw,28px)}
 .device-frame__bezel{position:relative;width:100%;max-width:900px;aspect-ratio:4/3;background:linear-gradient(155deg,rgba(15,23,42,.1),rgba(15,23,42,.04));border-radius:32px;padding:clamp(18px,4vw,28px);border:1px solid rgba(15,23,42,.08);box-shadow:0 30px 60px rgba(15,23,42,.12);display:flex;align-items:stretch}
 .device-frame__bezel::after{content:"";position:absolute;top:clamp(14px,3vw,22px);left:50%;width:64px;height:6px;margin-left:-32px;border-radius:999px;background:rgba(148,163,184,.45)}
-.device-frame__screen{flex:1;border-radius:20px;background:#fff;border:1px solid rgba(148,163,184,.24);box-shadow:inset 0 2px 6px rgba(15,23,42,.08);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:clamp(18px,4vw,28px);color:#475569;font-size:1rem;line-height:1.6;text-align:center}
+.device-frame__screen{flex:1;border-radius:20px;background:#fff;border:1px solid rgba(148,163,184,.24);box-shadow:inset 0 2px 6px rgba(15,23,42,.08);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:clamp(18px,4vw,28px);color:#475569;font-size:1rem;line-height:1.6;text-align:center;position:relative}
 .device-frame__screen p{margin:0}
 .device-frame[data-loading="true"] .device-frame__screen{color:#1f2937}
-.device-frame[data-loading="true"] .device-frame__screen::before{content:"Loading demo…";animation:pulse 1.8s ease-in-out infinite;display:block}
+.device-frame[data-loading="true"] .device-frame__screen::before{content:"Loading demo…";animation:pulse 1.8s ease-in-out infinite;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:600;letter-spacing:.02em;background:rgba(248,250,252,.82);color:#1f2937}
+.device-frame[data-loading="true"] .virtual-demo{visibility:hidden}
+.virtual-demo{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.virtual-demo__viewport{position:relative;width:100%;aspect-ratio:13/8;background:linear-gradient(160deg,rgba(248,250,252,.95) 0%,rgba(241,245,249,.92) 100%);border-radius:18px;border:1px solid rgba(148,163,184,.25);box-shadow:inset 0 2px 4px rgba(255,255,255,.6),0 18px 40px rgba(15,23,42,.12);overflow:hidden;transition:transform .3s ease,box-shadow .3s ease}
+.virtual-demo__viewport::before,.virtual-demo__viewport::after{content:"";position:absolute;inset:0;pointer-events:none}
+.virtual-demo__viewport::before{background:radial-gradient(circle at center,rgba(255,255,255,.9) 0%,rgba(255,255,255,0) 60%);opacity:0;transform:scale(.85);transition:opacity .35s ease,transform .35s ease;z-index:2}
+.virtual-demo__viewport::after{background:linear-gradient(160deg,rgba(15,23,42,.18) 0%,rgba(15,23,42,.12) 100%);opacity:.55;transition:opacity .3s ease;z-index:1}
+.virtual-demo__viewport:hover::after,.virtual-demo__viewport:focus-visible::after,.virtual-demo__viewport.is-focused::after{opacity:0}
+.virtual-demo__viewport.is-focused{transform:scale(1.01);box-shadow:inset 0 2px 4px rgba(255,255,255,.7),0 32px 70px rgba(15,23,42,.26)}
+.virtual-demo__viewport.is-focused::before{opacity:.65;transform:scale(1)}
+.virtual-demo__viewport.is-flashing::before{animation:virtualDemoFlash .9s ease-out}
+.virtual-demo__viewport iframe{position:absolute;top:0;left:0;border:0;background:transparent;transform-origin:top left;z-index:3}
+
+.device-frame.is-focused{position:relative;z-index:95}
+.device-frame.is-focused .device-frame__screen{box-shadow:inset 0 2px 6px rgba(15,23,42,.12),0 36px 80px rgba(15,23,42,.3)}
+
+.virtual-demo-focus-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:90}
+.virtual-demo-focus-overlay.is-active{opacity:1;pointer-events:auto}
+body.virtual-demo-focus-active{overflow:hidden}
+
+@keyframes virtualDemoFlash{0%{opacity:0;transform:scale(.85)}35%{opacity:.7;transform:scale(1.05)}100%{opacity:0;transform:scale(1.2)}}
 @media (max-width:720px){
   .device-frame__bezel{border-radius:24px}
   .device-frame__screen{border-radius:16px}
