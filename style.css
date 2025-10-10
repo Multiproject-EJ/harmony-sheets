@@ -929,6 +929,8 @@ details.faq summary{cursor:pointer;font-weight:600}
 .auth-tab.auth-tab--ghost.is-active{background:#fff;border-style:solid;color:#1d4ed8}
 .auth-forms{display:grid;gap:24px}
 .auth-form{display:grid;gap:18px}
+.auth-note{margin:0;font-size:.88rem;color:#475569}
+.auth-note .text-link{font-weight:600}
 .form-field{display:grid;gap:8px}
 .form-field label{font-weight:600;color:#0f172a}
 .form-field input{border:1px solid rgba(148,163,184,.4);border-radius:12px;padding:12px 14px;font:inherit;background:#f8fafc;transition:border-color .2s ease,box-shadow .2s ease}
