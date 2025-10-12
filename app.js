@@ -1297,12 +1297,9 @@ App.initNav = function() {
     if (siteHeader) siteHeader.classList.add("site-header--brand-text-visible");
   };
 
-  const hideBrandText = force => {
-    if (!siteHeader || !nav) return;
-    if (force || !nav.classList.contains("is-open")) {
-      siteHeader.classList.remove("site-header--brand-text-visible");
-    }
-  };
+  const hideBrandText = () => {};
+
+  showBrandText();
 
   if (!toggle || !nav) {
     App.closeNavMenu = () => {};
