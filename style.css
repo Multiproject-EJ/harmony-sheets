@@ -110,7 +110,8 @@ button.nav-link{border:0;background:transparent;cursor:pointer;font:inherit}
 .nav-mega__count{margin-left:auto;color:inherit;font-size:.78rem}
 .nav-mega__prod{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
 .nav-mega__row{position:relative;--nav-row-image:none;--nav-row-preview-width:0px;--nav-row-preview-gap:0px;--nav-row-fade-width:0px}
-.nav-mega__row td{transition:background .2s ease;position:relative;z-index:1;padding-right:calc(14px + var(--nav-row-preview-width) + var(--nav-row-preview-gap))}
+.nav-mega__row td{transition:background .2s ease;position:relative;z-index:1;}
+.nav-mega__row td:first-child{padding-right:calc(14px + var(--nav-row-preview-width) + var(--nav-row-preview-gap));}
 .nav-mega__row.has-preview{--nav-row-preview-width:210px;--nav-row-preview-gap:22px;--nav-row-fade-width:140px}
 .nav-mega__row:hover td,.nav-mega__row:focus-within td{background:color-mix(in srgb,var(--nav-mega-acc) 14%,#fff)}
 .nav-mega__row.is-active td{background:color-mix(in srgb,var(--nav-mega-acc) 18%,#fff)}
