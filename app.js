@@ -1562,7 +1562,9 @@ App.initNavDropdown = function() {
         ? item.price
         : "");
     const priceDisplay = computedDisplay ? formatPriceDisplay(computedDisplay) : "";
-    const accentColor = navAccentMap[areaId] || getCategoryInfo(areaId)?.color || navAccentMap.all;
+    const areaInfo = getCategoryInfo(areaId) || {};
+    const accentColor = navAccentMap[areaId] || areaInfo.color || navAccentMap.all;
+    const lifeAreaLabel = areaInfo.short || areaInfo.title || areaId;
     const rawImage = typeof item.image === "string" ? item.image.trim() : "";
     const image = rawImage || "";
     const previewImages = Array.isArray(item.previewImages)
@@ -1596,7 +1598,9 @@ App.initNavDropdown = function() {
       url: href,
       image,
       previewImages,
-      accentColor
+      accentColor,
+      lifeAreaId: areaId,
+      lifeAreaLabel
     };
   };
 
@@ -1873,7 +1877,7 @@ App.initNavDropdown = function() {
         const message = query
           ? `No matches for “${navState.q}”.`
           : info.empty || "Fresh tools coming soon.";
-        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="4">${App.escapeHtml(message)}</td></tr>`;
+        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="5">${App.escapeHtml(message)}</td></tr>`;
         setActiveRow(null);
       } else {
         const rows = sorted
@@ -1890,7 +1894,16 @@ App.initNavDropdown = function() {
             const previewSrc = getPreviewSource(item);
             const previewAttr = previewSrc ? ` data-preview-image="${App.escapeHtml(previewSrc)}"` : "";
             const previewClass = previewSrc ? " has-preview" : "";
-            return `<tr class="nav-mega__row${previewClass}" data-nav-item="${App.escapeHtml(navId)}"${previewAttr}><td><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+            const accentColor = item.accentColor ? App.escapeHtml(item.accentColor) : "";
+            const dotStyle = accentColor ? ` style="--nav-dot:${accentColor}"` : "";
+            const areaInfo =
+              item.lifeAreaLabel ||
+              getCategoryInfo(navState.cat)?.short ||
+              getCategoryInfo(navState.cat)?.title ||
+              "Life area";
+            const areaLabelText = `Life area: ${areaInfo}`;
+            const areaLabel = App.escapeHtml(areaLabelText);
+            return `<tr class="nav-mega__row${previewClass}" data-nav-item="${App.escapeHtml(navId)}"${previewAttr}><td class="nav-mega__dot-cell"><span class="nav-mega__dot nav-mega__dot--row"${dotStyle} aria-hidden="true"></span><span class="sr-only">${areaLabel}</span></td><td><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
         rowsEl.innerHTML = rows;
@@ -1940,14 +1953,24 @@ App.initNavDropdown = function() {
               <table class="nav-mega__table" data-nav-table aria-label="${initialLabel} list">
                 <thead>
                   <tr>
-                    <th scope="col" style="width:54%">Product</th>
-                    <th scope="col" style="width:20%">Type</th>
+                    <th scope="col" class="nav-mega__icon-header" style="width:6%">
+                      <span class="sr-only">Life area</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="8"/>
+                          <circle cx="12" cy="12" r="2.8"/>
+                          <path d="M12 3.5V8M20.5 12H16M12 20.5V16M3.5 12H8"/>
+                        </g>
+                      </svg>
+                    </th>
+                    <th scope="col" style="width:50%">Product</th>
+                    <th scope="col" style="width:18%">Type</th>
                     <th scope="col" style="width:14%">Badge</th>
                     <th scope="col" style="width:12%">Price</th>
                   </tr>
                 </thead>
                 <tbody data-nav-rows>
-                  <tr class="nav-mega__empty-row"><td colspan="4">Loading Life Harmony tools…</td></tr>
+                  <tr class="nav-mega__empty-row"><td colspan="5">Loading Life Harmony tools…</td></tr>
                 </tbody>
               </table>
             </div>
