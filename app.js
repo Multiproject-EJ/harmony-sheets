@@ -125,7 +125,7 @@ App.LIFE_AREAS = {
   love: {
     title: "Love & Romantic Relationships",
     short: "Love",
-    color: "#F471B5",
+    color: "#FF4D8D",
     icon: App.LIFE_ICONS.love,
     description: "Create rituals and check-ins that nurture meaningful partnerships.",
     link: "products.html?area=love",
@@ -141,7 +141,7 @@ App.LIFE_AREAS = {
   career: {
     title: "Career, Growth & Learning",
     short: "Career",
-    color: "#A855F7",
+    color: "#7B3FF2",
     icon: App.LIFE_ICONS.career,
     description: "Stay organized, track goals, and keep moving toward your next milestone.",
     link: "products.html?area=career",
@@ -157,7 +157,7 @@ App.LIFE_AREAS = {
   health: {
     title: "Health & Fitness",
     short: "Health",
-    color: "#22C55E",
+    color: "#00B46E",
     icon: App.LIFE_ICONS.health,
     description: "Build calm routines for movement, rest, and mindful habits.",
     link: "products.html?area=health",
@@ -173,7 +173,7 @@ App.LIFE_AREAS = {
   finances: {
     title: "Finances",
     short: "Finances",
-    color: "#FACC15",
+    color: "#FFB800",
     icon: App.LIFE_ICONS.finances,
     description: "See your money clearly and plan budgets that match your values.",
     link: "products.html?area=finances",
@@ -189,7 +189,7 @@ App.LIFE_AREAS = {
   fun: {
     title: "Fun & Recreation",
     short: "Fun",
-    color: "#FB923C",
+    color: "#FF6B2C",
     icon: App.LIFE_ICONS.fun,
     description: "Plan adventures, hobbies, and creative breaks that refill your energy.",
     link: "products.html?area=fun",
@@ -205,7 +205,7 @@ App.LIFE_AREAS = {
   family: {
     title: "Family & Friends",
     short: "Family",
-    color: "#60A5FA",
+    color: "#1A7CFF",
     icon: App.LIFE_ICONS.family,
     description: "Coordinate family schedules and stay connected with the people who matter most.",
     link: "products.html?area=family",
@@ -221,7 +221,7 @@ App.LIFE_AREAS = {
   environment: {
     title: "Living Space",
     short: "Living Space",
-    color: "#14B8A6",
+    color: "#00B8A0",
     icon: App.LIFE_ICONS.environment,
     description: "Design supportive spaces, tidy routines, and home projects with clarity.",
     link: "products.html?area=environment",
@@ -237,7 +237,7 @@ App.LIFE_AREAS = {
   spirituality: {
     title: "Spirituality & Community",
     short: "Spirituality",
-    color: "#6366F1",
+    color: "#4554FF",
     icon: App.LIFE_ICONS.spirituality,
     description: "Cultivate reflection, service, and community practices that ground you.",
     link: "products.html?area=spirituality",

@@ -93,38 +93,72 @@
       <div class="life-wheel__graphic">
         <svg viewBox="0 0 360 360" role="img" aria-labelledby="life-wheel-title">
           <title id="life-wheel-title">Life Harmony Wheel categories</title>
+          <defs>
+            <linearGradient id="life-wheel-gradient-love" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FF9AC8"/>
+              <stop offset="100%" stop-color="#FF4D8D"/>
+            </linearGradient>
+            <linearGradient id="life-wheel-gradient-career" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#D1B8FF"/>
+              <stop offset="100%" stop-color="#7B3FF2"/>
+            </linearGradient>
+            <linearGradient id="life-wheel-gradient-health" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#6CFCC5"/>
+              <stop offset="100%" stop-color="#00B46E"/>
+            </linearGradient>
+            <linearGradient id="life-wheel-gradient-finances" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFE176"/>
+              <stop offset="100%" stop-color="#FFB800"/>
+            </linearGradient>
+            <linearGradient id="life-wheel-gradient-fun" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFC08D"/>
+              <stop offset="100%" stop-color="#FF6B2C"/>
+            </linearGradient>
+            <linearGradient id="life-wheel-gradient-family" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#8AC9FF"/>
+              <stop offset="100%" stop-color="#1A7CFF"/>
+            </linearGradient>
+            <linearGradient id="life-wheel-gradient-environment" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7FF1D7"/>
+              <stop offset="100%" stop-color="#00B8A0"/>
+            </linearGradient>
+            <linearGradient id="life-wheel-gradient-spirituality" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#B7C0FF"/>
+              <stop offset="100%" stop-color="#4554FF"/>
+            </linearGradient>
+          </defs>
           <g class="life-wheel__segments" transform="rotate(-22.5 180 180)">
             <a class="life-wheel__slice-link" data-area="love" href="products.html?area=love">
               <title>Love &amp; Romantic Relationships</title>
-              <path class="life-wheel__slice" fill="#F471B5" d="M 180 180 L 180.0 20.0 A 160 160 0 0 1 293.137 66.863 Z"/>
+              <path class="life-wheel__slice" fill="url(#life-wheel-gradient-love)" d="M 180 180 L 180.0 20.0 A 160 160 0 0 1 293.137 66.863 Z"/>
             </a>
             <a class="life-wheel__slice-link" data-area="career" href="products.html?area=career">
               <title>Career, Growth &amp; Learning</title>
-              <path class="life-wheel__slice" fill="#A855F7" d="M 180 180 L 293.137 66.863 A 160 160 0 0 1 340.0 180.0 Z"/>
+              <path class="life-wheel__slice" fill="url(#life-wheel-gradient-career)" d="M 180 180 L 293.137 66.863 A 160 160 0 0 1 340.0 180.0 Z"/>
             </a>
             <a class="life-wheel__slice-link" data-area="health" href="products.html?area=health">
               <title>Health &amp; Fitness</title>
-              <path class="life-wheel__slice" fill="#22C55E" d="M 180 180 L 340.0 180.0 A 160 160 0 0 1 293.137 293.137 Z"/>
+              <path class="life-wheel__slice" fill="url(#life-wheel-gradient-health)" d="M 180 180 L 340.0 180.0 A 160 160 0 0 1 293.137 293.137 Z"/>
             </a>
             <a class="life-wheel__slice-link" data-area="finances" href="products.html?area=finances">
               <title>Finances</title>
-              <path class="life-wheel__slice" fill="#FACC15" d="M 180 180 L 293.137 293.137 A 160 160 0 0 1 180.0 340.0 Z"/>
+              <path class="life-wheel__slice" fill="url(#life-wheel-gradient-finances)" d="M 180 180 L 293.137 293.137 A 160 160 0 0 1 180.0 340.0 Z"/>
             </a>
             <a class="life-wheel__slice-link" data-area="fun" href="products.html?area=fun">
               <title>Fun &amp; Recreation</title>
-              <path class="life-wheel__slice" fill="#FB923C" d="M 180 180 L 180.0 340.0 A 160 160 0 0 1 66.863 293.137 Z"/>
+              <path class="life-wheel__slice" fill="url(#life-wheel-gradient-fun)" d="M 180 180 L 180.0 340.0 A 160 160 0 0 1 66.863 293.137 Z"/>
             </a>
             <a class="life-wheel__slice-link" data-area="family" href="products.html?area=family">
               <title>Family &amp; Friends</title>
-              <path class="life-wheel__slice" fill="#60A5FA" d="M 180 180 L 66.863 293.137 A 160 160 0 0 1 20.0 180.0 Z"/>
+              <path class="life-wheel__slice" fill="url(#life-wheel-gradient-family)" d="M 180 180 L 66.863 293.137 A 160 160 0 0 1 20.0 180.0 Z"/>
             </a>
             <a class="life-wheel__slice-link" data-area="environment" href="products.html?area=environment">
               <title>Living Space</title>
-              <path class="life-wheel__slice" fill="#14B8A6" d="M 180 180 L 20.0 180.0 A 160 160 0 0 1 66.863 66.863 Z"/>
+              <path class="life-wheel__slice" fill="url(#life-wheel-gradient-environment)" d="M 180 180 L 20.0 180.0 A 160 160 0 0 1 66.863 66.863 Z"/>
             </a>
             <a class="life-wheel__slice-link" data-area="spirituality" href="products.html?area=spirituality">
               <title>Spirituality &amp; Community</title>
-              <path class="life-wheel__slice" fill="#6366F1" d="M 180 180 L 66.863 66.863 A 160 160 0 0 1 180.0 20.0 Z"/>
+              <path class="life-wheel__slice" fill="url(#life-wheel-gradient-spirituality)" d="M 180 180 L 66.863 66.863 A 160 160 0 0 1 180.0 20.0 Z"/>
             </a>
           </g>
           <circle class="life-wheel__center" cx="180" cy="180" r="72"></circle>
