@@ -1691,147 +1691,61 @@ App.initNavDropdown = function() {
   let infoTextEl = null;
   let searchInput = null;
   let sortSelect = null;
-  let previewEl = null;
-  let previewContentEl = null;
   let tableEl = null;
-  let activePreviewId = null;
   let activePreviewRow = null;
   let hasRowListeners = false;
-  const previewItemMap = new Map();
-  const createInitials = value => {
-    const text = String(value || "").trim();
-    if (!text) return "HS";
-    const parts = text.split(/\s+/).filter(Boolean);
-    if (!parts.length) return "HS";
-    if (parts.length === 1) {
-      return parts[0].slice(0, 2).toUpperCase();
+
+  const applyRowImage = (row, src) => {
+    if (!row) return;
+    if (!src) {
+      row.style.removeProperty("--nav-row-image");
+      return;
     }
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    const safe = String(src).replace(/["\\\n\r]/g, match => {
+      if (match === "\n" || match === "\r") return "";
+      return `\\${match}`;
+    });
+    row.style.setProperty("--nav-row-image", `url("${safe}")`);
   };
 
   const setActiveRow = row => {
     if (activePreviewRow === row) return;
     if (activePreviewRow) {
       activePreviewRow.classList.remove("is-active");
+      applyRowImage(activePreviewRow, "");
     }
     activePreviewRow = row || null;
     if (activePreviewRow) {
       activePreviewRow.classList.add("is-active");
+      const previewSrc = activePreviewRow.getAttribute("data-preview-image") || "";
+      applyRowImage(activePreviewRow, previewSrc);
     }
-  };
-
-  const resetPreview = () => {
-    if (!previewEl || !previewContentEl) return;
-    previewContentEl.innerHTML = '<p class="nav-mega__preview-placeholder">Hover a product to preview images.</p>';
-    previewEl.classList.add("is-empty");
-    activePreviewId = null;
-    setActiveRow(null);
-  };
-
-  const findRowById = id => {
-    if (!rowsEl || !id) return null;
-    const selectorId = String(id);
-    if (window.CSS && typeof window.CSS.escape === "function") {
-      return rowsEl.querySelector(`[data-nav-item="${window.CSS.escape(selectorId)}"]`);
-    }
-    return Array.from(rowsEl.querySelectorAll("[data-nav-item]")).find(row => row.getAttribute("data-nav-item") === selectorId) || null;
-  };
-
-  const renderPreview = (item, row, navIdOverride = null) => {
-    if (!previewEl || !previewContentEl) return;
-    if (!item) {
-      resetPreview();
-      return;
-    }
-
-    const rawName = item.name || "Harmony Sheets tool";
-    const safeUrl = App.escapeHtml(item.url || "#");
-    const fallbackAccent = navAccentMap[navState.cat] || getCategoryInfo(navState.cat)?.color || navAccentMap.all;
-    const previewAccent = item.accentColor || fallbackAccent;
-    previewEl.style.setProperty("--nav-mega-preview-acc", previewAccent);
-    const imageSrc = item.image ? App.escapeHtml(item.image) : "";
-    const initials = App.escapeHtml(createInitials(rawName));
-    const imageList = Array.isArray(item.previewImages) ? item.previewImages : [];
-    const cleanedImages = imageList
-      .map(src => (typeof src === "string" ? src.trim() : ""))
-      .filter(Boolean);
-
-    if (!cleanedImages.length && imageSrc) {
-      cleanedImages.push(item.image);
-    }
-
-    if (cleanedImages.length > 3) {
-      cleanedImages.length = 3;
-    }
-
-    if (cleanedImages.length === 1) {
-      cleanedImages.push(cleanedImages[0], cleanedImages[0]);
-    } else if (cleanedImages.length === 2) {
-      cleanedImages.push(cleanedImages[0]);
-    }
-
-    const galleryMarkup = cleanedImages.length
-      ? `<div class="nav-mega__preview-gallery">${cleanedImages
-          .map((src, index) => {
-            const escapedSrc = App.escapeHtml(src);
-            const alt = App.escapeHtml(`${rawName} preview ${index + 1}`);
-            return `<a class="nav-mega__preview-item" href="${safeUrl}"><img class="nav-mega__preview-img" src="${escapedSrc}" alt="${alt}"></a>`;
-          })
-          .join("")}</div>`
-      : `<div class="nav-mega__preview-gallery">${Array.from({ length: 3 })
-          .map(
-            () =>
-              `<a class="nav-mega__preview-item nav-mega__preview-item--placeholder" href="${safeUrl}"><span>${initials}</span></a>`
-          )
-          .join("")}</div>`;
-
-    previewContentEl.innerHTML = `
-      ${galleryMarkup}
-      <a class="nav-mega__preview-link" href="${safeUrl}">View product</a>
-    `;
-    previewEl.classList.remove("is-empty");
-    const resolvedId = navIdOverride || item.id || null;
-    activePreviewId = resolvedId;
-    if (row) {
-      setActiveRow(row);
-    } else if (resolvedId) {
-      const foundRow = findRowById(resolvedId);
-      setActiveRow(foundRow || null);
-    } else {
-      setActiveRow(null);
-    }
-  };
-
-  const previewDefault = () => {
-    const first = previewItemMap.keys().next();
-    if (!first || first.done) {
-      resetPreview();
-      return;
-    }
-    const id = first.value;
-    const item = previewItemMap.get(id);
-    const row = findRowById(id);
-    renderPreview(item, row || undefined, id);
   };
 
   const handleRowEvent = event => {
+    if (!rowsEl) return;
     const row = event.target.closest("[data-nav-item]");
-    if (!row) return;
-    const id = row.getAttribute("data-nav-item");
-    if (!id) return;
-    const item = previewItemMap.get(id);
-    if (!item) return;
-    renderPreview(item, row, id);
+    if (!row || !rowsEl.contains(row)) return;
+    setActiveRow(row);
+  };
+
+  const handleRowsMouseLeave = () => {
+    setActiveRow(null);
+  };
+
+  const handleRowsFocusOut = event => {
+    if (!rowsEl) return;
+    if (!rowsEl.contains(event.relatedTarget)) {
+      setActiveRow(null);
+    }
   };
 
   const attachRowListeners = () => {
     if (!rowsEl || hasRowListeners) return;
     rowsEl.addEventListener("mouseover", handleRowEvent);
     rowsEl.addEventListener("focusin", handleRowEvent);
-    rowsEl.addEventListener("mouseleave", previewDefault);
-    rowsEl.addEventListener("focusout", event => {
-      if (!rowsEl.contains(event.relatedTarget)) previewDefault();
-    });
+    rowsEl.addEventListener("mouseleave", handleRowsMouseLeave);
+    rowsEl.addEventListener("focusout", handleRowsFocusOut);
     hasRowListeners = true;
   };
 
@@ -1902,6 +1816,18 @@ App.initNavDropdown = function() {
     return "";
   };
 
+  const getPreviewSource = item => {
+    if (!item) return "";
+    const list = Array.isArray(item.previewImages) ? item.previewImages : [];
+    const cleaned = list
+      .map(src => (typeof src === "string" ? src.trim() : ""))
+      .filter(Boolean);
+    if (!cleaned.length && item.image) {
+      cleaned.push(item.image);
+    }
+    return cleaned.length ? cleaned[0] : "";
+  };
+
   const updateActive = () => {
     if (!panelEl) return;
     if (!areaOrder.includes(navState.cat)) {
@@ -1912,10 +1838,6 @@ App.initNavDropdown = function() {
     const accent = navAccentMap[navState.cat] || info.color || navAccentMap.all;
     panelEl.dataset.area = navState.cat;
     panelEl.style.setProperty("--nav-mega-acc", accent);
-
-    if (previewEl) {
-      previewEl.style.setProperty("--nav-mega-preview-acc", accent);
-    }
 
     if (tableEl) {
       const labelBase = info.title || info.short || "Life Harmony tools";
@@ -1961,17 +1883,14 @@ App.initNavDropdown = function() {
 
     const totalItems = sorted.length;
 
-    previewItemMap.clear();
-
     if (rowsEl) {
       if (!totalItems) {
         const message = query
           ? `No matches for “${navState.q}”.`
           : info.empty || "Fresh tools coming soon.";
         rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="4">${App.escapeHtml(message)}</td></tr>`;
-        resetPreview();
+        setActiveRow(null);
       } else {
-        let firstNavId = null;
         const rows = sorted
           .map((item, index) => {
             const badgeType = getBadgeType(item.badge);
@@ -1983,23 +1902,14 @@ App.initNavDropdown = function() {
             const name = App.escapeHtml(item.name || "Harmony Sheets tool");
             const type = App.escapeHtml(item.type || "Template");
             const navId = String(item.id || `${navState.cat}-item-${index}`);
-            if (index === 0) firstNavId = navId;
-            previewItemMap.set(navId, item);
-            return `<tr class="nav-mega__row" data-nav-item="${App.escapeHtml(navId)}"><td><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+            const previewSrc = getPreviewSource(item);
+            const previewAttr = previewSrc ? ` data-preview-image="${App.escapeHtml(previewSrc)}"` : "";
+            const previewClass = previewSrc ? " has-preview" : "";
+            return `<tr class="nav-mega__row${previewClass}" data-nav-item="${App.escapeHtml(navId)}"${previewAttr}><td><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
         rowsEl.innerHTML = rows;
-
-        if (activePreviewId && previewItemMap.has(activePreviewId)) {
-          const activeItem = previewItemMap.get(activePreviewId);
-          const activeRow = findRowById(activePreviewId);
-          if (activeItem && activeRow) {
-            renderPreview(activeItem, activeRow, activePreviewId);
-            return;
-          }
-        }
-
-        resetPreview();
+        setActiveRow(null);
       }
     }
 
@@ -2013,10 +1923,6 @@ App.initNavDropdown = function() {
           infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool" : "tools"} available`;
         }
       }
-    }
-
-    if (!totalItems) {
-      previewItemMap.clear();
     }
 
     scheduleReposition();
@@ -2062,6 +1968,8 @@ App.initNavDropdown = function() {
                   <span class="sr-only">Search Life Harmony tools</span>
                   <input type="search" placeholder="Search tools…" value="${App.escapeHtml(navState.q)}" data-nav-search>
                 </label>
+              </div>
+              <div class="nav-mega__sort">
                 <select class="nav-mega__select" data-nav-sort>
                   <option value="badge"${navState.sort === "badge" ? " selected" : ""}>Sort: Badge</option>
                   <option value="name"${navState.sort === "name" ? " selected" : ""}>Sort: Name</option>
@@ -2089,11 +1997,6 @@ App.initNavDropdown = function() {
               <a class="nav-mega__pager-link" href="products.html">Browse all Harmony tools</a>
             </div>
           </div>
-          <div class="nav-mega__preview is-empty" data-nav-preview>
-            <div class="nav-mega__preview-content" data-nav-preview-content>
-              <p class="nav-mega__preview-placeholder">Hover a product to preview images.</p>
-            </div>
-          </div>
         </div>
       </div>
     `;
@@ -2103,8 +2006,6 @@ App.initNavDropdown = function() {
     infoTextEl = content.querySelector("[data-nav-info]");
     searchInput = content.querySelector("[data-nav-search]");
     sortSelect = content.querySelector("[data-nav-sort]");
-    previewEl = content.querySelector("[data-nav-preview]");
-    previewContentEl = content.querySelector("[data-nav-preview-content]");
     tableEl = content.querySelector("[data-nav-table]");
 
     catButtonMap.clear();
@@ -2118,10 +2019,6 @@ App.initNavDropdown = function() {
         updateActive();
       });
     });
-
-    if (previewEl && previewContentEl) {
-      resetPreview();
-    }
 
     if (searchInput) {
       searchInput.addEventListener("input", event => {
