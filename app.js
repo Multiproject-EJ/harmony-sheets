@@ -1686,7 +1686,6 @@ App.initNavDropdown = function() {
 
   let areaProducts = buildAreaProducts([]);
   let panelEl = null;
-  const catButtonMap = new Map();
   let rowsEl = null;
   let infoTextEl = null;
   let searchInput = null;
@@ -1790,14 +1789,6 @@ App.initNavDropdown = function() {
     return aggregated;
   };
 
-  const updateCounts = () => {
-    catButtonMap.forEach(({ count }, id) => {
-      if (!count) return;
-      const total = Array.isArray(areaProducts[id]) ? areaProducts[id].length : 0;
-      count.textContent = total;
-    });
-  };
-
   const badgeWeight = badge => {
     const value = String(badge || "").toLowerCase();
     if (!value) return 0;
@@ -1851,12 +1842,6 @@ App.initNavDropdown = function() {
     if (sortSelect && sortSelect.value !== navState.sort) {
       sortSelect.value = navState.sort;
     }
-
-    catButtonMap.forEach(({ button }, id) => {
-      if (!button) return;
-      const isActive = id === navState.cat;
-      button.setAttribute("aria-current", isActive ? "true" : "false");
-    });
 
     const query = (navState.q || "").trim().toLowerCase();
 
@@ -1929,38 +1914,12 @@ App.initNavDropdown = function() {
   };
 
   const renderShell = () => {
-    const catItems = areaOrder
-      .map(id => {
-        const info = getCategoryInfo(id);
-        if (!info) return "";
-        const label = App.escapeHtml(info.short || info.title || id);
-        const safeId = App.escapeHtml(id);
-        const count = Array.isArray(areaProducts[id]) ? areaProducts[id].length : 0;
-        const extraClass = ` nav-mega__catbtn--${safeId}`;
-        return `
-          <li>
-            <button class="nav-mega__catbtn${extraClass}" type="button" data-nav-cat="${safeId}" aria-current="${id === navState.cat}">
-              <span class="nav-mega__dot nav-mega__dot--${safeId}"></span>
-              <span class="nav-mega__catname">${label}</span>
-              <span class="nav-mega__count" data-nav-count>${count}</span>
-            </button>
-          </li>
-        `;
-      })
-      .join("");
-
     const currentInfo = getCategoryInfo(navState.cat) || {};
     const initialLabel = App.escapeHtml(currentInfo.title || currentInfo.short || "Life Harmony tools");
 
     content.innerHTML = `
       <div class="nav-mega__panel" data-nav-panel data-area="${App.escapeHtml(navState.cat)}">
         <div class="nav-mega__pane">
-          <aside class="nav-mega__cats">
-            <div class="nav-mega__cats-head">Explore</div>
-            <ul class="nav-mega__catlist">
-              ${catItems}
-            </ul>
-          </aside>
           <div class="nav-mega__prod">
             <div class="nav-mega__prod-head">
               <div class="nav-mega__tools">
@@ -2008,18 +1967,6 @@ App.initNavDropdown = function() {
     sortSelect = content.querySelector("[data-nav-sort]");
     tableEl = content.querySelector("[data-nav-table]");
 
-    catButtonMap.clear();
-    content.querySelectorAll("[data-nav-cat]").forEach(btn => {
-      const id = btn.getAttribute("data-nav-cat");
-      const count = btn.querySelector("[data-nav-count]");
-      catButtonMap.set(id, { button: btn, count });
-      btn.addEventListener("click", () => {
-        if (navState.cat === id) return;
-        navState.cat = id;
-        updateActive();
-      });
-    });
-
     if (searchInput) {
       searchInput.addEventListener("input", event => {
         navState.q = event.target.value || "";
@@ -2040,13 +1987,11 @@ App.initNavDropdown = function() {
   };
 
   renderShell();
-  updateCounts();
   updateActive();
 
   App.loadProducts()
     .then(products => {
       areaProducts = buildAreaProducts(products);
-      updateCounts();
       updateActive();
     })
     .catch(err => {
