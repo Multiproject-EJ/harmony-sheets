@@ -302,14 +302,14 @@ body[class*="theme-midnight"]{
 .actions+.action-hint{margin:-.35rem 0 1.5rem 0}
 .actions--compact{gap:.4rem}
 
-.life-parallax{position:relative;min-height:clamp(360px,60vh,600px);display:flex;align-items:center;justify-content:center;text-align:center;padding:48px 24px;color:#fff;background-image:linear-gradient(180deg,rgba(15,23,42,.65) 0%,rgba(15,23,42,.4) 60%,rgba(15,23,42,.65) 100%),url("assets/topplx.webp");background-size:cover;background-position:center;background-attachment:fixed;overflow:hidden}
+.life-parallax{position:relative;min-height:clamp(324px,54vh,540px);display:flex;align-items:center;justify-content:center;text-align:center;padding:44px 22px;color:#fff;background-image:linear-gradient(180deg,rgba(15,23,42,.65) 0%,rgba(15,23,42,.4) 60%,rgba(15,23,42,.65) 100%),url("assets/topplx.webp");background-size:cover,auto 100%;background-position:center,center;background-repeat:no-repeat,no-repeat;background-attachment:fixed;overflow:hidden}
 .life-parallax::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(96,165,250,.35),transparent 55%),radial-gradient(circle at 80% 30%,rgba(165,180,252,.32),transparent 50%);mix-blend-mode:screen;opacity:.85;pointer-events:none}
 .life-parallax__inner{position:relative;max-width:660px;display:grid;gap:18px;justify-items:center}
 .life-parallax__eyebrow{display:inline-flex;padding:8px 18px;border-radius:999px;background:rgba(148,163,184,.24);color:rgba(255,255,255,.88);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:.75rem}
 .life-parallax h2{margin:0;font-size:clamp(2rem,3vw,2.75rem);font-weight:700;letter-spacing:.01em}
 .life-parallax p{margin:0;color:rgba(255,255,255,.88);font-size:1.05rem;line-height:1.6;max-width:540px}
 @media (max-width:768px){
-  .life-parallax{background-attachment:scroll;min-height:clamp(280px,55vh,520px);padding:42px 18px}
+  .life-parallax{background-attachment:scroll;min-height:clamp(252px,49.5vh,468px);padding:38px 16px}
   .life-parallax__inner{gap:16px}
   .life-parallax__eyebrow{font-size:.7rem;letter-spacing:.1em;padding:7px 16px}
   .life-parallax h2{font-size:clamp(1.6rem,6vw,2.2rem)}
