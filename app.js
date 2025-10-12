@@ -1877,7 +1877,7 @@ App.initNavDropdown = function() {
         const message = query
           ? `No matches for “${navState.q}”.`
           : info.empty || "Fresh tools coming soon.";
-        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="5">${App.escapeHtml(message)}</td></tr>`;
+        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="4">${App.escapeHtml(message)}</td></tr>`;
         setActiveRow(null);
       } else {
         const rows = sorted
@@ -1903,7 +1903,7 @@ App.initNavDropdown = function() {
               "Life area";
             const areaLabelText = `Life area: ${areaInfo}`;
             const areaLabel = App.escapeHtml(areaLabelText);
-            return `<tr class="nav-mega__row${previewClass}" data-nav-item="${App.escapeHtml(navId)}"${previewAttr}><td class="nav-mega__dot-cell"><span class="nav-mega__dot nav-mega__dot--row"${dotStyle} aria-hidden="true"></span><span class="sr-only">${areaLabel}</span></td><td><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+            return `<tr class="nav-mega__row${previewClass}" data-nav-item="${App.escapeHtml(navId)}"${previewAttr}><td class="nav-mega__product-cell"><span class="nav-mega__dot nav-mega__dot--row"${dotStyle} aria-hidden="true"></span><span class="sr-only">${areaLabel}</span><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
         rowsEl.innerHTML = rows;
@@ -1953,24 +1953,25 @@ App.initNavDropdown = function() {
               <table class="nav-mega__table" data-nav-table aria-label="${initialLabel} list">
                 <thead>
                   <tr>
-                    <th scope="col" class="nav-mega__icon-header" style="width:6%">
-                      <span class="sr-only">Life area</span>
-                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                          <circle cx="12" cy="12" r="8"/>
-                          <circle cx="12" cy="12" r="2.8"/>
-                          <path d="M12 3.5V8M20.5 12H16M12 20.5V16M3.5 12H8"/>
-                        </g>
-                      </svg>
+                    <th scope="col" class="nav-mega__product-header" style="width:56%">
+                      <span class="nav-mega__product-header-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="8"/>
+                            <circle cx="12" cy="12" r="2.8"/>
+                            <path d="M12 3.5V8M20.5 12H16M12 20.5V16M3.5 12H8"/>
+                          </g>
+                        </svg>
+                      </span>
+                      <span>Product</span>
                     </th>
-                    <th scope="col" style="width:50%">Product</th>
                     <th scope="col" style="width:18%">Type</th>
                     <th scope="col" style="width:14%">Badge</th>
                     <th scope="col" style="width:12%">Price</th>
                   </tr>
                 </thead>
                 <tbody data-nav-rows>
-                  <tr class="nav-mega__empty-row"><td colspan="5">Loading Life Harmony tools…</td></tr>
+                  <tr class="nav-mega__empty-row"><td colspan="4">Loading Life Harmony tools…</td></tr>
                 </tbody>
               </table>
             </div>
