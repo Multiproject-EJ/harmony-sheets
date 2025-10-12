@@ -1695,6 +1695,50 @@ App.initNavDropdown = function() {
   let activePreviewRow = null;
   let hasRowListeners = false;
 
+  const navDebugEnabled = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.has("navDebug");
+    } catch (error) {
+      return false;
+    }
+  })();
+
+  const logTableLayout = (force = false) => {
+    if (!tableEl || (!navDebugEnabled && !force)) return;
+    const headerRow = tableEl.tHead?.rows?.[0];
+    const bodyRow = tableEl.tBodies?.[0]?.rows?.[0] || null;
+    const mapCells = row =>
+      Array.from(row?.cells || []).map(cell => {
+        const rect = cell.getBoundingClientRect();
+        return {
+          column: cell.cellIndex + 1,
+          text: (cell.textContent || "").trim() || "(empty)",
+          left: Math.round(rect.left),
+          width: Math.round(rect.width)
+        };
+      });
+
+    const headerData = mapCells(headerRow);
+    const bodyData = mapCells(bodyRow);
+    if (!headerData.length && !bodyData.length) return;
+
+    const label = force ? "[nav-mega] manual layout check" : "[nav-mega] column layout";
+    const groupFn = force
+      ? console.group || console.log
+      : console.groupCollapsed || console.group || console.log;
+    const closeFn = console.groupEnd || (() => {});
+
+    groupFn.call(console, label);
+    if (headerData.length) {
+      console.table(headerData);
+    }
+    if (bodyData.length) {
+      console.table(bodyData);
+    }
+    closeFn.call(console);
+  };
+
   const applyRowImage = (row, src) => {
     if (!row) return;
     if (!src) {
@@ -1890,6 +1934,7 @@ App.initNavDropdown = function() {
           : info.empty || "Fresh tools coming soon.";
         rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="4">${App.escapeHtml(message)}</td></tr>`;
         setActiveRow(null);
+        logTableLayout();
       } else {
         const rows = sorted
           .map((item, index) => {
@@ -1910,6 +1955,7 @@ App.initNavDropdown = function() {
           .join("");
         rowsEl.innerHTML = rows;
         setActiveRow(null);
+        logTableLayout();
       }
     }
 
@@ -1978,7 +2024,7 @@ App.initNavDropdown = function() {
               </div>
             </div>
             <div class="nav-mega__scroll">
-              <table class="nav-mega__table" data-nav-table aria-label="${initialLabel} list">
+              <table class="nav-mega__table" data-nav-table data-nav-trim="product" aria-label="${initialLabel} list">
                 <thead>
                   <tr>
                     <th scope="col" style="width:54%">Product</th>
@@ -2007,6 +2053,11 @@ App.initNavDropdown = function() {
     searchInput = content.querySelector("[data-nav-search]");
     sortSelect = content.querySelector("[data-nav-sort]");
     tableEl = content.querySelector("[data-nav-table]");
+
+    if (navDebugEnabled) {
+      mega?.setAttribute("data-nav-debug", "true");
+      logTableLayout();
+    }
 
     catButtonMap.clear();
     content.querySelectorAll("[data-nav-cat]").forEach(btn => {
@@ -2042,6 +2093,10 @@ App.initNavDropdown = function() {
   renderShell();
   updateCounts();
   updateActive();
+
+  App.debugMegaMenuLayout = () => {
+    logTableLayout(true);
+  };
 
   App.loadProducts()
     .then(products => {
