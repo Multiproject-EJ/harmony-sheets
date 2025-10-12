@@ -1905,7 +1905,7 @@ App.initNavDropdown = function() {
             const previewSrc = getPreviewSource(item);
             const previewAttr = previewSrc ? ` data-preview-image="${App.escapeHtml(previewSrc)}"` : "";
             const previewClass = previewSrc ? " has-preview" : "";
-            return `<tr class="nav-mega__row${previewClass}" data-nav-item="${App.escapeHtml(navId)}"${previewAttr}><td><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+            return `<tr class="nav-mega__row${previewClass}" data-nav-item="${App.escapeHtml(navId)}"${previewAttr}><td><a class="nav-mega__product-link" href="${url}" title="${name}"><span class="nav-mega__product-name">${name}</span></a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
         rowsEl.innerHTML = rows;
