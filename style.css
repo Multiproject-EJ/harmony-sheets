@@ -22,7 +22,7 @@ img{max-width:100%;display:block}
 .site-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:saturate(150%) blur(14px);z-index:60;min-height:76px}
 .brand{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:1.12rem;letter-spacing:.02em;color:#0f172a;text-decoration:none;transition:color .2s ease}
 .brand__logo{width:48px;height:48px;object-fit:contain;display:block;flex-shrink:0}
-.brand__text{display:flex;flex-direction:column;gap:2px;line-height:1.05;max-width:0;max-height:0;opacity:0;transform:none;transform-origin:left center;overflow:hidden;transition:max-width .3s ease,max-height .3s ease,opacity .28s ease}
+.brand__text{display:flex;flex-direction:column;gap:2px;line-height:1.05;max-width:0;max-height:0;opacity:0;transform:none;transform-origin:left center;overflow:hidden;transition:opacity .32s ease}
 .site-header:not(.site-header--brand-text-visible) .brand{gap:0}
 .site-header--brand-text-visible .brand{gap:8px}
 .site-header--brand-text-visible .brand__text{opacity:1;transform:none;max-width:min(260px,70vw);max-height:200px}
