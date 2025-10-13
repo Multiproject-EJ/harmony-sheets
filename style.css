@@ -315,16 +315,21 @@ body[class*="theme-midnight"]{
 .life-parallax{position:relative;min-height:clamp(260px,43vh,432px);display:flex;align-items:center;justify-content:center;text-align:center;padding:44px 22px;color:#fff;background-image:linear-gradient(180deg,rgba(15,23,42,.65) 0%,rgba(15,23,42,.4) 60%,rgba(15,23,42,.65) 100%),url("assets/topplx.webp");background-size:cover,auto 100%;background-position:center,center;background-repeat:no-repeat,no-repeat;background-attachment:fixed;overflow:hidden}
 .life-parallax::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 20%,rgba(96,165,250,.35),transparent 55%),radial-gradient(circle at 80% 30%,rgba(165,180,252,.32),transparent 50%);mix-blend-mode:screen;opacity:.85;pointer-events:none}
 .life-parallax__inner{position:relative;max-width:660px;display:grid;gap:18px;justify-items:center;z-index:1}
-.life-parallax__overlay{position:absolute;top:70%;left:50%;transform:translate(-50%,-32%);width:min(460px,80vw);pointer-events:none;z-index:0;display:flex;justify-content:center}
+.life-parallax__overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(460px,80vw);pointer-events:none;z-index:0;display:flex;justify-content:center}
 .life-parallax__overlay-image{width:100%;height:auto;display:block;filter:drop-shadow(0 22px 46px rgba(15,23,42,.42));border-radius:18px}
-.life-parallax__eyebrow{position:relative;z-index:2;display:inline-flex;padding:8px 18px;border-radius:999px;background:rgba(148,163,184,.24);color:rgba(255,255,255,.88);font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:.75rem}
+.platform-highlight{display:flex;justify-content:center;padding:18px 16px 32px}
+.platform-highlight__pill{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:10px 20px;border-radius:999px;background:rgba(15,23,42,.06);color:#0f172a;font-weight:600;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;line-height:1.4;text-align:center;box-shadow:0 10px 28px rgba(15,23,42,.08);flex-wrap:wrap;row-gap:8px}
+.platform-highlight__icon{display:inline-flex;width:28px;height:28px;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(15,23,42,.18)}
+.platform-highlight__icon svg{width:100%;height:100%;display:block}
 .life-parallax h2{margin:0;font-size:clamp(2rem,3vw,2.75rem);font-weight:700;letter-spacing:.01em}
 .life-parallax p{margin:0;color:rgba(255,255,255,.88);font-size:1.05rem;line-height:1.6;max-width:540px}
 @media (max-width:768px){
   .life-parallax{background-attachment:scroll;min-height:clamp(202px,39.6vh,374px);padding:38px 16px}
   .life-parallax__inner{gap:16px}
-  .life-parallax__overlay{top:74%;transform:translate(-50%,-22%);width:min(420px,88vw)}
-  .life-parallax__eyebrow{font-size:.7rem;letter-spacing:.1em;padding:7px 16px}
+  .life-parallax__overlay{top:50%;transform:translate(-50%,-50%);width:min(420px,88vw)}
+  .platform-highlight{padding:16px 14px 28px}
+  .platform-highlight__pill{gap:10px;padding:9px 18px;font-size:.78rem;letter-spacing:.1em}
+  .platform-highlight__icon{width:26px;height:26px}
   .life-parallax h2{font-size:clamp(1.6rem,6vw,2.2rem)}
   .life-parallax p{font-size:.98rem}
 }
