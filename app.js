@@ -1297,21 +1297,21 @@ App.initNav = function() {
     if (siteHeader) siteHeader.classList.add("site-header--brand-text-visible");
   };
 
-  const hideBrandText = () => {};
-
-  showBrandText();
+  const hideBrandText = () => {
+    if (siteHeader) siteHeader.classList.remove("site-header--brand-text-visible");
+  };
 
   if (!toggle || !nav) {
     App.closeNavMenu = () => {};
-    hideBrandText(true);
+    hideBrandText();
     return;
   }
 
   nav.addEventListener("mouseenter", () => showBrandText());
-  nav.addEventListener("mouseleave", () => hideBrandText(false));
+  nav.addEventListener("mouseleave", () => hideBrandText());
   nav.addEventListener("focusin", () => showBrandText());
   nav.addEventListener("focusout", event => {
-    if (!nav.contains(event.relatedTarget)) hideBrandText(false);
+    if (!nav.contains(event.relatedTarget)) hideBrandText();
   });
   nav.addEventListener(
     "touchstart",
@@ -1325,7 +1325,7 @@ App.initNav = function() {
     nav.classList.remove("is-open");
     toggle.classList.remove("is-open");
     toggle.setAttribute("aria-expanded", "false");
-    hideBrandText(true);
+    hideBrandText();
     if (typeof App.closeBrowseMenu === "function") App.closeBrowseMenu();
     if (typeof App.closeBundlesMenu === "function") App.closeBundlesMenu();
     if (typeof App.closeAccountMenu === "function") App.closeAccountMenu();
@@ -1338,7 +1338,7 @@ App.initNav = function() {
     if (isOpen) {
       showBrandText();
     } else {
-      hideBrandText(true);
+      hideBrandText();
       if (typeof App.closeBrowseMenu === "function") App.closeBrowseMenu();
       if (typeof App.closeBundlesMenu === "function") App.closeBundlesMenu();
       if (typeof App.closeAccountMenu === "function") App.closeAccountMenu();
