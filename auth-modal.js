@@ -211,18 +211,8 @@ function setLoading(form, isLoading) {
   });
 }
 
-function disableAllForms(message) {
-  forms.forEach(form => {
-    form.querySelectorAll("input, button").forEach(element => {
-      element.disabled = true;
-    });
-  });
-  tabs.forEach(tab => {
-    tab.disabled = true;
-    tab.setAttribute("aria-disabled", "true");
-  });
-  setStatus("error", message);
-}
+const AUTH_UNAVAILABLE_MESSAGE =
+  "Supabase credentials are missing. Update supabase-config.js to enable account access.";
 
 function toggleTab(target) {
   forms.forEach(form => {
@@ -287,7 +277,10 @@ function configureResetForm(mode) {
 
 async function handleLogin(event) {
   event.preventDefault();
-  if (!supabaseClient) return;
+  if (!supabaseClient) {
+    setStatus("error", AUTH_UNAVAILABLE_MESSAGE);
+    return;
+  }
   clearStatus();
   const form = event.currentTarget;
   const formData = new FormData(form);
@@ -317,7 +310,10 @@ async function handleLogin(event) {
 
 async function handleSignup(event) {
   event.preventDefault();
-  if (!supabaseClient) return;
+  if (!supabaseClient) {
+    setStatus("error", AUTH_UNAVAILABLE_MESSAGE);
+    return;
+  }
   clearStatus();
   const form = event.currentTarget;
   const formData = new FormData(form);
@@ -364,7 +360,10 @@ async function handleSignup(event) {
 
 async function handleReset(event) {
   event.preventDefault();
-  if (!supabaseClient) return;
+  if (!supabaseClient) {
+    setStatus("error", AUTH_UNAVAILABLE_MESSAGE);
+    return;
+  }
   clearStatus();
   const form = event.currentTarget;
 
@@ -598,7 +597,7 @@ function initSupabase() {
   if (!hasSupabaseConfig) {
     setAccountState(null);
     if (!skipModal) {
-      disableAllForms("Supabase credentials are missing. Update supabase-config.js to enable account access.");
+      setStatus("error", AUTH_UNAVAILABLE_MESSAGE);
     }
     return;
   }
