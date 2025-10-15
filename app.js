@@ -1202,7 +1202,7 @@ App.initAuthLink = function() {
   const labelEl = toggle.querySelector("[data-account-label]");
   const chevron = toggle.querySelector(".nav-link__chevron");
   const signOutButton = dropdown.querySelector("[data-account-signout]");
-  const signedOutLabel = toggle.dataset.authLabelSignedOut || "Sign up / Log in";
+  const signedOutLabel = toggle.dataset.authLabelSignedOut || "Log in/Sign up";
   const signedInLabel = toggle.dataset.authLabelSignedIn || "Account";
 
   let isAuthenticated = accountItem.dataset.authState === "authenticated";

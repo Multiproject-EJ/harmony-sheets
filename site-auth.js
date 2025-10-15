@@ -7,7 +7,7 @@ const dropdown = accountItem?.querySelector("[data-account-dropdown]");
 const signOutButton = dropdown?.querySelector("[data-account-signout]");
 const signOutDefaultLabel = signOutButton?.textContent?.trim() || "Log out";
 
-const signedOutLabel = toggle?.dataset.authLabelSignedOut || "Sign up / Log in";
+const signedOutLabel = toggle?.dataset.authLabelSignedOut || "Log in/Sign up";
 const signedInLabel = toggle?.dataset.authLabelSignedIn || "Account";
 
 let supabaseClient = null;
