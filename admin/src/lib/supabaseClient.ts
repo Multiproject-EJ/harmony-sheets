@@ -1,11 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
+import { getSupabaseCredentials } from './runtimeConfig'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+const { url, anonKey } = getSupabaseCredentials()
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  // eslint-disable-next-line no-console
-  console.warn('Supabase environment variables are missing. Check your .env.local file.')
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(url, anonKey)
