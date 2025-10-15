@@ -11,9 +11,9 @@ With your Supabase project URL and anon key now wired into the Harmony Sheets fr
 ## 2. Confirm the on-site experience
 
 - [ ] Serve the site locally (for example: `python3 -m http.server 8000`) and visit [`http://localhost:8000/`](http://localhost:8000/).
-- [ ] Click **Log in/Sign up** in the header to open the modal. Sign up with a fresh test email and complete the confirmation email Supabase sends.
+- [ ] Click **Log In/Sign Up** in the header to open the modal. Sign up with a fresh test email and complete the confirmation email Supabase sends.
 - [ ] After verification, reload the home page and ensure the header button now reads **Account** with the dropdown links visible.
-- [ ] Open the dropdown and use **Log out** to confirm the state returns to **Log in/Sign up**.
+- [ ] Open the dropdown and use **Log out** to confirm the state returns to **Log In/Sign Up**.
 - [ ] Navigate between pages (e.g., `products.html`, `faq.html`) while signed in to ensure the account label and dropdown remain in sync.
 
 ## 3. Double-check the dedicated account page
