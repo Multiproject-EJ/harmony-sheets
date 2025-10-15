@@ -10,6 +10,46 @@ function normalizeEmail(value) {
 
 const configuredAdminEmail = normalizeEmail(SUPABASE_ADMIN_EMAIL);
 
+function getNestedValue(source, path) {
+  return path.reduce((value, key) => {
+    if (value && typeof value === "object") {
+      return value[key];
+    }
+    return undefined;
+  }, source);
+}
+
+function isTruthyFlag(value) {
+  if (value === true) return true;
+  if (typeof value === "number") {
+    return Number.isFinite(value) && value !== 0;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return false;
+    return ["true", "1", "yes", "y", "on", "enabled", "admin", "owner"].includes(normalized);
+  }
+  return false;
+}
+
+const ADMIN_KEYWORDS = new Set(["admin", "administrator", "owner", "superuser"]);
+
+function containsAdminKeyword(value) {
+  if (!value) return false;
+  if (Array.isArray(value)) {
+    return value.some(containsAdminKeyword);
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return false;
+    return ADMIN_KEYWORDS.has(normalized);
+  }
+  if (typeof value === "object") {
+    return Object.values(value).some(containsAdminKeyword);
+  }
+  return false;
+}
+
 export function getConfiguredAdminEmail() {
   return configuredAdminEmail;
 }
@@ -32,6 +72,33 @@ export function isAdminUser(user) {
     for (const value of metaEmailSources) {
       if (normalizeEmail(value) === adminEmail) return true;
     }
+
+    const emailCollections = [
+      user.user_metadata?.adminEmails,
+      user.user_metadata?.admin_emails,
+      user.app_metadata?.adminEmails,
+      user.app_metadata?.admin_emails
+    ];
+    for (const collection of emailCollections) {
+      if (!collection) continue;
+      if (Array.isArray(collection)) {
+        if (collection.some(value => normalizeEmail(value) === adminEmail)) {
+          return true;
+        }
+      } else if (typeof collection === "string") {
+        const candidates = collection
+          .split(/[\s,;]+/)
+          .map(normalizeEmail)
+          .filter(Boolean);
+        if (candidates.includes(adminEmail)) {
+          return true;
+        }
+      }
+    }
+  }
+
+  if (typeof user.role === "string" && user.role.trim().toLowerCase() === "admin") {
+    return true;
   }
 
   const roleCandidates = [];
@@ -61,14 +128,38 @@ export function isAdminUser(user) {
     return true;
   }
 
-  const booleanAdminFlags = [
-    user.app_metadata?.is_admin,
-    user.user_metadata?.is_admin,
-    user.app_metadata?.admin,
-    user.user_metadata?.admin
+  const adminFlagPaths = [
+    ["app_metadata", "is_admin"],
+    ["user_metadata", "is_admin"],
+    ["app_metadata", "admin"],
+    ["user_metadata", "admin"],
+    ["app_metadata", "isAdmin"],
+    ["user_metadata", "isAdmin"],
+    ["app_metadata", "adminUser"],
+    ["user_metadata", "adminUser"],
+    ["app_metadata", "admin_user"],
+    ["user_metadata", "admin_user"],
+    ["app_metadata", "is_owner"],
+    ["user_metadata", "is_owner"],
+    ["app_metadata", "owner"],
+    ["user_metadata", "owner"],
+    ["app_metadata", "claims", "admin"],
+    ["user_metadata", "claims", "admin"],
+    ["app_metadata", "claims_admin"],
+    ["user_metadata", "claims_admin"],
+    ["app_metadata", "permissions"],
+    ["user_metadata", "permissions"],
+    ["app_metadata", "features"],
+    ["user_metadata", "features"],
+    ["app_metadata", "flags"],
+    ["user_metadata", "flags"]
   ];
-  if (booleanAdminFlags.some(value => value === true)) {
-    return true;
+
+  for (const path of adminFlagPaths) {
+    const value = getNestedValue(user, path);
+    if (isTruthyFlag(value) || containsAdminKeyword(value)) {
+      return true;
+    }
   }
 
   return false;
