@@ -12,6 +12,7 @@ const toggle = accountItem?.querySelector("[data-account-toggle]");
 const dropdown = accountItem?.querySelector("[data-account-dropdown]");
 const labelEl = toggle?.querySelector("[data-account-label]");
 let accountLinkEl = dropdown?.querySelector("[data-account-link='account']");
+let adminLinkEl = dropdown?.querySelector("[data-account-link='admin']");
 const skipModal = document.body.classList.contains("page-auth");
 const hasSupabaseConfig = isSupabaseConfigured();
 
@@ -78,6 +79,9 @@ function updateAccountLink(user) {
   if (!accountLinkEl || !dropdown.contains(accountLinkEl)) {
     accountLinkEl = dropdown.querySelector("[data-account-link='account']");
   }
+  if (!adminLinkEl || !dropdown.contains(adminLinkEl)) {
+    adminLinkEl = dropdown.querySelector("[data-account-link='admin']");
+  }
   if (!accountLinkEl) return;
 
   if (!user) {
@@ -88,15 +92,23 @@ function updateAccountLink(user) {
       accountLinkEl.href = "login.html";
       accountLinkEl.textContent = "My account";
     }
+    if (adminLinkEl) {
+      adminLinkEl.hidden = true;
+      adminLinkEl.setAttribute("aria-hidden", "true");
+    }
     return;
   }
 
-  if (isAdminUser(user)) {
-    accountLinkEl.href = ADMIN_DASHBOARD_PATH;
-    accountLinkEl.textContent = "Admin dashboard";
-  } else {
-    accountLinkEl.href = ACCOUNT_PAGE_PATH;
-    accountLinkEl.textContent = "My account";
+  accountLinkEl.href = ACCOUNT_PAGE_PATH;
+  accountLinkEl.textContent = "My account";
+
+  if (adminLinkEl) {
+    const isAdmin = isAdminUser(user);
+    adminLinkEl.hidden = !isAdmin;
+    adminLinkEl.setAttribute("aria-hidden", isAdmin ? "false" : "true");
+    if (isAdmin) {
+      adminLinkEl.href = ADMIN_DASHBOARD_PATH;
+    }
   }
 }
 
