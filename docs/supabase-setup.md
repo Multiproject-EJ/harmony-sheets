@@ -31,9 +31,13 @@ This walkthrough covers everything needed to power Harmony Sheets authentication
 
 1. In the Supabase dashboard, open **Project Settings → API**.
 2. Copy the **Project URL** and **anon public** key.
-3. In this repository, duplicate [`supabase-config.example.js`](../supabase-config.example.js) as `supabase-config.js` (a placeholder file already exists) and replace the `SUPABASE_URL` and `SUPABASE_ANON_KEY` values with your project's URL and anon key.
+3. In this repository, duplicate [`supabase-config.example.js`](../supabase-config.example.js) as `supabase-config.js` (a placeholder file already exists) and replace the `SUPABASE_URL` and `SUPABASE_ANON_KEY` values with your project's URL and anon key **or** supply them from a runtime source. The config module now looks for values in:
+   * `globalThis.SUPABASE_URL` / `globalThis.SUPABASE_ANON_KEY` (or the camelCase equivalents on `globalThis.HarmonySheetsSupabase`),
+   * `globalThis.env`, `globalThis.__env`, or `process.env` (handy for static-site hosts that expose build-time environment variables), and
+   * optional `<meta name="supabase-url">` / `<meta name="supabase-anon-key">` tags included in your HTML templates.
+   If none of these are present it falls back to the literal placeholder values, which keep sign-in disabled.
 4. Commit the public anon key along with the front-end — it is safe to expose. **Never** add the service role key to client code.
-5. If you manage configuration through environment variables, you can point the placeholder file to `window.env` or a similar global object; just ensure the values resolve at page load so that `auth.js` can instantiate the Supabase client.
+5. However you surface the values, ensure they resolve before `auth.js` runs so the Supabase client instantiates with the correct credentials.
 
 ## 4. Create a profiles table that mirrors user metadata
 
