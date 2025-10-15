@@ -1,10 +1,17 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.7/+esm";
 import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
+import {
+  ACCOUNT_PAGE_PATH,
+  ADMIN_DASHBOARD_PATH,
+  getPostSignInRedirect,
+  isAdminUser
+} from "./auth-helpers.js";
 
 const accountItem = document.querySelector("[data-account-menu]");
 const toggle = accountItem?.querySelector("[data-account-toggle]");
 const dropdown = accountItem?.querySelector("[data-account-dropdown]");
 const labelEl = toggle?.querySelector("[data-account-label]");
+let accountLinkEl = dropdown?.querySelector("[data-account-link='account']");
 const skipModal = document.body.classList.contains("page-auth");
 const hasSupabaseConfig = isSupabaseConfigured();
 
@@ -50,6 +57,8 @@ function setAccountState(user) {
     }
   }
 
+  updateAccountLink(user);
+
   if (toggle) {
     if (isSignedIn && user?.email) {
       toggle.setAttribute("aria-label", `Account menu for ${user.email}`);
@@ -62,6 +71,45 @@ function setAccountState(user) {
     signOutButton.hidden = !isSignedIn;
     signOutButton.disabled = !isSignedIn;
   }
+}
+
+function updateAccountLink(user) {
+  if (!dropdown) return;
+  if (!accountLinkEl || !dropdown.contains(accountLinkEl)) {
+    accountLinkEl = dropdown.querySelector("[data-account-link='account']");
+  }
+  if (!accountLinkEl) return;
+
+  if (!user) {
+    if (skipModal) {
+      accountLinkEl.href = "products.html";
+      accountLinkEl.textContent = "Browse templates";
+    } else {
+      accountLinkEl.href = "login.html";
+      accountLinkEl.textContent = "My account";
+    }
+    return;
+  }
+
+  if (isAdminUser(user)) {
+    accountLinkEl.href = ADMIN_DASHBOARD_PATH;
+    accountLinkEl.textContent = "Admin dashboard";
+  } else {
+    accountLinkEl.href = ACCOUNT_PAGE_PATH;
+    accountLinkEl.textContent = "My account";
+  }
+}
+
+function maybeRedirectToAdmin(user) {
+  if (!isAdminUser(user)) return false;
+  const currentPath = window.location.pathname.replace(/^\/+/, "");
+  if (currentPath.startsWith(ADMIN_DASHBOARD_PATH)) {
+    return false;
+  }
+  const target = getPostSignInRedirect(user, ADMIN_DASHBOARD_PATH);
+  if (!target) return false;
+  window.location.href = target;
+  return true;
 }
 
 function createModal() {
@@ -572,12 +620,17 @@ function initSupabase() {
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     applySession(session);
-    if (event === "SIGNED_IN" && !skipModal) {
-      setStatus("success", "You're signed in! Enjoy exploring Harmony Sheets.");
-      window.setTimeout(() => {
-        clearStatus();
-        closeModal();
-      }, 1200);
+    if (event === "SIGNED_IN") {
+      if (maybeRedirectToAdmin(session?.user)) {
+        return;
+      }
+      if (!skipModal) {
+        setStatus("success", "You're signed in! Enjoy exploring Harmony Sheets.");
+        window.setTimeout(() => {
+          clearStatus();
+          closeModal();
+        }, 1200);
+      }
     }
     if (event === "SIGNED_OUT" && !skipModal) {
       clearStatus();

@@ -1,5 +1,6 @@
 export const SUPABASE_URL = "YOUR_SUPABASE_URL";
 export const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+export const SUPABASE_ADMIN_EMAIL = ""; // Optional: set to the admin Supabase email to enable automatic dashboard redirects.
 
 export function isSupabaseConfigured() {
   return (

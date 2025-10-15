@@ -1,10 +1,12 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.7/+esm";
 import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
+import { getPostSignInRedirect, sanitizeRedirect } from "./auth-helpers.js";
 
 const statusEl = document.querySelector("[data-auth-status]");
 const forms = Array.from(document.querySelectorAll("[data-auth-form]"));
 const tabs = Array.from(document.querySelectorAll("[data-auth-tab]"));
-const redirect = new URLSearchParams(window.location.search).get("redirect") || "products.html";
+const redirectParam = new URLSearchParams(window.location.search).get("redirect");
+const redirect = sanitizeRedirect(redirectParam, "account.html");
 
 const resetForm = document.querySelector("[data-auth-form='reset']");
 const resetEmailField = resetForm?.querySelector("[data-reset-field='email']");
@@ -164,7 +166,7 @@ async function handleLogin(event) {
   }
 
   setLoading(form, true);
-  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   setLoading(form, false);
 
   if (error) {
@@ -174,7 +176,8 @@ async function handleLogin(event) {
 
   setStatus("success", "Welcome back! Redirecting to your dashboard…");
   setTimeout(() => {
-    window.location.href = redirect;
+    const target = getPostSignInRedirect(data?.session?.user, redirect);
+    window.location.href = target;
   }, 1200);
 }
 
@@ -215,7 +218,8 @@ async function handleSignup(event) {
   if (data.session) {
     setStatus("success", "Freemium account created! Redirecting…");
     setTimeout(() => {
-      window.location.href = redirect;
+      const target = getPostSignInRedirect(data.session?.user, redirect);
+      window.location.href = target;
     }, 1200);
   } else {
     setStatus(
