@@ -8,8 +8,9 @@ The customer login and freemium sign-up experience lives at [`login.html`](login
 * creating a Supabase account and project,
 * configuring email authentication and redirect URLs,
 * supplying the anon key to `supabase-config.js`,
-* provisioning a `profiles` table (plus row-level security policies) that mirrors stored user metadata, and
-* testing the full login, signup, and password reset flows locally.
+* provisioning a `profiles` table (plus row-level security policies) that mirrors stored user metadata (see also the quick reference in [`docs/sql/`](docs/sql/)),
+* testing the full login, signup, and password reset flows locally, and
+* completing the [post-setup checklist](docs/auth-post-setup-checklist.md) to confirm the navigation dropdown, dedicated account page, and admin dashboard all stay in sync with Supabase Auth.
 
 > **Note:** Because Supabase's anon key is intended to be public, committing it to the static front-end is safe. Never expose service role keys in front-end code.
 

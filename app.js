@@ -1199,17 +1199,74 @@ App.initAuthLink = function() {
     accountLink.textContent = "Browse templates";
   }
 
+  const labelEl = toggle.querySelector("[data-account-label]");
+  const chevron = toggle.querySelector(".nav-link__chevron");
+  const signOutButton = dropdown.querySelector("[data-account-signout]");
+  const signedOutLabel = toggle.dataset.authLabelSignedOut || "Sign up / Log in";
+  const signedInLabel = toggle.dataset.authLabelSignedIn || "Account";
+
+  let isAuthenticated = accountItem.dataset.authState === "authenticated";
+
+  const syncAria = () => {
+    toggle.setAttribute("aria-haspopup", isAuthenticated ? "true" : "dialog");
+    const expanded = isAuthenticated && accountItem.classList.contains("is-open");
+    toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+  };
+
   const setOpen = open => {
-    accountItem.classList.toggle("is-open", open);
-    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    const shouldOpen = isAuthenticated && open;
+    accountItem.classList.toggle("is-open", shouldOpen);
+    syncAria();
   };
 
   const closeMenu = () => setOpen(false);
   const openMenu = () => setOpen(true);
 
+  const updateLabel = (state, labelOverride) => {
+    if (!labelEl) return;
+    if (typeof labelOverride === "string" && labelOverride.trim()) {
+      labelEl.textContent = labelOverride.trim();
+    } else {
+      labelEl.textContent = state ? signedInLabel : signedOutLabel;
+    }
+  };
+
+  const applyAuthState = state => {
+    isAuthenticated = state;
+    accountItem.dataset.authState = state ? "authenticated" : "anonymous";
+    if (!state) accountItem.classList.remove("is-open");
+    dropdown.hidden = !state;
+    accountItem.classList.toggle("is-authenticated", state);
+    accountItem.classList.toggle("is-anonymous", !state);
+    if (chevron) chevron.hidden = !state;
+    if (signOutButton) signOutButton.hidden = !state;
+    syncAria();
+  };
+
+  applyAuthState(isAuthenticated);
+  updateLabel(isAuthenticated);
+
+  document.addEventListener("account-auth-state", event => {
+    const nextState = Boolean(event.detail?.authenticated);
+    const labelOverride = event.detail?.label;
+    applyAuthState(nextState);
+    updateLabel(nextState, labelOverride);
+  });
+
   const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
 
   toggle.addEventListener("click", event => {
+    if (!isAuthenticated) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (window.HarmonyAuth?.openModal) {
+        window.HarmonyAuth.openModal();
+      } else {
+        window.location.href = "login.html";
+      }
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
     setOpen(!accountItem.classList.contains("is-open"));
@@ -1248,6 +1305,11 @@ App.initAuthLink = function() {
     if (actionLink.matches("[data-account-cart]")) {
       event.preventDefault();
       if (typeof App.openCart === "function") App.openCart();
+    } else if (actionLink.matches("[data-account-signout]")) {
+      event.preventDefault();
+      if (window.HarmonyAuth?.signOut) {
+        window.HarmonyAuth.signOut();
+      }
     }
     closeMenu();
   });
