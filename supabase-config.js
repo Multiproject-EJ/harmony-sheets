@@ -1,5 +1,6 @@
-const FALLBACK_URL = "YOUR_SUPABASE_URL";
-const FALLBACK_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const FALLBACK_URL = "https://jvjmmzbibpnlzhzzyncx.supabase.co";
+const FALLBACK_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2am1temJpYnBubHpoenp5bmN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MjYyMzksImV4cCI6MjA3NjEwMjIzOX0.JyaY7kJbbZKKBCj_UX6M-t-eKoK9WJibcJjlLZnSvWA";
 
 function safeGet(object, ...keys) {
   return keys.reduce((value, key) => {
