@@ -39,15 +39,16 @@
       </div>
       <a class="nav-link" href="faq.html">FAQ / Support</a>
       <a class="nav-link" href="about.html">About</a>
-      <div class="nav-item nav-item--account" data-account-menu>
-        <button class="nav-link nav-link--account nav-link--menu" type="button" data-account-toggle aria-haspopup="true" aria-expanded="false">
-          Follow / Sign in
-          <span class="nav-link__chevron" aria-hidden="true"></span>
+      <div class="nav-item nav-item--account" data-account-menu data-auth-state="anonymous">
+        <button class="nav-link nav-link--account nav-link--menu" type="button" data-account-toggle data-auth-label-signed-out="Sign up / Log in" data-auth-label-signed-in="Account" aria-haspopup="dialog" aria-expanded="false">
+          <span data-account-label>Sign up / Log in</span>
+          <span class="nav-link__chevron" aria-hidden="true" hidden></span>
         </button>
-        <div class="nav-dropdown" data-account-dropdown role="menu" aria-label="Account options">
+        <div class="nav-dropdown" data-account-dropdown role="menu" aria-label="Account options" hidden>
           <a class="nav-dropdown__link" href="login.html" data-account-link="account">My account</a>
           <a class="nav-dropdown__link" href="products.html#my-products" data-account-link="products">My products</a>
           <button class="nav-dropdown__link nav-dropdown__link--action" type="button" data-account-cart>Shopping cart</button>
+          <button class="nav-dropdown__link nav-dropdown__link--action" type="button" data-account-signout hidden>Log out</button>
         </div>
       </div>
       <button class="nav-link nav-link--icon nav-link--cart" type="button" data-cart-toggle aria-expanded="false" aria-controls="cart-panel" hidden>
@@ -209,5 +210,6 @@
 </footer>
 
 <script src="app.js"></script>
+<script type="module" src="site-auth.js"></script>
 </body>
 </html>
