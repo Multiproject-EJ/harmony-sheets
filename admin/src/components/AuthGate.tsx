@@ -2,6 +2,7 @@ import { PropsWithChildren, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Box, CircularProgress } from '@mui/material'
 import { supabase } from '../lib/supabaseClient'
+import { isAdminUser } from '../lib/runtimeConfig'
 
 export default function AuthGate({ children }: PropsWithChildren) {
   const navigate = useNavigate()
@@ -10,15 +11,12 @@ export default function AuthGate({ children }: PropsWithChildren) {
   const [isAuthorized, setIsAuthorized] = useState(false)
 
   useEffect(() => {
-    const adminEmail = import.meta.env.VITE_ADMIN_EMAIL as string
-
     async function getInitialSession() {
       const {
         data: { session }
       } = await supabase.auth.getSession()
 
-      const userEmail = session?.user.email?.toLowerCase()
-      const allowed = Boolean(adminEmail && userEmail === adminEmail.toLowerCase())
+      const allowed = isAdminUser(session?.user)
 
       setIsAuthorized(allowed)
       setLoading(false)
@@ -31,9 +29,7 @@ export default function AuthGate({ children }: PropsWithChildren) {
     getInitialSession()
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      const userEmail = session?.user.email?.toLowerCase()
-      const adminEmailLower = adminEmail?.toLowerCase()
-      const allowed = Boolean(adminEmailLower && userEmail === adminEmailLower)
+      const allowed = isAdminUser(session?.user)
       setIsAuthorized(allowed)
       if (!allowed) {
         navigate('/login')

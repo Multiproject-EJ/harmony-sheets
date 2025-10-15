@@ -4,9 +4,55 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Harmony Sheets — Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module">
+      const script = document.currentScript
+      const basePath = new URL('./', script?.src ?? window.location.href).pathname
+
+      const resolve = (value, fallbackBase = basePath) => {
+        if (!value) return undefined
+        if (/^https?:\/\//i.test(value) || value.startsWith('/')) return value
+        return `${fallbackBase.replace(/\/$/, '')}/${value.replace(/^\//, '')}`
+      }
+
+      const devEntry = resolve('/src/bootstrap.ts', '/')
+      const prodEntry = resolve('assets/admin.js')
+      const prodCss = resolve('assets/admin.css')
+
+      const loadStylesheet = (href) => {
+        if (!href || document.querySelector(`link[data-admin-css="${href}"]`)) return
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = href
+        link.dataset.adminCss = href
+        document.head.appendChild(link)
+      }
+
+      const attemptImport = async (specifier) => {
+        if (!specifier) throw new Error('Missing module specifier')
+        return import(specifier)
+      }
+
+      const bootstrap = async () => {
+        try {
+          await attemptImport(devEntry)
+          return
+        } catch (error) {
+          console.warn('Admin dev entry failed to load, falling back to built bundle.', error)
+        }
+
+        try {
+          loadStylesheet(prodCss)
+          await attemptImport(prodEntry)
+        } catch (error) {
+          console.error('Failed to load the admin dashboard bundle.', error)
+        }
+      }
+
+      void bootstrap()
+    </script>
   </body>
 </html>
