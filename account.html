@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Affiliate Program — Harmony Sheets</title>
+  <title>My Account — Harmony Sheets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Access your Harmony Sheets downloads, purchase history, and customer information in one place.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-neutral page-affiliate">
+<body class="theme-neutral page-account">
 <header class="site-header">
   <a class="brand" href="/">
     <img class="brand__logo" src="assets/logoHarmonySheets.webp" alt="">
@@ -82,55 +83,95 @@
   </div>
 </aside>
 
-<main>
-  <section id="apply" class="affiliate-hero anchor-section">
-    <h1>Partner with Harmony Sheets</h1>
-    <p>Earn recurring commissions by recommending calm, app-like spreadsheet tools. Our templates help customers see their lives clearly without the pressure of subscriptions.</p>
-    <div class="actions">
-      <a class="btn primary" href="mailto:partners@harmony-sheets.com?subject=Affiliate%20Application">Apply now</a>
-      <a class="btn ghost" href="#login">Affiliate portal</a>
-    </div>
-    <div class="meta">
-      <span>25% commission on every sale</span>
-      <span>30-day tracking cookies</span>
-      <span>Monthly PayPal payouts</span>
+<main class="account-page" id="main-content">
+  <section class="account account--loading" data-account-loading>
+    <div class="account-card">
+      <h1>Loading your account</h1>
+      <p>Hold tight while we retrieve your Harmony Sheets details.</p>
     </div>
   </section>
 
-  <section class="affiliate-section affiliate-benefits anchor-section" id="benefits">
-    <h2>Why partners choose Harmony Sheets</h2>
-    <div class="affiliate-grid">
-      <article class="affiliate-card">
-        <h3>High-converting templates</h3>
-        <p>Our product pages highlight the transformation customers can expect. Affiliates regularly see above-average conversion rates because buyers know exactly what they’re getting.</p>
-      </article>
-      <article class="affiliate-card">
-        <h3>Fresh launches &amp; promos</h3>
-        <p>We release new planners and life-area bundles every season. You’ll receive launch assets, swipe copy, and early previews to keep your audience inspired.</p>
-      </article>
-      <article class="affiliate-card">
-        <h3>Supportive onboarding</h3>
-        <p>Need custom graphics or tailored copy? We’ll work with you on co-branded assets so your recommendations feel natural to your community.</p>
-      </article>
+  <section class="account" data-account-view hidden>
+    <div class="account-hero">
+      <div class="account-hero__content">
+        <h1>Welcome back</h1>
+        <p data-account-greeting>Your downloads and customer information are ready for you.</p>
+        <p class="account-status" data-account-status role="status" aria-live="polite"></p>
+      </div>
+      <div class="account-hero__actions">
+        <button class="btn secondary" type="button" data-account-signout hidden>Sign out</button>
+      </div>
+    </div>
+    <div class="account-layout">
+      <div class="account-column account-column--primary">
+        <article class="account-panel account-panel--overview">
+          <h2>Account overview</h2>
+          <dl class="account-details">
+            <div class="account-details__row">
+              <dt>Email</dt>
+              <dd data-account-email>—</dd>
+            </div>
+            <div class="account-details__row">
+              <dt>Plan</dt>
+              <dd data-account-plan>—</dd>
+            </div>
+            <div class="account-details__row">
+              <dt>Member since</dt>
+              <dd data-account-joined>—</dd>
+            </div>
+            <div class="account-details__row">
+              <dt>Last sign in</dt>
+              <dd data-account-last-sign-in>—</dd>
+            </div>
+          </dl>
+        </article>
+        <article class="account-panel">
+          <h2>Downloads</h2>
+          <p class="account-panel__hint" data-account-downloads-empty>No downloads yet. Purchases appear here with fresh copy links.</p>
+          <ul class="account-list" data-account-downloads hidden></ul>
+        </article>
+      </div>
+      <div class="account-column account-column--secondary">
+        <article class="account-panel">
+          <h2>Purchase history</h2>
+          <p class="account-panel__hint" data-account-purchases-empty>Your orders will display here once you complete a checkout.</p>
+          <ul class="account-list" data-account-purchases hidden></ul>
+        </article>
+        <article class="account-panel">
+          <h2>Customer information</h2>
+          <dl class="account-details">
+            <div class="account-details__row">
+              <dt>Preferred name</dt>
+              <dd data-account-name>—</dd>
+            </div>
+            <div class="account-details__row">
+              <dt>Support email</dt>
+              <dd><a href="mailto:support@harmony-sheets.com">support@harmony-sheets.com</a></dd>
+            </div>
+            <div class="account-details__row">
+              <dt>Need help?</dt>
+              <dd><a href="faq.html#contact">Contact Harmony Sheets</a></dd>
+            </div>
+          </dl>
+        </article>
+      </div>
     </div>
   </section>
 
-  <section class="affiliate-section affiliate-highlight anchor-section" id="how-it-works">
-    <h2>How it works</h2>
-    <ol class="affiliate-steps">
-      <li>Apply with details about your audience and the channels you use.</li>
-      <li>Receive your unique tracking links, media kit, and launch calendar.</li>
-      <li>Share Harmony Sheets in newsletters, social posts, videos, or workshops.</li>
-      <li>Track clicks and commissions in real time, with payouts delivered monthly.</li>
-    </ol>
-    <p>We’ll share proven angles, best-performing bundles, and ongoing product updates so you always have something valuable to promote.</p>
+  <section class="account" data-account-empty hidden>
+    <div class="account-card">
+      <h1>Sign in to view your account</h1>
+      <p>Your Harmony Sheets downloads and purchase history live here.</p>
+      <a class="btn primary" href="login.html?redirect=account.html">Log in to continue</a>
+    </div>
   </section>
 
-  <section id="login" class="affiliate-login anchor-section">
-    <h2>Affiliate Login</h2>
-    <p>Already part of the program? Head to the partner dashboard to grab fresh links, review stats, or download campaign assets.</p>
-    <a class="btn primary" href="https://partners.harmony-sheets.com/login" target="_blank" rel="noopener">Open partner portal</a>
-    <p class="muted">Need help? Email <a href="mailto:partners@harmony-sheets.com">partners@harmony-sheets.com</a> and we’ll get you sorted.</p>
+  <section class="account" data-account-error hidden>
+    <div class="account-card">
+      <h1>Account unavailable</h1>
+      <p data-account-error-message>We couldn't connect to your Harmony Sheets account. Please try again in a moment.</p>
+      <a class="btn secondary" href="faq.html#contact">Contact support</a>
+    </div>
   </section>
 </main>
 
@@ -161,7 +202,6 @@
         <ul class="site-footer__links">
           <li><a href="affiliate.html#apply">Become an Affiliate</a></li>
           <li><a href="affiliate.html#login">Affiliate Login</a></li>
-          <li><a href="/admin/" target="_blank" rel="noopener">Developer: Product Management Dashboard</a></li>
         </ul>
       </div>
       <div class="site-footer__column site-footer__column--newsletter">
@@ -213,5 +253,6 @@
 
 <script src="app.js"></script>
 <script type="module" src="auth-modal.js"></script>
+<script type="module" src="account.js"></script>
 </body>
 </html>
