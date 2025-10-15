@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Alert, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { getConfiguredAdminEmail, getNormalizedAdminEmail } from '../lib/runtimeConfig'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -10,7 +11,9 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL as string)?.toLowerCase()
+  const adminEmailDisplay = getConfiguredAdminEmail()
+  const normalizedAdminEmail = getNormalizedAdminEmail()
+  const adminEmailConfigured = Boolean(normalizedAdminEmail)
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -19,8 +22,13 @@ export default function Login() {
     setMessage(null)
 
     try {
-      const normalizedEmail = email.toLowerCase()
-      if (!adminEmail || normalizedEmail !== adminEmail) {
+      const normalizedEmail = email.trim().toLowerCase()
+      if (!normalizedEmail) {
+        setError('Enter the email address you use for the admin account.')
+        return
+      }
+
+      if (adminEmailConfigured && normalizedEmail !== normalizedAdminEmail) {
         setError('Only the designated admin email can access this dashboard.')
         return
       }
@@ -39,8 +47,8 @@ export default function Login() {
   }
 
   async function handleDemoLogin() {
-    if (!adminEmail) {
-      setError('Demo sign in requires VITE_ADMIN_EMAIL to be configured.')
+    if (!adminEmailConfigured || !normalizedAdminEmail) {
+      setError('Demo sign in requires an admin email to be configured.')
       return
     }
 
@@ -49,7 +57,7 @@ export default function Login() {
     setLoading(true)
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: adminEmail,
+        email: normalizedAdminEmail,
         password: 'password'
       })
 
@@ -77,6 +85,11 @@ export default function Login() {
             <Typography variant="body2" color="text.secondary" textAlign="center">
               Sign in with the admin email to manage products and pricing.
             </Typography>
+            {adminEmailDisplay && (
+              <Typography variant="body2" color="text.secondary" textAlign="center">
+                Admin access is limited to <strong>{adminEmailDisplay}</strong>.
+              </Typography>
+            )}
           </Stack>
 
           <TextField
@@ -92,7 +105,12 @@ export default function Login() {
             Send magic link
           </Button>
 
-          <Button variant="outlined" size="large" disabled={loading} onClick={handleDemoLogin}>
+          <Button
+            variant="outlined"
+            size="large"
+            disabled={loading || !adminEmailConfigured}
+            onClick={handleDemoLogin}
+          >
             Demo sign in
           </Button>
 
