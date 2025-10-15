@@ -40,10 +40,10 @@
       <a class="nav-link" href="faq.html">Community</a>
       <div class="nav-item nav-item--account" data-account-menu>
         <button class="nav-link nav-link--account nav-link--menu" type="button" data-account-toggle aria-haspopup="true" aria-expanded="false">
-          Follow / Sign in
+          <span class="nav-link__label" data-account-label>Log In/Sign Up</span>
           <span class="nav-link__chevron" aria-hidden="true"></span>
         </button>
-        <div class="nav-dropdown" data-account-dropdown role="menu" aria-label="Account options">
+        <div class="nav-dropdown" data-account-dropdown role="menu" aria-label="Account options" hidden>
           <a class="nav-dropdown__link" href="login.html" data-account-link="account">My account</a>
           <a class="nav-dropdown__link" href="products.html#my-products" data-account-link="products">My products</a>
           <button class="nav-dropdown__link nav-dropdown__link--action" type="button" data-account-cart>Shopping cart</button>
@@ -165,5 +165,6 @@
   </footer>
 
   <script src="app.js"></script>
+<script type="module" src="auth-modal.js"></script>
 </body>
 </html>
