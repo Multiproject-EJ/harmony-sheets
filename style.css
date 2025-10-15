@@ -38,6 +38,46 @@ img{max-width:100%;display:block}
 .nav-link{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:999px;font-weight:600;color:var(--nav-link-ink-strong);background:rgba(255,255,255,.95);border:1px solid rgba(148,163,184,.32);box-shadow:0 10px 20px rgba(15,23,42,.08);transition:background .2s ease,color .2s ease,box-shadow .2s ease,border-color .2s ease}
 .nav-link:hover,.nav-link:focus-visible{background:rgba(255,255,255,.98);box-shadow:0 14px 26px rgba(15,23,42,.12);color:var(--nav-link-ink-strong);border-color:rgba(148,163,184,.38)}
 .nav-link.active{background:rgba(255,255,255,.95);color:var(--nav-link-ink-strong);border-color:#1d4ed8;box-shadow:0 12px 26px rgba(37,99,235,.18)}
+.auth-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:32px;z-index:120}
+.auth-modal[hidden]{display:none}
+.auth-modal.is-open{display:flex}
+.auth-modal__overlay{position:absolute;inset:0;background:rgba(15,23,42,.52);backdrop-filter:blur(6px);opacity:0;transition:opacity .24s ease}
+.auth-modal.is-open .auth-modal__overlay{opacity:1}
+.auth-modal__dialog{position:relative;background:#fff;border-radius:28px;padding:32px;max-width:420px;width:min(420px,100%);box-shadow:0 32px 68px rgba(15,23,42,.18);display:grid;gap:20px;transform:translateY(12px);opacity:0;transition:transform .24s ease,opacity .24s ease}
+.auth-modal.is-open .auth-modal__dialog{transform:translateY(0);opacity:1}
+.auth-modal__close{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(148,163,184,.36);background:#f8fafc;color:#0f172a;font-size:1.2rem;line-height:1;cursor:pointer;display:grid;place-items:center;transition:background .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease}
+.auth-modal__close:hover,.auth-modal__close:focus-visible{background:#eef2ff;color:#1d4ed8;border-color:#c7d2fe;box-shadow:0 14px 26px rgba(148,163,184,.22)}
+.auth-modal__header{display:grid;gap:12px;text-align:left}
+.auth-modal__header h2{margin:0;font-size:1.6rem;color:#0f172a}
+.auth-modal__subtitle{margin:0;font-size:.98rem;color:#475569}
+.auth-modal__tabs{display:flex;gap:8px}
+.auth-modal__tab{flex:1;border-radius:16px;padding:10px 16px;font-weight:600;font-size:.95rem;border:1px solid rgba(148,163,184,.32);background:#f8fafc;color:#1f2937;cursor:pointer;transition:background .2s ease,border-color .2s ease,box-shadow .2s ease,color .2s ease}
+.auth-modal__tab.is-active,.auth-modal__tab[aria-selected="true"]{background:#eef2ff;color:#1d4ed8;border-color:#c7d2fe;box-shadow:0 16px 32px rgba(99,102,241,.16)}
+.auth-modal__status{margin:0;font-weight:600;font-size:.96rem;min-height:1.4em}
+.auth-modal__status[data-state="success"]{color:#16a34a}
+.auth-modal__status[data-state="error"]{color:#dc2626}
+.auth-modal__status[data-state="info"]{color:#2563eb}
+.auth-modal__form{display:grid;gap:14px}
+.auth-modal__field{display:grid;gap:6px;text-align:left}
+.auth-modal__field label{font-weight:600;font-size:.9rem;color:#0f172a}
+.auth-modal__field input{padding:11px 14px;border-radius:14px;border:1px solid rgba(148,163,184,.38);font-size:1rem;transition:border-color .2s ease,box-shadow .2s ease}
+.auth-modal__field input:focus{outline:none;border-color:#4c6ef5;box-shadow:0 0 0 3px rgba(99,102,241,.18)}
+.auth-modal__note{margin:0;color:#64748b;font-size:.82rem}
+.auth-modal__submit{justify-self:flex-start;padding:12px 22px;border-radius:999px;border:none;background:#1d4ed8;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 18px 36px rgba(37,99,235,.22);transition:background .2s ease,box-shadow .2s ease,transform .2s ease}
+.auth-modal__submit:hover,.auth-modal__submit:focus-visible{background:#1e3a8a;box-shadow:0 20px 40px rgba(30,64,175,.28);transform:translateY(-1px)}
+.auth-modal__submit[disabled]{opacity:.6;cursor:not-allowed;box-shadow:none;transform:none}
+.auth-modal__hint{margin:0;text-align:left;font-size:.85rem;color:#475569}
+.auth-modal__hint a{font-weight:600;color:#1d4ed8}
+body.auth-modal-open{overflow:hidden}
+@media (max-width:640px){
+  .auth-modal{padding:20px}
+  .auth-modal__dialog{padding:26px;border-radius:24px;gap:18px}
+  .auth-modal__header h2{font-size:1.4rem}
+  .auth-modal__subtitle{font-size:.9rem}
+  .auth-modal__tabs{flex-direction:column}
+  .auth-modal__tab{width:100%}
+  .auth-modal__submit{width:100%;justify-self:stretch}
+}
 .nav-link--menu{padding-right:36px}
 .nav-link__chevron{width:10px;height:10px;display:inline-flex;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-left:12px;transition:transform .2s ease}
 .nav-item--account.is-open .nav-link__chevron{transform:rotate(-135deg)}
