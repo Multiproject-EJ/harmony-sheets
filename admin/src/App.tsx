@@ -1,8 +1,7 @@
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import Login from './routes/Login'
-import Products from './routes/Products'
-import Analytics from './routes/Analytics'
+import Dashboard from './routes/Dashboard'
 import AuthGate from './components/AuthGate'
 
 const theme = createTheme({
@@ -27,26 +26,20 @@ export default function App() {
           path="/"
           element={
             <AuthGate>
-              <Navigate to="/products" replace />
+              <Navigate to="/dashboard" replace />
             </AuthGate>
           }
         />
         <Route
-          path="/products"
+          path="/dashboard"
           element={
             <AuthGate>
-              <Products />
+              <Dashboard />
             </AuthGate>
           }
         />
-        <Route
-          path="/analytics"
-          element={
-            <AuthGate>
-              <Analytics />
-            </AuthGate>
-          }
-        />
+        <Route path="/products" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/analytics" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </ThemeProvider>
