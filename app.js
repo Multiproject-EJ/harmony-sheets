@@ -1224,25 +1224,55 @@ App.initAuthLink = function() {
     return;
   }
 
+  if (!accountItem.dataset.authState) {
+    accountItem.dataset.authState = "signed-out";
+  }
+
   const accountLink = dropdown.querySelector('[data-account-link="account"]');
   if (App.qs("body.page-auth") && accountLink) {
     accountLink.href = "products.html";
     accountLink.textContent = "Browse templates";
   }
 
+  const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
+  const isAuthenticated = () => accountItem.dataset.authState === "signed-in";
+
   const setOpen = open => {
+    if (!isAuthenticated()) {
+      accountItem.classList.remove("is-open");
+      toggle.setAttribute("aria-expanded", "false");
+      dropdown.setAttribute("aria-hidden", "true");
+      return;
+    }
     accountItem.classList.toggle("is-open", open);
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    dropdown.setAttribute("aria-hidden", open ? "false" : "true");
   };
 
   const closeMenu = () => setOpen(false);
   const openMenu = () => setOpen(true);
 
-  const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
+  const updateMenuForAuthState = () => {
+    const authed = isAuthenticated();
+    dropdown.hidden = !authed;
+    dropdown.setAttribute("aria-hidden", authed ? (accountItem.classList.contains("is-open") ? "false" : "true") : "true");
+    toggle.setAttribute("aria-haspopup", authed ? "true" : "dialog");
+    if (!authed) {
+      closeMenu();
+    }
+  };
 
   toggle.addEventListener("click", event => {
     event.preventDefault();
     event.stopPropagation();
+    if (!isAuthenticated()) {
+      if (typeof window.openAuthModal === "function") {
+        window.openAuthModal();
+      } else {
+        window.location.href = "login.html";
+      }
+      return;
+    }
     setOpen(!accountItem.classList.contains("is-open"));
   });
 
@@ -1284,6 +1314,10 @@ App.initAuthLink = function() {
   });
 
   window.addEventListener("resize", () => closeMenu());
+
+  const observer = new MutationObserver(() => updateMenuForAuthState());
+  observer.observe(accountItem, { attributes: true, attributeFilter: ["data-auth-state"] });
+  updateMenuForAuthState();
 
   App.closeAccountMenu = closeMenu;
   closeMenu();
