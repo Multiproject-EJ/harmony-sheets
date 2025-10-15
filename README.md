@@ -7,7 +7,7 @@ The customer login and freemium sign-up experience lives at [`login.html`](login
 
 * creating a Supabase account and project,
 * configuring email authentication and redirect URLs,
-* supplying the anon key to `supabase-config.js`,
+* supplying the anon key to `supabase-config.js` (either inline or via environment/meta configuration),
 * provisioning a `profiles` table (plus row-level security policies) that mirrors stored user metadata, and
 * testing the full login, signup, and password reset flows locally.
 
