@@ -47,7 +47,7 @@
       const baseUrl = new URL('./', documentUrl)
       const originUrl = new URL(documentUrl.origin)
 
-      const debugState = { attempts: [], errors: [] }
+      const debugState = { attempts: [], errors: [], status: [] }
       Object.defineProperty(window, 'HarmonySheetsAdminBoot', {
         configurable: true,
         get() {
@@ -79,14 +79,126 @@
       statusMessage.style.border = '1px solid rgba(96, 84, 208, 0.15)'
       statusContainer.appendChild(statusMessage)
 
-      function setStatus(message, tone = 'info') {
+      const statusDetails = document.createElement('pre')
+      statusDetails.style.margin = '0.75rem 0 0'
+      statusDetails.style.padding = '0.75rem'
+      statusDetails.style.backgroundColor = 'rgba(96, 84, 208, 0.06)'
+      statusDetails.style.borderRadius = '0.5rem'
+      statusDetails.style.fontSize = '0.85rem'
+      statusDetails.style.lineHeight = '1.4'
+      statusDetails.style.textAlign = 'left'
+      statusDetails.style.whiteSpace = 'pre-wrap'
+      statusDetails.style.wordBreak = 'break-word'
+      statusDetails.style.border = '1px dashed rgba(96, 84, 208, 0.35)'
+      statusDetails.style.display = 'none'
+      statusMessage.appendChild(statusDetails)
+
+      const controls = document.createElement('div')
+      controls.style.marginTop = '0.75rem'
+      controls.style.display = 'flex'
+      controls.style.justifyContent = 'center'
+      controls.style.gap = '0.5rem'
+      statusMessage.appendChild(controls)
+
+      const toggleButton = document.createElement('button')
+      toggleButton.type = 'button'
+      toggleButton.textContent = 'Show debug details'
+      toggleButton.style.padding = '0.35rem 0.75rem'
+      toggleButton.style.fontSize = '0.8rem'
+      toggleButton.style.borderRadius = '999px'
+      toggleButton.style.border = '1px solid rgba(96, 84, 208, 0.35)'
+      toggleButton.style.background = '#fff'
+      toggleButton.style.color = '#4338ca'
+      toggleButton.style.cursor = 'pointer'
+      toggleButton.style.transition = 'all 150ms ease'
+      toggleButton.addEventListener('mouseenter', () => {
+        toggleButton.style.background = 'rgba(79, 70, 229, 0.08)'
+      })
+      toggleButton.addEventListener('mouseleave', () => {
+        toggleButton.style.background = '#fff'
+      })
+      controls.appendChild(toggleButton)
+
+      const copyButton = document.createElement('button')
+      copyButton.type = 'button'
+      copyButton.textContent = 'Copy debug JSON'
+      copyButton.style.padding = toggleButton.style.padding
+      copyButton.style.fontSize = toggleButton.style.fontSize
+      copyButton.style.borderRadius = toggleButton.style.borderRadius
+      copyButton.style.border = toggleButton.style.border
+      copyButton.style.background = toggleButton.style.background
+      copyButton.style.color = toggleButton.style.color
+      copyButton.style.cursor = toggleButton.style.cursor
+      copyButton.style.transition = toggleButton.style.transition
+      copyButton.addEventListener('mouseenter', () => {
+        copyButton.style.background = 'rgba(79, 70, 229, 0.08)'
+      })
+      copyButton.addEventListener('mouseleave', () => {
+        copyButton.style.background = '#fff'
+      })
+      controls.appendChild(copyButton)
+
+      let detailsVisible = false
+      function updateDetailsVisibility() {
+        if (toggleButton.disabled) {
+          statusDetails.style.display = 'none'
+          toggleButton.textContent = 'No debug details available yet'
+          return
+        }
+        statusDetails.style.display = detailsVisible ? 'block' : 'none'
+        toggleButton.textContent = detailsVisible ? 'Hide debug details' : 'Show debug details'
+      }
+      toggleButton.addEventListener('click', () => {
+        detailsVisible = !detailsVisible
+        updateDetailsVisibility()
+      })
+
+      copyButton.addEventListener('click', async () => {
+        const payload = JSON.stringify(debugState, null, 2)
+        try {
+          if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+            throw new Error('Clipboard API is not available in this context.')
+          }
+          await navigator.clipboard.writeText(payload)
+          copyButton.textContent = 'Copied!'
+          window.setTimeout(() => {
+            copyButton.textContent = 'Copy debug JSON'
+          }, 2000)
+        } catch (error) {
+          console.warn('[admin boot] Failed to copy debug payload to clipboard.', error)
+          copyButton.textContent = 'Copy failed — check console'
+          window.setTimeout(() => {
+            copyButton.textContent = 'Copy debug JSON'
+          }, 3000)
+        }
+      })
+
+      function setStatus(message, tone = 'info', details) {
         if (!statusContainer.isConnected) {
           document.body.appendChild(statusContainer)
         }
-        statusMessage.textContent = message
+        statusMessage.firstChild?.nodeType === Node.TEXT_NODE
+          ? (statusMessage.firstChild.textContent = message)
+          : statusMessage.insertBefore(document.createTextNode(message), statusMessage.firstChild)
+        while (statusMessage.childNodes.length > 1 && statusMessage.childNodes[1] !== statusDetails) {
+          statusMessage.removeChild(statusMessage.childNodes[1])
+        }
         statusMessage.style.borderColor =
           tone === 'error' ? 'rgba(220, 38, 38, 0.35)' : tone === 'success' ? 'rgba(22, 163, 74, 0.35)' : 'rgba(96, 84, 208, 0.15)'
         statusMessage.style.color = tone === 'error' ? '#991b1b' : tone === 'success' ? '#0f5132' : '#1f2933'
+        const hasDetails = typeof details === 'string' && details.trim().length > 0
+        statusDetails.textContent = hasDetails ? details : ''
+        toggleButton.disabled = !hasDetails
+        toggleButton.style.opacity = hasDetails ? '1' : '0.5'
+        toggleButton.style.cursor = hasDetails ? 'pointer' : 'not-allowed'
+        detailsVisible = hasDetails
+        updateDetailsVisibility()
+        debugState.status.push({
+          at: new Date().toISOString(),
+          tone,
+          message,
+          details
+        })
       }
 
       function clearStatus() {
@@ -107,7 +219,10 @@
       }
 
       function recordError(error, context) {
-        debugState.errors.push({ context, error })
+        const serialised = error instanceof Error
+          ? { message: error.message, stack: error.stack }
+          : { message: String(error) }
+        debugState.errors.push({ context, error: serialised })
       }
 
       function loadStylesheet(href) {
@@ -219,27 +334,48 @@
         const localHost = isLikelyLocalHost(window.location.hostname)
 
         if (localHost) {
-          setStatus('Connecting to the Vite dev server…')
+          setStatus(
+            'Connecting to the Vite dev server…',
+            'info',
+            JSON.stringify({ host: window.location.host, origin: originUrl.toString() }, null, 2)
+          )
           const devLoaded = await loadFromDevServer()
           if (devLoaded) {
             clearStatus()
             return
           }
           console.info('[admin boot] Vite dev server was not reachable. Falling back to static assets.')
+          setStatus(
+            'The Vite dev server was not reachable. Falling back to the static admin bundle…',
+            'info',
+            JSON.stringify({ attempts: debugState.attempts, errors: debugState.errors }, null, 2)
+          )
         } else {
           console.info('[admin boot] Non-local host detected — skipping Vite dev server probe.')
+          setStatus(
+            'Running in a non-local environment — loading the static admin dashboard…',
+            'info',
+            JSON.stringify({ host: window.location.host, origin: originUrl.toString() }, null, 2)
+          )
         }
 
-        setStatus('Loading the static admin dashboard…')
+        setStatus('Loading the static admin dashboard…', 'info', JSON.stringify({ cssUrl, jsUrl }, null, 2))
         const staticLoaded = await loadStaticBundle()
         if (staticLoaded) {
           clearStatus()
           return
         }
 
+        const payload = {
+          baseUrl: baseUrl.toString(),
+          originUrl: originUrl.toString(),
+          attempts: debugState.attempts,
+          errors: debugState.errors
+        }
         setStatus(
-          'The admin dashboard bundle failed to load. Check the browser console and network panel for failed requests.',
-          'error'
+          'The admin dashboard bundle failed to load. Inspect the debug details below or see window.HarmonySheetsAdminBoot.',
+          'error',
+          JSON.stringify(payload, null, 2)
         )
         console.error('[admin boot] Unable to load any admin bundle. Inspect window.HarmonySheetsAdminBoot for details.')
       }
