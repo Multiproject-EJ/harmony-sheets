@@ -119,7 +119,18 @@
         )
       }
 
+      function ensureProcessEnv(mode) {
+        const globalTarget = typeof globalThis !== 'undefined' ? globalThis : window
+        const processLike = (globalTarget.process = globalTarget.process || {})
+        const env = (processLike.env = processLike.env || {})
+        const current = typeof env.NODE_ENV === 'string' ? env.NODE_ENV.trim().toLowerCase() : undefined
+        if (!current || current !== mode) {
+          env.NODE_ENV = mode
+        }
+      }
+
       async function loadFromDevServer() {
+        ensureProcessEnv('development')
         const devClientCandidates = [
           resolveUrl('@vite/client', originUrl),
           resolveUrl('../@vite/client', baseUrl),
@@ -150,6 +161,7 @@
       }
 
       async function loadStaticBundle() {
+        ensureProcessEnv('production')
         const cssUrl = resolveUrl('assets/admin.css', baseUrl)
         const jsUrl = resolveUrl('assets/admin.js', baseUrl)
 
