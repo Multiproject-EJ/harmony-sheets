@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Alert, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import { getConfiguredAdminEmail, getNormalizedAdminEmail } from '../lib/runtimeConfig'
+import { getConfiguredAdminEmail, getNormalizedAdminEmail, isAdminUser } from '../lib/runtimeConfig'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -14,6 +14,33 @@ export default function Login() {
   const adminEmailDisplay = getConfiguredAdminEmail()
   const normalizedAdminEmail = getNormalizedAdminEmail()
   const adminEmailConfigured = Boolean(normalizedAdminEmail)
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function checkExistingSession() {
+      const {
+        data: { session }
+      } = await supabase.auth.getSession()
+
+      if (isMounted && isAdminUser(session?.user)) {
+        navigate('/dashboard', { replace: true })
+      }
+    }
+
+    checkExistingSession()
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (isAdminUser(session?.user)) {
+        navigate('/dashboard', { replace: true })
+      }
+    })
+
+    return () => {
+      isMounted = false
+      authListener.subscription.unsubscribe()
+    }
+  }, [navigate])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
