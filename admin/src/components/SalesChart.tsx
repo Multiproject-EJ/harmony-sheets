@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Card, CardContent, Typography } from '@mui/material'
+import { alpha, useTheme } from '@mui/material/styles'
 import {
   Chart,
   CategoryScale,
@@ -21,8 +22,14 @@ interface SalesChartProps {
 export default function SalesChart({ data }: SalesChartProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const chartRef = useRef<Chart<'line'> | null>(null)
+  const theme = useTheme()
+  const chartBackground = alpha(theme.palette.background.paper, 0.64)
+  const borderColor = alpha(theme.palette.primary.main, 0.16)
 
   useEffect(() => {
+    const primaryColor = theme.palette.primary.main
+    const primaryFill = alpha(primaryColor, 0.2)
+
     if (!canvasRef.current) return
 
     if (chartRef.current) {
@@ -37,8 +44,8 @@ export default function SalesChart({ data }: SalesChartProps) {
           {
             label: 'Revenue',
             data: data.map((sale) => sale.amount),
-            borderColor: '#6054d0',
-            backgroundColor: 'rgba(96, 84, 208, 0.2)',
+            borderColor: primaryColor,
+            backgroundColor: primaryFill,
             tension: 0.4,
             fill: true,
             pointRadius: 3
@@ -61,10 +68,19 @@ export default function SalesChart({ data }: SalesChartProps) {
     return () => {
       chartRef.current?.destroy()
     }
-  }, [data])
+  }, [data, theme])
 
   return (
-    <Card elevation={2}>
+    <Card
+      elevation={0}
+      sx={{
+        borderRadius: 3,
+        border: '1px solid',
+        borderColor,
+        backgroundColor: chartBackground,
+        backdropFilter: 'blur(6px)'
+      }}
+    >
       <CardContent sx={{ height: 360 }}>
         <Typography variant="h6" fontWeight={600} mb={2}>
           Monthly revenue
