@@ -10,19 +10,74 @@
     <div id="root"></div>
     <script type="module">
       const script = document.currentScript
-      const basePath = new URL('./', script?.src ?? window.location.href).pathname
+      const documentUrl = new URL(script?.src || window.location.href)
+      const baseUrl = new URL('./', documentUrl)
+      const originUrl = new URL(documentUrl.origin)
 
-      const resolve = (value, fallbackBase = basePath) => {
-        if (!value) return undefined
-        if (/^https?:\/\//i.test(value) || value.startsWith('/')) return value
-        return `${fallbackBase.replace(/\/$/, '')}/${value.replace(/^\//, '')}`
+      const debugState = { attempts: [], errors: [] }
+      Object.defineProperty(window, 'HarmonySheetsAdminBoot', {
+        configurable: true,
+        get() {
+          return debugState
+        }
+      })
+
+      const statusContainer = document.createElement('div')
+      statusContainer.id = 'admin-bootstrap-status'
+      statusContainer.style.position = 'fixed'
+      statusContainer.style.inset = '0'
+      statusContainer.style.display = 'grid'
+      statusContainer.style.placeItems = 'center'
+      statusContainer.style.background = 'radial-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.6))'
+      statusContainer.style.zIndex = '2147483647'
+      statusContainer.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+      statusContainer.style.transition = 'opacity 250ms ease'
+
+      const statusMessage = document.createElement('div')
+      statusMessage.style.padding = '1.25rem 1.75rem'
+      statusMessage.style.borderRadius = '0.75rem'
+      statusMessage.style.boxShadow = '0 1.5rem 3rem rgba(0, 0, 0, 0.15)'
+      statusMessage.style.backgroundColor = '#ffffff'
+      statusMessage.style.color = '#1f2933'
+      statusMessage.style.fontSize = '1rem'
+      statusMessage.style.lineHeight = '1.5'
+      statusMessage.style.maxWidth = 'min(90vw, 28rem)'
+      statusMessage.style.textAlign = 'center'
+      statusMessage.style.border = '1px solid rgba(96, 84, 208, 0.15)'
+      statusContainer.appendChild(statusMessage)
+
+      function setStatus(message, tone = 'info') {
+        if (!statusContainer.isConnected) {
+          document.body.appendChild(statusContainer)
+        }
+        statusMessage.textContent = message
+        statusMessage.style.borderColor =
+          tone === 'error' ? 'rgba(220, 38, 38, 0.35)' : tone === 'success' ? 'rgba(22, 163, 74, 0.35)' : 'rgba(96, 84, 208, 0.15)'
+        statusMessage.style.color = tone === 'error' ? '#991b1b' : tone === 'success' ? '#0f5132' : '#1f2933'
       }
 
-      const devEntry = resolve('/src/bootstrap.ts', '/')
-      const prodEntry = resolve('assets/admin.js')
-      const prodCss = resolve('assets/admin.css')
+      function clearStatus() {
+        if (!statusContainer.isConnected) return
+        statusContainer.style.opacity = '0'
+        window.setTimeout(() => {
+          statusContainer.remove()
+        }, 400)
+      }
 
-      const loadStylesheet = (href) => {
+      function resolveUrl(specifier, base = baseUrl) {
+        try {
+          return new URL(specifier, base).toString()
+        } catch (error) {
+          console.warn('[admin boot] Failed to resolve URL for', specifier, error)
+          return specifier
+        }
+      }
+
+      function recordError(error, context) {
+        debugState.errors.push({ context, error })
+      }
+
+      function loadStylesheet(href) {
         if (!href || document.querySelector(`link[data-admin-css="${href}"]`)) return
         const link = document.createElement('link')
         link.rel = 'stylesheet'
@@ -31,27 +86,107 @@
         document.head.appendChild(link)
       }
 
-      const attemptImport = async (specifier) => {
-        if (!specifier) throw new Error('Missing module specifier')
-        return import(specifier)
+      async function importModule(url, label) {
+        const attempt = { label, url, startedAt: Date.now() }
+        debugState.attempts.push(attempt)
+        try {
+          await import(/* @vite-ignore */ url)
+          attempt.finishedAt = Date.now()
+          attempt.status = 'success'
+          console.info(`[admin boot] Loaded ${label} from ${url}`)
+          return true
+        } catch (error) {
+          attempt.finishedAt = Date.now()
+          attempt.status = 'error'
+          attempt.error = error instanceof Error ? { message: error.message, stack: error.stack } : { message: String(error) }
+          recordError(error, `import:${label}`)
+          console.warn(`[admin boot] Failed to load ${label} from ${url}`, error)
+          return false
+        }
       }
 
-      const bootstrap = async () => {
-        try {
-          await attemptImport(devEntry)
+      function isLikelyLocalHost(hostname) {
+        if (!hostname) return false
+        const normalized = hostname.toLowerCase()
+        return (
+          normalized === 'localhost' ||
+          normalized === '127.0.0.1' ||
+          normalized === '0.0.0.0' ||
+          normalized === '[::1]' ||
+          normalized === '::1' ||
+          normalized.endsWith('.local') ||
+          normalized.endsWith('.test')
+        )
+      }
+
+      async function loadFromDevServer() {
+        const devClientCandidates = [
+          resolveUrl('@vite/client', originUrl),
+          resolveUrl('../@vite/client', baseUrl),
+          resolveUrl('../../@vite/client', baseUrl)
+        ]
+
+        let clientLoaded = false
+        for (const candidate of devClientCandidates) {
+          if (await importModule(candidate, 'Vite client')) {
+            clientLoaded = true
+            break
+          }
+        }
+
+        const entryCandidates = [
+          resolveUrl('src/main.tsx', baseUrl),
+          resolveUrl('/src/main.tsx', originUrl),
+          resolveUrl('../src/main.tsx', baseUrl)
+        ]
+
+        for (const candidate of entryCandidates) {
+          if (await importModule(candidate, 'Vite entry')) {
+            return clientLoaded || true
+          }
+        }
+
+        return false
+      }
+
+      async function loadStaticBundle() {
+        const cssUrl = resolveUrl('assets/admin.css', baseUrl)
+        const jsUrl = resolveUrl('assets/admin.js', baseUrl)
+
+        loadStylesheet(cssUrl)
+        return importModule(jsUrl, 'static admin bundle')
+      }
+
+      async function bootstrap() {
+        const localHost = isLikelyLocalHost(window.location.hostname)
+
+        if (localHost) {
+          setStatus('Connecting to the Vite dev server…')
+          const devLoaded = await loadFromDevServer()
+          if (devLoaded) {
+            clearStatus()
+            return
+          }
+          console.info('[admin boot] Vite dev server was not reachable. Falling back to static assets.')
+        } else {
+          console.info('[admin boot] Non-local host detected — skipping Vite dev server probe.')
+        }
+
+        setStatus('Loading the static admin dashboard…')
+        const staticLoaded = await loadStaticBundle()
+        if (staticLoaded) {
+          clearStatus()
           return
-        } catch (error) {
-          console.warn('Admin dev entry failed to load, falling back to built bundle.', error)
         }
 
-        try {
-          loadStylesheet(prodCss)
-          await attemptImport(prodEntry)
-        } catch (error) {
-          console.error('Failed to load the admin dashboard bundle.', error)
-        }
+        setStatus(
+          'The admin dashboard bundle failed to load. Check the browser console and network panel for failed requests.',
+          'error'
+        )
+        console.error('[admin boot] Unable to load any admin bundle. Inspect window.HarmonySheetsAdminBoot for details.')
       }
 
+      setStatus('Preparing the admin dashboard…')
       void bootstrap()
     </script>
   </body>
