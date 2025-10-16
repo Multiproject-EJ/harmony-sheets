@@ -49,13 +49,13 @@ limit 20;
 -- 6. List row-level security policies in case access looks incorrect
 select schemaname,
        tablename,
-       polname,
+       policyname,
        qual,
        with_check
 from pg_policies
 where schemaname = 'public'
   and tablename in ('products', 'prices')
-order by tablename, polname;
+order by tablename, policyname;
 
 -- 7. Confirm row-level security is actually enabled on the tables
 select relname,
