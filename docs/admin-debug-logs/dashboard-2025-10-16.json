@@ -1,0 +1,22 @@
+{
+  "source": "https://www.harmony-sheets.com/admin/",
+  "panel": "dashboard",
+  "resolutionPlan": "See docs/admin-debug-logs/2025-10-16-dashboard-remediation.md",
+  "snapshot": {
+    "attempts": [],
+    "errors": [],
+    "status": [
+      {
+        "at": "2025-10-16T21:17:29.602Z",
+        "tone": "info",
+        "message": "Preparing the admin dashboard…"
+      },
+      {
+        "at": "2025-10-16T21:17:29.607Z",
+        "tone": "info",
+        "message": "Running in a non-local environment — loading the static admin dashboard…",
+        "details": "{\n  \"host\": \"www.harmony-sheets.com\",\n  \"origin\": \"https://www.harmony-sheets.com/\"\n}"
+      }
+    ]
+  }
+}
