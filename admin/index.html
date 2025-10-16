@@ -308,13 +308,23 @@
         return false
       }
 
-      async function loadStaticBundle() {
+      async function loadStaticBundle(cssUrl, jsUrl) {
         ensureProcessEnv('production')
-        const cssUrl = resolveUrl('assets/admin.css', baseUrl)
-        const jsUrl = resolveUrl('assets/admin.js', baseUrl)
-
         loadStylesheet(cssUrl)
         return importModule(jsUrl, 'static admin bundle')
+      }
+
+      function readQueryFlag(name) {
+        const params = new URLSearchParams(window.location.search)
+        if (!params.has(name)) return false
+        const value = params.get(name)
+        if (value === null) return true
+        const normalized = value.trim().toLowerCase()
+        if (!normalized) return true
+        if (['0', 'false', 'no', 'off', 'disabled'].includes(normalized)) {
+          return false
+        }
+        return true
       }
 
       async function bootstrap() {
@@ -331,36 +341,74 @@
           }
         }
 
+        const forceDev = readQueryFlag('forceDev')
+        const forceStatic = readQueryFlag('forceStatic')
         const localHost = isLikelyLocalHost(window.location.hostname)
 
-        if (localHost) {
+        if (forceDev && forceStatic) {
+          console.warn('[admin boot] forceDev and forceStatic both set — prioritising forceDev.')
+        }
+
+        if (forceDev || (localHost && !forceStatic)) {
+          const reason = forceDev
+            ? 'Force dev override detected — probing the Vite dev server…'
+            : 'Connecting to the Vite dev server…'
           setStatus(
-            'Connecting to the Vite dev server…',
+            reason,
             'info',
-            JSON.stringify({ host: window.location.host, origin: originUrl.toString() }, null, 2)
+            JSON.stringify(
+              {
+                host: window.location.host,
+                origin: originUrl.toString(),
+                forceDev,
+                forceStatic,
+                localHost
+              },
+              null,
+              2
+            )
           )
           const devLoaded = await loadFromDevServer()
           if (devLoaded) {
             clearStatus()
             return
           }
-          console.info('[admin boot] Vite dev server was not reachable. Falling back to static assets.')
+          const fallbackReason = forceDev
+            ? '[admin boot] Vite dev server override active but server was unreachable.'
+            : '[admin boot] Vite dev server was not reachable. Falling back to static assets.'
+          console.info(fallbackReason)
           setStatus(
             'The Vite dev server was not reachable. Falling back to the static admin bundle…',
             'info',
             JSON.stringify({ attempts: debugState.attempts, errors: debugState.errors }, null, 2)
           )
         } else {
-          console.info('[admin boot] Non-local host detected — skipping Vite dev server probe.')
+          const reason = forceStatic
+            ? '[admin boot] forceStatic flag detected — skipping Vite dev server probe.'
+            : '[admin boot] Non-local host detected — skipping Vite dev server probe.'
+          console.info(reason)
           setStatus(
             'Running in a non-local environment — loading the static admin dashboard…',
             'info',
-            JSON.stringify({ host: window.location.host, origin: originUrl.toString() }, null, 2)
+            JSON.stringify(
+              {
+                host: window.location.host,
+                origin: originUrl.toString(),
+                forceDev,
+                forceStatic,
+                localHost
+              },
+              null,
+              2
+            )
           )
         }
 
+        const cssUrl = resolveUrl('assets/admin.css', baseUrl)
+        const jsUrl = resolveUrl('assets/admin.js', baseUrl)
+
         setStatus('Loading the static admin dashboard…', 'info', JSON.stringify({ cssUrl, jsUrl }, null, 2))
-        const staticLoaded = await loadStaticBundle()
+        const staticLoaded = await loadStaticBundle(cssUrl, jsUrl)
         if (staticLoaded) {
           clearStatus()
           return

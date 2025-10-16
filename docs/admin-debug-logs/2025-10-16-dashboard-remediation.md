@@ -8,12 +8,12 @@ Both debug snapshots taken on October 16, 2025 show the admin dashboard bootload
 * The current production build of the static bundle has not been refreshed since the last set of Supabase schema changes. As a result, once the static code loads it is missing the newer API surface and silently stalls on data fetches.
 
 ## Remediation plan
-1. **Rebuild the admin bundle**: run `npm install` (if needed) and then `npm run build:admin` to regenerate `admin/assets/admin.css` and `admin/assets/admin.js` against the latest code.
+1. **Rebuild the admin bundle** ✅ — run `npm install` (if needed) and then `npm run build -- --config vite.static.config.ts` to regenerate `admin/assets/admin.css` and `admin/assets/admin.js` against the latest code.
 2. **Deploy the updated assets**: publish the refreshed files to the CDN bucket backing `https://www.harmony-sheets.com/admin/assets/` and purge the CDN cache so new visitors pick up the update immediately.
 3. **Add a regression check**: update the deployment playbook to include a smoke test that loads `/admin/` with `?debug=1` and verifies that `window.HarmonySheetsAdminBoot.assets.static.status` reports `"success"`.
-4. **Add a temporary host override**: update `admin/index.html` to honor a `?forceDev=1` query flag that bypasses the host check, then document the option so engineers can opt into the Vite dev server during remote debugging sessions from staging domains.
+4. **Add a temporary host override** ✅ — update `admin/index.html` to honor `?forceDev=1` (and optional `?forceStatic=1`) query flags that bypass the host check, then document the option so engineers can opt into the Vite dev server during remote debugging sessions from staging domains.
 
 ## Current status
-* Bundle rebuild scheduled for the next deployment window.
+* Static bundle rebuilt and committed on Oct 17, 2025 (UTC) to match the latest Supabase schema.
 * CDN publish checklist updated with the new smoke test.
-* Implementation ticket filed to add and document the `?forceDev=1` override during the next sprint.
+* Query-flag override implemented and ready for deployment; follow-on documentation ticket closed out by this change.
