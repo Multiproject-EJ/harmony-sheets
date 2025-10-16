@@ -9,6 +9,39 @@
   <body>
     <div id="root"></div>
     <script type="module">
+      const globalTarget = typeof globalThis !== 'undefined' ? globalThis : window
+      const existingConfig =
+        globalTarget.HarmonySheetsSupabase && typeof globalTarget.HarmonySheetsSupabase === 'object'
+          ? globalTarget.HarmonySheetsSupabase
+          : {}
+      globalTarget.HarmonySheetsSupabase = existingConfig
+
+      function assignIfString(key, value) {
+        if (typeof value === 'string') {
+          const trimmed = value.trim()
+          if (trimmed) {
+            existingConfig[key] = trimmed
+          }
+        }
+      }
+
+      globalTarget.HarmonySheetsAdminBootConfigReady = (async () => {
+        try {
+          const {
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY,
+            SUPABASE_ADMIN_EMAIL
+          } = await import('../supabase-config.js')
+
+          assignIfString('url', SUPABASE_URL)
+          assignIfString('anonKey', SUPABASE_ANON_KEY)
+          assignIfString('adminEmail', SUPABASE_ADMIN_EMAIL)
+        } catch (error) {
+          console.warn('[admin boot] Unable to load supabase-config.js for admin bootstrap.', error)
+        }
+      })()
+    </script>
+    <script type="module">
       const script = document.currentScript
       const documentUrl = new URL(script?.src || window.location.href)
       const baseUrl = new URL('./', documentUrl)
@@ -170,6 +203,19 @@
       }
 
       async function bootstrap() {
+        const configReady =
+          typeof globalThis !== 'undefined' && globalThis
+            ? globalThis.HarmonySheetsAdminBootConfigReady
+            : undefined
+
+        if (configReady && typeof configReady.then === 'function') {
+          try {
+            await configReady
+          } catch (error) {
+            console.warn('[admin boot] Supabase config promise rejected.', error)
+          }
+        }
+
         const localHost = isLikelyLocalHost(window.location.hostname)
 
         if (localHost) {
