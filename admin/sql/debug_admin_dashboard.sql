@@ -67,7 +67,6 @@ order by relname;
 
 -- 8. Ensure the pgcrypto extension exists so gen_random_uuid() works
 select e.extname,
-       n.nspname as schema
+       pg_get_extension_schema(e.extname) as schema
 from pg_extension e
-join pg_namespace n on n.oid = e.extnamespace
 where e.extname = 'pgcrypto';
