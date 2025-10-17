@@ -1,11 +1,11 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.7/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
+import { isSupabaseConfigured } from "./supabase-config.js";
 import {
   ACCOUNT_PAGE_PATH,
   ADMIN_DASHBOARD_PATH,
   getPostSignInRedirect,
   isAdminUser
 } from "./auth-helpers.js";
+import { getSupabaseClient } from "./supabase-client.js";
 
 const accountItem = document.querySelector("[data-account-menu]");
 const toggle = accountItem?.querySelector("[data-account-toggle]");
@@ -661,12 +661,7 @@ function initSupabase() {
     return;
   }
 
-  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  });
+  supabaseClient = getSupabaseClient();
 
   const applySession = session => {
     const user = session?.user || null;

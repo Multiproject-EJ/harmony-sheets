@@ -1,6 +1,6 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.7/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
+import { isSupabaseConfigured } from "./supabase-config.js";
 import { ACCOUNT_PAGE_PATH, ADMIN_DASHBOARD_PATH, isAdminUser } from "./auth-helpers.js";
+import { getSupabaseClient } from "./supabase-client.js";
 
 const PAGE_PATH = ADMIN_DASHBOARD_PATH || "admin_dashboard.html";
 
@@ -41,6 +41,7 @@ let supabaseTesterReady = false;
 let supabaseTestPromise = null;
 let relativeTimeSupported =
   typeof Intl !== "undefined" && typeof Intl.RelativeTimeFormat === "function";
+let redirecting = false;
 
 function updateSupabaseStatus(message, tone = "neutral") {
   if (supabaseTestEls.status) {
@@ -352,8 +353,12 @@ function setUnauthorizedMessage(message) {
 }
 
 function redirectTo(target) {
-  if (!target) return;
+  if (!target || redirecting) return;
+  redirecting = true;
   window.location.replace(target);
+  window.setTimeout(() => {
+    redirecting = false;
+  }, 0);
 }
 
 function handleUnauthorized(message, redirectTarget) {
@@ -409,7 +414,7 @@ async function initialize() {
     return;
   }
 
-  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  supabaseClient = getSupabaseClient();
 
   try {
     const { data, error } = await supabaseClient.auth.getSession();
