@@ -1,3 +1,35 @@
+create extension if not exists "pgcrypto";
+
+do $$
+begin
+    if not exists (
+        select 1
+        from information_schema.columns
+        where table_schema = 'public'
+          and table_name = 'products'
+          and column_name = 'slug'
+    ) then
+        alter table public.products add column slug text;
+    end if;
+
+    update public.products
+    set slug = coalesce(slug, id::text)
+    where slug is null;
+
+    begin
+        alter table public.products add constraint products_slug_key unique (slug);
+    exception
+        when duplicate_object then null;
+    end;
+
+    begin
+        alter table public.products alter column slug set not null;
+    exception
+        when others then null;
+    end;
+end
+$$;
+
 begin;
 
 create temporary table temp_product_map (
