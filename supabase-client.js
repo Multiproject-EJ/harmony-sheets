@@ -1,7 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.7/+esm";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
 
-const STORAGE_KEY = "sb-hs-auth";
+const STORAGE_KEY = "sb-hs-admin-auth";
 
 let supabaseSingleton = null;
 
