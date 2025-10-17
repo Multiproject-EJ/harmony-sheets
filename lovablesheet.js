@@ -2,7 +2,13 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
 import { ACCOUNT_PAGE_PATH, isAdminUser } from "./auth-helpers.js";
 
-const PAGE_PATH = "lovablesheet.html";
+const DEFAULT_PAGE_PATH = "lovablesheet.html";
+const SUPPORTED_PAGE_PATHS = new Set([DEFAULT_PAGE_PATH, "lovables_sheet.html"]);
+
+const PAGE_PATH = (() => {
+  const currentPath = window.location.pathname.split("/").pop() || DEFAULT_PAGE_PATH;
+  return SUPPORTED_PAGE_PATHS.has(currentPath) ? currentPath : DEFAULT_PAGE_PATH;
+})();
 const BRAIN_BOARD_GROUP_RADIUS = 220;
 const BRAIN_BOARD_COLORS = new Set(["sunshine", "meadow", "ocean", "blossom"]);
 
