@@ -522,14 +522,14 @@ order by mapped.id, mapped.position;
 -- FAQs
 with data(slug, question, answer, position) as (
     values
-        ('pomodoro', 'Does the timer keep running if I close the tab?', $$Yes. The timer stays in sync even if you close the tab, so you can come back and pick up where you left off.$$),
-        ('pomodoro', 'Can I change the work/break lengths?', $$Absolutely — customize any durations you need, from quick sprints to long focus sessions.$$),
-        ('budget-dashboard', 'Does this work for couples or families?', $$Yes! Duplicate the dashboard for shared budgets and invite collaborators with their own logins.$$),
-        ('budget-dashboard', 'Can I import transactions?', $$You can quickly paste exports from banks or cards to keep everything up to date.$$),
-        ('pomodoro-pro', 'What makes Pomodoro Pro different?', $$You get focus analytics, custom goals, and deep trends tracking built right in.$$),
-        ('ultimate-subscription-tracker', 'How do renewal reminders work?', $$Set review cadences for each subscription and get email nudges before they renew.$$),
-        ('ultimate-study-planner', 'Can I plan multiple classes?', $$Yes — organize assignments and study blocks by course so nothing slips through.$$),
-        ('smart-savings-tracker', 'Will this help with multiple savings goals?', $$Track each goal separately and see combined progress at a glance.$$)
+        ('pomodoro', 'Does the timer keep running if I close the tab?', $$Yes. The timer stays in sync even if you close the tab, so you can come back and pick up where you left off.$$, 1),
+        ('pomodoro', 'Can I change the work/break lengths?', $$Absolutely — customize any durations you need, from quick sprints to long focus sessions.$$, 1),
+        ('budget-dashboard', 'Does this work for couples or families?', $$Yes! Duplicate the dashboard for shared budgets and invite collaborators with their own logins.$$, 1),
+        ('budget-dashboard', 'Can I import transactions?', $$You can quickly paste exports from banks or cards to keep everything up to date.$$, 1),
+        ('pomodoro-pro', 'What makes Pomodoro Pro different?', $$You get focus analytics, custom goals, and deep trends tracking built right in.$$, 1),
+        ('ultimate-subscription-tracker', 'How do renewal reminders work?', $$Set review cadences for each subscription and get email nudges before they renew.$$, 1),
+        ('ultimate-study-planner', 'Can I plan multiple classes?', $$Yes — organize assignments and study blocks by course so nothing slips through.$$, 1),
+        ('smart-savings-tracker', 'Will this help with multiple savings goals?', $$Track each goal separately and see combined progress at a glance.$$, 1)
 ), mapped as (
     select map.id, data.question, data.answer, data.position
     from data
@@ -541,14 +541,14 @@ where pf.product_id = mapped.id;
 
 with data(slug, question, answer, position) as (
     values
-        ('pomodoro', 'Does the timer keep running if I close the tab?', $$Yes. The timer stays in sync even if you close the tab, so you can come back and pick up where you left off.$$),
-        ('pomodoro', 'Can I change the work/break lengths?', $$Absolutely — customize any durations you need, from quick sprints to long focus sessions.$$),
-        ('budget-dashboard', 'Does this work for couples or families?', $$Yes! Duplicate the dashboard for shared budgets and invite collaborators with their own logins.$$),
-        ('budget-dashboard', 'Can I import transactions?', $$You can quickly paste exports from banks or cards to keep everything up to date.$$),
-        ('pomodoro-pro', 'What makes Pomodoro Pro different?', $$You get focus analytics, custom goals, and deep trends tracking built right in.$$),
-        ('ultimate-subscription-tracker', 'How do renewal reminders work?', $$Set review cadences for each subscription and get email nudges before they renew.$$),
-        ('ultimate-study-planner', 'Can I plan multiple classes?', $$Yes — organize assignments and study blocks by course so nothing slips through.$$),
-        ('smart-savings-tracker', 'Will this help with multiple savings goals?', $$Track each goal separately and see combined progress at a glance.$$)
+        ('pomodoro', 'Does the timer keep running if I close the tab?', $$Yes. The timer stays in sync even if you close the tab, so you can come back and pick up where you left off.$$, 1),
+        ('pomodoro', 'Can I change the work/break lengths?', $$Absolutely — customize any durations you need, from quick sprints to long focus sessions.$$, 1),
+        ('budget-dashboard', 'Does this work for couples or families?', $$Yes! Duplicate the dashboard for shared budgets and invite collaborators with their own logins.$$, 1),
+        ('budget-dashboard', 'Can I import transactions?', $$You can quickly paste exports from banks or cards to keep everything up to date.$$, 1),
+        ('pomodoro-pro', 'What makes Pomodoro Pro different?', $$You get focus analytics, custom goals, and deep trends tracking built right in.$$, 1),
+        ('ultimate-subscription-tracker', 'How do renewal reminders work?', $$Set review cadences for each subscription and get email nudges before they renew.$$, 1),
+        ('ultimate-study-planner', 'Can I plan multiple classes?', $$Yes — organize assignments and study blocks by course so nothing slips through.$$, 1),
+        ('smart-savings-tracker', 'Will this help with multiple savings goals?', $$Track each goal separately and see combined progress at a glance.$$, 1)
 ), mapped as (
     select map.id, data.question, data.answer, data.position
     from data
