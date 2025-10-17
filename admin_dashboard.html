@@ -136,6 +136,16 @@
               <span aria-hidden="true">⟲</span>
               <span>Reset data</span>
             </button>
+            <button
+              class="btn-ghost admin__btn"
+              type="button"
+              data-editing-guide-open
+              aria-haspopup="dialog"
+              aria-controls="editing-guide-dialog"
+              aria-expanded="false"
+            >
+              Open editing guide
+            </button>
           </div>
         </div>
         <div class="admin__toolbar" role="search">
@@ -186,25 +196,6 @@
         <footer class="admin__panel-foot">
           <p data-table-meta>0 products</p>
         </footer>
-      </div>
-
-      <div class="admin__editor" aria-live="polite">
-        <div class="admin__editor-tools">
-          <button
-            class="btn-ghost admin__btn"
-            type="button"
-            data-editing-guide-open
-            aria-haspopup="dialog"
-            aria-controls="editing-guide-dialog"
-            aria-expanded="false"
-          >
-            Open editing guide
-          </button>
-        </div>
-        <div class="admin__editor-placeholder" data-editor-empty>
-          <h2>Choose a product to edit</h2>
-          <p>Select a row from the catalog or create something new. All edits are stored locally until you download the JSON file.</p>
-        </div>
       </div>
 
       <div class="admin-editor-modal" data-product-modal hidden>
