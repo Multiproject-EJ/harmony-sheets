@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>LovableSheet — Harmony Sheets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-neutral page-lovablesheet">
+<header class="site-header">
+  <a class="brand" href="/">
+    <img class="brand__logo" src="assets/logoHarmonySheets.webp" alt="">
+    <span class="brand__text">
+      <span class="brand__name">Harmony Sheets</span>
+      <span class="brand__notice">Plan Better. Live Smarter.</span>
+    </span>
+  </a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-menu">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="nav-toggle__icon" aria-hidden="true"></span>
+  </button>
+  <nav class="main-nav" id="site-menu">
+      <div class="nav-item nav-item--browse">
+        <a class="nav-link nav-link--browse" href="products.html" aria-haspopup="true" aria-expanded="false">Discover Templates</a>
+        <div class="nav-mega" role="menu" aria-label="Life Harmony categories">
+          <div class="nav-mega__content" data-nav-mega-content>
+            <p class="nav-mega__placeholder">Loading Life Harmony areas…</p>
+          </div>
+        </div>
+      </div>
+      <div class="nav-item nav-item--bundles">
+        <a class="nav-link nav-link--bundles" href="bundles.html" aria-haspopup="true" aria-expanded="false">Bundles</a>
+        <div class="nav-flyout" role="menu" aria-label="Featured bundles">
+          <div class="nav-flyout__content" data-nav-bundles>
+            <p class="nav-flyout__placeholder">Loading bundles…</p>
+          </div>
+        </div>
+      </div>
+      <a class="nav-link" href="faq.html">Community</a>
+      <div class="nav-item nav-item--account" data-account-menu>
+        <button class="nav-link nav-link--account nav-link--menu" type="button" data-account-toggle aria-haspopup="true" aria-expanded="false">
+          <span class="nav-link__label" data-account-label>Log In/Sign Up</span>
+          <span class="nav-link__chevron" aria-hidden="true"></span>
+        </button>
+        <div class="nav-dropdown" data-account-dropdown role="menu" aria-label="Account options" hidden>
+          <a class="nav-dropdown__link" href="account.html" data-account-link="account">My account</a>
+          <a class="nav-dropdown__link" href="admin/" data-account-link="admin" hidden aria-hidden="true">Admin dashboard</a>
+          <a class="nav-dropdown__link" href="LovableSheet.html" data-account-link="lovablesheet" hidden aria-hidden="true">LovableSheet</a>
+          <a class="nav-dropdown__link" href="products.html#my-products" data-account-link="products">My products</a>
+          <button class="nav-dropdown__link nav-dropdown__link--action" type="button" data-account-cart>Shopping cart</button>
+          <button class="nav-dropdown__link nav-dropdown__link--action" type="button" data-account-signout hidden disabled>Sign out</button>
+        </div>
+      </div>
+      <button class="nav-link nav-link--icon nav-link--cart" type="button" data-cart-toggle aria-expanded="false" aria-controls="cart-panel" hidden>
+        <span class="sr-only" data-cart-label>View cart</span>
+        <svg class="nav-link__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3.5 4h2.6l1.6 9.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 .97-.76L20 7.5H7.1"/>
+            <circle cx="10" cy="18.5" r="1.25"/>
+            <circle cx="17" cy="18.5" r="1.25"/>
+          </g>
+        </svg>
+        <span class="cart-count" data-cart-count>0</span>
+      </button>
+    </nav>
+</header>
+
+<div class="cart-overlay" data-cart-overlay></div>
+<aside class="cart-panel" id="cart-panel" aria-hidden="true" aria-labelledby="cart-panel-title" role="dialog" aria-modal="true">
+  <div class="cart-panel__header">
+    <h2 id="cart-panel-title">Your cart</h2>
+    <button class="cart-panel__close" type="button" data-cart-close aria-label="Close cart">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="cart-panel__body" data-cart-items></div>
+  <div class="cart-panel__footer">
+    <div class="cart-panel__total">
+      <span>Total</span>
+      <strong data-cart-total>$0.00</strong>
+    </div>
+    <button class="btn primary cart-panel__checkout" type="button" data-cart-checkout>Checkout</button>
+    <p class="cart-panel__hint muted">Checkout grants instant access to your Harmony Sheets downloads.</p>
+  </div>
+</aside>
+
+<main class="lovablesheet-page" id="main-content">
+  <section class="lovablesheet-state" data-lovablesheet-loading>
+    <div class="account-card">
+      <h1>Loading LovableSheet</h1>
+      <p>Verifying your admin access…</p>
+    </div>
+  </section>
+  <section class="lovablesheet-state" data-lovablesheet-unauthorized hidden>
+    <div class="account-card">
+      <h1>Access restricted</h1>
+      <p data-lovablesheet-message>You need an admin account to view LovableSheet.</p>
+      <a class="btn secondary" href="login.html">Go to sign in</a>
+    </div>
+  </section>
+  <section class="lovablesheet-content" data-lovablesheet-content hidden></section>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__grid">
+      <div class="site-footer__column">
+        <h3 class="site-footer__heading">Customer Support</h3>
+        <ul class="site-footer__links">
+          <li><a href="about.html">About</a></li>
+          <li><a href="faq.html#guides">Information Guides</a></li>
+          <li><a href="faq.html">Community</a></li>
+          <li><a href="faq.html#contact">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="site-footer__column">
+        <h3 class="site-footer__heading">Policies</h3>
+        <ul class="site-footer__links">
+          <li><a href="policies.html#privacy">Privacy Policy</a></li>
+          <li><a href="policies.html#delivery">Delivery Policy</a></li>
+          <li><a href="policies.html#refund">Refund Policy</a></li>
+          <li><a href="policies.html#terms">Terms of Service</a></li>
+        </ul>
+      </div>
+      <div class="site-footer__column">
+        <h3 class="site-footer__heading">Affiliate</h3>
+        <ul class="site-footer__links">
+          <li><a href="affiliate.html#apply">Become an Affiliate</a></li>
+          <li><a href="affiliate.html#login">Affiliate Login</a></li>
+        </ul>
+      </div>
+      <div class="site-footer__column site-footer__column--newsletter">
+        <h3 class="site-footer__heading">Social &amp; Newsletter</h3>
+        <form id="footer-newsletter" class="footer-form">
+          <label class="sr-only" for="footer-email">Email address</label>
+          <div class="footer-form__controls">
+            <input id="footer-email" type="email" name="email" placeholder="Enter email" required>
+            <button type="submit" class="footer-form__submit">Join</button>
+          </div>
+        </form>
+        <p class="site-footer__note">Subscribe to receive exclusive releases, deals, and event updates.</p>
+        <div class="site-footer__social">
+          <a class="site-footer__social-link" href="https://www.instagram.com/harmonysheets" target="_blank" rel="noopener" aria-label="Instagram">
+            <span aria-hidden="true">IG</span>
+          </a>
+          <a class="site-footer__social-link" href="https://www.youtube.com/@HarmonySheets" target="_blank" rel="noopener" aria-label="YouTube">
+            <span aria-hidden="true">YT</span>
+          </a>
+          <a class="site-footer__social-link" href="https://www.pinterest.com/harmonysheets" target="_blank" rel="noopener" aria-label="Pinterest">
+            <span aria-hidden="true">PI</span>
+          </a>
+          <a class="site-footer__social-link" href="mailto:support@harmony-sheets.com" aria-label="Email Harmony Sheets">
+            <span aria-hidden="true">@</span>
+          </a>
+        </div>
+        <p id="footer-newsletter-status" class="site-footer__status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <div class="site-footer__brand">
+        <a class="brand brand--footer" href="/">Harmony Sheets</a>
+        <p class="site-footer__copy">© <span id="year"></span> Harmony Sheets. All rights reserved.</p>
+        <p class="site-footer__tagline">One-time purchase. No subscriptions.</p>
+      </div>
+      <div class="site-footer__extras">
+        <p class="site-footer__locale">Serving customers worldwide • USD</p>
+        <div class="site-footer__payments">
+          <span class="site-footer__payment">Visa</span>
+          <span class="site-footer__payment">Mastercard</span>
+          <span class="site-footer__payment">Amex</span>
+          <span class="site-footer__payment">PayPal</span>
+          <span class="site-footer__payment">Shop Pay</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script type="module" src="auth-modal.js"></script>
+<script type="module" src="lovablesheet.js"></script>
+</body>
+</html>
