@@ -2,7 +2,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
 import { ACCOUNT_PAGE_PATH, isAdminUser } from "./auth-helpers.js";
 
-const PAGE_PATH = "LovableSheet.html";
+const PAGE_PATH = "lovablesheet.html";
 const BRAIN_BOARD_GROUP_RADIUS = 220;
 const BRAIN_BOARD_COLORS = new Set(["sunshine", "meadow", "ocean", "blossom"]);
 
