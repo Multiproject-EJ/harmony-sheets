@@ -106,6 +106,16 @@ begin
             alter table public.products add column slug text;
         end if;
 
+        if not exists (
+            select 1
+            from information_schema.columns
+            where table_schema = 'public'
+              and table_name = 'products'
+              and column_name = 'tagline'
+        ) then
+            alter table public.products add column tagline text;
+        end if;
+
         update public.products
         set slug = id
         where slug is null;

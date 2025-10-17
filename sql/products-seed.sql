@@ -16,11 +16,16 @@ begin
     set slug = coalesce(slug, id::text)
     where slug is null;
 
-    begin
+    if not exists (
+        select 1
+        from pg_constraint con
+        join pg_class rel on rel.oid = con.conrelid
+        join pg_namespace nsp on nsp.oid = rel.relnamespace
+        where con.conname = 'products_slug_key'
+          and nsp.nspname = 'public'
+    ) then
         alter table public.products add constraint products_slug_key unique (slug);
-    exception
-        when duplicate_object then null;
-    end;
+    end if;
 
     begin
         alter table public.products alter column slug set not null;
@@ -29,6 +34,26 @@ begin
     end;
 end
 $$;
+
+alter table public.products
+    add column if not exists name text,
+    add column if not exists tagline text,
+    add column if not exists description text,
+    add column if not exists price_amount numeric(10, 2),
+    add column if not exists price_currency text,
+    add column if not exists price_display text,
+    add column if not exists hero_image text,
+    add column if not exists color_image text,
+    add column if not exists color_caption text,
+    add column if not exists demo_video text,
+    add column if not exists demo_poster text,
+    add column if not exists virtual_demo text,
+    add column if not exists pricing_title text,
+    add column if not exists pricing_sub text,
+    add column if not exists stripe_url text,
+    add column if not exists etsy_url text,
+    add column if not exists updated_at timestamptz default now(),
+    add column if not exists created_at timestamptz default now();
 
 begin;
 
