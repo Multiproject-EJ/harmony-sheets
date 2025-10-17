@@ -28,7 +28,10 @@ const els = {
   guideButton: document.querySelector('[data-editing-guide-open]'),
   guideModal: document.querySelector('[data-editing-guide-modal]'),
   guideDialog: document.querySelector('[data-editing-guide-dialog]'),
-  guideDismissTriggers: document.querySelectorAll('[data-editing-guide-dismiss]')
+  guideDismissTriggers: document.querySelectorAll('[data-editing-guide-dismiss]'),
+  productModal: document.querySelector('[data-product-modal]'),
+  productModalDialog: document.querySelector('[data-product-modal-dialog]'),
+  productModalDismissTriggers: document.querySelectorAll('[data-product-modal-dismiss]')
 };
 
 const formFields = {
@@ -57,6 +60,8 @@ const formFields = {
 };
 
 let lastFocusedGuideTrigger = null;
+let lastFocusedEditorTrigger = null;
+let lastFocusedEditorTriggerId = null;
 
 function getGuideFocusableElements() {
   if (!els.guideModal) return [];
@@ -136,6 +141,110 @@ function setupGuideModal() {
   });
 }
 
+function getEditorFocusableElements() {
+  if (!els.productModal) return [];
+  const selectors = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+  return Array.from(els.productModal.querySelectorAll(selectors)).filter((element) => {
+    if (!(element instanceof HTMLElement)) return false;
+    if (element.hasAttribute('disabled')) return false;
+    if (element.getAttribute('aria-hidden') === 'true') return false;
+    return element.offsetParent !== null || element === els.productModalDialog;
+  });
+}
+
+function handleEditorKeydown(event) {
+  if (!els.productModal?.classList.contains('is-open')) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    handleCancel();
+    return;
+  }
+  if (event.key === 'Tab') {
+    const focusable = getEditorFocusableElements();
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey) {
+      if (document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else if (document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+}
+
+function openProductModal(options = {}) {
+  if (!els.productModal) return;
+  const { focusTarget = null } = options;
+  if (els.productModal.classList.contains('is-open')) {
+    const fallback = focusTarget || els.productModalDialog;
+    if (fallback && typeof fallback.focus === 'function') {
+      fallback.focus();
+    }
+    return;
+  }
+  if (els.form) {
+    els.form.hidden = false;
+  }
+  lastFocusedEditorTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  lastFocusedEditorTriggerId =
+    lastFocusedEditorTrigger?.dataset?.id || lastFocusedEditorTrigger?.getAttribute?.('data-id') || null;
+  els.productModal.hidden = false;
+  requestAnimationFrame(() => {
+    els.productModal?.classList.add('is-open');
+    document.body.classList.add('admin-editor-open');
+    const target = focusTarget || els.productModalDialog || getEditorFocusableElements()[0];
+    target?.focus();
+  });
+  document.addEventListener('keydown', handleEditorKeydown);
+}
+
+function closeProductModal({ restoreFocus = true } = {}) {
+  if (!els.productModal) return;
+  els.productModal.classList.remove('is-open');
+  document.body.classList.remove('admin-editor-open');
+  document.removeEventListener('keydown', handleEditorKeydown);
+  if (els.form) {
+    els.form.hidden = true;
+  }
+  els.productModal.hidden = true;
+  if (restoreFocus) {
+    if (lastFocusedEditorTriggerId) {
+      const safeId = escapeSelector(lastFocusedEditorTriggerId);
+      const replacement = document.querySelector(`.admin-table__select[data-id="${safeId}"]`);
+      if (replacement instanceof HTMLElement) {
+        replacement.focus();
+        lastFocusedEditorTrigger = null;
+        lastFocusedEditorTriggerId = null;
+        return;
+      }
+    }
+    if (lastFocusedEditorTrigger && typeof lastFocusedEditorTrigger.focus === 'function') {
+      lastFocusedEditorTrigger.focus();
+    }
+  }
+  lastFocusedEditorTrigger = null;
+  lastFocusedEditorTriggerId = null;
+}
+
+function setupProductModal() {
+  if (!els.productModal) return;
+  els.productModalDismissTriggers?.forEach((trigger) => {
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      handleCancel();
+    });
+  });
+  els.productModal.addEventListener('click', (event) => {
+    if (event.target === els.productModal) {
+      handleCancel();
+    }
+  });
+}
+
 const lifeAreaNames = {
   love: 'Love',
   career: 'Career',
@@ -185,6 +294,13 @@ function priceValue(price) {
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function escapeSelector(value) {
+  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+    return CSS.escape(value);
+  }
+  return String(value).replace(/(["\\])/g, '\\$1');
 }
 
 function loadFromStorage() {
@@ -319,16 +435,17 @@ function renderTable() {
   }
 }
 
-function selectProduct(id) {
+function selectProduct(id, options = {}) {
+  const { openModal: shouldOpenModal = false, focusTarget = null } = options;
   if (!els.form || !els.formTitle) return;
   const product = state.products.find((item) => item.id === id);
   state.selectedId = product ? product.id : null;
   renderTable();
   if (!product) {
-    els.form.hidden = true;
     if (els.formPlaceholder) {
       els.formPlaceholder.hidden = false;
     }
+    closeProductModal({ restoreFocus: false });
     return;
   }
 
@@ -336,7 +453,6 @@ function selectProduct(id) {
   if (els.formPlaceholder) {
     els.formPlaceholder.hidden = true;
   }
-  els.form.hidden = false;
   els.formMode.textContent = 'Editing';
   els.formTitle.textContent = product.name || 'Untitled product';
 
@@ -368,6 +484,10 @@ function selectProduct(id) {
   formFields.demoPoster.value = product.demoPoster || '';
   formFields.socialStars.value = product.socialProof?.stars || '';
   formFields.socialQuote.value = product.socialProof?.quote || '';
+
+  if (shouldOpenModal) {
+    openProductModal({ focusTarget });
+  }
 }
 
 function parseList(value) {
@@ -512,7 +632,7 @@ function handleTableClick(event) {
   const button = event.target.closest('.admin-table__select');
   if (!button) return;
   const { id } = button.dataset;
-  if (id) selectProduct(id);
+  if (id) selectProduct(id, { openModal: true });
 }
 
 function handleSort(event) {
@@ -538,20 +658,25 @@ function handleAddProduct() {
   if (els.formPlaceholder) {
     els.formPlaceholder.hidden = true;
   }
-  els.form.hidden = false;
-  els.form.reset();
-  els.formMode.textContent = 'New product';
-  els.formTitle.textContent = 'New product';
+  els.form?.reset();
+  if (els.formMode) {
+    els.formMode.textContent = 'New product';
+  }
+  if (els.formTitle) {
+    els.formTitle.textContent = 'New product';
+  }
+  renderTable();
   setStatus('Drafting a new product. Complete the form and save to add it to the list.', 'info');
+  openProductModal({ focusTarget: formFields.id });
 }
 
 function handleDelete() {
   if (!state.selectedId) {
     els.form.reset();
-    els.form.hidden = true;
     if (els.formPlaceholder) {
       els.formPlaceholder.hidden = false;
     }
+    closeProductModal({ restoreFocus: false });
     return;
   }
   const index = state.products.findIndex((item) => item.id === state.selectedId);
@@ -562,20 +687,26 @@ function handleDelete() {
   persist({ message: null });
   renderTable();
   els.form.reset();
-  els.form.hidden = true;
   if (els.formPlaceholder) {
     els.formPlaceholder.hidden = false;
+  }
+  closeProductModal({ restoreFocus: false });
+  const firstRow = els.tableBody?.querySelector('.admin-table__select');
+  if (firstRow instanceof HTMLElement) {
+    firstRow.focus();
+  } else {
+    els.addButton?.focus();
   }
 }
 
 function handleCancel() {
   els.form.reset();
-  els.form.hidden = true;
   state.selectedId = null;
   renderTable();
   if (els.formPlaceholder) {
     els.formPlaceholder.hidden = false;
   }
+  closeProductModal();
 }
 
 function handleExport() {
@@ -602,8 +733,8 @@ function handleReset() {
   }
   if (els.form) {
     els.form.reset();
-    els.form.hidden = true;
   }
+  closeProductModal({ restoreFocus: false });
 }
 
 function handleKeyboardNavigation(event) {
@@ -621,8 +752,7 @@ function handleKeyboardNavigation(event) {
   const nextRow = rows[nextIndex];
   if (nextRow) {
     const nextId = nextRow.dataset.id;
-    selectProduct(nextId);
-    nextRow.querySelector('.admin-table__select')?.focus();
+    selectProduct(nextId, { openModal: true });
   }
 }
 
@@ -640,6 +770,7 @@ function registerEvents() {
   els.tableContainer?.addEventListener('keydown', handleKeyboardNavigation);
 }
 
+setupProductModal();
 setupGuideModal();
 registerEvents();
 loadProducts();

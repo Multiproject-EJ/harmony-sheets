@@ -205,134 +205,148 @@
           <h2>Choose a product to edit</h2>
           <p>Select a row from the catalog or create something new. All edits are stored locally until you download the JSON file.</p>
         </div>
-        <form class="admin-form" data-product-form hidden>
-          <header class="admin-form__header">
-            <div>
-              <span class="admin-form__mode" data-form-mode>Editing</span>
-              <h2 class="admin-form__title" data-form-title>Untitled product</h2>
-            </div>
-            <div class="admin-form__header-actions">
-              <button class="btn-ghost" type="button" data-cancel>Edit another product</button>
-              <button class="btn-ghost danger" type="button" data-delete>Delete</button>
-              <button class="btn primary" type="submit" data-save>Save changes</button>
-            </div>
-          </header>
+      </div>
 
-          <section class="admin-form__grid">
-            <div class="admin-form__field">
-              <label for="product-id">Product ID</label>
-              <input id="product-id" name="id" type="text" required>
-              <p class="admin-form__help">Used in URLs. Lowercase and hyphenated.</p>
-            </div>
-            <div class="admin-form__field">
-              <label for="product-name">Name</label>
-              <input id="product-name" name="name" type="text" required>
-            </div>
-            <div class="admin-form__field">
-              <label for="product-tagline">Tagline</label>
-              <input id="product-tagline" name="tagline" type="text">
-            </div>
-            <div class="admin-form__field">
-              <label for="product-price">Price</label>
-              <input id="product-price" name="price" type="text" placeholder="$29">
-            </div>
-            <div class="admin-form__field">
-              <label for="product-life-areas">Life areas</label>
-              <input id="product-life-areas" name="lifeAreas" type="text" placeholder="career, health, fun">
-              <p class="admin-form__help">Comma separated list. Controls product filtering.</p>
-            </div>
-            <div class="admin-form__field">
-              <label for="product-badges">Labels</label>
-              <input id="product-badges" name="badges" type="text" placeholder="One-time purchase, Instant download">
-              <p class="admin-form__help">Comma separated labels displayed as badges.</p>
-            </div>
-          </section>
+      <div class="admin-editor-modal" data-product-modal hidden>
+        <div class="admin-editor-modal__backdrop" data-product-modal-dismiss></div>
+        <div
+          class="admin-editor-modal__dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="product-editor-title"
+          data-product-modal-dialog
+          tabindex="-1"
+        >
+          <button class="admin-editor-modal__close" type="button" data-product-modal-dismiss aria-label="Close product editor">×</button>
+          <form class="admin-form" data-product-form hidden>
+            <header class="admin-form__header">
+              <div>
+                <span class="admin-form__mode" data-form-mode>Editing</span>
+                <h2 class="admin-form__title" data-form-title id="product-editor-title">Untitled product</h2>
+              </div>
+              <div class="admin-form__header-actions">
+                <button class="btn-ghost" type="button" data-cancel>Edit another product</button>
+                <button class="btn-ghost danger" type="button" data-delete>Delete</button>
+                <button class="btn primary" type="submit" data-save>Save changes</button>
+              </div>
+            </header>
 
-          <label class="admin-form__field" for="product-description">
-            <span>Description</span>
-            <textarea id="product-description" name="description" rows="5" placeholder="HTML allowed"></textarea>
-          </label>
+            <section class="admin-form__grid">
+              <div class="admin-form__field">
+                <label for="product-id">Product ID</label>
+                <input id="product-id" name="id" type="text" required>
+                <p class="admin-form__help">Used in URLs. Lowercase and hyphenated.</p>
+              </div>
+              <div class="admin-form__field">
+                <label for="product-name">Name</label>
+                <input id="product-name" name="name" type="text" required>
+              </div>
+              <div class="admin-form__field">
+                <label for="product-tagline">Tagline</label>
+                <input id="product-tagline" name="tagline" type="text">
+              </div>
+              <div class="admin-form__field">
+                <label for="product-price">Price</label>
+                <input id="product-price" name="price" type="text" placeholder="$29">
+              </div>
+              <div class="admin-form__field">
+                <label for="product-life-areas">Life areas</label>
+                <input id="product-life-areas" name="lifeAreas" type="text" placeholder="career, health, fun">
+                <p class="admin-form__help">Comma separated list. Controls product filtering.</p>
+              </div>
+              <div class="admin-form__field">
+                <label for="product-badges">Labels</label>
+                <input id="product-badges" name="badges" type="text" placeholder="One-time purchase, Instant download">
+                <p class="admin-form__help">Comma separated labels displayed as badges.</p>
+              </div>
+            </section>
 
-          <section class="admin-form__grid">
-            <label class="admin-form__field" for="product-features">
-              <span>Key features</span>
-              <textarea id="product-features" name="features" rows="4" placeholder="One feature per line"></textarea>
+            <label class="admin-form__field" for="product-description">
+              <span>Description</span>
+              <textarea id="product-description" name="description" rows="5" placeholder="HTML allowed"></textarea>
             </label>
-            <label class="admin-form__field" for="product-included">
-              <span>What's included</span>
-              <textarea id="product-included" name="included" rows="4" placeholder="One item per line"></textarea>
-            </label>
-          </section>
 
-          <section class="admin-form__grid">
-            <label class="admin-form__field" for="product-gallery">
-              <span>Gallery</span>
-              <textarea id="product-gallery" name="gallery" rows="4" placeholder="assets/image.webp | Alt text"></textarea>
-              <p class="admin-form__help">One per line. Use <code>path | alt text</code>.</p>
-            </label>
-            <label class="admin-form__field" for="product-faqs">
-              <span>FAQs</span>
-              <textarea id="product-faqs" name="faqs" rows="4" placeholder="Question? | Answer"></textarea>
-              <p class="admin-form__help">One per line using <code>question | answer</code>.</p>
-            </label>
-          </section>
-
-          <section class="admin-form__grid">
-            <label class="admin-form__field" for="product-benefits">
-              <span>Benefits</span>
-              <textarea id="product-benefits" name="benefits" rows="4" placeholder="Title | Description"></textarea>
-              <p class="admin-form__help">One per line using <code>title | description</code>.</p>
-            </label>
-            <div class="admin-form__stack">
-              <label class="admin-form__field" for="product-pricing-title">
-                <span>Pricing title</span>
-                <input id="product-pricing-title" name="pricingTitle" type="text">
+            <section class="admin-form__grid">
+              <label class="admin-form__field" for="product-features">
+                <span>Key features</span>
+                <textarea id="product-features" name="features" rows="4" placeholder="One feature per line"></textarea>
               </label>
-              <label class="admin-form__field" for="product-pricing-sub">
-                <span>Pricing subtitle</span>
-                <input id="product-pricing-sub" name="pricingSub" type="text">
+              <label class="admin-form__field" for="product-included">
+                <span>What's included</span>
+                <textarea id="product-included" name="included" rows="4" placeholder="One item per line"></textarea>
               </label>
-              <label class="admin-form__field" for="product-price-stripe">
-                <span>Stripe checkout URL</span>
-                <input id="product-price-stripe" name="stripe" type="url" placeholder="https://">
-              </label>
-              <label class="admin-form__field" for="product-price-etsy">
-                <span>Etsy URL</span>
-                <input id="product-price-etsy" name="etsy" type="url" placeholder="https://">
-              </label>
-            </div>
-          </section>
+            </section>
 
-          <section class="admin-form__grid">
-            <label class="admin-form__field" for="product-color-image">
-              <span>Accent image</span>
-              <input id="product-color-image" name="colorImage" type="text" placeholder="assets/example.webp">
-            </label>
-            <label class="admin-form__field" for="product-color-caption">
-              <span>Accent caption</span>
-              <input id="product-color-caption" name="colorCaption" type="text">
-            </label>
-            <label class="admin-form__field" for="product-demo-video">
-              <span>Demo video</span>
-              <input id="product-demo-video" name="demoVideo" type="text" placeholder="assets/demo.mp4">
-            </label>
-            <label class="admin-form__field" for="product-demo-poster">
-              <span>Demo poster</span>
-              <input id="product-demo-poster" name="demoPoster" type="text" placeholder="assets/demo-poster.jpg">
-            </label>
-          </section>
+            <section class="admin-form__grid">
+              <label class="admin-form__field" for="product-gallery">
+                <span>Gallery</span>
+                <textarea id="product-gallery" name="gallery" rows="4" placeholder="assets/image.webp | Alt text"></textarea>
+                <p class="admin-form__help">One per line. Use <code>path | alt text</code>.</p>
+              </label>
+              <label class="admin-form__field" for="product-faqs">
+                <span>FAQs</span>
+                <textarea id="product-faqs" name="faqs" rows="4" placeholder="Question? | Answer"></textarea>
+                <p class="admin-form__help">One per line using <code>question | answer</code>.</p>
+              </label>
+            </section>
 
-          <section class="admin-form__grid">
-            <label class="admin-form__field" for="product-social-stars">
-              <span>Social proof stars</span>
-              <input id="product-social-stars" name="socialStars" type="text" placeholder="★★★★★">
-            </label>
-            <label class="admin-form__field" for="product-social-quote">
-              <span>Social proof quote</span>
-              <textarea id="product-social-quote" name="socialQuote" rows="3" placeholder="Short testimonial"></textarea>
-            </label>
-          </section>
-        </form>
+            <section class="admin-form__grid">
+              <label class="admin-form__field" for="product-benefits">
+                <span>Benefits</span>
+                <textarea id="product-benefits" name="benefits" rows="4" placeholder="Title | Description"></textarea>
+                <p class="admin-form__help">One per line using <code>title | description</code>.</p>
+              </label>
+              <div class="admin-form__stack">
+                <label class="admin-form__field" for="product-pricing-title">
+                  <span>Pricing title</span>
+                  <input id="product-pricing-title" name="pricingTitle" type="text">
+                </label>
+                <label class="admin-form__field" for="product-pricing-sub">
+                  <span>Pricing subtitle</span>
+                  <input id="product-pricing-sub" name="pricingSub" type="text">
+                </label>
+                <label class="admin-form__field" for="product-price-stripe">
+                  <span>Stripe checkout URL</span>
+                  <input id="product-price-stripe" name="stripe" type="url" placeholder="https://">
+                </label>
+                <label class="admin-form__field" for="product-price-etsy">
+                  <span>Etsy URL</span>
+                  <input id="product-price-etsy" name="etsy" type="url" placeholder="https://">
+                </label>
+              </div>
+            </section>
+
+            <section class="admin-form__grid">
+              <label class="admin-form__field" for="product-color-image">
+                <span>Accent image</span>
+                <input id="product-color-image" name="colorImage" type="text" placeholder="assets/example.webp">
+              </label>
+              <label class="admin-form__field" for="product-color-caption">
+                <span>Accent caption</span>
+                <input id="product-color-caption" name="colorCaption" type="text">
+              </label>
+              <label class="admin-form__field" for="product-demo-video">
+                <span>Demo video</span>
+                <input id="product-demo-video" name="demoVideo" type="text" placeholder="assets/demo.mp4">
+              </label>
+              <label class="admin-form__field" for="product-demo-poster">
+                <span>Demo poster</span>
+                <input id="product-demo-poster" name="demoPoster" type="text" placeholder="assets/demo-poster.jpg">
+              </label>
+            </section>
+
+            <section class="admin-form__grid">
+              <label class="admin-form__field" for="product-social-stars">
+                <span>Social proof stars</span>
+                <input id="product-social-stars" name="socialStars" type="text" placeholder="★★★★★">
+              </label>
+              <label class="admin-form__field" for="product-social-quote">
+                <span>Social proof quote</span>
+                <textarea id="product-social-quote" name="socialQuote" rows="3" placeholder="Short testimonial"></textarea>
+              </label>
+            </section>
+          </form>
+        </div>
       </div>
     </section>
   </section>
