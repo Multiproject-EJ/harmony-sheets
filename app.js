@@ -1196,6 +1196,7 @@ App.init = function() {
   // Hero headline rotation (home page)
   App.initHeroRotation();
   if (App.qs("[data-home-parallax]")) App.initHomeParallax();
+  if (App.qs("[data-questionnaire-modal]")) App.initQuestionnaire();
 
   // Auto-detect page
   if (App.qs("body.page-products")) App.initProducts();
@@ -2888,6 +2889,182 @@ App.initHome = function() {
   });
 
   render(defaultState, false);
+};
+
+/*****************************************************
+ * Home questionnaire modal (index.html)
+ *****************************************************/
+App.initQuestionnaire = function() {
+  const modal = App.qs("[data-questionnaire-modal]");
+  if (!modal || modal.dataset.initialized) return;
+
+  const dialog = modal.querySelector("[data-questionnaire-dialog]");
+  const form = modal.querySelector("[data-questionnaire-form]");
+  if (!dialog || !form) return;
+
+  const openers = App.qsa("[data-questionnaire-open]");
+  if (!openers.length) return;
+
+  modal.dataset.initialized = "true";
+
+  const overlay = modal.querySelector("[data-questionnaire-overlay]");
+  const closeButtons = modal.querySelectorAll("[data-questionnaire-close]");
+  const result = modal.querySelector("[data-questionnaire-result]");
+  const resultTitle = modal.querySelector("[data-questionnaire-result-title]");
+  const resultText = modal.querySelector("[data-questionnaire-result-text]");
+  const resultHighlights = modal.querySelector("[data-questionnaire-result-highlights]");
+  const resultLink = modal.querySelector("[data-questionnaire-result-link]");
+  const firstInput = modal.querySelector("[data-questionnaire-initial]");
+  const defaultLinkText = resultLink ? resultLink.textContent : "";
+  const defaultLinkHref = resultLink ? resultLink.getAttribute("href") : "";
+  const focusableSelector = "a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex='-1'])";
+  let lastFocused = null;
+
+  const resetResult = () => {
+    if (!result) return;
+    result.hidden = true;
+    result.setAttribute("aria-hidden", "true");
+    if (resultTitle) resultTitle.textContent = "";
+    if (resultText) resultText.textContent = "";
+    if (resultHighlights) {
+      resultHighlights.innerHTML = "";
+      resultHighlights.hidden = true;
+    }
+    if (resultLink) {
+      resultLink.textContent = defaultLinkText || "Browse templates";
+      resultLink.setAttribute("href", defaultLinkHref || "products.html");
+    }
+  };
+
+  resetResult();
+
+  const getFocusable = () =>
+    Array.from(dialog.querySelectorAll(focusableSelector)).filter(el => {
+      if (el.disabled) return false;
+      if (el.getAttribute("aria-hidden") === "true") return false;
+      if (el.closest("[hidden]")) return false;
+      return true;
+    });
+
+  const closeModal = () => {
+    dialog.removeEventListener("keydown", handleKeyDown);
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    modal.hidden = true;
+    document.body.classList.remove("questionnaire-open");
+    if (lastFocused && typeof lastFocused.focus === "function") {
+      lastFocused.focus();
+    }
+  };
+
+  const handleKeyDown = event => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+
+    const focusable = getFocusable();
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+
+    if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  const openModal = () => {
+    lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    modal.hidden = false;
+    modal.removeAttribute("hidden");
+    modal.setAttribute("aria-hidden", "false");
+    modal.classList.add("is-open");
+    document.body.classList.add("questionnaire-open");
+    form.reset();
+    resetResult();
+
+    requestAnimationFrame(() => {
+      const target = firstInput && typeof firstInput.focus === "function" ? firstInput : dialog;
+      if (target && typeof target.focus === "function") target.focus();
+    });
+
+    dialog.addEventListener("keydown", handleKeyDown);
+  };
+
+  openers.forEach(trigger => {
+    trigger.addEventListener("click", event => {
+      event.preventDefault();
+      openModal();
+    });
+  });
+
+  closeButtons.forEach(btn => {
+    btn.addEventListener("click", event => {
+      event.preventDefault();
+      closeModal();
+    });
+  });
+
+  if (overlay) {
+    overlay.addEventListener("click", () => {
+      closeModal();
+    });
+  }
+
+  form.addEventListener("change", () => {
+    resetResult();
+  });
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const area = formData.get("focus-area");
+    const areas = App.LIFE_AREAS || {};
+    const info = area ? areas[area] : null;
+
+    const fallback = {
+      title: "Explore the Harmony Sheets library",
+      description: "Browse the full collection to find a template that fits right now.",
+      link: "products.html",
+      cta: "Browse all templates"
+    };
+
+    const details = info || fallback;
+    if (resultTitle) resultTitle.textContent = details.title || fallback.title;
+    if (resultText) resultText.textContent = details.description || fallback.description;
+
+    if (resultHighlights) {
+      const highlights = info && Array.isArray(info.menuHighlights) ? info.menuHighlights.filter(Boolean) : [];
+      if (highlights.length) {
+        resultHighlights.innerHTML = highlights.map(item => `<li>${item}</li>`).join("");
+        resultHighlights.hidden = false;
+      } else {
+        resultHighlights.innerHTML = "";
+        resultHighlights.hidden = true;
+      }
+    }
+
+    if (resultLink) {
+      const href = details.link || defaultLinkHref || "products.html";
+      const text = details.cta || defaultLinkText || "Browse templates";
+      resultLink.setAttribute("href", href);
+      resultLink.textContent = text;
+    }
+
+    if (result) {
+      result.hidden = false;
+      result.setAttribute("aria-hidden", "false");
+    }
+  });
 };
 
 /*****************************************************

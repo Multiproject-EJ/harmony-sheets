@@ -85,13 +85,105 @@
 </aside>
 
 <main>
-  <section class="life-parallax" aria-label="Harmony Sheets lifestyle inspiration">
-    <div class="life-parallax__inner">
-      <div class="life-parallax__overlay" aria-hidden="true">
-        <img class="life-parallax__overlay-image" src="assets/topplx3.webp" alt="">
+  <section class="questionnaire-cta" aria-label="Life Harmony questionnaire invitation">
+    <div class="container questionnaire-cta__inner">
+      <div class="questionnaire-cta__copy">
+        <p class="questionnaire-cta__eyebrow">Discover your focus</p>
+        <h2 class="questionnaire-cta__title">Take the Life Harmony questionnaire</h2>
+        <p class="questionnaire-cta__text">Answer a few quick prompts and we&rsquo;ll point you to the Harmony Sheets tools that match where you are right now.</p>
+      </div>
+      <div class="questionnaire-cta__action">
+        <button class="btn primary questionnaire-cta__button" type="button" data-questionnaire-open aria-haspopup="dialog" aria-controls="questionnaire-dialog">Start questionnaire</button>
+        <p class="questionnaire-cta__hint">Takes less than two minutes.</p>
       </div>
     </div>
   </section>
+
+  <div class="questionnaire-modal" data-questionnaire-modal hidden aria-hidden="true">
+    <div class="questionnaire-modal__backdrop" data-questionnaire-overlay></div>
+    <div class="questionnaire-modal__dialog" id="questionnaire-dialog" data-questionnaire-dialog role="dialog" aria-modal="true" aria-labelledby="questionnaire-title" aria-describedby="questionnaire-description" tabindex="-1">
+      <button class="questionnaire-modal__close" type="button" data-questionnaire-close aria-label="Close questionnaire">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <div class="questionnaire-modal__body">
+        <header class="questionnaire-modal__header">
+          <p class="questionnaire-modal__eyebrow">Life Harmony Wheel</p>
+          <h2 class="questionnaire-modal__title" id="questionnaire-title">Find the best place to start</h2>
+          <p class="questionnaire-modal__intro" id="questionnaire-description">Choose the area you want to nurture and we&rsquo;ll recommend the Harmony Sheets templates to explore first.</p>
+        </header>
+        <form class="questionnaire-form" data-questionnaire-form>
+          <fieldset class="questionnaire-form__group">
+            <legend class="questionnaire-form__legend">Which area needs your attention right now?</legend>
+            <div class="questionnaire-form__options">
+              <label class="questionnaire-form__option">
+                <input type="radio" name="focus-area" value="love" required data-questionnaire-initial checked>
+                <span class="questionnaire-form__label">
+                  <strong>Love &amp; Romantic Relationships</strong>
+                  <em>Deepen connection and shared rituals.</em>
+                </span>
+              </label>
+              <label class="questionnaire-form__option">
+                <input type="radio" name="focus-area" value="career" required>
+                <span class="questionnaire-form__label">
+                  <strong>Career, Growth &amp; Learning</strong>
+                  <em>Stay focused on momentum and new skills.</em>
+                </span>
+              </label>
+              <label class="questionnaire-form__option">
+                <input type="radio" name="focus-area" value="health" required>
+                <span class="questionnaire-form__label">
+                  <strong>Health &amp; Fitness</strong>
+                  <em>Build calm, consistent wellness routines.</em>
+                </span>
+              </label>
+              <label class="questionnaire-form__option">
+                <input type="radio" name="focus-area" value="finances" required>
+                <span class="questionnaire-form__label">
+                  <strong>Finances</strong>
+                  <em>Create clarity with budgets and savings.</em>
+                </span>
+              </label>
+              <label class="questionnaire-form__option">
+                <input type="radio" name="focus-area" value="fun" required>
+                <span class="questionnaire-form__label">
+                  <strong>Fun &amp; Recreation</strong>
+                  <em>Design adventures and energising breaks.</em>
+                </span>
+              </label>
+              <label class="questionnaire-form__option">
+                <input type="radio" name="focus-area" value="family" required>
+                <span class="questionnaire-form__label">
+                  <strong>Family &amp; Friends</strong>
+                  <em>Coordinate the people and moments that matter.</em>
+                </span>
+              </label>
+              <label class="questionnaire-form__option">
+                <input type="radio" name="focus-area" value="environment" required>
+                <span class="questionnaire-form__label">
+                  <strong>Living Space</strong>
+                  <em>Refresh the spaces that support your routines.</em>
+                </span>
+              </label>
+              <label class="questionnaire-form__option">
+                <input type="radio" name="focus-area" value="spirituality" required>
+                <span class="questionnaire-form__label">
+                  <strong>Spirituality &amp; Community</strong>
+                  <em>Cultivate reflection, service, and grounding.</em>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+          <button class="btn primary questionnaire-form__submit" type="submit">See my recommendation</button>
+        </form>
+        <section class="questionnaire-result" data-questionnaire-result hidden aria-live="polite">
+          <h3 class="questionnaire-result__title" data-questionnaire-result-title></h3>
+          <p class="questionnaire-result__description" data-questionnaire-result-text></p>
+          <ul class="questionnaire-result__highlights" data-questionnaire-result-highlights></ul>
+          <a class="btn primary questionnaire-result__link" data-questionnaire-result-link href="products.html">Browse templates</a>
+        </section>
+      </div>
+    </div>
+  </div>
 
   <section class="platform-highlight" aria-label="Harmony Sheets platform highlight">
     <div class="platform-highlight__pill">
