@@ -24,7 +24,11 @@ const els = {
   formMode: document.querySelector('[data-form-mode]'),
   formPlaceholder: document.querySelector('[data-editor-empty]'),
   deleteButton: document.querySelector('[data-delete]'),
-  cancelButton: document.querySelector('[data-cancel]')
+  cancelButton: document.querySelector('[data-cancel]'),
+  guideButton: document.querySelector('[data-editing-guide-open]'),
+  guideModal: document.querySelector('[data-editing-guide-modal]'),
+  guideDialog: document.querySelector('[data-editing-guide-dialog]'),
+  guideDismissTriggers: document.querySelectorAll('[data-editing-guide-dismiss]')
 };
 
 const formFields = {
@@ -51,6 +55,86 @@ const formFields = {
   socialStars: els.form?.elements.namedItem('socialStars'),
   socialQuote: els.form?.elements.namedItem('socialQuote')
 };
+
+let lastFocusedGuideTrigger = null;
+
+function getGuideFocusableElements() {
+  if (!els.guideModal) return [];
+  const selectors = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+  return Array.from(els.guideModal.querySelectorAll(selectors)).filter((element) => {
+    if (!(element instanceof HTMLElement)) return false;
+    if (element.hasAttribute('disabled')) return false;
+    if (element.getAttribute('aria-hidden') === 'true') return false;
+    return element.offsetParent !== null || element === els.guideDialog;
+  });
+}
+
+function handleGuideKeydown(event) {
+  if (event.key === 'Escape' && els.guideModal?.classList.contains('is-open')) {
+    event.preventDefault();
+    closeGuideModal();
+  }
+  if (event.key === 'Tab' && els.guideModal?.classList.contains('is-open')) {
+    const focusable = getGuideFocusableElements();
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey) {
+      if (document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else if (document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+}
+
+function openGuideModal() {
+  if (!els.guideModal) return;
+  lastFocusedGuideTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : els.guideButton;
+  els.guideModal.hidden = false;
+  els.guideButton?.setAttribute('aria-expanded', 'true');
+  requestAnimationFrame(() => {
+    els.guideModal?.classList.add('is-open');
+    document.body.classList.add('admin-guide-open');
+    const focusTarget = els.guideDialog || getGuideFocusableElements()[0];
+    focusTarget?.focus();
+  });
+  document.addEventListener('keydown', handleGuideKeydown);
+}
+
+function closeGuideModal() {
+  if (!els.guideModal) return;
+  els.guideModal.classList.remove('is-open');
+  els.guideModal.hidden = true;
+  document.body.classList.remove('admin-guide-open');
+  document.removeEventListener('keydown', handleGuideKeydown);
+  els.guideButton?.setAttribute('aria-expanded', 'false');
+  if (lastFocusedGuideTrigger && typeof lastFocusedGuideTrigger.focus === 'function') {
+    lastFocusedGuideTrigger.focus();
+  }
+  lastFocusedGuideTrigger = null;
+}
+
+function setupGuideModal() {
+  if (!els.guideModal || !els.guideButton) return;
+  els.guideButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    openGuideModal();
+  });
+  els.guideDismissTriggers?.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      closeGuideModal();
+    });
+  });
+  els.guideModal.addEventListener('click', (event) => {
+    if (event.target === els.guideModal) {
+      closeGuideModal();
+    }
+  });
+}
 
 const lifeAreaNames = {
   love: 'Love',
@@ -556,5 +640,6 @@ function registerEvents() {
   els.tableContainer?.addEventListener('keydown', handleKeyboardNavigation);
 }
 
+setupGuideModal();
 registerEvents();
 loadProducts();

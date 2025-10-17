@@ -188,6 +188,18 @@
       </div>
 
       <div class="admin__editor" aria-live="polite">
+        <div class="admin__editor-tools">
+          <button
+            class="btn-ghost admin__btn"
+            type="button"
+            data-editing-guide-open
+            aria-haspopup="dialog"
+            aria-controls="editing-guide-dialog"
+            aria-expanded="false"
+          >
+            Open editing guide
+          </button>
+        </div>
         <div class="admin__editor-placeholder" data-editor-empty>
           <h2>Choose a product to edit</h2>
           <p>Select a row from the catalog or create something new. All edits are stored locally until you download the JSON file.</p>
@@ -324,6 +336,131 @@
     </section>
   </section>
 </main>
+
+<div class="admin-guide-modal" data-editing-guide-modal hidden>
+  <div class="admin-guide-modal__backdrop" data-editing-guide-dismiss></div>
+  <div
+    class="admin-guide-modal__dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="editing-guide-title"
+    data-editing-guide-dialog
+    id="editing-guide-dialog"
+    tabindex="-1"
+  >
+    <button class="admin-guide-modal__close" type="button" data-editing-guide-dismiss aria-label="Close editing guide">×</button>
+    <div class="admin-guide-modal__body">
+      <p class="admin-guide-modal__eyebrow">Workspace quick reference</p>
+      <h2 class="admin-guide-modal__title" id="editing-guide-title">Product editing guide</h2>
+      <p class="admin-guide-modal__intro">
+        Choose a product to edit. Select a row from the catalog or create something new. All edits are stored locally until you download the JSON file.
+      </p>
+      <section class="admin-guide-modal__section">
+        <h3>Editor header</h3>
+        <ul>
+          <li><strong>Editing</strong> &mdash; Mode indicator shown while modifying a product.</li>
+          <li><strong>Untitled product</strong> &mdash; Default title before a product is selected.</li>
+          <li><strong>Edit another product</strong> &mdash; Return to the product list without saving.</li>
+          <li><strong>Delete</strong> &mdash; Remove the selected product from the workspace.</li>
+          <li><strong>Save changes</strong> &mdash; Persist updates to your local workspace.</li>
+        </ul>
+      </section>
+      <section class="admin-guide-modal__section">
+        <h3>Field reference</h3>
+        <dl class="admin-guide-modal__list">
+          <div>
+            <dt>Product ID</dt>
+            <dd>Used in URLs. Lowercase and hyphenated.</dd>
+          </div>
+          <div>
+            <dt>Name</dt>
+            <dd>Main product title.</dd>
+          </div>
+          <div>
+            <dt>Tagline</dt>
+            <dd>Short descriptive subtitle.</dd>
+          </div>
+          <div>
+            <dt>Price</dt>
+            <dd>Display price. Example: <code>$29</code>.</dd>
+          </div>
+          <div>
+            <dt>Life areas</dt>
+            <dd>Comma separated list. Controls product filtering. Example: <code>career, health, fun</code>.</dd>
+          </div>
+          <div>
+            <dt>Labels</dt>
+            <dd>Comma separated labels displayed as badges. Example: <code>One-time purchase, Instant download</code>.</dd>
+          </div>
+          <div>
+            <dt>Description</dt>
+            <dd>Long-form body copy. HTML allowed.</dd>
+          </div>
+          <div>
+            <dt>Key features</dt>
+            <dd>List one feature per line.</dd>
+          </div>
+          <div>
+            <dt>What's included</dt>
+            <dd>List one item per line.</dd>
+          </div>
+          <div>
+            <dt>Gallery</dt>
+            <dd>One per line. Use <code>path | alt text</code>. Example: <code>assets/image.webp | Alt text</code>.</dd>
+          </div>
+          <div>
+            <dt>FAQs</dt>
+            <dd>One per line using <code>question | answer</code>. Example: <code>Question? | Answer</code>.</dd>
+          </div>
+          <div>
+            <dt>Benefits</dt>
+            <dd>One per line using <code>title | description</code>.</dd>
+          </div>
+          <div>
+            <dt>Pricing title</dt>
+            <dd>Optional heading for pricing details.</dd>
+          </div>
+          <div>
+            <dt>Pricing subtitle</dt>
+            <dd>Secondary text supporting the pricing call-to-action.</dd>
+          </div>
+          <div>
+            <dt>Stripe checkout URL</dt>
+            <dd>Link to the Stripe checkout page. Example: <code>https://</code>.</dd>
+          </div>
+          <div>
+            <dt>Etsy URL</dt>
+            <dd>Link to the Etsy listing. Example: <code>https://</code>.</dd>
+          </div>
+          <div>
+            <dt>Accent image</dt>
+            <dd>Primary supporting image path. Example: <code>assets/example.webp</code>.</dd>
+          </div>
+          <div>
+            <dt>Accent caption</dt>
+            <dd>Caption or supporting copy for the accent image.</dd>
+          </div>
+          <div>
+            <dt>Demo video</dt>
+            <dd>Video file path. Example: <code>assets/demo.mp4</code>.</dd>
+          </div>
+          <div>
+            <dt>Demo poster</dt>
+            <dd>Poster image path for the demo video. Example: <code>assets/demo-poster.jpg</code>.</dd>
+          </div>
+          <div>
+            <dt>Social proof stars</dt>
+            <dd>Star rating display. Example: <code>★★★★★</code>.</dd>
+          </div>
+          <div>
+            <dt>Social proof quote</dt>
+            <dd>Short testimonial. Example: <code>Short testimonial</code>.</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </div>
+</div>
 
 <footer class="site-footer">
   <div class="site-footer__inner">
