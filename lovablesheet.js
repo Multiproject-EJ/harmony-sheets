@@ -1,6 +1,6 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.7/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
+import { isSupabaseConfigured } from "./supabase-config.js";
 import { ACCOUNT_PAGE_PATH, isAdminUser } from "./auth-helpers.js";
+import { getSupabaseClient } from "./supabase-client.js";
 
 const DEFAULT_PAGE_PATH = "lovablesheet.html";
 const SUPPORTED_PAGE_PATHS = new Set([DEFAULT_PAGE_PATH, "lovables_sheet.html"]);
@@ -24,6 +24,7 @@ const messageEl = document.querySelector("[data-lovablesheet-message]");
 
 let supabaseClient = null;
 let authSubscription = null;
+let redirecting = false;
 
 function showSection(target) {
   Object.entries(sections).forEach(([key, element]) => {
@@ -33,8 +34,12 @@ function showSection(target) {
 }
 
 function redirectTo(target) {
-  if (!target) return;
+  if (!target || redirecting) return;
+  redirecting = true;
   window.location.replace(target);
+  window.setTimeout(() => {
+    redirecting = false;
+  }, 0);
 }
 
 function handleUnauthorized(message, redirectTarget) {
@@ -252,12 +257,7 @@ async function init() {
     return;
   }
 
-  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      detectSessionInUrl: true
-    }
-  });
+  supabaseClient = getSupabaseClient();
 
   const { data, error } = await supabaseClient.auth.getSession();
   if (error) {

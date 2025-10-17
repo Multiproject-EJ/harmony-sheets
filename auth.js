@@ -1,5 +1,5 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.7/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
+import { isSupabaseConfigured } from "./supabase-config.js";
+import { getSupabaseClient } from "./supabase-client.js";
 import { getPostSignInRedirect, sanitizeRedirect } from "./auth-helpers.js";
 
 const statusEl = document.querySelector("[data-auth-status]");
@@ -320,12 +320,7 @@ function init() {
     return;
   }
 
-  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  });
+  supabaseClient = getSupabaseClient();
 
   configureResetForm("request");
   detectRecoveryFlow();

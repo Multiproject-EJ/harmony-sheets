@@ -1,11 +1,11 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.7/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
+import { isSupabaseConfigured } from "./supabase-config.js";
 import {
   ACCOUNT_PAGE_PATH,
   ADMIN_DASHBOARD_PATH,
   getPostSignInRedirect,
   isAdminUser
 } from "./auth-helpers.js";
+import { getSupabaseClient } from "./supabase-client.js";
 
 const sections = {
   loading: document.querySelector("[data-account-loading]"),
@@ -30,6 +30,7 @@ const purchasesEmptyEl = document.querySelector("[data-account-purchases-empty]"
 
 let supabaseClient = null;
 let isMounted = true;
+let redirectingToAdmin = false;
 
 function showSection(targetKey) {
   Object.entries(sections).forEach(([key, element]) => {
@@ -278,8 +279,12 @@ async function hydrateAccount(user) {
   if (isAdminUser(user)) {
     const target = getPostSignInRedirect(user, ADMIN_DASHBOARD_PATH);
     const currentPath = window.location.pathname.replace(/^\/+/, "");
-    if (!currentPath.startsWith(ADMIN_DASHBOARD_PATH)) {
+    if (!currentPath.startsWith(ADMIN_DASHBOARD_PATH) && !redirectingToAdmin) {
+      redirectingToAdmin = true;
       window.location.href = target;
+      window.setTimeout(() => {
+        redirectingToAdmin = false;
+      }, 0);
     }
     return;
   }
@@ -329,12 +334,7 @@ function initSupabase() {
     return;
   }
 
-  supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      detectSessionInUrl: true
-    }
-  });
+  supabaseClient = getSupabaseClient();
 
   if (signOutButton) {
     signOutButton.addEventListener("click", async () => {
