@@ -1,5 +1,7 @@
 # Admin dashboard static bundle fallback (Oct 16, 2025)
 
+> **Legacy note (2026):** The bundled `/admin/` SPA referenced below has since been replaced by the gated `admin_dashboard.html` workspace. These remediation notes are retained for historical context only.
+
 ## Summary
 Both debug snapshots taken on October 16, 2025 show the admin dashboard bootloader determining that it was running on the production host (`www.harmony-sheets.com`) and therefore skipping the Vite dev-server probe. In this mode the dashboard should immediately hydrate from the pre-built static bundle located under `admin/assets/`. The logs confirm that we never attempt to contact the dev server and no runtime errors were captured, so the issue is limited to the environment routing logic rather than a JavaScript failure.
 

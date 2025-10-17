@@ -15,22 +15,12 @@ The customer login and freemium sign-up experience lives at [`login.html`](login
 
 ## Admin dashboard
 
-A TypeScript React dashboard for managing Stripe products now lives in [`admin/`](admin/). It uses Supabase Auth to gate access to a single admin email and syncs product changes with Stripe via Supabase Edge Functions.
+The admin workspace is now the static [`admin_dashboard.html`](admin_dashboard.html) page. Supabase Auth still gates access: the page verifies the visitor's session, checks the admin email or flags via `auth-helpers.js`, and only then loads the product editor (`editor.js`).
 
-To run the admin dashboard locally:
+To use the dashboard locally:
 
-1. Install dependencies:
+1. Update [`supabase-config.js`](supabase-config.js) with your Supabase project URL, anon key, and optional admin email override.
+2. Serve the site with any static file server (or open `admin_dashboard.html` via `npm run dev` from the project root if you already use Vite/Live Server tooling).
+3. Sign in with an authorized admin account. Once authenticated, the editor unlocks, pulls product data from `products.json`, and saves your changes to `localStorage` until you export.
 
-   ```bash
-   cd admin
-   npm install
-   ```
-
-2. Copy `.env.local.example` to `.env.local` and provide your Supabase project URL, anon key, and the admin email address that is allowed to sign in.
-3. Start the dev server:
-
-   ```bash
-   npm run dev
-   ```
-
-The Supabase SQL snippets required for the dashboard are available in [`admin/sql/`](admin/sql/), and the corresponding Edge Functions for syncing with Stripe are in [`admin/supabase_functions/`](admin/supabase_functions/).
+The legacy React/Vite admin bundle has been removed from the repository. Historical Supabase SQL snippets and Edge Function references remain in [`docs/admin-debug-logs/`](docs/admin-debug-logs/) for archival purposes.
