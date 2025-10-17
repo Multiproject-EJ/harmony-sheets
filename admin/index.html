@@ -220,10 +220,7 @@
       }
 
       function recordError(error, context) {
-        const serialised = error instanceof Error
-          ? { message: error.message, stack: error.stack }
-          : { message: String(error) }
-        debugState.errors.push({ context, error: serialised })
+        debugState.errors.push({ context, error: serialiseError(error) })
       }
 
       function loadStylesheet(href) {
@@ -233,6 +230,54 @@
         link.href = href
         link.dataset.adminCss = href
         document.head.appendChild(link)
+      }
+
+      function serialiseError(value) {
+        return value instanceof Error
+          ? { message: value.message, stack: value.stack }
+          : { message: String(value) }
+      }
+
+      async function collectImportDiagnostics(url) {
+        const diagnostics = { url }
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            credentials: 'omit',
+            cache: 'no-store'
+          })
+          diagnostics.response = {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            headers: {}
+          }
+          response.headers.forEach((value, key) => {
+            diagnostics.response.headers[key] = value
+          })
+          const contentType = response.headers.get('content-type') || ''
+          const shouldReadText =
+            /^(?:application\/(?:javascript|json)|text\/)/i.test(contentType) ||
+            (() => {
+              try {
+                const { pathname } = new URL(url, baseUrl)
+                return /\.(?:js|mjs|cjs|json|txt)(?:[?#].*)?$/i.test(pathname)
+              } catch (error) {
+                console.warn('[admin boot] Unable to analyse URL for diagnostics.', error)
+                return false
+              }
+            })()
+
+          if (shouldReadText) {
+            const rawText = await response.text()
+            const trimmed = rawText.trimStart()
+            const snippet = trimmed.split(/\r?\n/).slice(0, 20).join('\n')
+            diagnostics.response.bodySnippet = snippet.slice(0, 1200)
+          }
+        } catch (error) {
+          diagnostics.fetchError = serialiseError(error)
+        }
+        return diagnostics
       }
 
       async function importModule(url, label) {
@@ -247,8 +292,16 @@
         } catch (error) {
           attempt.finishedAt = Date.now()
           attempt.status = 'error'
-          attempt.error = error instanceof Error ? { message: error.message, stack: error.stack } : { message: String(error) }
+          attempt.error = serialiseError(error)
+          try {
+            attempt.diagnostics = await collectImportDiagnostics(url)
+          } catch (diagnosticError) {
+            attempt.diagnosticsError = serialiseError(diagnosticError)
+          }
           recordError(error, `import:${label}`)
+          if (attempt.diagnostics) {
+            debugState.errors.push({ context: `diagnostics:${label}`, error: attempt.diagnostics })
+          }
           console.warn(`[admin boot] Failed to load ${label} from ${url}`, error)
           return false
         }
