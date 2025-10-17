@@ -13,6 +13,7 @@ const dropdown = accountItem?.querySelector("[data-account-dropdown]");
 const labelEl = toggle?.querySelector("[data-account-label]");
 let accountLinkEl = dropdown?.querySelector("[data-account-link='account']");
 let adminLinkEl = dropdown?.querySelector("[data-account-link='admin']");
+let lovableSheetLinkEl = dropdown?.querySelector("[data-account-link='lovablesheet']");
 const skipModal = document.body.classList.contains("page-auth");
 const hasSupabaseConfig = isSupabaseConfigured();
 
@@ -74,6 +75,36 @@ function setAccountState(user) {
   }
 }
 
+function ensureLovableSheetLink() {
+  if (!dropdown) return null;
+
+  if (!lovableSheetLinkEl || !dropdown.contains(lovableSheetLinkEl)) {
+    lovableSheetLinkEl = dropdown.querySelector("[data-account-link='lovablesheet']");
+  }
+
+  if (lovableSheetLinkEl) {
+    return lovableSheetLinkEl;
+  }
+
+  const link = document.createElement("a");
+  link.className = "nav-dropdown__link";
+  link.textContent = "LovableSheet";
+  link.href = "LovableSheet.html";
+  link.dataset.accountLink = "lovablesheet";
+  link.hidden = true;
+  link.setAttribute("aria-hidden", "true");
+
+  const productsLink = dropdown.querySelector("[data-account-link='products']");
+  if (productsLink) {
+    dropdown.insertBefore(link, productsLink);
+  } else {
+    dropdown.appendChild(link);
+  }
+
+  lovableSheetLinkEl = link;
+  return lovableSheetLinkEl;
+}
+
 function updateAccountLink(user) {
   if (!dropdown) return;
   if (!accountLinkEl || !dropdown.contains(accountLinkEl)) {
@@ -82,6 +113,7 @@ function updateAccountLink(user) {
   if (!adminLinkEl || !dropdown.contains(adminLinkEl)) {
     adminLinkEl = dropdown.querySelector("[data-account-link='admin']");
   }
+  const lovableLink = ensureLovableSheetLink();
   if (!accountLinkEl) return;
 
   if (!user) {
@@ -96,18 +128,31 @@ function updateAccountLink(user) {
       adminLinkEl.hidden = true;
       adminLinkEl.setAttribute("aria-hidden", "true");
     }
+    if (lovableLink) {
+      lovableLink.hidden = true;
+      lovableLink.setAttribute("aria-hidden", "true");
+    }
     return;
   }
 
   accountLinkEl.href = ACCOUNT_PAGE_PATH;
   accountLinkEl.textContent = "My account";
 
+  const isAdmin = isAdminUser(user);
+
   if (adminLinkEl) {
-    const isAdmin = isAdminUser(user);
     adminLinkEl.hidden = !isAdmin;
     adminLinkEl.setAttribute("aria-hidden", isAdmin ? "false" : "true");
     if (isAdmin) {
       adminLinkEl.href = ADMIN_DASHBOARD_PATH;
+    }
+  }
+
+  if (lovableLink) {
+    lovableLink.hidden = !isAdmin;
+    lovableLink.setAttribute("aria-hidden", isAdmin ? "false" : "true");
+    if (isAdmin) {
+      lovableLink.href = "LovableSheet.html";
     }
   }
 }
