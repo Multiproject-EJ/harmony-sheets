@@ -1015,9 +1015,13 @@ App.renderCart = function() {
 App.openCart = function() {
   if (!App.cartEls.panel) return;
   if (typeof App.closeAccountMenu === "function") App.closeAccountMenu();
+  App.showLayer(App.cartEls.panel);
   App.cartEls.panel.classList.add("is-open");
   App.cartEls.panel.setAttribute("aria-hidden", "false");
-  if (App.cartEls.overlay) App.cartEls.overlay.classList.add("is-active");
+  if (App.cartEls.overlay) {
+    App.showLayer(App.cartEls.overlay);
+    App.cartEls.overlay.classList.add("is-active");
+  }
   if (App.cartEls.toggle) App.cartEls.toggle.setAttribute("aria-expanded", "true");
   if (typeof App.closeNavMenu === "function") App.closeNavMenu();
   document.body.classList.add("cart-open");
@@ -1030,6 +1034,8 @@ App.closeCart = function() {
   if (App.cartEls.overlay) App.cartEls.overlay.classList.remove("is-active");
   if (App.cartEls.toggle) App.cartEls.toggle.setAttribute("aria-expanded", "false");
   document.body.classList.remove("cart-open");
+  App.hideLayer(App.cartEls.panel);
+  if (App.cartEls.overlay) App.hideLayer(App.cartEls.overlay);
 };
 
 App.toggleCart = function() {
@@ -1107,6 +1113,9 @@ App.initCart = function() {
     label: App.qs("[data-cart-label]"),
     count: App.qs("[data-cart-count]")
   };
+
+  if (App.cartEls.panel) App.hideLayer(App.cartEls.panel);
+  if (App.cartEls.overlay) App.hideLayer(App.cartEls.overlay);
 
   if (App.cartEls.panel) App.cartEls.panel.setAttribute("aria-hidden", "true");
   if (App.cartEls.toggle) App.cartEls.toggle.setAttribute("aria-expanded", "false");
@@ -1215,6 +1224,71 @@ App.closeBrowseMenu = null;
 App.closeBundlesMenu = null;
 App.closeAccountMenu = null;
 App.closeNavMenu = () => {};
+
+App._layerTimers = new WeakMap();
+
+App.setLayerVisibility = function(el, open) {
+  if (!el) return;
+
+  if (App._layerTimers.has(el)) {
+    clearTimeout(App._layerTimers.get(el));
+    App._layerTimers.delete(el);
+  }
+
+  if (open) {
+    el.classList.remove("is-hidden");
+    el.hidden = false;
+    el.style.display = "";
+    el.style.pointerEvents = "";
+    el.setAttribute("aria-hidden", "false");
+    return;
+  }
+
+  el.classList.add("is-hidden");
+  el.setAttribute("aria-hidden", "true");
+  el.style.pointerEvents = "none";
+
+  let totalDuration = 0;
+  if (typeof window !== "undefined" && typeof window.getComputedStyle === "function") {
+    const styles = window.getComputedStyle(el);
+    const parseTime = value => {
+      if (!value) return 0;
+      const trimmed = value.trim();
+      if (!trimmed) return 0;
+      const numeric = parseFloat(trimmed);
+      if (Number.isNaN(numeric)) return 0;
+      return trimmed.endsWith("ms") ? numeric : numeric * 1000;
+    };
+    const durations = (styles.transitionDuration || "0s").split(",");
+    const delays = (styles.transitionDelay || "0s").split(",");
+    const totals = durations.map((duration, index) => {
+      const delay = delays[index] || delays[delays.length - 1] || "0s";
+      return parseTime(duration) + parseTime(delay);
+    });
+    totalDuration = Math.max(0, ...totals);
+  }
+
+  if (totalDuration <= 0) {
+    el.hidden = true;
+    el.style.display = "none";
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    el.hidden = true;
+    el.style.display = "none";
+    App._layerTimers.delete(el);
+  }, totalDuration);
+  App._layerTimers.set(el, timer);
+};
+
+App.showLayer = function(el) {
+  App.setLayerVisibility(el, true);
+};
+
+App.hideLayer = function(el) {
+  App.setLayerVisibility(el, false);
+};
 App.initAuthLink = function() {
   const accountItem = App.qs("[data-account-menu]");
   const toggle = accountItem?.querySelector("[data-account-toggle]");
@@ -1242,12 +1316,12 @@ App.initAuthLink = function() {
     if (!isAuthenticated()) {
       accountItem.classList.remove("is-open");
       toggle.setAttribute("aria-expanded", "false");
-      dropdown.setAttribute("aria-hidden", "true");
+      App.hideLayer(dropdown);
       return;
     }
     accountItem.classList.toggle("is-open", open);
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
-    dropdown.setAttribute("aria-hidden", open ? "false" : "true");
+    App.setLayerVisibility(dropdown, open);
   };
 
   const closeMenu = () => setOpen(false);
@@ -1255,11 +1329,16 @@ App.initAuthLink = function() {
 
   const updateMenuForAuthState = () => {
     const authed = isAuthenticated();
-    dropdown.hidden = !authed;
-    dropdown.setAttribute("aria-hidden", authed ? (accountItem.classList.contains("is-open") ? "false" : "true") : "true");
     toggle.setAttribute("aria-haspopup", authed ? "true" : "dialog");
     if (!authed) {
       closeMenu();
+      App.hideLayer(dropdown);
+      return;
+    }
+    if (accountItem.classList.contains("is-open")) {
+      App.showLayer(dropdown);
+    } else {
+      App.hideLayer(dropdown);
     }
   };
 
@@ -1491,6 +1570,7 @@ App.initNavDropdown = function() {
     }
     browseItem.classList.toggle("is-open", open);
     browseLink.setAttribute("aria-expanded", open ? "true" : "false");
+    App.setLayerVisibility(mega, open);
   };
   const close = () => setOpen(false);
   App.closeBrowseMenu = close;
@@ -2118,6 +2198,7 @@ App.initNavDropdown = function() {
     } else {
       resetBundlePosition();
     }
+    App.setLayerVisibility(bundleFlyout, open);
   };
 
   const closeBundles = () => setBundleOpen(false);
