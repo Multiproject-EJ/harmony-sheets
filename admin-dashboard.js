@@ -2,30 +2,74 @@ import { isSupabaseConfigured } from "./supabase-config.js";
 import { ACCOUNT_PAGE_PATH, ADMIN_DASHBOARD_PATH, isAdminUser } from "./auth-helpers.js";
 import { getSupabaseClient } from "./supabase-client.js";
 
+const ADMIN_PAGE_REGEX = /\/admin_dashboard\.html$/i;
+const isAdminPage = ADMIN_PAGE_REGEX.test(location.pathname);
+
+if (!isAdminPage) {
+  // Not the admin page → do nothing in this file.
+  // Prevents auth listeners, editor imports, and any redirects from running globally.
+  // eslint-disable-next-line no-useless-return
+  (function noop() {
+    return;
+  })();
+}
+
+const rootHook = !isAdminPage
+  ? null
+  : document.querySelector("[data-admin-dashboard-content]") ||
+    document.querySelector("[data-admin-dashboard-loading]") ||
+    document.querySelector("[data-admin-dashboard-unauthorized]");
+
+const shouldRunAdminDashboard = Boolean(rootHook);
+
+if (isAdminPage && !shouldRunAdminDashboard) {
+  // Admin DOM isn’t on this page; don’t run anything
+  // eslint-disable-next-line no-useless-return
+  (function noop() {
+    return;
+  })();
+}
+
 const PAGE_PATH = ADMIN_DASHBOARD_PATH || "admin_dashboard.html";
 
 const sections = {
-  loading: document.querySelector("[data-admin-dashboard-loading]"),
-  unauthorized: document.querySelector("[data-admin-dashboard-unauthorized]"),
-  content: document.querySelector("[data-admin-dashboard-content]")
+  loading: shouldRunAdminDashboard ? document.querySelector("[data-admin-dashboard-loading]") : null,
+  unauthorized: shouldRunAdminDashboard
+    ? document.querySelector("[data-admin-dashboard-unauthorized]")
+    : null,
+  content: shouldRunAdminDashboard ? document.querySelector("[data-admin-dashboard-content]") : null
 };
 
-const messageEl = document.querySelector("[data-admin-dashboard-message]");
+const messageEl = shouldRunAdminDashboard ? document.querySelector("[data-admin-dashboard-message]") : null;
 const contentSection = sections.content;
 
-const supabaseTestEls = {
-  card: document.querySelector("[data-supabase-card]"),
-  indicator: document.querySelector("[data-supabase-indicator]"),
-  status: document.querySelector("[data-supabase-status]"),
-  metrics: document.querySelector("[data-supabase-metrics]"),
-  products: document.querySelector("[data-supabase-products]"),
-  latest: document.querySelector("[data-supabase-latest]"),
-  local: document.querySelector("[data-supabase-local]"),
-  updated: document.querySelector("[data-supabase-updated]"),
-  updatedTime: document.querySelector("[data-supabase-updated-time]"),
-  button: document.querySelector("[data-supabase-test]"),
-  buttonLabel: document.querySelector("[data-supabase-test-label]")
-};
+const supabaseTestEls = shouldRunAdminDashboard
+  ? {
+      card: document.querySelector("[data-supabase-card]"),
+      indicator: document.querySelector("[data-supabase-indicator]"),
+      status: document.querySelector("[data-supabase-status]"),
+      metrics: document.querySelector("[data-supabase-metrics]"),
+      products: document.querySelector("[data-supabase-products]"),
+      latest: document.querySelector("[data-supabase-latest]"),
+      local: document.querySelector("[data-supabase-local]"),
+      updated: document.querySelector("[data-supabase-updated]"),
+      updatedTime: document.querySelector("[data-supabase-updated-time]"),
+      button: document.querySelector("[data-supabase-test]"),
+      buttonLabel: document.querySelector("[data-supabase-test-label]")
+    }
+  : {
+      card: null,
+      indicator: null,
+      status: null,
+      metrics: null,
+      products: null,
+      latest: null,
+      local: null,
+      updated: null,
+      updatedTime: null,
+      button: null,
+      buttonLabel: null
+    };
 
 const supabaseTestDefaults = {
   label:
@@ -246,7 +290,7 @@ function formatError(error) {
 }
 
 function runSupabaseTest(options = {}) {
-  if (!supabaseClient) {
+  if (!shouldRunAdminDashboard || !supabaseClient) {
     return Promise.resolve();
   }
   if (supabaseTestPromise) {
@@ -354,9 +398,14 @@ function setUnauthorizedMessage(message) {
 
 function redirectTo(target) {
   if (!target || redirecting) return;
+  const to = String(target);
+  const resolvedTarget = new URL(to, window.location.href).href;
+  if (resolvedTarget === window.location.href) {
+    return;
+  }
   redirecting = true;
-  window.location.replace(target);
   window.setTimeout(() => {
+    window.location.replace(resolvedTarget);
     redirecting = false;
   }, 0);
 }
@@ -407,6 +456,9 @@ function requireAdmin(user) {
 }
 
 async function initialize() {
+  if (!shouldRunAdminDashboard) {
+    return;
+  }
   if (!isSupabaseConfigured()) {
     handleUnauthorized(
       "Supabase credentials are missing. Update supabase-config.js to enable admin access."
@@ -431,6 +483,10 @@ async function initialize() {
     showSection("unauthorized");
   }
 
+  if (authSubscription?.subscription?.unsubscribe) {
+    authSubscription.subscription.unsubscribe();
+  }
+
   const { data: listener } = supabaseClient.auth.onAuthStateChange(async (_event, session) => {
     const user = session?.user || null;
     if (!requireAdmin(user)) {
@@ -443,10 +499,12 @@ async function initialize() {
   authSubscription = listener;
 }
 
-initialize();
+if (shouldRunAdminDashboard) {
+  initialize();
 
-window.addEventListener("beforeunload", () => {
-  if (authSubscription && typeof authSubscription.subscription?.unsubscribe === "function") {
-    authSubscription.subscription.unsubscribe();
-  }
-});
+  window.addEventListener("beforeunload", () => {
+    if (authSubscription && typeof authSubscription.subscription?.unsubscribe === "function") {
+      authSubscription.subscription.unsubscribe();
+    }
+  });
+}
