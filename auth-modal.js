@@ -7,6 +7,13 @@ import {
 } from "./auth-helpers.js";
 import { getSupabaseClient } from "./supabase-client.js";
 
+const ADMIN_PAGE_REGEX = /\/admin_dashboard\.html$/i;
+const ADMIN_AUTO_REDIRECT_PATHS = [
+  /^\/?$/,
+  /\/index\.html$/i,
+  /\/login\.html$/i
+];
+
 const accountItem = document.querySelector("[data-account-menu]");
 const toggle = accountItem?.querySelector("[data-account-toggle]");
 const dropdown = accountItem?.querySelector("[data-account-dropdown]");
@@ -159,14 +166,35 @@ function updateAccountLink(user) {
   }
 }
 
+function isAdminAutoRedirectPath(pathname) {
+  return ADMIN_AUTO_REDIRECT_PATHS.some((pattern) => pattern.test(pathname));
+}
+
 function maybeRedirectToAdmin(user) {
   if (!isAdminUser(user)) return false;
-  const currentPath = window.location.pathname.replace(/^\/+/, "");
-  if (currentPath.startsWith(ADMIN_DASHBOARD_PATH)) {
+
+  const { pathname } = window.location;
+  if (ADMIN_PAGE_REGEX.test(pathname)) {
     return false;
   }
+
+  if (!isAdminAutoRedirectPath(pathname)) {
+    return false;
+  }
+
   const target = getPostSignInRedirect(user, ADMIN_DASHBOARD_PATH);
   if (!target) return false;
+
+  try {
+    const resolvedTarget = new URL(target, window.location.origin);
+    if (resolvedTarget.pathname === pathname) {
+      return false;
+    }
+  } catch (error) {
+    console.warn("[auth-modal] Invalid admin redirect target", error);
+    return false;
+  }
+
   window.location.href = target;
   return true;
 }
