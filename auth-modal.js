@@ -32,6 +32,8 @@ let resetSubmitButton = null;
 let resetMode = "request";
 let lastFocusedElement = null;
 let signOutButton = null;
+let lastAppliedUserId = null;
+let skipNextAdminRedirect = false;
 
 if (accountItem && !accountItem.dataset.authState) {
   accountItem.dataset.authState = "signed-out";
@@ -667,17 +669,32 @@ function initSupabase() {
   });
 
   const applySession = session => {
-    setAccountState(session?.user || null);
+    const user = session?.user || null;
+    lastAppliedUserId = user?.id || null;
+    setAccountState(user);
   };
 
   supabaseClient.auth.getSession().then(({ data }) => {
     applySession(data.session);
+    skipNextAdminRedirect = Boolean(data.session?.user);
   });
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     applySession(session);
+    const user = session?.user || null;
+
     if (event === "SIGNED_IN") {
-      if (maybeRedirectToAdmin(session?.user)) {
+      const userId = user?.id || null;
+      if (skipNextAdminRedirect) {
+        skipNextAdminRedirect = false;
+        if (!userId || userId === lastAppliedUserId) {
+          return;
+        }
+      }
+
+      skipNextAdminRedirect = false;
+
+      if (maybeRedirectToAdmin(user)) {
         return;
       }
       if (!skipModal) {
@@ -688,9 +705,12 @@ function initSupabase() {
         }, 1200);
       }
     }
-    if (event === "SIGNED_OUT" && !skipModal) {
-      clearStatus();
-      configureResetForm("request");
+    if (event === "SIGNED_OUT") {
+      skipNextAdminRedirect = false;
+      if (!skipModal) {
+        clearStatus();
+        configureResetForm("request");
+      }
     }
   });
 }
