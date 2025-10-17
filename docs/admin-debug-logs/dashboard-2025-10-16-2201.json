@@ -1,5 +1,5 @@
 {
-  "source": "https://www.harmony-sheets.com/admin/",
+  "source": "https://www.harmony-sheets.com/admin_dashboard.html",
   "panel": "dashboard",
   "resolutionPlan": "See docs/admin-debug-logs/2025-10-16-dashboard-remediation.md",
   "snapshot": {
