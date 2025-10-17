@@ -89,7 +89,7 @@ function ensureLovableSheetLink() {
   const link = document.createElement("a");
   link.className = "nav-dropdown__link";
   link.textContent = "LovableSheet";
-  link.href = "LovableSheet.html";
+  link.href = "lovablesheet.html";
   link.dataset.accountLink = "lovablesheet";
   link.hidden = true;
   link.setAttribute("aria-hidden", "true");
@@ -152,7 +152,7 @@ function updateAccountLink(user) {
     lovableLink.hidden = !isAdmin;
     lovableLink.setAttribute("aria-hidden", isAdmin ? "false" : "true");
     if (isAdmin) {
-      lovableLink.href = "LovableSheet.html";
+      lovableLink.href = "lovablesheet.html";
     }
   }
 }
