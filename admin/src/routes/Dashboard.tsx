@@ -1,14 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-  AppBar,
-  Box,
-  Button,
-  Container,
-  IconButton,
-  Stack,
-  Toolbar,
-  Typography
-} from '@mui/material'
+import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import LogoutIcon from '@mui/icons-material/Logout'
 import AddIcon from '@mui/icons-material/Add'
 import { useNavigate } from 'react-router-dom'
@@ -69,28 +60,35 @@ export default function Dashboard() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
-      <AppBar position="sticky" color="primary" enableColorOnDark>
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Harmony Sheets — Admin
-          </Typography>
-          <IconButton color="inherit" onClick={handleSignOut}>
-            <LogoutIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-
-      <Container sx={{ py: 4 }}>
+    <Box sx={{ bgcolor: 'grey.100' }}>
+      <Container sx={{ py: { xs: 6, md: 8 } }}>
         <Stack spacing={6}>
           <Stack spacing={3}>
-            <Stack spacing={1}>
-              <Typography variant="h4" fontWeight={600}>
-                Business overview
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Track sales performance and customer growth across Harmony Sheets.
-              </Typography>
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              justifyContent="space-between"
+              alignItems={{ xs: 'flex-start', md: 'center' }}
+              spacing={2}
+            >
+              <Stack spacing={1}>
+                <Typography variant="overline" color="primary" fontWeight={600}>
+                  Harmony Sheets Admin
+                </Typography>
+                <Typography variant="h4" fontWeight={600}>
+                  Business overview
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Track sales performance and customer growth across Harmony Sheets.
+                </Typography>
+              </Stack>
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<LogoutIcon />}
+                onClick={handleSignOut}
+              >
+                Sign out
+              </Button>
             </Stack>
 
             <KpiCards kpis={kpis} />
