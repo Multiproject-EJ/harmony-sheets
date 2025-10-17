@@ -114,6 +114,35 @@
           <p class="admin__status-value" data-status>Loading products…</p>
         </div>
       </div>
+      <div class="admin__status-card admin__supabase-card" data-supabase-card>
+        <div class="admin__status-indicator" data-supabase-indicator data-tone="neutral"></div>
+        <div class="admin__supabase-body">
+          <p class="admin__status-label">Supabase sync</p>
+          <p class="admin__status-value" data-supabase-status>Run a test to verify Supabase updates.</p>
+          <div class="admin__supabase-metrics" data-supabase-metrics hidden>
+            <dl class="admin__supabase-metric">
+              <dt>Supabase products</dt>
+              <dd data-supabase-products>—</dd>
+            </dl>
+            <dl class="admin__supabase-metric">
+              <dt>Latest change</dt>
+              <dd data-supabase-latest>—</dd>
+            </dl>
+            <dl class="admin__supabase-metric">
+              <dt>Local catalog</dt>
+              <dd data-supabase-local>—</dd>
+            </dl>
+          </div>
+          <p class="admin__supabase-updated" data-supabase-updated hidden>
+            Last checked <time data-supabase-updated-time datetime=""></time>
+          </p>
+        </div>
+        <div class="admin__supabase-actions">
+          <button class="btn-ghost admin__btn" type="button" data-supabase-test disabled>
+            <span data-supabase-test-label>Run test</span>
+          </button>
+        </div>
+      </div>
     </section>
 
     <section class="admin__grid">
