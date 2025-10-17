@@ -66,6 +66,33 @@ button.nav-link{border:0;background:transparent;cursor:pointer;font:inherit}
 .main-nav:hover .nav-link.active,.main-nav:focus-within .nav-link.active{background:rgba(255,255,255,.95);color:var(--nav-link-ink-strong);border-color:#1d4ed8;box-shadow:0 12px 26px rgba(37,99,235,.18)}
 .main-nav:hover .nav-link--account,.main-nav:focus-within .nav-link--account{background:linear-gradient(rgba(255,255,255,1),rgba(255,255,255,.92)) padding-box,linear-gradient(135deg,#60a5fa,#1d4ed8) border-box;color:#1d4ed8;box-shadow:0 0 18px rgba(59,130,246,.36),0 12px 30px rgba(37,99,235,.24)}
 
+/* Defensive nav/cart states so hidden flyouts never swallow clicks */
+.nav-mega[hidden],
+.nav-mega[aria-hidden="true"],
+.nav-flyout[hidden],
+.nav-flyout[aria-hidden="true"],
+.nav-dropdown[hidden],
+.nav-dropdown[aria-hidden="true"],
+.cart-overlay[hidden],
+.cart-overlay[aria-hidden="true"],
+.cart-panel[hidden],
+.cart-panel[aria-hidden="true"]{
+  display:none!important;
+  pointer-events:none!important;
+}
+
+.nav-mega.is-hidden,
+.nav-flyout.is-hidden,
+.nav-dropdown.is-hidden,
+.cart-overlay.is-hidden,
+.cart-panel.is-hidden{
+  pointer-events:none!important;
+}
+
+nav,nav *{pointer-events:auto;}
+
+.is-disabled:not(button):not(a){pointer-events:auto;}
+
 @media(min-width:721px){
   .main-nav:not(:hover):not(:focus-within){background:transparent;box-shadow:none}
   .main-nav--cart-active{box-shadow:none}
