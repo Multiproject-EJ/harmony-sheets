@@ -1054,10 +1054,10 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin__supabase-metric{margin:0;display:flex;justify-content:space-between;gap:12px;font-size:.85rem;line-height:1.4;color:rgba(226,232,240,.86)}
 .admin__supabase-metric dt{margin:0;font-weight:600;color:rgba(248,250,252,.72)}
 .admin__supabase-metric dd{margin:0;font-weight:500;color:#fff}
-.admin__supabase-actions{display:flex;align-items:center;margin-left:auto}
+.admin__supabase-actions{display:flex;align-items:center;margin-left:auto;gap:12px}
 .admin__supabase-actions .btn-ghost{background:#fff;color:#0f172a;border-color:rgba(248,250,252,.4)}
 .admin__supabase-actions .btn-ghost:hover,.admin__supabase-actions .btn-ghost:focus-visible{background:#cbd5f5;color:#0f172a;box-shadow:0 14px 32px rgba(29,78,216,.18)}
-.admin__supabase-actions .btn-ghost[disabled]{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none}
+.admin__supabase-actions .btn[disabled]{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none}
 .admin__supabase-updated{margin:0;font-size:.78rem;color:rgba(226,232,240,.65)}
 
 .admin__grid{display:grid;grid-template-columns:1fr;gap:32px;align-items:start}
