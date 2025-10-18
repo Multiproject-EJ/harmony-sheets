@@ -8,6 +8,8 @@ const state = {
   sortDir: 'asc'
 };
 
+const subscribers = new Set();
+
 const els = {
   status: document.querySelector('[data-status]'),
   statusIndicator: document.querySelector('[data-status-indicator]'),
@@ -297,6 +299,21 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function notifyCatalogSubscribers(reason = 'update') {
+  if (!subscribers.size) return;
+  const payload = {
+    products: clone(state.products),
+    reason
+  };
+  subscribers.forEach((subscriber) => {
+    try {
+      subscriber(payload);
+    } catch (error) {
+      console.error('[editor] Catalog subscriber failed', error);
+    }
+  });
+}
+
 function escapeSelector(value) {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
     return CSS.escape(value);
@@ -374,6 +391,7 @@ async function loadProducts() {
       setStatus('Loaded from source JSON.');
     }
     renderTable();
+    notifyCatalogSubscribers('load');
   } catch (error) {
     console.error(error);
     setStatus('Unable to load products. Refresh to try again.', 'danger');
@@ -665,6 +683,7 @@ function handleFormSubmit(event) {
     return;
   }
 
+  let changeReason = 'update';
   if (isNew) {
     const newProduct = {
       ...productPayload,
@@ -677,6 +696,7 @@ function handleFormSubmit(event) {
     state.products.push(newProduct);
     state.selectedId = newProduct.id;
     persist({ message: 'New product saved locally. Download the JSON when you are ready to publish.', tone: 'success' });
+    changeReason = 'create';
   } else {
     const index = state.products.findIndex((item) => item.id === state.selectedId);
     if (index === -1) return;
@@ -691,10 +711,12 @@ function handleFormSubmit(event) {
     state.products.splice(index, 1, merged);
     state.selectedId = merged.id;
     persist({ message: 'Product updated and saved locally.', tone: 'success' });
+    changeReason = 'update';
   }
 
   renderTable();
   selectProduct(state.selectedId);
+  notifyCatalogSubscribers(changeReason);
 }
 
 function handleTableClick(event) {
@@ -727,6 +749,7 @@ function handleDraftToggle(event) {
     : `“${productLabel}” marked as active.`;
 
   persist({ message, tone: checked ? 'info' : 'success' });
+  notifyCatalogSubscribers('draft-toggle');
   renderTable();
 
   if (state.selectedId === id && formFields.draft) {
@@ -796,6 +819,7 @@ function handleDelete() {
   setStatus(`Deleted “${removed[0]?.name || removed[0]?.id}”.`, 'danger');
   state.selectedId = null;
   persist({ message: null });
+  notifyCatalogSubscribers('delete');
   renderTable();
   els.form.reset();
   if (formFields.draft) {
@@ -845,6 +869,7 @@ function handleReset() {
   clearStorage();
   setStatus('Reverted to source JSON.', 'info');
   renderTable();
+  notifyCatalogSubscribers('reset');
   if (els.formPlaceholder) {
     els.formPlaceholder.hidden = false;
   }
@@ -889,6 +914,25 @@ function registerEvents() {
   els.cancelButton?.addEventListener('click', handleCancel);
   els.form?.addEventListener('submit', handleFormSubmit);
   els.tableContainer?.addEventListener('keydown', handleKeyboardNavigation);
+}
+
+export function getCatalogSnapshot() {
+  return clone(state.products);
+}
+
+export function subscribeToCatalog(callback) {
+  if (typeof callback !== 'function') {
+    throw new TypeError('Catalog subscriber must be a function');
+  }
+  try {
+    callback({ products: clone(state.products), reason: 'subscribe' });
+  } catch (error) {
+    console.error('[editor] Catalog subscriber failed during initial emit', error);
+  }
+  subscribers.add(callback);
+  return () => {
+    subscribers.delete(callback);
+  };
 }
 
 setupProductModal();
