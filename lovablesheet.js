@@ -101,19 +101,31 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+function applyNoteTransform(note, x, y) {
+  if (!note) return;
+  const scale = boardScale || 1;
+  const safeScale = Math.abs(scale) < Number.EPSILON ? 1 : scale;
+  const translateX = x / safeScale;
+  const translateY = y / safeScale;
+  note.style.setProperty("--note-scale", `${scale}`);
+  note.style.setProperty("--note-translate-x", `${translateX}px`);
+  note.style.setProperty("--note-translate-y", `${translateY}px`);
+}
+
 function setNotePosition(note, x, y) {
   note.dataset.x = String(x);
   note.dataset.y = String(y);
   note.style.setProperty("--note-x", `${x}px`);
   note.style.setProperty("--note-y", `${y}px`);
+  applyNoteTransform(note, x, y);
 }
 
 function getNoteCenter(note) {
   const x = Number.parseFloat(note.dataset.x || "0");
   const y = Number.parseFloat(note.dataset.y || "0");
   return {
-    x: x + note.offsetWidth / 2,
-    y: y + note.offsetHeight / 2
+    x: x + (note.offsetWidth * boardScale) / 2,
+    y: y + (note.offsetHeight * boardScale) / 2
   };
 }
 
@@ -155,7 +167,13 @@ function updateZoomControls() {
 
 function applyBoardScale() {
   if (workspaceEl) {
-    workspaceEl.style.transform = `scale(${boardScale})`;
+    workspaceEl.style.removeProperty("transform");
+    workspaceEl.style.setProperty("--board-note-scale", `${boardScale}`);
+    workspaceEl.querySelectorAll("[data-note]").forEach((note) => {
+      const x = Number.parseFloat(note.dataset.x || "0");
+      const y = Number.parseFloat(note.dataset.y || "0");
+      applyNoteTransform(note, x, y);
+    });
   }
   updateZoomControls();
 }
@@ -202,8 +220,8 @@ function getNearbyColorNotes(activeNote) {
       note: candidate,
       startX: Number.parseFloat(candidate.dataset.x || "0"),
       startY: Number.parseFloat(candidate.dataset.y || "0"),
-      width: candidate.offsetWidth,
-      height: candidate.offsetHeight
+      width: candidate.offsetWidth * boardScale,
+      height: candidate.offsetHeight * boardScale
     }));
 }
 
@@ -231,8 +249,8 @@ function setupNote(note) {
       const pointerId = event.pointerId;
       const boardWidth = workspaceEl.clientWidth;
       const boardHeight = workspaceEl.clientHeight;
-      const noteWidth = note.offsetWidth;
-      const noteHeight = note.offsetHeight;
+      const noteWidth = note.offsetWidth * boardScale;
+      const noteHeight = note.offsetHeight * boardScale;
       const maxX = Math.max(0, boardWidth - noteWidth);
       const maxY = Math.max(0, boardHeight - noteHeight);
 
@@ -247,8 +265,8 @@ function setupNote(note) {
       handle.setPointerCapture(pointerId);
 
       const onPointerMove = (moveEvent) => {
-        const deltaX = (moveEvent.clientX - originPointer.x) / boardScale;
-        const deltaY = (moveEvent.clientY - originPointer.y) / boardScale;
+        const deltaX = moveEvent.clientX - originPointer.x;
+        const deltaY = moveEvent.clientY - originPointer.y;
 
         const targetX = clamp(startX + deltaX, 0, maxX);
         const targetY = clamp(startY + deltaY, 0, maxY);
@@ -386,8 +404,8 @@ function createNewStickyNote() {
   setupNote(noteElement);
 
   window.requestAnimationFrame(() => {
-    const noteWidth = noteElement.offsetWidth;
-    const noteHeight = noteElement.offsetHeight;
+    const noteWidth = noteElement.offsetWidth * boardScale;
+    const noteHeight = noteElement.offsetHeight * boardScale;
     const boardWidth = workspaceEl.clientWidth;
     const boardHeight = workspaceEl.clientHeight;
     const maxX = Math.max(0, boardWidth - noteWidth);
@@ -399,10 +417,9 @@ function createNewStickyNote() {
     if (boardMenuEl) {
       const workspaceRect = workspaceEl.getBoundingClientRect();
       const menuRect = boardMenuEl.getBoundingClientRect();
-      const scale = boardScale || 1;
-      const gap = 4 / scale;
-      const relativeMenuLeft = (menuRect.left - workspaceRect.left) / scale;
-      const relativeMenuTop = (menuRect.top - workspaceRect.top) / scale;
+      const gap = 4;
+      const relativeMenuLeft = menuRect.left - workspaceRect.left;
+      const relativeMenuTop = menuRect.top - workspaceRect.top;
 
       targetX = clamp(relativeMenuLeft - noteWidth - gap, 0, maxX);
       targetY = clamp(relativeMenuTop, 0, maxY);
