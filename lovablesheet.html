@@ -112,10 +112,19 @@
           <h2 id="brain-board-title">Brain board</h2>
           <p class="brain-board__summary">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
         </div>
+        <div class="brain-board__toolbar" data-board-toolbar>
+          <label class="brain-board__toolbar-label" for="brain-board-select">Boards</label>
+          <select class="brain-board__select" id="brain-board-select" data-board-select>
+            <option value="default">Default Board (Demo)</option>
+          </select>
+          <button class="btn primary brain-board__save" type="button" data-board-save>Save to Supabase</button>
+          <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
+        </div>
+
         <div class="brain-board__workspace" data-brain-board-workspace role="list">
           <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-x="32" data-y="40">
             <div class="brain-board__handle" data-note-handle>
-              <span class="brain-board__label">Quick capture</span>
+              <span class="brain-board__label" data-note-label>Quick capture</span>
               <div class="brain-board__actions">
                 <div class="brain-board__swatches" role="group" aria-label="Change note color">
                   <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
@@ -131,7 +140,7 @@
 
           <div class="brain-board__note" role="listitem" data-note data-color="meadow" data-x="232" data-y="40">
             <div class="brain-board__handle" data-note-handle>
-              <span class="brain-board__label">In progress</span>
+              <span class="brain-board__label" data-note-label>In progress</span>
               <div class="brain-board__actions">
                 <div class="brain-board__swatches" role="group" aria-label="Change note color">
                   <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
@@ -147,7 +156,7 @@
 
           <div class="brain-board__note" role="listitem" data-note data-color="ocean" data-x="432" data-y="40">
             <div class="brain-board__handle" data-note-handle>
-              <span class="brain-board__label">Opportunities</span>
+              <span class="brain-board__label" data-note-label>Opportunities</span>
               <div class="brain-board__actions">
                 <div class="brain-board__swatches" role="group" aria-label="Change note color">
                   <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
@@ -163,7 +172,7 @@
 
           <div class="brain-board__note" role="listitem" data-note data-color="blossom" data-x="632" data-y="40">
             <div class="brain-board__handle" data-note-handle>
-              <span class="brain-board__label">Backlog</span>
+              <span class="brain-board__label" data-note-label>Backlog</span>
               <div class="brain-board__actions">
                 <div class="brain-board__swatches" role="group" aria-label="Change note color">
                   <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
@@ -177,6 +186,23 @@
             <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Collect user stories that need deeper grooming.</div>
           </div>
         </div>
+        <template id="brain-board-note-template">
+          <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-x="0" data-y="0">
+            <div class="brain-board__handle" data-note-handle>
+              <span class="brain-board__label" data-note-label>Note</span>
+              <div class="brain-board__actions">
+                <div class="brain-board__swatches" role="group" aria-label="Change note color">
+                  <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                  <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                  <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                  <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                </div>
+                <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+              </div>
+            </div>
+            <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea"></div>
+          </div>
+        </template>
       </section>
     </article>
   </section>
