@@ -698,8 +698,15 @@ function initSupabase() {
   };
 
   supabaseClient.auth.getSession().then(({ data }) => {
-    applySession(data.session);
-    skipNextAdminRedirect = Boolean(data.session?.user);
+    const session = data.session;
+    applySession(session);
+
+    if (session?.user) {
+      skipNextAdminRedirect = true;
+      maybeRedirectToAdmin(session.user);
+    } else {
+      skipNextAdminRedirect = false;
+    }
   });
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
