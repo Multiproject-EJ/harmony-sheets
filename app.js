@@ -803,10 +803,63 @@ App.registerParallax = function(el, speed = 0.25) {
 };
 
 App.productsPromise = null;
+
+App.normalizeDraftFlag = function(value) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return false;
+    return ["true", "1", "yes", "y", "draft", "inactive", "disabled", "hidden", "archived"].includes(normalized);
+  }
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return false;
+    return value !== 0;
+  }
+  return Boolean(value);
+};
+
+App.normalizeProduct = function(product) {
+  if (!product || typeof product !== "object") return product;
+
+  const normalized = { ...product };
+  const status = typeof normalized.status === "string" ? normalized.status.trim().toLowerCase() : "";
+
+  let draft = false;
+  if (status && ["draft", "inactive", "disabled", "hidden", "archived"].includes(status)) {
+    draft = true;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(normalized, "draft")) {
+    draft = draft || App.normalizeDraftFlag(normalized.draft);
+  } else if (Object.prototype.hasOwnProperty.call(normalized, "inactive")) {
+    draft = draft || App.normalizeDraftFlag(normalized.inactive);
+    delete normalized.inactive;
+  }
+
+  normalized.draft = Boolean(draft);
+  return normalized;
+};
+
+App.isProductActive = function(product) {
+  if (!product || typeof product !== "object") return false;
+  const normalized = Object.prototype.hasOwnProperty.call(product, "draft")
+    ? product
+    : App.normalizeProduct(product);
+  return normalized ? !normalized.draft : false;
+};
+
+App.filterActiveProducts = function(products) {
+  if (!Array.isArray(products)) return [];
+  return products
+    .map(item => (Object.prototype.hasOwnProperty.call(item || {}, "draft") ? item : App.normalizeProduct(item)))
+    .filter(item => item && !item.draft);
+};
+
 App.loadProducts = function() {
   if (!App.productsPromise) {
     App.productsPromise = fetch("products.json")
       .then(res => res.json())
+      .then(data => (Array.isArray(data) ? data.map(App.normalizeProduct) : []))
       .catch(err => {
         App.productsPromise = null;
         throw err;
@@ -2349,7 +2402,8 @@ App.initNavDropdown = function() {
 
   App.loadProducts()
     .then(products => {
-      areaProducts = buildAreaProducts(products);
+      const activeProducts = App.filterActiveProducts(products);
+      areaProducts = buildAreaProducts(activeProducts);
       updateActive();
     })
     .catch(err => {
@@ -2708,6 +2762,7 @@ App.initProducts = async function() {
 
   try {
     const products = await App.loadProducts();
+    const activeProducts = App.filterActiveProducts(products);
 
     if (areaInfo) {
       if (heading) heading.textContent = areaInfo.title;
@@ -2715,9 +2770,9 @@ App.initProducts = async function() {
       document.title = `${areaInfo.title} — Harmony Sheets`;
     }
 
-    let list = products;
+    let list = activeProducts;
     if (areaInfo) {
-      list = products.filter(p => Array.isArray(p.lifeAreas) && p.lifeAreas.includes(areaSlug));
+      list = activeProducts.filter(p => Array.isArray(p.lifeAreas) && p.lifeAreas.includes(areaSlug));
     }
 
     if (!list.length) {
@@ -2771,12 +2826,13 @@ App.initHome = function() {
   if (bestsellersGrid) {
     App.loadProducts()
       .then(products => {
-        if (!Array.isArray(products) || !products.length) {
+        const activeProducts = App.filterActiveProducts(products);
+        if (!activeProducts.length) {
           bestsellersGrid.innerHTML = "<p class=\"muted\">New templates are on the way. Check back soon!</p>";
           return;
         }
 
-        const cards = products
+        const cards = activeProducts
           .map(product => {
             const productId = product && product.id ? String(product.id) : "";
             const link = productId ? `product.html?id=${encodeURIComponent(productId)}` : "products.html";
