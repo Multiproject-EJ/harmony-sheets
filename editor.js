@@ -38,6 +38,7 @@ const formFields = {
   id: els.form?.elements.namedItem('id'),
   name: els.form?.elements.namedItem('name'),
   tagline: els.form?.elements.namedItem('tagline'),
+  draft: els.form?.elements.namedItem('draft'),
   price: els.form?.elements.namedItem('price'),
   lifeAreas: els.form?.elements.namedItem('lifeAreas'),
   badges: els.form?.elements.namedItem('badges'),
@@ -303,6 +304,40 @@ function escapeSelector(value) {
   return String(value).replace(/(["\\])/g, '\\$1');
 }
 
+function escapeAttribute(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function normalizeDraftFlag(value) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return false;
+    return ['true', '1', 'yes', 'y', 'draft', 'inactive'].includes(normalized);
+  }
+  if (value == null) return false;
+  return Boolean(value);
+}
+
+function normalizeProduct(product) {
+  if (!product || typeof product !== 'object') return product;
+  const normalized = { ...product };
+  if (Object.prototype.hasOwnProperty.call(normalized, 'draft')) {
+    normalized.draft = normalizeDraftFlag(normalized.draft);
+  } else if (Object.prototype.hasOwnProperty.call(normalized, 'inactive')) {
+    normalized.draft = normalizeDraftFlag(normalized.inactive);
+    delete normalized.inactive;
+  } else {
+    normalized.draft = false;
+  }
+  return normalized;
+}
+
 function loadFromStorage() {
   if (!window.localStorage) return null;
   const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -328,10 +363,16 @@ async function loadProducts() {
     const response = await fetch('products.json', { cache: 'no-store' });
     if (!response.ok) throw new Error('Failed to load products');
     const data = await response.json();
-    state.baseline = clone(data);
+    const baseline = clone(data).map(normalizeProduct);
+    state.baseline = baseline;
     const stored = loadFromStorage();
-    state.products = stored && Array.isArray(stored) ? stored : clone(data);
-    setStatus(stored ? 'Loaded from local workspace.' : 'Loaded from source JSON.');
+    if (stored && Array.isArray(stored)) {
+      state.products = stored.map(normalizeProduct);
+      setStatus('Loaded from local workspace.');
+    } else {
+      state.products = clone(baseline);
+      setStatus('Loaded from source JSON.');
+    }
     renderTable();
   } catch (error) {
     console.error(error);
@@ -342,7 +383,7 @@ async function loadProducts() {
 
 function renderErrorRow(message) {
   if (!els.tableBody) return;
-  els.tableBody.innerHTML = `<tr><td colspan="4" class="admin-table__empty">${message}</td></tr>`;
+  els.tableBody.innerHTML = `<tr><td colspan="5" class="admin-table__empty">${message}</td></tr>`;
   if (els.tableMeta) {
     els.tableMeta.textContent = '0 products';
   }
@@ -399,32 +440,53 @@ function getFilteredProducts() {
   return filtered;
 }
 
+function renderProductRow(product) {
+  const isSelected = state.selectedId === product.id;
+  const attributes = [
+    'data-row',
+    `id="product-row-${product.id}"`,
+    `data-id="${product.id}"`,
+    `data-draft="${product.draft ? 'true' : 'false'}"`,
+    isSelected ? 'aria-selected="true"' : '',
+    isSelected ? 'class="is-active"' : ''
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const statusLabel = product.draft ? 'Draft' : 'Active';
+  const labelName = escapeAttribute(product.name || product.id || 'product');
+
+  return `
+    <tr ${attributes}>
+      <th scope="row">
+        <button type="button" class="admin-table__select" data-id="${product.id}">
+          <span class="admin-table__name">${product.name || 'Untitled product'}</span>
+          <span class="admin-table__tagline">${product.tagline || ''}</span>
+        </button>
+      </th>
+      <td>${formatLifeAreas(product.lifeAreas)}</td>
+      <td>${formatBadges(product.badges)}</td>
+      <td class="admin-table__price">${product.price || '—'}</td>
+      <td class="admin-table__status">
+        <label class="admin-table__status-toggle">
+          <input type="checkbox" data-draft-toggle data-id="${product.id}" ${
+            product.draft ? 'checked' : ''
+          } aria-label="Toggle draft status for ${labelName}">
+          <span class="sr-only">${statusLabel} status for ${product.name || 'Untitled product'}</span>
+        </label>
+      </td>
+    </tr>
+  `;
+}
+
 function renderTable() {
   if (!els.tableBody) return;
   const products = getFilteredProducts();
 
   if (!products.length) {
-    els.tableBody.innerHTML = '<tr><td colspan="4" class="admin-table__empty">No products found. Adjust your filters or add a new product.</td></tr>';
+    els.tableBody.innerHTML = '<tr><td colspan="5" class="admin-table__empty">No products found. Adjust your filters or add a new product.</td></tr>';
   } else {
-    const rows = products
-      .map(
-        (product) => `
-          <tr data-row id="product-row-${product.id}" data-id="${product.id}" ${
-            state.selectedId === product.id ? 'aria-selected="true" class="is-active"' : ''
-          }>
-            <th scope="row">
-              <button type="button" class="admin-table__select" data-id="${product.id}">
-                <span class="admin-table__name">${product.name || 'Untitled product'}</span>
-                <span class="admin-table__tagline">${product.tagline || ''}</span>
-              </button>
-            </th>
-            <td>${formatLifeAreas(product.lifeAreas)}</td>
-            <td>${formatBadges(product.badges)}</td>
-            <td class="admin-table__price">${product.price || '—'}</td>
-          </tr>
-        `
-      )
-      .join('');
+    const rows = products.map((product) => renderProductRow(product)).join('');
     els.tableBody.innerHTML = rows;
   }
 
@@ -445,6 +507,9 @@ function selectProduct(id, options = {}) {
     if (els.formPlaceholder) {
       els.formPlaceholder.hidden = false;
     }
+    if (formFields.draft) {
+      formFields.draft.checked = false;
+    }
     closeProductModal({ restoreFocus: false });
     return;
   }
@@ -459,6 +524,9 @@ function selectProduct(id, options = {}) {
   formFields.id.value = product.id || '';
   formFields.name.value = product.name || '';
   formFields.tagline.value = product.tagline || '';
+  if (formFields.draft) {
+    formFields.draft.checked = Boolean(product.draft);
+  }
   formFields.price.value = product.price || '';
   formFields.lifeAreas.value = Array.isArray(product.lifeAreas) ? product.lifeAreas.join(', ') : '';
   formFields.badges.value = Array.isArray(product.badges) ? product.badges.join(', ') : '';
@@ -542,6 +610,7 @@ function buildProductPayload() {
     id: formFields.id.value.trim(),
     name: formFields.name.value.trim(),
     tagline: formFields.tagline.value.trim(),
+    draft: Boolean(formFields.draft?.checked),
     price: formFields.price.value.trim(),
     lifeAreas: parseList(formFields.lifeAreas.value.trim()),
     badges: parseList(formFields.badges.value.trim()),
@@ -635,6 +704,45 @@ function handleTableClick(event) {
   if (id) selectProduct(id, { openModal: true });
 }
 
+function handleDraftToggle(event) {
+  const checkbox = event.target.closest('[data-draft-toggle]');
+  if (!checkbox) return;
+  const { id } = checkbox.dataset;
+  if (!id) return;
+  const index = state.products.findIndex((item) => item.id === id);
+  if (index === -1) return;
+
+  const wasFocused = document.activeElement === checkbox;
+  const checked = checkbox.checked;
+  const product = state.products[index];
+  const updated = {
+    ...product,
+    draft: checked
+  };
+  state.products.splice(index, 1, updated);
+
+  const productLabel = updated.name || updated.id || 'product';
+  const message = checked
+    ? `“${productLabel}” marked as draft.`
+    : `“${productLabel}” marked as active.`;
+
+  persist({ message, tone: checked ? 'info' : 'success' });
+  renderTable();
+
+  if (state.selectedId === id && formFields.draft) {
+    formFields.draft.checked = checked;
+  }
+
+  if (wasFocused) {
+    const safeId = escapeSelector(id);
+    requestAnimationFrame(() => {
+      els.tableBody
+        ?.querySelector(`[data-draft-toggle][data-id="${safeId}"]`)
+        ?.focus();
+    });
+  }
+}
+
 function handleSort(event) {
   const button = event.target.closest('[data-sort]');
   if (!button) return;
@@ -659,6 +767,9 @@ function handleAddProduct() {
     els.formPlaceholder.hidden = true;
   }
   els.form?.reset();
+  if (formFields.draft) {
+    formFields.draft.checked = true;
+  }
   if (els.formMode) {
     els.formMode.textContent = 'New product';
   }
@@ -687,6 +798,9 @@ function handleDelete() {
   persist({ message: null });
   renderTable();
   els.form.reset();
+  if (formFields.draft) {
+    formFields.draft.checked = false;
+  }
   if (els.formPlaceholder) {
     els.formPlaceholder.hidden = false;
   }
@@ -701,6 +815,9 @@ function handleDelete() {
 
 function handleCancel() {
   els.form.reset();
+  if (formFields.draft) {
+    formFields.draft.checked = false;
+  }
   state.selectedId = null;
   renderTable();
   if (els.formPlaceholder) {
@@ -734,6 +851,9 @@ function handleReset() {
   if (els.form) {
     els.form.reset();
   }
+  if (formFields.draft) {
+    formFields.draft.checked = false;
+  }
   closeProductModal({ restoreFocus: false });
 }
 
@@ -757,6 +877,7 @@ function handleKeyboardNavigation(event) {
 }
 
 function registerEvents() {
+  els.tableBody?.addEventListener('change', handleDraftToggle);
   els.tableBody?.addEventListener('click', handleTableClick);
   document.querySelector('.admin-table thead')?.addEventListener('click', handleSort);
   els.search?.addEventListener('input', handleSearch);
