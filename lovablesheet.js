@@ -104,12 +104,9 @@ function clamp(value, min, max) {
 function applyNoteTransform(note, x, y) {
   if (!note) return;
   const scale = boardScale || 1;
-  const safeScale = Math.abs(scale) < Number.EPSILON ? 1 : scale;
-  const translateX = x / safeScale;
-  const translateY = y / safeScale;
   note.style.setProperty("--note-scale", `${scale}`);
-  note.style.setProperty("--note-translate-x", `${translateX}px`);
-  note.style.setProperty("--note-translate-y", `${translateY}px`);
+  note.style.setProperty("--note-translate-x", `${x}px`);
+  note.style.setProperty("--note-translate-y", `${y}px`);
 }
 
 function setNotePosition(note, x, y) {
