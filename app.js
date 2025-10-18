@@ -1162,6 +1162,7 @@ App.init = function() {
   App.initNav();
   App.initAuthLink();
   App.initCart();
+  App.initFinishStory();
 
   // Update footer year
   const yearEl = App.qs("#year");
@@ -1215,6 +1216,227 @@ App.init = function() {
 
   // Init suggest form everywhere
   App.initSuggestForm();
+};
+
+App.finishStory = {
+  modal: null,
+  openers: [],
+  lastFocus: null,
+  close: null
+};
+
+App.initFinishStory = function() {
+  const nav = App.qs(".main-nav");
+  if (!nav) return;
+
+  let openers = App.qsa("[data-finish-story-open]");
+  if (!openers.length) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "nav-link nav-link--finish-story";
+    button.textContent = "FinishThatStory";
+    button.setAttribute("data-finish-story-open", "");
+    button.setAttribute("aria-haspopup", "dialog");
+    button.setAttribute("aria-expanded", "false");
+
+    const communityLink = nav.querySelector('a[href="faq.html"]');
+    if (communityLink) {
+      communityLink.insertAdjacentElement("afterend", button);
+    } else {
+      nav.appendChild(button);
+    }
+    openers = [button];
+  } else {
+    openers.forEach(opener => {
+      opener.setAttribute("aria-haspopup", "dialog");
+      if (!opener.hasAttribute("aria-expanded")) {
+        opener.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  if (!document.body) return;
+
+  let modal = App.qs("[data-finish-story-modal]");
+  if (!modal) {
+    document.body.insertAdjacentHTML("beforeend", `
+      <div class="finish-story-modal is-hidden" data-finish-story-modal hidden aria-hidden="true">
+        <div class="finish-story-modal__overlay" data-finish-story-overlay></div>
+        <div class="finish-story-modal__dialog" data-finish-story-dialog role="dialog" aria-modal="true" aria-labelledby="finish-story-title" aria-describedby="finish-story-description" tabindex="-1">
+          <header class="finish-story-modal__header">
+            <div class="finish-story-modal__headline">
+              <p class="finish-story-modal__eyebrow">Coming soon</p>
+              <h2 class="finish-story-modal__title" id="finish-story-title">FinishThatStory</h2>
+              <p class="finish-story-modal__subtitle" id="finish-story-description">A collaborative space for storytellers. Preview the creative playground we're building.</p>
+            </div>
+            <button class="finish-story-modal__close" type="button" data-finish-story-close aria-label="Close FinishThatStory preview"><span aria-hidden="true">&times;</span></button>
+          </header>
+          <div class="finish-story-modal__sections">
+            <section class="finish-story-modal__section">
+              <span class="finish-story-modal__badge">1 • Story submission</span>
+              <h3>Submit Your Story</h3>
+              <p>Share unfinished chapters, audio snippets, or interactive beats. The submission hub saves drafts, attaches media, and lets collaborators leave scene-by-scene comments.</p>
+              <p class="finish-story-modal__note">Uploads open soon. Polish your synopsis, cast list, and story beats so you can publish in minutes once we launch.</p>
+            </section>
+            <section class="finish-story-modal__section">
+              <span class="finish-story-modal__badge">2 • Popular stories</span>
+              <h3>Popular Stories, Published by You</h3>
+              <p>Spotlight the community's favourite arcs. We'll rotate featured stories, highlight milestones, and celebrate the writers behind them.</p>
+              <ul class="finish-story-modal__list">
+                <li><strong>City of Echoes</strong> — Mystery updates twice weekly with branching endings.</li>
+                <li><strong>Galactic Gardeners</strong> — Cozy sci-fi where readers vote on each season's harvest.</li>
+                <li><strong>The Last Library</strong> — Interactive audio drama with living footnotes from the archivist.</li>
+              </ul>
+            </section>
+            <section class="finish-story-modal__section">
+              <span class="finish-story-modal__badge">3 • Legal & disclaimers</span>
+              <h3>Legal &amp; Disclaimers</h3>
+              <ul class="finish-story-modal__list">
+                <li>Creators retain full ownership of every submission. We only host and showcase with your permission.</li>
+                <li>Fan-inspired spin-offs must include credit and proof of rights or we'll remove the project.</li>
+                <li>All stories are reviewed for safety, age rating, and accessibility before going live.</li>
+              </ul>
+              <p class="finish-story-modal__note">Full legal terms, licensing options, and content guidelines will be available at launch.</p>
+            </section>
+            <section class="finish-story-modal__section">
+              <span class="finish-story-modal__badge">4 • Story booster</span>
+              <h3>Take Story Booster Skills Courses</h3>
+              <p>Mini courses sharpen the craft behind every FinishThatStory release. Mix-and-match learning paths or follow curated tracks.</p>
+              <div class="finish-story-modal__grid">
+                <div class="finish-story-modal__grid-item"><strong>Plot Architect</strong> Blueprint your acts, twists, and cliffhangers with modular beat sheets.</div>
+                <div class="finish-story-modal__grid-item"><strong>Character Lab</strong> Design motivations, relationship webs, and evolution arcs with guided exercises.</div>
+                <div class="finish-story-modal__grid-item"><strong>Worldbuilding Studio</strong> Craft lore, maps, and sensory anchors that make your world binge-worthy.</div>
+              </div>
+            </section>
+            <section class="finish-story-modal__section">
+              <span class="finish-story-modal__badge">5 • Create account</span>
+              <h3>Create Your Account</h3>
+              <p>Reserve your username, organise collaborators, and follow favourite storytellers. Early supporters unlock launch-day perks.</p>
+              <button class="btn primary finish-story-modal__cta" type="button" data-finish-story-placeholder>Join the early access list</button>
+              <p class="finish-story-modal__status" data-finish-story-status aria-live="polite" hidden>Thanks! We'll email you as soon as FinishThatStory opens.</p>
+            </section>
+          </div>
+        </div>
+      </div>
+    `);
+    modal = App.qs("[data-finish-story-modal]");
+  }
+
+  if (!modal) return;
+
+  const overlay = modal.querySelector("[data-finish-story-overlay]");
+  const closeBtn = modal.querySelector("[data-finish-story-close]");
+  const dialog = modal.querySelector("[data-finish-story-dialog]");
+  const placeholderBtn = modal.querySelector("[data-finish-story-placeholder]");
+  const statusEl = modal.querySelector("[data-finish-story-status]");
+
+  const getFocusable = () => {
+    if (!dialog) return [];
+    const selectors = 'a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    return Array.from(dialog.querySelectorAll(selectors)).filter(el => {
+      if (el.hasAttribute("disabled")) return false;
+      const tabIndex = el.getAttribute("tabindex");
+      if (tabIndex === "-1") return false;
+      if (typeof window === "undefined") return true;
+      const style = window.getComputedStyle(el);
+      return style.visibility !== "hidden" && style.display !== "none";
+    });
+  };
+
+  const setExpanded = value => {
+    openers.forEach(opener => opener.setAttribute("aria-expanded", value ? "true" : "false"));
+  };
+
+  const openModal = event => {
+    if (event) event.preventDefault();
+    App.finishStory.lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    App.finishStory.modal = modal;
+    App.finishStory.openers = openers;
+    setExpanded(true);
+    App.showLayer(modal);
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("finish-story-open");
+    const focusables = getFocusable();
+    const target = focusables[0] || dialog;
+    if (target) {
+      setTimeout(() => target.focus(), 0);
+    }
+  };
+
+  const closeModal = () => {
+    setExpanded(false);
+    App.hideLayer(modal);
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("finish-story-open");
+    const last = App.finishStory.lastFocus;
+    if (last && typeof last.focus === "function") {
+      last.focus();
+    }
+  };
+
+  const handleKeydown = event => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeModal();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focusables = getFocusable();
+    if (!focusables.length) {
+      event.preventDefault();
+      dialog?.focus();
+      return;
+    }
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement;
+    if (event.shiftKey) {
+      if (active === first || active === dialog) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else if (active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  openers.forEach(opener => {
+    if (opener.dataset.finishStoryBound === "true") return;
+    opener.dataset.finishStoryBound = "true";
+    opener.addEventListener("click", openModal);
+  });
+
+  if (overlay && overlay.dataset.finishStoryBound !== "true") {
+    overlay.dataset.finishStoryBound = "true";
+    overlay.addEventListener("click", closeModal);
+  }
+
+  if (closeBtn && closeBtn.dataset.finishStoryBound !== "true") {
+    closeBtn.dataset.finishStoryBound = "true";
+    closeBtn.addEventListener("click", closeModal);
+  }
+
+  if (modal.dataset.finishStoryBound !== "true") {
+    modal.dataset.finishStoryBound = "true";
+    modal.addEventListener("keydown", handleKeydown);
+  }
+
+  if (placeholderBtn && placeholderBtn.dataset.finishStoryBound !== "true") {
+    placeholderBtn.dataset.finishStoryBound = "true";
+    placeholderBtn.addEventListener("click", () => {
+      placeholderBtn.classList.add("is-success");
+      placeholderBtn.textContent = "You're on the list!";
+      placeholderBtn.setAttribute("disabled", "true");
+      placeholderBtn.setAttribute("aria-disabled", "true");
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.classList.add("is-visible");
+      }
+    });
+  }
+
+  App.finishStory.close = closeModal;
 };
 
 /*****************************************************
