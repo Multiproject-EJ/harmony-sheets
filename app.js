@@ -855,11 +855,199 @@ App.filterActiveProducts = function(products) {
     .filter(item => item && !item.draft);
 };
 
+App.supabaseConfigCache = undefined;
+App.supabaseStatusCache = null;
+App.supabaseStatusPromise = null;
+
+App.getSupabaseConfig = function() {
+  if (App.supabaseConfigCache !== undefined) {
+    return App.supabaseConfigCache;
+  }
+
+  const FALLBACK_URL = "https://jvjmmzbibpnlzhzzyncx.supabase.co";
+  const FALLBACK_ANON_KEY =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2am1temJpYnBubHpoenp5bmN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA1MjYyMzksImV4cCI6MjA3NjEwMjIzOX0.JyaY7kJbbZKKBCj_UX6M-t-eKoK9WJibcJjlLZnSvWA";
+
+  const safeGet = (object, ...keys) =>
+    keys.reduce((value, key) => {
+      if (value && typeof value === "object" && key in value) {
+        return value[key];
+      }
+      return undefined;
+    }, object);
+
+  const readFromMeta = name => {
+    if (typeof document === "undefined") return undefined;
+    const element = document.querySelector(`meta[name="${name}"]`);
+    return element?.content;
+  };
+
+  const readConfigValue = ({ direct, env, meta, fallback }) => {
+    const sources = [direct, env, meta, fallback];
+    for (const value of sources) {
+      if (typeof value === "string" && value.trim()) {
+        return value.trim();
+      }
+    }
+    return undefined;
+  };
+
+  const globalConfig =
+    safeGet(globalThis, "HarmonySheetsSupabase") ??
+    safeGet(globalThis, "harmonySheetsSupabase") ??
+    safeGet(globalThis, "SUPABASE_CONFIG") ??
+    safeGet(globalThis, "env") ??
+    safeGet(globalThis, "__env") ??
+    {};
+
+  const url = readConfigValue({
+    direct:
+      safeGet(globalThis, "SUPABASE_URL") ??
+      safeGet(globalThis, "Supabase", "url") ??
+      safeGet(globalThis, "HarmonySheetsSupabase", "url") ??
+      safeGet(globalThis, "__SUPABASE__", "url") ??
+      safeGet(globalConfig, "SUPABASE_URL") ??
+      safeGet(globalConfig, "supabaseUrl"),
+    env:
+      safeGet(globalThis, "process", "env", "SUPABASE_URL") ??
+      safeGet(globalThis, "process", "env", "VITE_SUPABASE_URL") ??
+      safeGet(globalThis, "process", "env", "PUBLIC_SUPABASE_URL"),
+    meta: readFromMeta("supabase-url") ?? readFromMeta("harmony-sheets-supabase-url"),
+    fallback: FALLBACK_URL
+  });
+
+  const anonKey = readConfigValue({
+    direct:
+      safeGet(globalThis, "SUPABASE_ANON_KEY") ??
+      safeGet(globalThis, "Supabase", "anonKey") ??
+      safeGet(globalThis, "HarmonySheetsSupabase", "anonKey") ??
+      safeGet(globalThis, "__SUPABASE__", "anonKey") ??
+      safeGet(globalConfig, "SUPABASE_ANON_KEY") ??
+      safeGet(globalConfig, "supabaseAnonKey"),
+    env:
+      safeGet(globalThis, "process", "env", "SUPABASE_ANON_KEY") ??
+      safeGet(globalThis, "process", "env", "VITE_SUPABASE_ANON_KEY") ??
+      safeGet(globalThis, "process", "env", "PUBLIC_SUPABASE_ANON_KEY"),
+    meta: readFromMeta("supabase-anon-key") ?? readFromMeta("harmony-sheets-supabase-anon-key"),
+    fallback: FALLBACK_ANON_KEY
+  });
+
+  const isValidUrl = typeof url === "string" && url.startsWith("http");
+  const isValidKey = typeof anonKey === "string" && anonKey.length > 20 && !anonKey.includes("YOUR_SUPABASE");
+
+  App.supabaseConfigCache = isValidUrl && isValidKey ? { url, anonKey } : null;
+  return App.supabaseConfigCache;
+};
+
+App.fetchSupabaseProductStatuses = function() {
+  const config = App.getSupabaseConfig();
+  if (!config) {
+    return Promise.resolve(null);
+  }
+
+  if (App.supabaseStatusCache) {
+    return Promise.resolve(App.supabaseStatusCache);
+  }
+
+  if (App.supabaseStatusPromise) {
+    return App.supabaseStatusPromise;
+  }
+
+  const { url, anonKey } = config;
+  const endpointBase = typeof url === "string" ? url.replace(/\/?$/, "") : "";
+  const endpoint = `${endpointBase}/rest/v1/products?select=slug,id,draft`;
+
+  const headers = {
+    apikey: anonKey,
+    Authorization: `Bearer ${anonKey}`,
+    Accept: "application/json",
+    "Content-Type": "application/json"
+  };
+
+  App.supabaseStatusPromise = fetch(endpoint, {
+    headers,
+    mode: "cors",
+    cache: "no-store"
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Supabase responded with ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(rows => {
+      if (!Array.isArray(rows) || !rows.length) {
+        App.supabaseStatusCache = new Map();
+        return App.supabaseStatusCache;
+      }
+
+      const map = new Map();
+      rows.forEach(row => {
+        if (!row || typeof row !== "object") return;
+        const keys = [];
+        if (typeof row.slug === "string" && row.slug.trim()) keys.push(row.slug.trim());
+        if (typeof row.id === "string" && row.id.trim()) keys.push(row.id.trim());
+        if (!keys.length) return;
+        const draft = App.normalizeDraftFlag ? App.normalizeDraftFlag(row.draft) : Boolean(row.draft);
+        keys.forEach(key => {
+          map.set(key, draft);
+        });
+      });
+
+      App.supabaseStatusCache = map;
+      return App.supabaseStatusCache;
+    })
+    .catch(error => {
+      console.warn("[App] Failed to load Supabase product statuses", error);
+      return null;
+    })
+    .finally(() => {
+      App.supabaseStatusPromise = null;
+    });
+
+  return App.supabaseStatusPromise;
+};
+
+App.applySupabaseDraftOverrides = function(products, overrides) {
+  if (!Array.isArray(products) || !overrides) return products;
+
+  products.forEach(product => {
+    if (!product || typeof product !== "object") return;
+    const keys = [];
+    if (typeof product.id === "string" && product.id.trim()) keys.push(product.id.trim());
+    if (typeof product.slug === "string" && product.slug.trim()) keys.push(product.slug.trim());
+
+    for (const key of keys) {
+      if (overrides.has(key)) {
+        product.draft = Boolean(overrides.get(key));
+        break;
+      }
+    }
+  });
+
+  return products;
+};
+
 App.loadProducts = function() {
   if (!App.productsPromise) {
+    const supabasePromise = App.fetchSupabaseProductStatuses();
     App.productsPromise = fetch("products.json")
       .then(res => res.json())
-      .then(data => (Array.isArray(data) ? data.map(App.normalizeProduct) : []))
+      .then(async data => {
+        const normalized = Array.isArray(data) ? data.map(App.normalizeProduct) : [];
+        let overrides = null;
+        try {
+          overrides = await supabasePromise;
+        } catch (error) {
+          console.warn("[App] Supabase overrides failed", error);
+        }
+
+        if (overrides instanceof Map && overrides.size) {
+          App.applySupabaseDraftOverrides(normalized, overrides);
+        }
+
+        return normalized;
+      })
       .catch(err => {
         App.productsPromise = null;
         throw err;
