@@ -23,7 +23,7 @@
   <nav class="main-nav" id="site-menu">
       <div class="nav-item nav-item--browse">
         <a class="nav-link nav-link--browse" href="products.html" aria-haspopup="true" aria-expanded="false">Discover Templates</a>
-        <div class="nav-mega" role="menu" aria-label="Life Harmony categories">
+        <div class="nav-mega" role="menu" aria-label="Life Harmony categories" hidden>
           <div class="nav-mega__content" data-nav-mega-content>
             <p class="nav-mega__placeholder">Loading Life Harmony areas…</p>
           </div>
@@ -31,7 +31,7 @@
       </div>
       <div class="nav-item nav-item--bundles">
         <a class="nav-link nav-link--bundles" href="bundles.html" aria-haspopup="true" aria-expanded="false">Bundles</a>
-        <div class="nav-flyout" role="menu" aria-label="Featured bundles">
+        <div class="nav-flyout" role="menu" aria-label="Featured bundles" hidden>
           <div class="nav-flyout__content" data-nav-bundles>
             <p class="nav-flyout__placeholder">Loading bundles…</p>
           </div>
@@ -65,7 +65,7 @@
     </nav>
 </header>
 
-<div class="cart-overlay" data-cart-overlay></div>
+<div class="cart-overlay" data-cart-overlay hidden></div>
 <aside class="cart-panel" id="cart-panel" aria-hidden="true" aria-labelledby="cart-panel-title" role="dialog" aria-modal="true">
   <div class="cart-panel__header">
     <h2 id="cart-panel-title">Your cart</h2>
@@ -213,11 +213,12 @@
                 <th scope="col" class="admin-table__price">
                   <button type="button" class="admin-table__sort" data-sort="price">Price</button>
                 </th>
+                <th scope="col" class="admin-table__status">Draft</th>
               </tr>
             </thead>
             <tbody data-products-table>
               <tr>
-                <td colspan="4" class="admin-table__empty">Loading products…</td>
+                <td colspan="5" class="admin-table__empty">Loading products…</td>
               </tr>
             </tbody>
           </table>
@@ -264,6 +265,14 @@
               <div class="admin-form__field">
                 <label for="product-tagline">Tagline</label>
                 <input id="product-tagline" name="tagline" type="text">
+              </div>
+              <div class="admin-form__field admin-form__field--checkbox">
+                <span>Status</span>
+                <label class="admin-form__checkbox" for="product-draft">
+                  <input id="product-draft" name="draft" type="checkbox">
+                  <span>Mark as draft (inactive)</span>
+                </label>
+                <p class="admin-form__help">Draft products stay hidden from customer-facing pages.</p>
               </div>
               <div class="admin-form__field">
                 <label for="product-price">Price</label>

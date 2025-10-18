@@ -9,6 +9,7 @@ create table if not exists public.products (
     price_amount numeric(10, 2) not null,
     price_currency text not null default 'USD',
     price_display text not null,
+    draft boolean not null default false,
     hero_image text,
     color_image text,
     color_caption text,
