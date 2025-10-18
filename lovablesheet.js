@@ -20,6 +20,8 @@ let noteTemplate = null;
 let boardSelectEl = null;
 let boardSaveButton = null;
 let boardStatusEl = null;
+let boardMenuEl = null;
+let addNoteButton = null;
 let currentBoardId = DEFAULT_BOARD_ID;
 let defaultBoardSnapshot = [];
 let boardsCache = new Map();
@@ -318,6 +320,54 @@ function createNoteElement(noteData) {
   return element;
 }
 
+function createNewStickyNote() {
+  if (!workspaceEl) return null;
+
+  const nextIndex = workspaceEl.querySelectorAll("[data-note]").length + 1;
+  const defaultLabel = `Note ${nextIndex}`;
+  const noteElement = createNoteElement({
+    color: "sunshine",
+    label: defaultLabel,
+    body: "",
+    placeholder: "Click to capture an idea"
+  });
+
+  if (!noteElement) return null;
+
+  workspaceEl.appendChild(noteElement);
+  setupNote(noteElement);
+
+  window.requestAnimationFrame(() => {
+    const noteWidth = noteElement.offsetWidth;
+    const noteHeight = noteElement.offsetHeight;
+    const boardWidth = workspaceEl.clientWidth;
+    const boardHeight = workspaceEl.clientHeight;
+    const maxX = Math.max(0, boardWidth - noteWidth);
+    const maxY = Math.max(0, boardHeight - noteHeight);
+
+    let targetX = maxX;
+    let targetY = 0;
+
+    if (boardMenuEl) {
+      const workspaceRect = workspaceEl.getBoundingClientRect();
+      const menuRect = boardMenuEl.getBoundingClientRect();
+      const gap = 4;
+      const relativeMenuLeft = menuRect.left - workspaceRect.left;
+      const relativeMenuTop = menuRect.top - workspaceRect.top;
+
+      targetX = clamp(relativeMenuLeft - noteWidth - gap, 0, maxX);
+      targetY = clamp(relativeMenuTop, 0, maxY);
+    }
+
+    setNotePosition(noteElement, targetX, targetY);
+
+    const bodyEl = noteElement.querySelector("[data-note-body]");
+    bodyEl?.focus?.({ preventScroll: true });
+  });
+
+  return noteElement;
+}
+
 function renderBoard(notes = []) {
   if (!workspaceEl) return;
   if (!noteTemplate || !noteTemplate.content?.firstElementChild) {
@@ -597,6 +647,8 @@ function initializeBrainBoard() {
   boardSelectEl = board.querySelector("[data-board-select]");
   boardSaveButton = board.querySelector("[data-board-save]");
   boardStatusEl = board.querySelector("[data-board-status]");
+  boardMenuEl = board.querySelector(".brain-board-menu");
+  addNoteButton = boardMenuEl?.querySelector(".brain-board-menu__add") || null;
 
   const notes = Array.from(workspaceEl.querySelectorAll("[data-note]"));
   notes.forEach((note) => setupNote(note));
@@ -619,6 +671,15 @@ function initializeBrainBoard() {
 
   if (boardSaveButton) {
     boardSaveButton.addEventListener("click", handleSaveBoard);
+  }
+
+  if (addNoteButton) {
+    addNoteButton.addEventListener("click", () => {
+      const newNote = createNewStickyNote();
+      if (newNote) {
+        setBoardStatus("Added a new sticky note to the board.");
+      }
+    });
   }
 
   brainBoardInitialized = true;
