@@ -13,6 +13,11 @@ const BRAIN_BOARD_GROUP_RADIUS = 220;
 const BRAIN_BOARD_COLORS = new Set(["sunshine", "meadow", "ocean", "blossom"]);
 const DEFAULT_BOARD_ID = "default";
 const BOARD_STATUS_CLEAR_DELAY = 4000;
+const BOARD_SCALE_DEFAULT = 1;
+const BOARD_SCALE_MIN = 0.6;
+const BOARD_SCALE_MAX = 1.4;
+const BOARD_SCALE_STEP = 0.1;
+const BOARD_SCALE_TOLERANCE = 0.001;
 
 let brainBoardInitialized = false;
 let workspaceEl = null;
@@ -22,6 +27,9 @@ let boardSaveButton = null;
 let boardStatusEl = null;
 let boardMenuEl = null;
 let addNoteButton = null;
+let zoomOutButton = null;
+let zoomInButton = null;
+let zoomDisplayEl = null;
 let currentBoardId = DEFAULT_BOARD_ID;
 let defaultBoardSnapshot = [];
 let boardsCache = new Map();
@@ -30,6 +38,7 @@ let boardsLoading = false;
 let boardsLoaded = false;
 let isSavingBoard = false;
 let boardStatusTimeoutId = null;
+let boardScale = BOARD_SCALE_DEFAULT;
 
 const sections = {
   loading: document.querySelector("[data-lovablesheet-loading]"),
@@ -129,6 +138,45 @@ function setNoteColor(note, color) {
   updateColorControls(note);
 }
 
+function updateZoomControls() {
+  if (zoomDisplayEl) {
+    const percent = Math.round(boardScale * 100);
+    zoomDisplayEl.textContent = `${percent}%`;
+  }
+
+  if (zoomOutButton) {
+    zoomOutButton.disabled = boardScale <= BOARD_SCALE_MIN + BOARD_SCALE_TOLERANCE;
+  }
+
+  if (zoomInButton) {
+    zoomInButton.disabled = boardScale >= BOARD_SCALE_MAX - BOARD_SCALE_TOLERANCE;
+  }
+}
+
+function applyBoardScale() {
+  if (workspaceEl) {
+    workspaceEl.style.transform = `scale(${boardScale})`;
+  }
+  updateZoomControls();
+}
+
+function setBoardScale(nextScale) {
+  const clamped = clamp(nextScale, BOARD_SCALE_MIN, BOARD_SCALE_MAX);
+  const rounded = Math.round(clamped * 100) / 100;
+  if (Math.abs(rounded - boardScale) <= BOARD_SCALE_TOLERANCE) {
+    boardScale = rounded;
+    applyBoardScale();
+    return;
+  }
+
+  boardScale = rounded;
+  applyBoardScale();
+}
+
+function adjustBoardScale(delta) {
+  setBoardScale(boardScale + delta);
+}
+
 function updateGroupButtonState(note, isActive) {
   const button = note.querySelector("[data-note-group]");
   if (!button) return;
@@ -199,8 +247,8 @@ function setupNote(note) {
       handle.setPointerCapture(pointerId);
 
       const onPointerMove = (moveEvent) => {
-        const deltaX = moveEvent.clientX - originPointer.x;
-        const deltaY = moveEvent.clientY - originPointer.y;
+        const deltaX = (moveEvent.clientX - originPointer.x) / boardScale;
+        const deltaY = (moveEvent.clientY - originPointer.y) / boardScale;
 
         const targetX = clamp(startX + deltaX, 0, maxX);
         const targetY = clamp(startY + deltaY, 0, maxY);
@@ -351,9 +399,10 @@ function createNewStickyNote() {
     if (boardMenuEl) {
       const workspaceRect = workspaceEl.getBoundingClientRect();
       const menuRect = boardMenuEl.getBoundingClientRect();
-      const gap = 4;
-      const relativeMenuLeft = menuRect.left - workspaceRect.left;
-      const relativeMenuTop = menuRect.top - workspaceRect.top;
+      const scale = boardScale || 1;
+      const gap = 4 / scale;
+      const relativeMenuLeft = (menuRect.left - workspaceRect.left) / scale;
+      const relativeMenuTop = (menuRect.top - workspaceRect.top) / scale;
 
       targetX = clamp(relativeMenuLeft - noteWidth - gap, 0, maxX);
       targetY = clamp(relativeMenuTop, 0, maxY);
@@ -649,6 +698,9 @@ function initializeBrainBoard() {
   boardStatusEl = board.querySelector("[data-board-status]");
   boardMenuEl = board.querySelector(".brain-board-menu");
   addNoteButton = boardMenuEl?.querySelector(".brain-board-menu__add") || null;
+  zoomOutButton = boardMenuEl?.querySelector("[data-board-zoom-out]") || null;
+  zoomInButton = boardMenuEl?.querySelector("[data-board-zoom-in]") || null;
+  zoomDisplayEl = boardMenuEl?.querySelector("[data-board-zoom-display]") || null;
 
   const notes = Array.from(workspaceEl.querySelectorAll("[data-note]"));
   notes.forEach((note) => setupNote(note));
@@ -681,6 +733,20 @@ function initializeBrainBoard() {
       }
     });
   }
+
+  if (zoomOutButton) {
+    zoomOutButton.addEventListener("click", () => {
+      adjustBoardScale(-BOARD_SCALE_STEP);
+    });
+  }
+
+  if (zoomInButton) {
+    zoomInButton.addEventListener("click", () => {
+      adjustBoardScale(BOARD_SCALE_STEP);
+    });
+  }
+
+  applyBoardScale();
 
   brainBoardInitialized = true;
 }
