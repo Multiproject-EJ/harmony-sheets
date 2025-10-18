@@ -19,6 +19,27 @@ body.cart-open{overflow:hidden}
 a{color:var(--brand);text-decoration:none}
 img{max-width:100%;display:block}
 
+/* Hidden must not be interactive */
+[hidden],
+[aria-hidden="true"]{
+  display:none!important;
+  pointer-events:none!important;
+}
+
+svg[aria-hidden="true"]{
+  display:block!important;
+  pointer-events:none!important;
+}
+
+span[aria-hidden="true"]{
+  display:inline-flex!important;
+  pointer-events:none!important;
+}
+
+.nav-toggle__icon[aria-hidden="true"]{
+  display:block!important;
+}
+
 .site-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:saturate(150%) blur(14px);z-index:60;min-height:76px}
 .brand{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:1.12rem;letter-spacing:.02em;color:#0f172a;text-decoration:none;transition:color .2s ease}
 .brand__logo{width:48px;height:48px;object-fit:contain;display:block;flex-shrink:0}
