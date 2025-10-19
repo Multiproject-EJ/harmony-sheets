@@ -33,7 +33,8 @@ const els = {
   guideDismissTriggers: document.querySelectorAll('[data-editing-guide-dismiss]'),
   productModal: document.querySelector('[data-product-modal]'),
   productModalDialog: document.querySelector('[data-product-modal-dialog]'),
-  productModalDismissTriggers: document.querySelectorAll('[data-product-modal-dismiss]')
+  productModalDismissTriggers: document.querySelectorAll('[data-product-modal-dismiss]'),
+  formFeedback: document.querySelector('[data-form-feedback]')
 };
 
 const formFields = {
@@ -65,6 +66,8 @@ const formFields = {
 let lastFocusedGuideTrigger = null;
 let lastFocusedEditorTrigger = null;
 let lastFocusedEditorTriggerId = null;
+let pendingSupabaseCheck = null;
+let lastProductAction = null;
 
 function getGuideFocusableElements() {
   if (!els.guideModal) return [];
@@ -273,6 +276,19 @@ function setStatus(message, tone = 'neutral') {
   els.status.textContent = message;
   const indicator = els.statusIndicator;
   indicator.dataset.tone = tone;
+}
+
+function setFormFeedback(message, tone = 'info') {
+  if (!els.formFeedback) return;
+  if (!message) {
+    els.formFeedback.textContent = '';
+    els.formFeedback.hidden = true;
+    delete els.formFeedback.dataset.tone;
+    return;
+  }
+  els.formFeedback.textContent = message;
+  els.formFeedback.hidden = false;
+  els.formFeedback.dataset.tone = tone;
 }
 
 function formatLifeAreas(areas) {
@@ -521,8 +537,15 @@ function renderTable() {
 }
 
 function selectProduct(id, options = {}) {
-  const { openModal: shouldOpenModal = false, focusTarget = null } = options;
+  const {
+    openModal: shouldOpenModal = false,
+    focusTarget = null,
+    resetFeedback = true
+  } = options;
   if (!els.form || !els.formTitle) return;
+  if (resetFeedback) {
+    setFormFeedback(null);
+  }
   const product = state.products.find((item) => item.id === id);
   state.selectedId = product ? product.id : null;
   renderTable();
@@ -532,6 +555,9 @@ function selectProduct(id, options = {}) {
     }
     if (formFields.draft) {
       formFields.draft.checked = false;
+    }
+    if (!resetFeedback) {
+      setFormFeedback(null);
     }
     closeProductModal({ restoreFocus: false });
     return;
@@ -671,10 +697,13 @@ function buildProductPayload() {
 
 function handleFormSubmit(event) {
   event.preventDefault();
+  pendingSupabaseCheck = null;
+  lastProductAction = null;
   const productPayload = buildProductPayload();
 
   if (!productPayload.id) {
     setStatus('Product ID is required to save.', 'danger');
+    setFormFeedback('Product ID is required to save.', 'danger');
     formFields.id.focus();
     return;
   }
@@ -684,6 +713,7 @@ function handleFormSubmit(event) {
 
   if (isNew && idExists) {
     setStatus('A product with that ID already exists. Choose a unique ID.', 'danger');
+    setFormFeedback('A product with that ID already exists. Choose a unique ID.', 'danger');
     formFields.id.focus();
     return;
   }
@@ -701,6 +731,8 @@ function handleFormSubmit(event) {
     state.products.push(newProduct);
     state.selectedId = newProduct.id;
     persist({ message: 'New product saved locally. Download the JSON when you are ready to publish.', tone: 'success' });
+    setFormFeedback('New product saved locally. Checking Supabase for sync…', 'info');
+    lastProductAction = 'create';
     changeReason = 'create';
   } else {
     const index = state.products.findIndex((item) => item.id === state.selectedId);
@@ -716,12 +748,26 @@ function handleFormSubmit(event) {
     state.products.splice(index, 1, merged);
     state.selectedId = merged.id;
     persist({ message: 'Product updated and saved locally.', tone: 'success' });
+    setFormFeedback('Product updated locally. Checking Supabase for sync…', 'info');
+    lastProductAction = 'update';
     changeReason = 'update';
   }
 
   renderTable();
-  selectProduct(state.selectedId);
+  selectProduct(state.selectedId, { resetFeedback: false });
   notifyCatalogSubscribers(changeReason);
+
+  const checkToken = `product-save:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`;
+  pendingSupabaseCheck = checkToken;
+  window.dispatchEvent(
+    new CustomEvent('admin:product-saved', {
+      detail: {
+        id: state.selectedId,
+        reason: changeReason,
+        token: checkToken
+      }
+    })
+  );
 }
 
 function handleTableClick(event) {
@@ -804,6 +850,7 @@ function handleAddProduct() {
   if (els.formTitle) {
     els.formTitle.textContent = 'New product';
   }
+  setFormFeedback('Drafting a new product. Complete the form and save to add it to your workspace.', 'info');
   renderTable();
   setStatus('Drafting a new product. Complete the form and save to add it to the list.', 'info');
   openProductModal({ focusTarget: formFields.id });
@@ -822,6 +869,7 @@ function handleDelete() {
   if (index === -1) return;
   const removed = state.products.splice(index, 1);
   setStatus(`Deleted “${removed[0]?.name || removed[0]?.id}”.`, 'danger');
+  setFormFeedback('Product deleted locally. Save to Supabase when you are ready to publish this change.', 'warning');
   state.selectedId = null;
   persist({ message: null });
   notifyCatalogSubscribers('delete');
@@ -852,6 +900,7 @@ function handleCancel() {
   if (els.formPlaceholder) {
     els.formPlaceholder.hidden = false;
   }
+  setFormFeedback(null);
   closeProductModal();
 }
 
@@ -873,6 +922,7 @@ function handleReset() {
   state.selectedId = null;
   clearStorage();
   setStatus('Reverted to source JSON.', 'info');
+  setFormFeedback(null);
   renderTable();
   notifyCatalogSubscribers('reset');
   if (els.formPlaceholder) {
@@ -920,6 +970,42 @@ function registerEvents() {
   els.form?.addEventListener('submit', handleFormSubmit);
   els.tableContainer?.addEventListener('keydown', handleKeyboardNavigation);
 }
+
+window.addEventListener('admin:supabase-check', (event) => {
+  const detail = event?.detail || {};
+  if (detail.source !== 'product-save') return;
+  if (!detail.token || detail.token !== pendingSupabaseCheck) return;
+  pendingSupabaseCheck = null;
+
+  const baseMessage = lastProductAction === 'create' ? 'New product saved locally.' : 'Product updated locally.';
+  lastProductAction = null;
+
+  if (detail.status === 'error') {
+    const errorText = detail.message ? String(detail.message) : 'Supabase check failed.';
+    setFormFeedback(`${baseMessage} Supabase check failed: ${errorText}`, 'danger');
+    return;
+  }
+
+  if (detail.status === 'success') {
+    const count = typeof detail.count === 'number' ? detail.count : null;
+    const localCount = typeof detail.localCount === 'number' ? detail.localCount : null;
+    if (detail.matchesLocal && count !== null) {
+      setFormFeedback(
+        `${baseMessage} Supabase currently lists ${count} product${count === 1 ? '' : 's'}, matching your workspace.`,
+        'success'
+      );
+      return;
+    }
+    if (count !== null && localCount !== null) {
+      setFormFeedback(
+        `${baseMessage} Supabase currently lists ${count} product${count === 1 ? '' : 's'} while your workspace has ${localCount}. Save to Supabase when you're ready to publish.`,
+        'warning'
+      );
+      return;
+    }
+    setFormFeedback(`${baseMessage} Supabase check completed.`, 'success');
+  }
+});
 
 export function getCatalogSnapshot() {
   return clone(state.products);
