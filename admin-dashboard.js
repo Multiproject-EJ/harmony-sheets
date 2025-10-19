@@ -92,6 +92,24 @@ if (!rootHook) {
     }
   };
 
+  const KPI_ASK_BUTTON_SELECTOR = "[data-kpi-ask-button]";
+  const kpiModalEls = {
+    modal: document.querySelector("[data-kpi-modal]"),
+    dialog: document.querySelector("[data-kpi-modal-dialog]"),
+    question: document.querySelector("[data-kpi-question-field]"),
+    context: document.querySelector("[data-kpi-context-field]"),
+    status: document.querySelector("[data-kpi-status]"),
+    topic: document.querySelector("[data-kpi-topic]"),
+    askButton: document.querySelector("[data-kpi-submit]"),
+    dismissTriggers: Array.from(document.querySelectorAll("[data-kpi-modal-dismiss]"))
+  };
+
+  let kpiModalReady = false;
+  let kpiModalOpen = false;
+  let activeKpiButton = null;
+  let kpiCatalogFallback = null;
+  let kpiCatalogPromise = null;
+
   let supabaseClient = null;
   let authSubscription = null;
   let editorLoaded = false;
@@ -559,8 +577,15 @@ if (!rootHook) {
     catalogSnapshot = cloneCatalog(products);
     if (Array.isArray(catalogSnapshot)) {
       setSupabaseMetrics({ localCount: catalogSnapshot.length });
+      kpiCatalogFallback = cloneCatalog(catalogSnapshot) || catalogSnapshot;
+      if (kpiModalOpen && activeKpiButton) {
+        populateKpiModal(activeKpiButton);
+      }
     } else {
       setSupabaseMetrics({ localCount: null });
+      if (kpiModalOpen) {
+        setKpiStatus("Product context is still loading.", "info");
+      }
     }
 
     if (!supabaseSavePromise) {
@@ -736,6 +761,422 @@ if (!rootHook) {
     }
 
     return { amount, currency, display };
+  }
+
+  function setKpiStatus(message, tone = "neutral") {
+    if (!kpiModalEls.status) return;
+    const statusEl = kpiModalEls.status;
+    const text = typeof message === "string" ? message.trim() : "";
+    statusEl.textContent = text;
+    if (text && tone && tone !== "neutral") {
+      statusEl.dataset.tone = tone;
+    } else {
+      delete statusEl.dataset.tone;
+    }
+  }
+
+  function matchesProductIdentifier(product, identifier) {
+    if (!product || typeof identifier !== "string") return false;
+    const target = identifier.trim().toLowerCase();
+    if (!target) return false;
+    const candidates = [product.id, product.slug, product.name];
+    return candidates.some((value) => typeof value === "string" && value.trim().toLowerCase() === target);
+  }
+
+  function formatShare(value) {
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      return null;
+    }
+    const percent = formatNumber(value * 100, { maximumFractionDigits: 1 });
+    return percent ? `${percent}%` : null;
+  }
+
+  function formatProductContext(product) {
+    if (!product || typeof product !== "object") return null;
+    const lines = [];
+    const name =
+      (typeof product.name === "string" && product.name.trim()) ||
+      (typeof product.title === "string" && product.title.trim()) ||
+      (typeof product.id === "string" && product.id.trim()) ||
+      "Product";
+    lines.push(`Product: ${name}`);
+
+    if (typeof product.tagline === "string" && product.tagline.trim()) {
+      lines.push(`Tagline: ${product.tagline.trim()}`);
+    }
+
+    const priceDetails = extractPriceDetails(product);
+    if (priceDetails?.display) {
+      lines.push(`Price: ${priceDetails.display}`);
+    }
+
+    if (Array.isArray(product.lifeAreas) && product.lifeAreas.length) {
+      lines.push(`Life areas: ${product.lifeAreas.join(", ")}`);
+    }
+
+    if (Array.isArray(product.badges) && product.badges.length) {
+      lines.push(`Badges: ${product.badges.slice(0, 4).join(", ")}`);
+    }
+
+    if (Array.isArray(product.features) && product.features.length) {
+      lines.push(`Key features: ${product.features.slice(0, 3).join("; ")}`);
+    }
+
+    if (Array.isArray(product.included) && product.included.length) {
+      lines.push(`Included: ${product.included.slice(0, 3).join("; ")}`);
+    }
+
+    return lines.join("\n");
+  }
+
+  function formatSalesContext(product) {
+    if (!salesSnapshot || typeof salesSnapshot !== "object") return null;
+    const lines = [];
+
+    if (salesSnapshot.source) {
+      lines.push(`Sales source: ${salesSnapshot.source}`);
+    }
+
+    if (salesSnapshot.updated) {
+      const formatted = formatTimestamp(salesSnapshot.updated);
+      if (formatted) {
+        lines.push(`Last updated: ${formatted.display}`);
+      }
+    }
+
+    if (salesSnapshot.revenueMonth) {
+      const revenueDisplay = formatCurrency(salesSnapshot.revenueMonth.current);
+      const change = describePercentChange(
+        salesSnapshot.revenueMonth.current,
+        salesSnapshot.revenueMonth.previous,
+        { suffix: "vs last month", decimals: 1 }
+      );
+      const revenueParts = [];
+      revenueParts.push(revenueDisplay || "—");
+      if (change?.text) {
+        revenueParts.push(`(${change.text})`);
+      }
+      lines.push(`Monthly revenue: ${revenueParts.join(" ")}`.trim());
+    }
+
+    if (salesSnapshot.ordersMonth) {
+      const ordersDisplay =
+        formatNumber(salesSnapshot.ordersMonth.current, { maximumFractionDigits: 0 }) ||
+        (Number.isFinite(salesSnapshot.ordersMonth.current)
+          ? String(salesSnapshot.ordersMonth.current)
+          : null);
+      const change = describePercentChange(
+        salesSnapshot.ordersMonth.current,
+        salesSnapshot.ordersMonth.previous,
+        { suffix: "vs last month", decimals: 1 }
+      );
+      const orderParts = [];
+      orderParts.push(ordersDisplay ? `${ordersDisplay} orders` : "—");
+      if (change?.text) {
+        orderParts.push(`(${change.text})`);
+      }
+      lines.push(`Monthly orders: ${orderParts.join(" ")}`.trim());
+    }
+
+    if (salesSnapshot.revenueDay) {
+      const dailyDisplay = formatCurrency(salesSnapshot.revenueDay.current);
+      const change = describePercentChange(
+        salesSnapshot.revenueDay.current,
+        salesSnapshot.revenueDay.previous,
+        { suffix: "vs prior day", decimals: 1 }
+      );
+      const dayParts = [];
+      dayParts.push(dailyDisplay || "—");
+      if (change?.text) {
+        dayParts.push(`(${change.text})`);
+      }
+      lines.push(`Daily revenue: ${dayParts.join(" ")}`.trim());
+    }
+
+    const top = salesSnapshot.topProduct;
+    if (top && typeof top.name === "string" && top.name.trim()) {
+      const share = formatShare(top.currentShare);
+      const previousShare = formatShare(top.previousShare);
+      const details = [];
+      if (share) {
+        details.push(`${share} of sales`);
+      }
+      if (previousShare) {
+        details.push(`was ${previousShare}`);
+      }
+      const suffix = details.length ? ` — ${details.join(", ")}` : "";
+      if (product && matchesProductIdentifier(product, top.name)) {
+        lines.push(`This KPI highlights ${top.name}${suffix}.`);
+      } else {
+        lines.push(`Top product spotlight: ${top.name}${suffix}.`);
+      }
+    }
+
+    return lines.join("\n");
+  }
+
+  async function requestFallbackCatalog() {
+    if (Array.isArray(kpiCatalogFallback) && kpiCatalogFallback.length) {
+      return kpiCatalogFallback;
+    }
+    if (kpiCatalogPromise) {
+      return kpiCatalogPromise;
+    }
+
+    kpiCatalogPromise = (async () => {
+      try {
+        const response = await fetch("products.json", { cache: "no-store" });
+        if (!response.ok) {
+          return null;
+        }
+        const data = await response.json();
+        kpiCatalogFallback = Array.isArray(data) ? data : null;
+        return kpiCatalogFallback;
+      } catch (error) {
+        console.warn("[admin] Failed to fetch catalog for Ask AI dialog", error);
+        return null;
+      } finally {
+        kpiCatalogPromise = null;
+      }
+    })();
+
+    return kpiCatalogPromise;
+  }
+
+  async function getCatalogData() {
+    if (Array.isArray(catalogSnapshot) && catalogSnapshot.length) {
+      return catalogSnapshot;
+    }
+
+    if (editorModule && typeof editorModule.getCatalogSnapshot === "function") {
+      try {
+        const snapshot = editorModule.getCatalogSnapshot();
+        if (Array.isArray(snapshot) && snapshot.length) {
+          return snapshot;
+        }
+      } catch (error) {
+        console.warn("[admin] Failed to read catalog for Ask AI dialog", error);
+      }
+    }
+
+    return requestFallbackCatalog();
+  }
+
+  async function buildKpiContext({ productId } = {}) {
+    const sections = [];
+    let product = null;
+
+    try {
+      const products = await getCatalogData();
+      if (Array.isArray(products) && products.length) {
+        if (productId) {
+          const targetId = String(productId).trim().toLowerCase();
+          product =
+            products.find((item) => matchesProductIdentifier(item, targetId)) ||
+            products.find((item) => matchesProductIdentifier(item, productId));
+        }
+
+        if (!product) {
+          product = products[0];
+        }
+      }
+    } catch (error) {
+      console.warn("[admin] Failed to load product context for Ask AI dialog", error);
+    }
+
+    const productContext = formatProductContext(product);
+    if (productContext) {
+      sections.push(productContext);
+    }
+
+    const salesContext = formatSalesContext(product);
+    if (salesContext) {
+      sections.push(salesContext);
+    }
+
+    if (!sections.length) {
+      return "Product context is still loading.";
+    }
+
+    return sections.join("\n\n");
+  }
+
+  function composeAiPrompt(question, context) {
+    const trimmedQuestion = typeof question === "string" ? question.trim() : "";
+    const trimmedContext = typeof context === "string" ? context.trim() : "";
+
+    if (trimmedQuestion && trimmedContext) {
+      return `${trimmedQuestion}\n\nProduct context:\n${trimmedContext}`;
+    }
+    if (trimmedQuestion) {
+      return trimmedQuestion;
+    }
+    if (trimmedContext) {
+      return `Product context:\n${trimmedContext}`;
+    }
+    return "";
+  }
+
+  async function copyPromptToClipboard(prompt) {
+    if (!prompt || typeof prompt !== "string") {
+      return false;
+    }
+    const clipboard = navigator?.clipboard;
+    if (!clipboard || typeof clipboard.writeText !== "function") {
+      return false;
+    }
+    await clipboard.writeText(prompt);
+    return true;
+  }
+
+  async function handleAskAiSubmit() {
+    if (!kpiModalEls.question || !kpiModalEls.context) return;
+    const prompt = composeAiPrompt(kpiModalEls.question.value, kpiModalEls.context.value);
+    if (!prompt.trim()) {
+      setKpiStatus("Add a question or context before asking the AI.", "error");
+      return;
+    }
+
+    try {
+      const copied = await copyPromptToClipboard(prompt);
+      if (copied) {
+        setKpiStatus("Prompt copied to your clipboard. Paste it into ChatGPT to continue.", "success");
+      } else {
+        setKpiStatus("Copy the prompt below and paste it into ChatGPT.", "info");
+      }
+    } catch (error) {
+      console.warn("[admin] Failed to copy Ask AI prompt", error);
+      setKpiStatus("Copy the prompt below and paste it into ChatGPT.", "error");
+    }
+  }
+
+  async function populateKpiModal(button) {
+    if (!kpiModalEls.context) return;
+    const trigger = button || activeKpiButton;
+    const productId = trigger?.dataset?.kpiProductId || null;
+
+    try {
+      const context = await buildKpiContext({ productId });
+      if (!kpiModalOpen || activeKpiButton !== trigger) {
+        return;
+      }
+      if (context && context !== "Product context is still loading.") {
+        setKpiStatus("Product context loaded. You're ready to ask the AI.", "success");
+      } else {
+        setKpiStatus("Product context is still loading.", "info");
+      }
+      kpiModalEls.context.value = context || "Product context is still loading.";
+    } catch (error) {
+      console.warn("[admin] Failed to populate Ask AI dialog", error);
+      if (!kpiModalOpen || activeKpiButton !== trigger) {
+        return;
+      }
+      kpiModalEls.context.value = "We couldn't load product context. Try again in a moment.";
+      setKpiStatus("We couldn't load product context. Try again in a moment.", "error");
+    }
+  }
+
+  function openKpiModal(button) {
+    if (!kpiModalEls.modal || !kpiModalEls.dialog) return;
+    activeKpiButton = button || null;
+    kpiModalOpen = true;
+
+    const topic = button?.dataset?.kpiName || button?.textContent?.trim() || "your KPI";
+    if (kpiModalEls.topic) {
+      kpiModalEls.topic.textContent = topic;
+    }
+
+    let questionText = button?.dataset?.kpiQuestion || "";
+    if (!questionText && button) {
+      const descriptionCell = button.closest("tr")?.querySelector("td:nth-child(2)");
+      if (descriptionCell) {
+        questionText = descriptionCell.textContent?.trim() || "";
+      }
+    }
+    if (kpiModalEls.question) {
+      kpiModalEls.question.value = questionText;
+    }
+
+    if (kpiModalEls.context) {
+      kpiModalEls.context.value = "Preparing product context…";
+    }
+    setKpiStatus("Preparing product details…", "info");
+
+    kpiModalEls.modal.hidden = false;
+    kpiModalEls.modal.classList.add("is-open");
+
+    window.requestAnimationFrame(() => {
+      kpiModalEls.dialog?.focus();
+    });
+
+    populateKpiModal(button);
+  }
+
+  function closeKpiModal() {
+    if (!kpiModalEls.modal) return;
+    kpiModalEls.modal.classList.remove("is-open");
+    kpiModalEls.modal.hidden = true;
+    kpiModalOpen = false;
+
+    if (kpiModalEls.question) {
+      kpiModalEls.question.value = "";
+    }
+    if (kpiModalEls.context) {
+      kpiModalEls.context.value = "";
+    }
+    if (kpiModalEls.topic) {
+      kpiModalEls.topic.textContent = "your KPI";
+    }
+    setKpiStatus("", "neutral");
+
+    const trigger = activeKpiButton;
+    activeKpiButton = null;
+    if (trigger && typeof trigger.focus === "function") {
+      trigger.focus();
+    }
+  }
+
+  function initializeKpiAsk() {
+    if (kpiModalReady) return;
+    const { modal, dialog, askButton, dismissTriggers } = kpiModalEls;
+    if (!modal || !dialog) return;
+
+    const buttons = Array.from(document.querySelectorAll(KPI_ASK_BUTTON_SELECTOR));
+    if (!buttons.length) return;
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        openKpiModal(button);
+      });
+    });
+
+    dismissTriggers.forEach((element) => {
+      element.addEventListener("click", () => {
+        closeKpiModal();
+      });
+    });
+
+    if (askButton) {
+      askButton.addEventListener("click", () => {
+        handleAskAiSubmit();
+      });
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (!kpiModalOpen) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeKpiModal();
+      }
+    });
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeKpiModal();
+      }
+    });
+
+    kpiModalReady = true;
   }
 
   function buildBaseProductRow(product) {
@@ -1286,6 +1727,7 @@ if (!rootHook) {
     }
     showSection("content");
     updateSalesSnapshot(salesSnapshot);
+    initializeKpiAsk();
   }
 
   function requireAdmin(user) {
