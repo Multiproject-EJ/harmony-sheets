@@ -234,6 +234,8 @@ nav,nav *{pointer-events:auto;}
 .brain-board__workspace{--board-note-scale:1;position:relative;height:100%;min-height:1120px;padding:36px;background:linear-gradient(160deg,rgba(226,232,240,.85),rgba(248,250,252,.96));border-radius:32px;border:1px solid rgba(148,163,184,.32);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 34px 68px rgba(15,23,42,.12);overflow:hidden;transform-origin:0 0;transition:transform .24s ease}
 .brain-board__workspace--static{pointer-events:none}
 .brain-board__workspace--static .brain-board__note{cursor:default}
+.brain-board__workspace--flowchart{background:radial-gradient(circle at 16% 18%,rgba(59,130,246,.24),rgba(59,130,246,0) 58%),radial-gradient(circle at 84% 14%,rgba(236,72,153,.22),rgba(236,72,153,0) 60%),radial-gradient(circle at 26% 78%,rgba(45,212,191,.24),rgba(45,212,191,0) 62%),linear-gradient(155deg,#020617 8%,#0f172a 52%,#111827 100%);border:1px solid rgba(56,189,248,.22);box-shadow:inset 0 1px 0 rgba(148,163,184,.1),0 42px 84px rgba(2,6,23,.72)}
+.brain-board__workspace--flowchart::after{background-image:radial-gradient(circle at 20% 22%,rgba(59,130,246,.45),rgba(59,130,246,0) 58%),radial-gradient(circle at 68% 30%,rgba(236,72,153,.32),rgba(236,72,153,0) 60%),radial-gradient(circle at 32% 86%,rgba(45,212,191,.28),rgba(45,212,191,0) 70%);mix-blend-mode:screen;opacity:.65}
 .brain-board__workspace-wrapper{position:relative}
 .brain-board-menu{position:absolute;top:20px;right:20px;display:flex;align-items:flex-start;z-index:5}
 .brain-board-menu__layout{display:flex;align-items:flex-start;gap:12px}
@@ -289,6 +291,37 @@ nav,nav *{pointer-events:auto;}
 .brain-board__note[data-color="meadow"]{--note-bg:#dcfce7;--note-ink:#166534;--note-border:#4ade80;--note-shadow:0 20px 34px rgba(22,163,74,.2)}
 .brain-board__note[data-color="ocean"]{--note-bg:#dbeafe;--note-ink:#1e3a8a;--note-border:#60a5fa;--note-shadow:0 20px 34px rgba(59,130,246,.24)}
 .brain-board__note[data-color="blossom"]{--note-bg:#fde2e7;--note-ink:#9d174d;--note-border:#fb7185;--note-shadow:0 20px 34px rgba(244,114,182,.24)}
+.brain-board--flowchart .brain-board__header h2{color:#e2e8f0}
+.brain-board--flowchart .brain-board__summary{color:color-mix(in srgb,#e2e8f0 78%,rgba(226,232,240,.75))}
+.brain-board--flowchart .brain-board__note{--note-ink:#f8fafc;--note-border:rgba(148,163,184,.32);--note-shadow:0 26px 48px rgba(15,23,42,.45);backdrop-filter:blur(10px);border:1px solid var(--note-border);box-shadow:var(--note-shadow);color:var(--note-ink);background:color-mix(in srgb,var(--note-bg,rgba(30,41,59,.72)) 86%,rgba(15,23,42,.62));text-shadow:0 1px 2px rgba(15,23,42,.4)}
+.brain-board--flowchart .brain-board__note[data-color="sunshine"]{--note-bg:linear-gradient(160deg,rgba(250,204,21,.42),rgba(251,191,36,.08));--note-border:rgba(250,204,21,.45);--note-shadow:0 28px 52px rgba(234,179,8,.24),0 0 34px rgba(250,204,21,.32)}
+.brain-board--flowchart .brain-board__note[data-color="meadow"]{--note-bg:linear-gradient(160deg,rgba(74,222,128,.38),rgba(16,185,129,.08));--note-border:rgba(16,185,129,.48);--note-shadow:0 28px 52px rgba(20,184,166,.26),0 0 34px rgba(16,185,129,.32)}
+.brain-board--flowchart .brain-board__note[data-color="ocean"]{--note-bg:linear-gradient(160deg,rgba(96,165,250,.4),rgba(37,99,235,.1));--note-border:rgba(59,130,246,.52);--note-shadow:0 28px 52px rgba(59,130,246,.28),0 0 34px rgba(96,165,250,.32)}
+.brain-board--flowchart .brain-board__note[data-color="blossom"]{--note-bg:linear-gradient(160deg,rgba(244,114,182,.4),rgba(236,72,153,.08));--note-border:rgba(236,72,153,.52);--note-shadow:0 28px 52px rgba(236,72,153,.28),0 0 34px rgba(244,114,182,.34)}
+.brain-board--flowchart .brain-board__handle{color:color-mix(in srgb,var(--note-ink) 92%,rgba(248,250,252,.82))}
+.brain-board--flowchart .brain-board__label{color:color-mix(in srgb,var(--note-ink) 90%,rgba(148,163,184,.4))}
+.brain-board--flowchart .brain-board__body{background:color-mix(in srgb,var(--note-bg,rgba(30,41,59,.8)) 38%,#0f172a);border:1px solid color-mix(in srgb,var(--note-border,rgba(94,234,212,.4)) 72%,rgba(15,23,42,.55));box-shadow:inset 0 1px 2px rgba(148,163,184,.28),0 0 24px color-mix(in srgb,var(--note-border,rgba(94,234,212,.4)) 32%,rgba(15,23,42,.25));color:color-mix(in srgb,var(--note-ink) 92%,rgba(226,232,240,.85))}
+.brain-board--flowchart .brain-board__body::selection{background:rgba(59,130,246,.35)}
+.brain-board--flowchart .brain-board__note::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 32px color-mix(in srgb,var(--note-border) 45%,rgba(14,116,144,.45));opacity:.25;pointer-events:none}
+.brain-board--flowchart .brain-board__note:focus-within{box-shadow:0 30px 58px color-mix(in srgb,var(--note-border) 38%,rgba(15,23,42,.5)),0 0 38px color-mix(in srgb,var(--note-border) 45%,rgba(96,165,250,.4))}
+.brain-board--flowchart .brain-board-menu{top:26px;right:26px}
+.brain-board-menu--flowchart .brain-board-menu__surface{background:linear-gradient(150deg,rgba(15,23,42,.84),rgba(30,41,59,.68));border:1px solid rgba(56,189,248,.32);box-shadow:0 32px 54px rgba(2,6,23,.7);color:#e2e8f0}
+.brain-board-menu--flowchart .brain-board-menu__surface::before{background:radial-gradient(circle at 30% 30%,rgba(56,189,248,.55),transparent 58%),radial-gradient(circle at 72% 28%,rgba(236,72,153,.4),transparent 62%);opacity:.65}
+.brain-board-menu--flowchart .brain-board-menu__cluster{opacity:1;transform:none;pointer-events:auto}
+.brain-board-menu--flowchart .brain-board-menu__placeholder{border:1.5px dashed rgba(94,234,212,.45);background:linear-gradient(135deg,rgba(15,23,42,.92),rgba(14,165,233,.18));box-shadow:0 12px 24px rgba(14,165,233,.32)}
+.brain-board-menu--flowchart .brain-board-menu__placeholder:is(:hover,:focus-visible){border-color:rgba(45,212,191,.65);background:linear-gradient(135deg,rgba(14,165,233,.4),rgba(15,23,42,.88));box-shadow:0 16px 30px rgba(45,212,191,.38)}
+.brain-board-menu--flowchart .brain-board-menu__screen{background:linear-gradient(145deg,rgba(15,23,42,.9),rgba(30,41,59,.65));border:1px solid rgba(59,130,246,.45);color:#f8fafc;box-shadow:0 18px 32px rgba(30,64,175,.45)}
+.brain-board-menu--flowchart .brain-board-menu__screen:is(:hover,:focus-visible){border-color:rgba(125,211,252,.65);color:#bae6fd;box-shadow:0 20px 36px rgba(56,189,248,.45)}
+.brain-board-menu--flowchart .brain-board-menu__zoom{background:linear-gradient(150deg,rgba(15,23,42,.9),rgba(30,41,59,.68));border:1px solid rgba(148,163,184,.38);box-shadow:0 20px 36px rgba(2,6,23,.7)}
+.brain-board-menu--flowchart .brain-board-menu__zoom-slider{background:linear-gradient(90deg,rgba(59,130,246,.36),rgba(236,72,153,.28));border-color:rgba(56,189,248,.32);box-shadow:inset 0 1px 2px rgba(148,163,184,.32)}
+.brain-board-menu--flowchart .brain-board-menu__zoom-slider::-webkit-slider-thumb{background:radial-gradient(circle at 30% 30%,rgba(148,163,184,.35),transparent 60%),linear-gradient(150deg,#38bdf8,#6366f1);border:1px solid rgba(148,163,184,.55);box-shadow:0 10px 22px rgba(79,70,229,.35)}
+.brain-board-menu--flowchart .brain-board-menu__zoom-slider::-moz-range-thumb{background:radial-gradient(circle at 30% 30%,rgba(148,163,184,.35),transparent 60%),linear-gradient(150deg,#38bdf8,#6366f1);border:1px solid rgba(148,163,184,.55);box-shadow:0 10px 22px rgba(79,70,229,.35)}
+.brain-board-menu--flowchart .brain-board-menu__zoom-display{color:#f8fafc}
+.brain-board-menu--flowchart .brain-board-menu__zoom-button{background:linear-gradient(150deg,rgba(15,23,42,.9),rgba(30,41,59,.66));border:1px solid rgba(148,163,184,.38);color:#e2e8f0;box-shadow:0 18px 32px rgba(2,6,23,.65)}
+.brain-board-menu--flowchart .brain-board-menu__zoom-button:is(:hover,:focus-visible){border-color:rgba(59,130,246,.6);color:#bae6fd;box-shadow:0 22px 38px rgba(37,99,235,.45)}
+.brain-board-menu--flowchart .brain-board-menu__add{background:radial-gradient(circle at 28% 30%,rgba(56,189,248,.42),rgba(59,130,246,0) 58%),linear-gradient(155deg,#1f2937,#4338ca);border:1px solid rgba(99,102,241,.55);box-shadow:0 26px 44px rgba(55,48,163,.58),inset 0 1px 2px rgba(148,163,184,.24);color:#f8fafc}
+.brain-board-menu--flowchart .brain-board-menu__add:is(:hover,:focus-visible){box-shadow:0 32px 52px rgba(79,70,229,.62);border-color:rgba(165,180,252,.68)}
+.brain-board-menu--flowchart .brain-board-menu__add svg{filter:drop-shadow(0 2px 6px rgba(15,23,42,.75))}
 .brain-board__swatch[data-note-color="sunshine"]{background:#fef3c7}
 .brain-board__swatch[data-note-color="meadow"]{background:#bbf7d0}
 .brain-board__swatch[data-note-color="ocean"]{background:#bfdbfe}
