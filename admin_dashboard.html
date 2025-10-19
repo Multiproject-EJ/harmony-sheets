@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <title>Admin Dashboard — Harmony Sheets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    name="admin-sheet-url"
+    content="https://docs.google.com/spreadsheets/d/ADMIN_DASHBOARD_SHEET_ID/edit"
+  >
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -183,6 +187,15 @@
             <button class="btn-ghost admin__btn" type="button" data-supabase-test disabled>
               <span data-supabase-test-label>Run test</span>
             </button>
+            <a
+              class="btn secondary admin__btn"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-admin-sheet-link
+            >
+              Open Google Sheet
+            </a>
           </div>
         </div>
       </div>
