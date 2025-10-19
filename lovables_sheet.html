@@ -108,13 +108,13 @@
         <p class="lovablesheet-workflow__description">Use the brain board to rough out initiatives, quick wins, and backlog ideas. Drag notes anywhere, recolor them, and rally similar ideas with a single move.</p>
       </header>
 
-      <section class="brain-board" data-brain-board aria-labelledby="brain-board-title">
+      <section class="brain-board" data-brain-board data-sticky-board="brain" aria-labelledby="brain-board-title">
         <div class="brain-board__header">
           <h2 id="brain-board-title">Brain board</h2>
           <p class="brain-board__summary">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
         </div>
         <div class="brain-board__workspace-wrapper">
-          <div class="brain-board__workspace" data-brain-board-workspace role="list">
+          <div class="brain-board__workspace" data-board-workspace role="list">
             <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-x="32" data-y="40">
               <div class="brain-board__handle" data-note-handle>
                 <span class="brain-board__label" data-note-label>Quick capture</span>
@@ -234,7 +234,7 @@
                 </button>
               </div>
             </div>
-            <button class="brain-board-menu__add" type="button">
+            <button class="brain-board-menu__add" type="button" data-board-add>
               <span class="sr-only">Add new sticky note</span>
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
