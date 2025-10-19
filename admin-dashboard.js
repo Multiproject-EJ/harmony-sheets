@@ -46,6 +46,19 @@ if (!rootHook) {
     saveButtonLabel: document.querySelector("[data-supabase-save-label]")
   };
 
+  const salesEls = {
+    source: document.querySelector("[data-sales-source]"),
+    updated: document.querySelector("[data-sales-updated]"),
+    revenueMonth: document.querySelector("[data-sales-revenue-month]"),
+    revenueMonthChange: document.querySelector("[data-sales-revenue-month-change]"),
+    ordersMonth: document.querySelector("[data-sales-orders-month]"),
+    ordersMonthChange: document.querySelector("[data-sales-orders-month-change]"),
+    revenueDay: document.querySelector("[data-sales-revenue-day]"),
+    revenueDayChange: document.querySelector("[data-sales-revenue-day-change]"),
+    topProduct: document.querySelector("[data-sales-top-product]"),
+    topShare: document.querySelector("[data-sales-top-share]")
+  };
+
   const supabaseTestDefaults = {
     label:
       supabaseTestEls.buttonLabel?.textContent?.trim() ||
@@ -64,6 +77,19 @@ if (!rootHook) {
     count: null,
     latest: null,
     localCount: null
+  };
+
+  const salesSnapshot = {
+    source: "Stripe Live",
+    updated: "2024-03-23T09:45:00-04:00",
+    revenueMonth: { current: 18420, previous: 16480 },
+    ordersMonth: { current: 312, previous: 284 },
+    revenueDay: { current: 620, previous: 680 },
+    topProduct: {
+      name: "Harmony Life Planner",
+      currentShare: 0.27,
+      previousShare: 0.21
+    }
   };
 
   let supabaseClient = null;
@@ -259,6 +285,202 @@ if (!rootHook) {
     }
 
     return `${name} — ${changeType}`;
+  }
+
+  function formatNumber(value, options = {}) {
+    if (typeof value !== "number" || !Number.isFinite(value)) return null;
+    const { minimumFractionDigits = 0, maximumFractionDigits = 0 } = options;
+    try {
+      return new Intl.NumberFormat(undefined, {
+        minimumFractionDigits,
+        maximumFractionDigits
+      }).format(value);
+    } catch (error) {
+      console.warn("[admin] Number formatting failed", error);
+      try {
+        return value.toFixed(Math.min(Math.max(maximumFractionDigits, minimumFractionDigits), 3));
+      } catch (fallbackError) {
+        console.warn("[admin] Number formatting fallback failed", fallbackError);
+      }
+    }
+    return String(value);
+  }
+
+  function formatCurrency(value, options = {}) {
+    if (typeof value !== "number" || !Number.isFinite(value)) return null;
+    const fractionDigits = value % 1 === 0 ? 0 : 2;
+    const baseOptions = {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+      ...options
+    };
+    try {
+      return new Intl.NumberFormat(undefined, baseOptions).format(value);
+    } catch (error) {
+      console.warn("[admin] Currency formatting failed", error);
+      const digits = baseOptions.maximumFractionDigits ?? fractionDigits;
+      return `$${value.toFixed(digits)}`;
+    }
+  }
+
+  function joinWithSuffix(value, suffix) {
+    if (!suffix) return value;
+    const trimmed = typeof value === "string" ? value.trim() : value;
+    if (!trimmed) return suffix;
+    return `${trimmed} ${suffix}`.trim();
+  }
+
+  function describePercentChange(current, previous, { suffix = "vs prior period", decimals = 0 } = {}) {
+    if (!Number.isFinite(current) || !Number.isFinite(previous)) {
+      return { text: "—", trend: "neutral" };
+    }
+    if (previous === 0) {
+      if (current === 0) {
+        return { text: joinWithSuffix("No change", suffix), trend: "flat" };
+      }
+      return { text: joinWithSuffix("New", suffix), trend: "new" };
+    }
+    const change = (current - previous) / Math.abs(previous);
+    if (!Number.isFinite(change)) {
+      return { text: "—", trend: "neutral" };
+    }
+    if (Math.abs(change) < 0.0005) {
+      return { text: joinWithSuffix("No change", suffix), trend: "flat" };
+    }
+    const magnitude = formatNumber(Math.abs(change * 100), {
+      maximumFractionDigits: decimals
+    });
+    if (!magnitude) {
+      return { text: "—", trend: "neutral" };
+    }
+    const prefix = change > 0 ? "+" : "−";
+    return {
+      text: joinWithSuffix(`${prefix}${magnitude}%`, suffix),
+      trend: change > 0 ? "up" : "down"
+    };
+  }
+
+  function describePointChange(current, previous, { suffix = "vs prior period", decimals = 1 } = {}) {
+    if (!Number.isFinite(current) || !Number.isFinite(previous)) {
+      return { text: "—", trend: "neutral" };
+    }
+    const change = (current - previous) * 100;
+    if (!Number.isFinite(change)) {
+      return { text: "—", trend: "neutral" };
+    }
+    if (Math.abs(change) < 0.05) {
+      return { text: joinWithSuffix("Flat", suffix), trend: "flat" };
+    }
+    const magnitude = formatNumber(Math.abs(change), {
+      maximumFractionDigits: decimals
+    });
+    if (!magnitude) {
+      return { text: "—", trend: "neutral" };
+    }
+    const prefix = change > 0 ? "+" : "−";
+    return {
+      text: joinWithSuffix(`${prefix}${magnitude} pts`, suffix),
+      trend: change > 0 ? "up" : "down"
+    };
+  }
+
+  function applyChange(element, descriptor) {
+    if (!element) return;
+    const text = descriptor?.text && String(descriptor.text).trim();
+    element.textContent = text || "—";
+    const trend = descriptor?.trend || "neutral";
+    element.dataset.trend = trend;
+  }
+
+  function updateSalesSnapshot(snapshot = {}) {
+    if (!snapshot || typeof snapshot !== "object") return;
+    const hasSalesEls = Object.values(salesEls || {}).some(Boolean);
+    if (!hasSalesEls) return;
+
+    if (salesEls.source) {
+      salesEls.source.textContent = snapshot.source || "—";
+    }
+
+    if (salesEls.updated) {
+      if (snapshot.updated) {
+        const formatted = formatTimestamp(snapshot.updated);
+        if (formatted) {
+          salesEls.updated.dateTime = formatted.iso;
+          salesEls.updated.setAttribute("datetime", formatted.iso);
+          const relative = formatRelativeTime(formatted.date);
+          const parts = [formatted.display];
+          if (relative) {
+            parts.push(`(${relative})`);
+          }
+          salesEls.updated.textContent = parts.join(" ");
+        } else {
+          salesEls.updated.dateTime = "";
+          salesEls.updated.removeAttribute("datetime");
+          salesEls.updated.textContent = snapshot.updated;
+        }
+      } else {
+        salesEls.updated.dateTime = "";
+        salesEls.updated.removeAttribute("datetime");
+        salesEls.updated.textContent = "—";
+      }
+    }
+
+    if (salesEls.revenueMonth) {
+      const revenue = formatCurrency(snapshot?.revenueMonth?.current);
+      salesEls.revenueMonth.textContent = revenue || "—";
+      applyChange(
+        salesEls.revenueMonthChange,
+        describePercentChange(snapshot?.revenueMonth?.current, snapshot?.revenueMonth?.previous, {
+          suffix: "vs prior 30 days",
+          decimals: 1
+        })
+      );
+    }
+
+    if (salesEls.ordersMonth) {
+      const orders = formatNumber(snapshot?.ordersMonth?.current, {
+        maximumFractionDigits: 0
+      });
+      salesEls.ordersMonth.textContent = orders ? `${orders} orders` : "—";
+      applyChange(
+        salesEls.ordersMonthChange,
+        describePercentChange(snapshot?.ordersMonth?.current, snapshot?.ordersMonth?.previous, {
+          suffix: "vs prior 30 days",
+          decimals: 1
+        })
+      );
+    }
+
+    if (salesEls.revenueDay) {
+      const dayRevenue = formatCurrency(snapshot?.revenueDay?.current);
+      salesEls.revenueDay.textContent = dayRevenue || "—";
+      applyChange(
+        salesEls.revenueDayChange,
+        describePercentChange(snapshot?.revenueDay?.current, snapshot?.revenueDay?.previous, {
+          suffix: "vs prior 24 hours",
+          decimals: 1
+        })
+      );
+    }
+
+    if (salesEls.topProduct) {
+      const top = snapshot?.topProduct || {};
+      const name = top.name || "—";
+      const share =
+        typeof top.currentShare === "number" && Number.isFinite(top.currentShare)
+          ? formatNumber(top.currentShare * 100, { maximumFractionDigits: 1 })
+          : null;
+      salesEls.topProduct.textContent = share ? `${name} — ${share}% of revenue` : name;
+      applyChange(
+        salesEls.topShare,
+        describePointChange(top.currentShare, top.previousShare, {
+          suffix: "vs prior 30 days",
+          decimals: 1
+        })
+      );
+    }
   }
 
   function setSupabaseUpdated(timestamp) {
@@ -1063,6 +1285,7 @@ if (!rootHook) {
       contentSection.hidden = false;
     }
     showSection("content");
+    updateSalesSnapshot(salesSnapshot);
   }
 
   function requireAdmin(user) {

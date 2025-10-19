@@ -13,6 +13,7 @@ const subscribers = new Set();
 const els = {
   status: document.querySelector('[data-status]'),
   statusIndicator: document.querySelector('[data-status-indicator]'),
+  workspaceLabel: document.querySelector('[data-workspace-label]'),
   tableBody: document.querySelector('[data-products-table]'),
   tableMeta: document.querySelector('[data-table-meta]'),
   tableContainer: document.querySelector('[data-table-container]'),
@@ -271,6 +272,14 @@ function safeParse(json) {
   }
 }
 
+function setWorkspaceSource(label) {
+  if (!els.workspaceLabel) return;
+  const text = typeof label === 'string' && label.trim().length ? label.trim() : 'Catalog workspace';
+  if (els.workspaceLabel.textContent !== text) {
+    els.workspaceLabel.textContent = text;
+  }
+}
+
 function setStatus(message, tone = 'neutral') {
   if (!els.status || !els.statusIndicator) return;
   els.status.textContent = message;
@@ -381,6 +390,7 @@ function persist(options = {}) {
   if (!window.localStorage) return;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.products));
   const { message = 'All changes saved locally.', tone = 'success' } = options || {};
+  setWorkspaceSource('Local workspace');
   if (message) {
     setStatus(message, tone);
   }
@@ -401,9 +411,11 @@ async function loadProducts() {
     const stored = loadFromStorage();
     if (stored && Array.isArray(stored)) {
       state.products = stored.map(normalizeProduct);
+      setWorkspaceSource('Local workspace');
       setStatus('Loaded from local workspace.');
     } else {
       state.products = clone(baseline);
+      setWorkspaceSource('Source JSON');
       setStatus('Loaded from source JSON.');
     }
     renderTable();
@@ -411,6 +423,7 @@ async function loadProducts() {
   } catch (error) {
     console.error(error);
     setStatus('Unable to load products. Refresh to try again.', 'danger');
+    setWorkspaceSource('Workspace unavailable');
     renderErrorRow('Could not load products.');
   }
 }
@@ -921,6 +934,7 @@ function handleReset() {
   state.products = clone(state.baseline);
   state.selectedId = null;
   clearStorage();
+  setWorkspaceSource('Source JSON');
   setStatus('Reverted to source JSON.', 'info');
   setFormFeedback(null);
   renderTable();
