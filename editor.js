@@ -28,6 +28,7 @@ const els = {
   formPlaceholder: document.querySelector('[data-editor-empty]'),
   deleteButton: document.querySelector('[data-delete]'),
   cancelButton: document.querySelector('[data-cancel]'),
+  viewButton: document.querySelector('[data-view-product]'),
   guideButton: document.querySelector('[data-editing-guide-open]'),
   guideModal: document.querySelector('[data-editing-guide-modal]'),
   guideDialog: document.querySelector('[data-editing-guide-dialog]'),
@@ -69,6 +70,7 @@ let lastFocusedEditorTrigger = null;
 let lastFocusedEditorTriggerId = null;
 let pendingSupabaseCheck = null;
 let lastProductAction = null;
+let currentPreviewUrl = null;
 
 function getGuideFocusableElements() {
   if (!els.guideModal) return [];
@@ -324,6 +326,28 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function getProductPreviewUrl(product) {
+  if (!product || typeof product !== 'object') return null;
+  const id = typeof product.id === 'string' ? product.id.trim() : '';
+  if (!id) return null;
+  return `product.html?id=${encodeURIComponent(id)}`;
+}
+
+function updateViewProductButton(product) {
+  if (!els.viewButton) return;
+  const url = getProductPreviewUrl(product);
+  currentPreviewUrl = url;
+  if (url) {
+    els.viewButton.disabled = false;
+    els.viewButton.removeAttribute('aria-disabled');
+    els.viewButton.title = 'Opens the product page in a new tab.';
+  } else {
+    els.viewButton.disabled = true;
+    els.viewButton.setAttribute('aria-disabled', 'true');
+    els.viewButton.title = 'Select a product with an ID to preview.';
+  }
+}
+
 function notifyCatalogSubscribers(reason = 'update') {
   if (!subscribers.size) return;
   const payload = {
@@ -563,6 +587,7 @@ function selectProduct(id, options = {}) {
   state.selectedId = product ? product.id : null;
   renderTable();
   if (!product) {
+    updateViewProductButton(null);
     if (els.formPlaceholder) {
       els.formPlaceholder.hidden = false;
     }
@@ -614,6 +639,8 @@ function selectProduct(id, options = {}) {
   formFields.demoPoster.value = product.demoPoster || '';
   formFields.socialStars.value = product.socialProof?.stars || '';
   formFields.socialQuote.value = product.socialProof?.quote || '';
+
+  updateViewProductButton(product);
 
   if (shouldOpenModal) {
     openProductModal({ focusTarget });
@@ -863,6 +890,7 @@ function handleAddProduct() {
   if (els.formTitle) {
     els.formTitle.textContent = 'New product';
   }
+  updateViewProductButton(null);
   setFormFeedback('Drafting a new product. Complete the form and save to add it to your workspace.', 'info');
   renderTable();
   setStatus('Drafting a new product. Complete the form and save to add it to the list.', 'info');
@@ -875,6 +903,7 @@ function handleDelete() {
     if (els.formPlaceholder) {
       els.formPlaceholder.hidden = false;
     }
+    updateViewProductButton(null);
     closeProductModal({ restoreFocus: false });
     return;
   }
@@ -884,6 +913,7 @@ function handleDelete() {
   setStatus(`Deleted “${removed[0]?.name || removed[0]?.id}”.`, 'danger');
   setFormFeedback('Product deleted locally. Save to Supabase when you are ready to publish this change.', 'warning');
   state.selectedId = null;
+  updateViewProductButton(null);
   persist({ message: null });
   notifyCatalogSubscribers('delete');
   renderTable();
@@ -909,6 +939,7 @@ function handleCancel() {
     formFields.draft.checked = false;
   }
   state.selectedId = null;
+  updateViewProductButton(null);
   renderTable();
   if (els.formPlaceholder) {
     els.formPlaceholder.hidden = false;
@@ -948,6 +979,7 @@ function handleReset() {
   if (formFields.draft) {
     formFields.draft.checked = false;
   }
+  updateViewProductButton(null);
   closeProductModal({ restoreFocus: false });
 }
 
@@ -981,8 +1013,22 @@ function registerEvents() {
   els.resetButton?.addEventListener('click', handleReset);
   els.deleteButton?.addEventListener('click', handleDelete);
   els.cancelButton?.addEventListener('click', handleCancel);
+  els.viewButton?.addEventListener('click', handleViewProduct);
   els.form?.addEventListener('submit', handleFormSubmit);
   els.tableContainer?.addEventListener('keydown', handleKeyboardNavigation);
+}
+
+function handleViewProduct(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  if (!currentPreviewUrl) return;
+  const previewWindow = window.open(currentPreviewUrl, '_blank', 'noopener');
+  if (previewWindow) {
+    previewWindow.opener = null;
+    return;
+  }
+  setStatus('Unable to open preview. Allow pop-ups and try again.', 'warning');
 }
 
 window.addEventListener('admin:supabase-check', (event) => {
@@ -1043,4 +1089,5 @@ export function subscribeToCatalog(callback) {
 setupProductModal();
 setupGuideModal();
 registerEvents();
+updateViewProductButton(null);
 loadProducts();
