@@ -835,7 +835,7 @@ if (!rootHook) {
         await syncCatalogWithSupabase(Array.isArray(snapshot) ? snapshot : []);
         setSupabaseUpdated(new Date());
         updateSupabaseStatus("Supabase updated. Verifying sync…", "success");
-        await runSupabaseTest({ initial: true });
+        await runSupabaseTest({ initial: true, source: "save-to-supabase" });
       } catch (error) {
         console.error("[admin] Supabase save failed", error);
         updateSupabaseStatus(`Supabase save failed: ${formatError(error)}`, "danger");
@@ -852,14 +852,35 @@ if (!rootHook) {
   }
 
   function runSupabaseTest(options = {}) {
-    if (!rootHook || !supabaseClient) {
+    if (!rootHook) {
       return Promise.resolve();
     }
-    if (supabaseTestPromise) {
-      return supabaseTestPromise;
+
+    const { initial = false, source = "manual", token = null } = options;
+
+    if (!supabaseClient) {
+      if (source === "product-save" && token) {
+        window.dispatchEvent(
+          new CustomEvent("admin:supabase-check", {
+            detail: {
+              status: "error",
+              message: "Supabase client is not ready.",
+              source,
+              token
+            }
+          })
+        );
+      }
+      return Promise.resolve();
     }
 
-    const { initial = false } = options;
+    if (supabaseTestPromise) {
+      return supabaseTestPromise.then(
+        () => runSupabaseTest(options),
+        () => runSupabaseTest(options)
+      );
+    }
+
     const loadingLabel = initial ? "Checking…" : "Testing…";
     const loadingMessage = initial
       ? "Checking Supabase for recent product updates…"
@@ -880,6 +901,11 @@ if (!rootHook) {
             ? "No product records found."
             : "No change details available.");
 
+        const matchesLocal =
+          typeof overview.count === "number" &&
+          typeof localCount === "number" &&
+          overview.count === localCount;
+
         setSupabaseMetrics({
           count: overview.count,
           latest: latestDescription,
@@ -898,7 +924,7 @@ if (!rootHook) {
         }
 
         if (typeof overview.count === "number" && typeof localCount === "number") {
-          if (overview.count === localCount) {
+          if (matchesLocal) {
             statusMessage += ` Product count matches the local catalog (${localCount}).`;
           } else {
             const difference = overview.count - localCount;
@@ -918,11 +944,38 @@ if (!rootHook) {
 
         updateSupabaseStatus(statusMessage, "success");
         setSupabaseUpdated(new Date());
+
+        window.dispatchEvent(
+          new CustomEvent("admin:supabase-check", {
+            detail: {
+              status: "success",
+              message: statusMessage,
+              source,
+              token,
+              count: typeof overview.count === "number" ? overview.count : null,
+              localCount: typeof localCount === "number" ? localCount : null,
+              matchesLocal,
+              latest: latestDescription
+            }
+          })
+        );
       } catch (error) {
         console.error("[admin] Supabase test failed", error);
-        updateSupabaseStatus(`Supabase test failed: ${formatError(error)}`, "danger");
+        const formattedError = formatError(error);
+        updateSupabaseStatus(`Supabase test failed: ${formattedError}`, "danger");
         setSupabaseMetrics({ count: null, latest: null });
         setSupabaseUpdated(new Date());
+
+        window.dispatchEvent(
+          new CustomEvent("admin:supabase-check", {
+            detail: {
+              status: "error",
+              message: formattedError,
+              source,
+              token
+            }
+          })
+        );
       } finally {
         setSupabaseButtonState({ disabled: false, label: supabaseTestDefaults.label });
       }
@@ -938,12 +991,17 @@ if (!rootHook) {
     if (!supabaseTestEls.button) return;
 
     supabaseTestEls.button.addEventListener("click", () => {
-      runSupabaseTest();
+      runSupabaseTest({ source: "manual" });
     });
 
     supabaseTesterReady = true;
     setSupabaseButtonState({ disabled: false, label: supabaseTestDefaults.label });
   }
+
+  window.addEventListener("admin:product-saved", (event) => {
+    const detail = event?.detail || {};
+    runSupabaseTest({ source: "product-save", token: detail.token || null });
+  });
 
   function showSection(target) {
     Object.entries(sections).forEach(([key, element]) => {
@@ -1045,7 +1103,7 @@ if (!rootHook) {
         initializeSupabaseTester();
         initializeSupabaseSaver();
         await loadEditorModule();
-        await runSupabaseTest({ initial: true });
+        await runSupabaseTest({ initial: true, source: "initial" });
       }
     } catch (error) {
       console.error("[admin] Failed to verify session", error);
@@ -1065,7 +1123,7 @@ if (!rootHook) {
       initializeSupabaseTester();
       initializeSupabaseSaver();
       await loadEditorModule();
-      await runSupabaseTest({ initial: true });
+      await runSupabaseTest({ initial: true, source: "initial" });
     });
     authSubscription = listener;
   }
