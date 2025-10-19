@@ -809,7 +809,7 @@ App.normalizeDraftFlag = function(value) {
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
     if (!normalized) return false;
-    return ["true", "1", "yes", "y", "draft", "inactive", "disabled", "hidden", "archived"].includes(normalized);
+    return ["true", "1", "yes", "y", "t", "on", "draft", "inactive", "disabled", "hidden", "archived"].includes(normalized);
   }
   if (typeof value === "number") {
     if (!Number.isFinite(value)) return false;
@@ -842,16 +842,14 @@ App.normalizeProduct = function(product) {
 
 App.isProductActive = function(product) {
   if (!product || typeof product !== "object") return false;
-  const normalized = Object.prototype.hasOwnProperty.call(product, "draft")
-    ? product
-    : App.normalizeProduct(product);
+  const normalized = App.normalizeProduct(product);
   return normalized ? !normalized.draft : false;
 };
 
 App.filterActiveProducts = function(products) {
   if (!Array.isArray(products)) return [];
   return products
-    .map(item => (Object.prototype.hasOwnProperty.call(item || {}, "draft") ? item : App.normalizeProduct(item)))
+    .map(item => App.normalizeProduct(item))
     .filter(item => item && !item.draft);
 };
 
@@ -1021,7 +1019,8 @@ App.applySupabaseDraftOverrides = function(products, overrides) {
 
     for (const key of keys) {
       if (overrides.has(key)) {
-        product.draft = Boolean(overrides.get(key));
+        const override = overrides.get(key);
+        product.draft = App.normalizeDraftFlag ? App.normalizeDraftFlag(override) : Boolean(override);
         break;
       }
     }
