@@ -46,6 +46,37 @@ if (!rootHook) {
     saveButtonLabel: document.querySelector("[data-supabase-save-label]")
   };
 
+  const adminSheetLink = document.querySelector("[data-admin-sheet-link]");
+
+  if (adminSheetLink) {
+    const metaSheetUrl = document
+      .querySelector('meta[name="admin-sheet-url"]')
+      ?.getAttribute("content");
+
+    const globalSheetUrl =
+      (typeof globalThis === "object" &&
+        globalThis &&
+        ((globalThis.HarmonySheetsAdmin &&
+          globalThis.HarmonySheetsAdmin.sheetUrl) ||
+          globalThis.ADMIN_SHEET_URL ||
+          (globalThis.HarmonySheets &&
+            globalThis.HarmonySheets.adminSheetUrl))) ||
+      null;
+
+    const resolvedSheetUrl = [globalSheetUrl, metaSheetUrl]
+      .filter((value) => typeof value === "string" && value.trim().length > 0)
+      .map((value) => value.trim())
+      .find((value) => /^https?:\/\//i.test(value));
+
+    if (resolvedSheetUrl) {
+      adminSheetLink.href = resolvedSheetUrl;
+    } else {
+      adminSheetLink.removeAttribute("href");
+      adminSheetLink.setAttribute("tabindex", "-1");
+      adminSheetLink.setAttribute("aria-disabled", "true");
+    }
+  }
+
   const salesEls = {
     source: document.querySelector("[data-sales-source]"),
     updated: document.querySelector("[data-sales-updated]"),
