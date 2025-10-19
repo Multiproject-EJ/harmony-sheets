@@ -1266,36 +1266,122 @@ App.fetchSupabaseProducts = function() {
   return App.supabaseProductsPromise;
 };
 
+App.PREVIEW_STORAGE_KEY = "hs-admin-preview-products-v1";
+App.PREVIEW_TTL_MS = 1000 * 60 * 60 * 12;
+App.previewProductsMeta = null;
+
+App.readPreviewProducts = function() {
+  if (typeof window === "undefined" || !("localStorage" in window)) {
+    return null;
+  }
+
+  let raw = null;
+  try {
+    raw = window.localStorage.getItem(App.PREVIEW_STORAGE_KEY);
+  } catch (error) {
+    console.warn("[App] Unable to access preview storage", error);
+    return null;
+  }
+
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    const products = Array.isArray(parsed.products) ? parsed.products : null;
+    if (!products || !products.length) return null;
+
+    let expiresAt = null;
+    if (parsed.expiresAt) {
+      const numeric = typeof parsed.expiresAt === "number" ? parsed.expiresAt : Date.parse(parsed.expiresAt);
+      if (Number.isFinite(numeric)) {
+        expiresAt = numeric;
+      }
+    }
+
+    if (!Number.isFinite(expiresAt) && parsed.updatedAt) {
+      const updatedAt = Date.parse(parsed.updatedAt);
+      if (Number.isFinite(updatedAt)) {
+        expiresAt = updatedAt + App.PREVIEW_TTL_MS;
+      }
+    }
+
+    if (Number.isFinite(expiresAt) && expiresAt < Date.now()) {
+      window.localStorage.removeItem(App.PREVIEW_STORAGE_KEY);
+      return null;
+    }
+
+    return {
+      products,
+      meta: {
+        updatedAt: parsed.updatedAt || null,
+        expiresAt: Number.isFinite(expiresAt) ? expiresAt : null,
+        version: parsed.version || null,
+        source: "preview",
+        count: products.length
+      }
+    };
+  } catch (error) {
+    console.warn("[App] Failed to parse preview products", error);
+    try {
+      window.localStorage.removeItem(App.PREVIEW_STORAGE_KEY);
+    } catch (_) {
+      /* noop */
+    }
+    return null;
+  }
+};
+
+App.clearPreviewProducts = function() {
+  if (typeof window === "undefined" || !("localStorage" in window)) {
+    return false;
+  }
+  try {
+    window.localStorage.removeItem(App.PREVIEW_STORAGE_KEY);
+    App.previewProductsMeta = null;
+    return true;
+  } catch (error) {
+    console.warn("[App] Failed to clear preview products", error);
+    return false;
+  }
+};
+
 App.loadProducts = function() {
   if (!App.productsPromise) {
-    App.productsPromise = App.fetchSupabaseProducts().then(async products => {
-      if (Array.isArray(products)) {
-        return products;
+    App.productsPromise = (async () => {
+      const preview = App.readPreviewProducts();
+      if (preview) {
+        App.previewProductsMeta = preview.meta;
+        console.info("[App] Using admin preview products for storefront rendering.", preview.meta);
+        return preview.products.map(App.normalizeProduct);
+      }
+
+      App.previewProductsMeta = null;
+      const supabaseProducts = await App.fetchSupabaseProducts();
+      if (Array.isArray(supabaseProducts)) {
+        return supabaseProducts;
       }
 
       const supabasePromise = App.fetchSupabaseProductStatuses();
-      return fetch("products.json")
-        .then(res => res.json())
-        .then(async data => {
-          const normalized = Array.isArray(data) ? data.map(App.normalizeProduct) : [];
-          let overrides = null;
-          try {
-            overrides = await supabasePromise;
-          } catch (error) {
-            console.warn("[App] Supabase overrides failed", error);
-          }
+      const response = await fetch("products.json");
+      const data = await response.json();
+      const normalized = Array.isArray(data) ? data.map(App.normalizeProduct) : [];
+      let overrides = null;
+      try {
+        overrides = await supabasePromise;
+      } catch (error) {
+        console.warn("[App] Supabase overrides failed", error);
+      }
 
-          if (overrides instanceof Map && overrides.size) {
-            App.applySupabaseDraftOverrides(normalized, overrides);
-          }
+      if (overrides instanceof Map && overrides.size) {
+        App.applySupabaseDraftOverrides(normalized, overrides);
+      }
 
-          return normalized;
-        });
-    })
-      .catch(err => {
-        App.productsPromise = null;
-        throw err;
-      });
+      return normalized;
+    })().catch(err => {
+      App.productsPromise = null;
+      throw err;
+    });
   }
   return App.productsPromise;
 };
@@ -3843,6 +3929,7 @@ App.renderProductDebugPanel = function() {
       const sections = [
         createSection("Location", entry.location, { showWhenEmpty: true }),
         createSection("Supabase config", entry.supabaseConfig, { showWhenEmpty: true }),
+        createSection("Preview products", entry.previewProducts, { showWhenEmpty: true }),
         createSection("Supabase products", entry.supabaseProducts),
         createSection("Supabase products error", entry.supabaseProductsError),
         createSection("Supabase status overrides", entry.supabaseStatusOverrides),
@@ -3900,6 +3987,26 @@ App.debugProductPage = async function(context = {}) {
     entry.supabaseConfig = config ? { hasConfig: true, url: config.url } : { hasConfig: false };
     if (typeof console !== "undefined") {
       console.log("supabaseConfig", entry.supabaseConfig);
+    }
+
+    const previewMeta = App.previewProductsMeta;
+    if (previewMeta) {
+      entry.previewProducts = {
+        active: true,
+        count: previewMeta.count || null,
+        updatedAt: previewMeta.updatedAt || null,
+        expiresAt:
+          typeof previewMeta.expiresAt === "number"
+            ? new Date(previewMeta.expiresAt).toISOString()
+            : previewMeta.expiresAt || null,
+        version: previewMeta.version || null,
+        source: previewMeta.source || "preview"
+      };
+    } else {
+      entry.previewProducts = { active: false };
+    }
+    if (typeof console !== "undefined") {
+      console.log("previewProducts", entry.previewProducts);
     }
 
     try {
