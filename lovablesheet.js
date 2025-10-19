@@ -48,6 +48,15 @@ let boardsLoading = false;
 let boardsLoaded = false;
 let isSavingBoard = false;
 let boardStatusTimeoutId = null;
+const flowchartPromptElements = {
+  container: document.querySelector("[data-flowchart-prompt]"),
+  output: document.querySelector("[data-flowchart-prompt-output]"),
+  compileButton: document.querySelector("[data-flowchart-prompt-generate]"),
+  copyButton: document.querySelector("[data-flowchart-prompt-copy]"),
+  status: document.querySelector("[data-flowchart-prompt-status]")
+};
+let flowchartPromptObserver = null;
+let flowchartPromptUpdateTimeoutId = null;
 
 const sections = {
   loading: document.querySelector("[data-lovablesheet-loading]"),
@@ -166,6 +175,158 @@ function mixHexColors(colorA, colorB, weight = 0.5) {
   const g = mix(rgbA.g, rgbB.g);
   const b = mix(rgbA.b, rgbB.b);
   return `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
+}
+
+function extractTextFromHtml(html) {
+  if (typeof html !== "string" || !html.trim()) return "";
+  const temp = document.createElement("div");
+  temp.innerHTML = html;
+  const text = temp.textContent || "";
+  return text.replace(/\s+/g, " ").trim();
+}
+
+function setFlowchartPromptStatus(message, tone = "neutral") {
+  const statusEl = flowchartPromptElements.status;
+  if (!statusEl) return;
+  statusEl.textContent = message || "";
+  statusEl.classList.remove("is-success", "is-error");
+  if (tone === "success") {
+    statusEl.classList.add("is-success");
+  } else if (tone === "error") {
+    statusEl.classList.add("is-error");
+  }
+}
+
+function compileFlowchartPrompt({ announce = true } = {}) {
+  const { output, container } = flowchartPromptElements;
+  if (!output || !flowchartBoard) return "";
+
+  const notes = flowchartBoard.captureSnapshot();
+  const processed = notes
+    .map((note) => {
+      const label = typeof note.label === "string" ? note.label.trim() : "";
+      const body = extractTextFromHtml(note.body);
+      if (!label && !body) return null;
+      return {
+        label,
+        body,
+        x: Number.isFinite(Number(note.x)) ? Number(note.x) : 0,
+        y: Number.isFinite(Number(note.y)) ? Number(note.y) : 0
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => {
+      const deltaY = a.y - b.y;
+      if (Math.abs(deltaY) > 1) {
+        return deltaY;
+      }
+      return a.x - b.x;
+    });
+
+  const promptParts = processed.map((note, index) => {
+    const prefix = note.label || `Note ${index + 1}`;
+    if (!note.body) {
+      return prefix;
+    }
+    return `${prefix}: ${note.body}`;
+  });
+
+  const prompt = promptParts.join("\n\n");
+  output.value = prompt;
+
+  if (container) {
+    container.dataset.promptEmpty = promptParts.length ? "false" : "true";
+  }
+
+  if (!promptParts.length) {
+    if (announce || !flowchartPromptElements.status?.textContent) {
+      setFlowchartPromptStatus("Add flowchart notes to build your prompt.");
+    }
+    return "";
+  }
+
+  if (announce) {
+    const total = promptParts.length;
+    const summary = total === 1
+      ? "Combined 1 flowchart note into a prompt."
+      : `Combined ${total} flowchart notes into a prompt.`;
+    setFlowchartPromptStatus(summary, "success");
+  }
+
+  return prompt;
+}
+
+function scheduleFlowchartPromptUpdate() {
+  if (flowchartPromptUpdateTimeoutId) {
+    window.clearTimeout(flowchartPromptUpdateTimeoutId);
+  }
+  flowchartPromptUpdateTimeoutId = window.setTimeout(() => {
+    flowchartPromptUpdateTimeoutId = null;
+    compileFlowchartPrompt({ announce: false });
+  }, 300);
+}
+
+async function copyFlowchartPrompt() {
+  const { output } = flowchartPromptElements;
+  if (!output) return;
+
+  const text = output.value.trim();
+  if (!text) {
+    setFlowchartPromptStatus("Compile the flowchart prompt before copying it.", "error");
+    return;
+  }
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      output.focus();
+      output.select();
+      const successful = document.execCommand ? document.execCommand("copy") : false;
+      output.setSelectionRange(text.length, text.length);
+      output.blur();
+      if (!successful) {
+        throw new Error("execCommand copy was unsuccessful");
+      }
+    }
+    setFlowchartPromptStatus("Copied the flowchart prompt to your clipboard.", "success");
+  } catch (error) {
+    console.error("Unable to copy flowchart prompt.", error);
+    setFlowchartPromptStatus("Copy is unavailable. Select the text manually to share it.", "error");
+  }
+}
+
+function setupFlowchartPrompt(board) {
+  const { container, compileButton, copyButton } = flowchartPromptElements;
+  if (!container || !board) return;
+
+  compileButton?.addEventListener("click", () => {
+    compileFlowchartPrompt();
+  });
+
+  copyButton?.addEventListener("click", () => {
+    copyFlowchartPrompt();
+  });
+
+  const workspace = board.querySelector("[data-board-workspace]");
+  if (workspace) {
+    workspace.addEventListener("input", scheduleFlowchartPromptUpdate);
+
+    if (flowchartPromptObserver) {
+      flowchartPromptObserver.disconnect();
+    }
+
+    flowchartPromptObserver = new MutationObserver(scheduleFlowchartPromptUpdate);
+    flowchartPromptObserver.observe(workspace, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["data-x", "data-y", "data-color", "data-custom-color"]
+    });
+  }
+
+  compileFlowchartPrompt({ announce: true });
 }
 
 function normalizeNoteColorValue(color) {
@@ -919,6 +1080,8 @@ function setupFlowchartBoard() {
     flowchartBoard = null;
     return;
   }
+
+  setupFlowchartPrompt(board);
 
   flowchartBoardInitialized = true;
 }

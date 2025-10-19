@@ -387,6 +387,25 @@
         <div class="brain-board__header">
           <h2 id="flowchart-board-title">Flowchart</h2>
           <p class="brain-board__summary">Sketch branching journeys and implementation checkpoints side-by-side with the sticky note toolkit.</p>
+          <div class="flowchart-prompt" data-flowchart-prompt>
+            <div class="flowchart-prompt__heading">
+              <span class="flowchart-prompt__eyebrow">Putting it together</span>
+              <p class="flowchart-prompt__description">Compile the notes from this flowchart into a single prompt. Each note is stitched together in sequence so you can quickly brief a teammate or power an AI workflow.</p>
+            </div>
+            <div class="flowchart-prompt__actions">
+              <button class="flowchart-prompt__action flowchart-prompt__action--primary" type="button" data-flowchart-prompt-generate>
+                Compile flowchart context
+              </button>
+              <button class="flowchart-prompt__action flowchart-prompt__action--ghost" type="button" data-flowchart-prompt-copy>
+                Copy prompt
+              </button>
+            </div>
+            <label class="flowchart-prompt__output">
+              <span class="sr-only">Compiled flowchart prompt</span>
+              <textarea class="flowchart-prompt__textarea" rows="6" readonly data-flowchart-prompt-output placeholder="Your compiled flowchart prompt will appear here."></textarea>
+            </label>
+            <p class="flowchart-prompt__status" data-flowchart-prompt-status role="status" aria-live="polite"></p>
+          </div>
         </div>
         <div class="brain-board__workspace-wrapper">
           <div class="brain-board__workspace brain-board__workspace--flowchart" data-board-workspace role="list" aria-label="Flowchart sticky board preview">
