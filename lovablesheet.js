@@ -5,6 +5,12 @@ import { getSupabaseClient } from "./supabase-client.js";
 const DEFAULT_PAGE_PATH = "lovablesheet.html";
 const SUPPORTED_PAGE_PATHS = new Set([DEFAULT_PAGE_PATH, "lovables_sheet.html"]);
 
+const SCROLL_SNAP_CLASS = "lovablesheet-scroll-snap";
+const prefersReducedMotionQuery = typeof window !== "undefined" && window.matchMedia
+  ? window.matchMedia("(prefers-reduced-motion: reduce)")
+  : null;
+let reducedMotionListenerInitialized = false;
+
 const PAGE_PATH = (() => {
   const currentPath = window.location.pathname.split("/").pop() || DEFAULT_PAGE_PATH;
   return SUPPORTED_PAGE_PATHS.has(currentPath) ? currentPath : DEFAULT_PAGE_PATH;
@@ -1009,7 +1015,42 @@ class StickyBoard {
   }
 }
 
+function enableStickyBoardScrollSnap() {
+  const root = document.documentElement;
+  if (!root) {
+    return;
+  }
+
+  if (!reducedMotionListenerInitialized && prefersReducedMotionQuery) {
+    const handlePreferenceChange = (event) => {
+      if (event.matches) {
+        root.classList.remove(SCROLL_SNAP_CLASS);
+      } else {
+        enableStickyBoardScrollSnap();
+      }
+    };
+
+    if (typeof prefersReducedMotionQuery.addEventListener === "function") {
+      prefersReducedMotionQuery.addEventListener("change", handlePreferenceChange);
+    } else if (typeof prefersReducedMotionQuery.addListener === "function") {
+      prefersReducedMotionQuery.addListener(handlePreferenceChange);
+    }
+
+    reducedMotionListenerInitialized = true;
+  }
+
+  if (prefersReducedMotionQuery?.matches) {
+    root.classList.remove(SCROLL_SNAP_CLASS);
+    return;
+  }
+
+  if (!root.classList.contains(SCROLL_SNAP_CLASS)) {
+    root.classList.add(SCROLL_SNAP_CLASS);
+  }
+}
+
 function initializeStickyBoards() {
+  enableStickyBoardScrollSnap();
   setupBrainBoard();
   setupFlowchartBoard();
 }
