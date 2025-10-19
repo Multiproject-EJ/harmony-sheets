@@ -1139,6 +1139,7 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-table__select:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
 .admin-table__name{font-weight:600;font-size:1.02rem}
 .admin-table__tagline{font-size:.85rem;color:#64748b;max-width:360px}
+.admin-table__tagline:empty{display:none}
 .admin-table__price{font-weight:600;width:110px}
 .admin-table__status{width:90px;text-align:center}
 .admin-table__status-toggle{display:inline-flex;align-items:center;justify-content:center;width:100%;gap:6px}
@@ -1232,6 +1233,27 @@ body.admin-guide-open{overflow:hidden}
   .admin-table__tagline{max-width:none}
   .admin-form__header{flex-direction:column;align-items:flex-start}
   .admin-form__header-actions{width:100%;justify-content:flex-start}
+}
+
+@media (max-width:640px){
+  .admin__intro{gap:20px}
+  .admin__status-card{flex-direction:column;align-items:flex-start}
+  .admin__supabase-body{flex-basis:100%}
+  .admin__supabase-actions{margin-left:0;width:100%;justify-content:flex-start;gap:10px;flex-wrap:wrap}
+  .admin__supabase-actions .btn,.admin__supabase-actions .btn-ghost{flex:1 1 160px;justify-content:center}
+  .admin__table-wrap{border:none;background:transparent;max-height:none}
+  .admin__table-scroll{overflow:visible}
+  .admin-table{border-collapse:separate;border-spacing:0}
+  .admin-table thead{display:none}
+  .admin-table tbody{display:grid;gap:18px}
+  .admin-table tbody tr{display:grid;gap:12px;padding:18px;border:1px solid rgba(148,163,184,.32);border-radius:18px;box-shadow:0 18px 40px rgba(15,23,42,.12);background:#fff}
+  .admin-table tbody tr.is-active{box-shadow:0 0 0 2px rgba(99,102,241,.25),0 20px 44px rgba(15,23,42,.14)}
+  .admin-table th,.admin-table td{display:grid;gap:6px;padding:0;border:none;text-align:left}
+  .admin-table th[data-label]::before,.admin-table td[data-label]::before{content:attr(data-label);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:#64748b;font-weight:600}
+  .admin-table__select{width:100%;align-items:flex-start}
+  .admin-table__price,.admin-table__status{width:auto;text-align:left}
+  .admin-table__status-toggle{justify-content:flex-start}
+  .admin__panel-foot{flex-direction:column;align-items:flex-start;gap:8px}
 }
 
 @media (max-width:720px){
