@@ -234,7 +234,10 @@
                       </g>
                     </svg>
                   </button>
-                  <span class="brain-board-menu__zoom-display" data-board-zoom-display>100%</span>
+                  <div class="brain-board-menu__zoom-track">
+                    <input class="brain-board-menu__zoom-slider" type="range" min="60" max="140" value="100" step="1" data-board-zoom-slider aria-label="Zoom level">
+                    <span class="brain-board-menu__zoom-display" data-board-zoom-display>100%</span>
+                  </div>
                   <button class="brain-board-menu__zoom-button" type="button" data-board-zoom-in aria-label="Zoom in">
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                       <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

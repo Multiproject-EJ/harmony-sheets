@@ -30,6 +30,7 @@ let addNoteButton = null;
 let zoomOutButton = null;
 let zoomInButton = null;
 let zoomDisplayEl = null;
+let zoomSliderEl = null;
 let currentBoardId = DEFAULT_BOARD_ID;
 let defaultBoardSnapshot = [];
 let boardsCache = new Map();
@@ -148,9 +149,14 @@ function setNoteColor(note, color) {
 }
 
 function updateZoomControls() {
+  const percent = Math.round(boardScale * 100);
+
   if (zoomDisplayEl) {
-    const percent = Math.round(boardScale * 100);
     zoomDisplayEl.textContent = `${percent}%`;
+  }
+
+  if (zoomSliderEl && Number.parseInt(zoomSliderEl.value, 10) !== percent) {
+    zoomSliderEl.value = `${percent}`;
   }
 
   if (zoomOutButton) {
@@ -715,6 +721,7 @@ function initializeBrainBoard() {
   zoomOutButton = boardMenuEl?.querySelector("[data-board-zoom-out]") || null;
   zoomInButton = boardMenuEl?.querySelector("[data-board-zoom-in]") || null;
   zoomDisplayEl = boardMenuEl?.querySelector("[data-board-zoom-display]") || null;
+  zoomSliderEl = boardMenuEl?.querySelector("[data-board-zoom-slider]") || null;
 
   const notes = Array.from(workspaceEl.querySelectorAll("[data-note]"));
   notes.forEach((note) => setupNote(note));
@@ -757,6 +764,18 @@ function initializeBrainBoard() {
   if (zoomInButton) {
     zoomInButton.addEventListener("click", () => {
       adjustBoardScale(BOARD_SCALE_STEP);
+    });
+  }
+
+  if (zoomSliderEl) {
+    zoomSliderEl.min = `${Math.round(BOARD_SCALE_MIN * 100)}`;
+    zoomSliderEl.max = `${Math.round(BOARD_SCALE_MAX * 100)}`;
+    zoomSliderEl.step = "1";
+    zoomSliderEl.value = `${Math.round(boardScale * 100)}`;
+    zoomSliderEl.addEventListener("input", (event) => {
+      const nextValue = Number.parseInt(event.target.value, 10);
+      if (Number.isNaN(nextValue)) return;
+      setBoardScale(nextValue / 100);
     });
   }
 
