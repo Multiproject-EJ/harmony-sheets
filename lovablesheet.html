@@ -127,11 +127,29 @@
               <div class="brain-board__handle" data-note-handle>
                 <span class="brain-board__label" data-note-label>Quick capture</span>
                 <div class="brain-board__actions">
-                  <div class="brain-board__swatches" role="group" aria-label="Change note color">
-                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                  <div class="brain-board__color-control" data-note-color-control>
+                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                      <span class="sr-only">Change note color</span>
+                      <span class="brain-board__color-preview" data-note-color-preview></span>
+                    </button>
+                    <div class="brain-board__color-menu" data-note-color-menu hidden>
+                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                      </div>
+                      <label class="brain-board__custom-color">
+                        <span class="brain-board__custom-color-label">Custom color</span>
+                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                      </label>
+                    </div>
                   </div>
                   <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
                 </div>
@@ -143,11 +161,29 @@
               <div class="brain-board__handle" data-note-handle>
                 <span class="brain-board__label" data-note-label>In progress</span>
                 <div class="brain-board__actions">
-                  <div class="brain-board__swatches" role="group" aria-label="Change note color">
-                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                  <div class="brain-board__color-control" data-note-color-control>
+                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                      <span class="sr-only">Change note color</span>
+                      <span class="brain-board__color-preview" data-note-color-preview></span>
+                    </button>
+                    <div class="brain-board__color-menu" data-note-color-menu hidden>
+                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                      </div>
+                      <label class="brain-board__custom-color">
+                        <span class="brain-board__custom-color-label">Custom color</span>
+                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                      </label>
+                    </div>
                   </div>
                   <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
                 </div>
@@ -159,11 +195,29 @@
               <div class="brain-board__handle" data-note-handle>
                 <span class="brain-board__label" data-note-label>Opportunities</span>
                 <div class="brain-board__actions">
-                  <div class="brain-board__swatches" role="group" aria-label="Change note color">
-                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                  <div class="brain-board__color-control" data-note-color-control>
+                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                      <span class="sr-only">Change note color</span>
+                      <span class="brain-board__color-preview" data-note-color-preview></span>
+                    </button>
+                    <div class="brain-board__color-menu" data-note-color-menu hidden>
+                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                      </div>
+                      <label class="brain-board__custom-color">
+                        <span class="brain-board__custom-color-label">Custom color</span>
+                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                      </label>
+                    </div>
                   </div>
                   <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
                 </div>
@@ -175,11 +229,29 @@
               <div class="brain-board__handle" data-note-handle>
                 <span class="brain-board__label" data-note-label>Backlog</span>
                 <div class="brain-board__actions">
-                  <div class="brain-board__swatches" role="group" aria-label="Change note color">
-                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                  <div class="brain-board__color-control" data-note-color-control>
+                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                      <span class="sr-only">Change note color</span>
+                      <span class="brain-board__color-preview" data-note-color-preview></span>
+                    </button>
+                    <div class="brain-board__color-menu" data-note-color-menu hidden>
+                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                      </div>
+                      <label class="brain-board__custom-color">
+                        <span class="brain-board__custom-color-label">Custom color</span>
+                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                      </label>
+                    </div>
                   </div>
                   <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
                 </div>
@@ -280,11 +352,29 @@
             <div class="brain-board__handle" data-note-handle>
               <span class="brain-board__label" data-note-label>Note</span>
               <div class="brain-board__actions">
-                <div class="brain-board__swatches" role="group" aria-label="Change note color">
-                  <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                  <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                  <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                  <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                <div class="brain-board__color-control" data-note-color-control>
+                  <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                    <span class="sr-only">Change note color</span>
+                    <span class="brain-board__color-preview" data-note-color-preview></span>
+                  </button>
+                  <div class="brain-board__color-menu" data-note-color-menu hidden>
+                    <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                      <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                      <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                      <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                      <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                      <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                      <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                      <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                      <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                      <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                      <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                    </div>
+                    <label class="brain-board__custom-color">
+                      <span class="brain-board__custom-color-label">Custom color</span>
+                      <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                    </label>
+                  </div>
                 </div>
                 <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
               </div>
@@ -304,11 +394,29 @@
               <div class="brain-board__handle" data-note-handle>
                 <span class="brain-board__label" data-note-label>Kickoff</span>
                 <div class="brain-board__actions">
-                  <div class="brain-board__swatches" role="group" aria-label="Change note color">
-                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                  <div class="brain-board__color-control" data-note-color-control>
+                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                      <span class="sr-only">Change note color</span>
+                      <span class="brain-board__color-preview" data-note-color-preview></span>
+                    </button>
+                    <div class="brain-board__color-menu" data-note-color-menu hidden>
+                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                      </div>
+                      <label class="brain-board__custom-color">
+                        <span class="brain-board__custom-color-label">Custom color</span>
+                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                      </label>
+                    </div>
                   </div>
                   <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
                 </div>
@@ -319,11 +427,29 @@
               <div class="brain-board__handle" data-note-handle>
                 <span class="brain-board__label" data-note-label>Decision lane</span>
                 <div class="brain-board__actions">
-                  <div class="brain-board__swatches" role="group" aria-label="Change note color">
-                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                  <div class="brain-board__color-control" data-note-color-control>
+                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                      <span class="sr-only">Change note color</span>
+                      <span class="brain-board__color-preview" data-note-color-preview></span>
+                    </button>
+                    <div class="brain-board__color-menu" data-note-color-menu hidden>
+                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                      </div>
+                      <label class="brain-board__custom-color">
+                        <span class="brain-board__custom-color-label">Custom color</span>
+                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                      </label>
+                    </div>
                   </div>
                   <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
                 </div>
@@ -334,11 +460,29 @@
               <div class="brain-board__handle" data-note-handle>
                 <span class="brain-board__label" data-note-label>Parallel tasks</span>
                 <div class="brain-board__actions">
-                  <div class="brain-board__swatches" role="group" aria-label="Change note color">
-                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                  <div class="brain-board__color-control" data-note-color-control>
+                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                      <span class="sr-only">Change note color</span>
+                      <span class="brain-board__color-preview" data-note-color-preview></span>
+                    </button>
+                    <div class="brain-board__color-menu" data-note-color-menu hidden>
+                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                      </div>
+                      <label class="brain-board__custom-color">
+                        <span class="brain-board__custom-color-label">Custom color</span>
+                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                      </label>
+                    </div>
                   </div>
                   <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
                 </div>
@@ -349,11 +493,29 @@
               <div class="brain-board__handle" data-note-handle>
                 <span class="brain-board__label" data-note-label>Wrap up</span>
                 <div class="brain-board__actions">
-                  <div class="brain-board__swatches" role="group" aria-label="Change note color">
-                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                  <div class="brain-board__color-control" data-note-color-control>
+                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                      <span class="sr-only">Change note color</span>
+                      <span class="brain-board__color-preview" data-note-color-preview></span>
+                    </button>
+                    <div class="brain-board__color-menu" data-note-color-menu hidden>
+                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                      </div>
+                      <label class="brain-board__custom-color">
+                        <span class="brain-board__custom-color-label">Custom color</span>
+                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                      </label>
+                    </div>
                   </div>
                   <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
                 </div>
