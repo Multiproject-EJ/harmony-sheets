@@ -1,4 +1,6 @@
 const STORAGE_KEY = 'harmony-sheets-admin-v1';
+const PREVIEW_STORAGE_KEY = 'hs-admin-preview-products-v1';
+const PREVIEW_TTL_MS = 1000 * 60 * 60 * 12; // 12 hours
 
 const state = {
   products: [],
@@ -21,6 +23,7 @@ const els = {
   areaFilter: document.querySelector('[data-area-filter]'),
   addButton: document.querySelector('[data-add-product]'),
   exportButton: document.querySelector('[data-export]'),
+  previewButton: document.querySelector('[data-preview-publish]'),
   resetButton: document.querySelector('[data-reset]'),
   form: document.querySelector('[data-product-form]'),
   formTitle: document.querySelector('[data-form-title]'),
@@ -324,6 +327,32 @@ function priceValue(price) {
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function isPreviewStorageAvailable() {
+  if (typeof window === 'undefined' || !('localStorage' in window)) {
+    return false;
+  }
+  try {
+    const testKey = '__hs_preview_test__';
+    window.localStorage.setItem(testKey, '1');
+    window.localStorage.removeItem(testKey);
+    return true;
+  } catch (error) {
+    console.warn('[editor] Preview storage unavailable', error);
+    return false;
+  }
+}
+
+function clearPreviewData() {
+  if (!isPreviewStorageAvailable()) return false;
+  try {
+    window.localStorage.removeItem(PREVIEW_STORAGE_KEY);
+    return true;
+  } catch (error) {
+    console.warn('[editor] Failed to clear preview data', error);
+    return false;
+  }
 }
 
 function getProductPreviewUrl(product) {
@@ -961,12 +990,58 @@ function handleExport() {
   setStatus('Download started. Upload the JSON wherever you host your catalog.', 'info');
 }
 
+function handlePreviewPublish() {
+  if (!Array.isArray(state.products) || !state.products.length) {
+    setStatus('Add at least one product before pushing a storefront preview.', 'warning');
+    return;
+  }
+
+  if (!isPreviewStorageAvailable()) {
+    setStatus('Preview requires local storage access. Use the JSON download as a fallback.', 'warning');
+    return;
+  }
+
+  const products = clone(state.products);
+  const updatedAt = new Date();
+  const payload = {
+    version: 1,
+    products,
+    updatedAt: updatedAt.toISOString(),
+    expiresAt: updatedAt.getTime() + PREVIEW_TTL_MS
+  };
+
+  try {
+    window.localStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(payload));
+    const count = products.length;
+    setStatus(
+      `Preview updated for ${count} product${count === 1 ? '' : 's'}. Reload storefront pages to review.`,
+      'success'
+    );
+    setFormFeedback(
+      'Preview data saved locally for the next 12 hours. Open product pages, the catalog, or the Discover Templates menu to see the changes.',
+      'info'
+    );
+    window.dispatchEvent(
+      new CustomEvent('admin:preview-published', {
+        detail: { count, updatedAt: payload.updatedAt, expiresAt: payload.expiresAt }
+      })
+    );
+  } catch (error) {
+    console.error('[editor] Failed to save preview data', error);
+    setStatus('We could not push the preview. Try again or download the JSON file.', 'danger');
+  }
+}
+
 function handleReset() {
   state.products = clone(state.baseline);
   state.selectedId = null;
   clearStorage();
   setWorkspaceSource('Source JSON');
-  setStatus('Reverted to source JSON.', 'info');
+  const previewCleared = clearPreviewData();
+  const resetMessage = previewCleared
+    ? 'Reverted to source JSON and cleared storefront preview data.'
+    : 'Reverted to source JSON.';
+  setStatus(resetMessage, 'info');
   setFormFeedback(null);
   renderTable();
   notifyCatalogSubscribers('reset');
@@ -1062,6 +1137,7 @@ function registerEvents() {
   els.search?.addEventListener('input', handleSearch);
   els.areaFilter?.addEventListener('change', handleSearch);
   els.addButton?.addEventListener('click', handleAddProduct);
+  els.previewButton?.addEventListener('click', handlePreviewPublish);
   els.exportButton?.addEventListener('click', handleExport);
   els.resetButton?.addEventListener('click', handleReset);
   els.deleteButton?.addEventListener('click', handleDelete);
