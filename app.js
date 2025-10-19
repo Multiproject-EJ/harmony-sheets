@@ -2187,15 +2187,6 @@ App.initNavDropdown = function() {
       map[id] = [];
     });
 
-    const extras = App.NAV_AREA_EXTRAS || {};
-    Object.entries(extras).forEach(([areaId, items]) => {
-      if (!Array.isArray(items) || !items.length) return;
-      if (!map[areaId]) map[areaId] = [];
-      items.forEach(item => {
-        map[areaId].push(normalizeEntry(areaId, item, map[areaId].length));
-      });
-    });
-
     if (Array.isArray(rawProducts)) {
       rawProducts.forEach(product => {
         if (!product) return;
@@ -2224,6 +2215,14 @@ App.initNavDropdown = function() {
         });
       });
     }
+
+    const extras = App.NAV_AREA_EXTRAS || {};
+    Object.entries(extras).forEach(([areaId, items]) => {
+      if (!Array.isArray(items) || !items.length) return;
+      if (!map[areaId]) map[areaId] = [];
+      if (map[areaId].length > 0) return;
+      map[areaId] = items.map((item, index) => normalizeEntry(areaId, item, index));
+    });
 
     if (map.all) {
       const existingAll = Array.isArray(map.all) ? map.all.slice() : [];
