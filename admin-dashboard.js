@@ -2050,6 +2050,39 @@ if (!rootHook) {
     runSupabaseTest({ source: "product-save", token: detail.token || null });
   });
 
+  window.addEventListener("admin:preview-published", async (event) => {
+    if (!rootHook) return;
+    const detail = event?.detail || {};
+    if (detail && Object.prototype.hasOwnProperty.call(detail, "shouldPublish") && !detail.shouldPublish) {
+      return;
+    }
+
+    const count = typeof detail.count === "number" && Number.isFinite(detail.count) ? detail.count : null;
+    const targetLabel =
+      count && count > 0
+        ? `${count} product${count === 1 ? "" : "s"}`
+        : "your catalog";
+
+    await loadEditorModule();
+
+    if (!supabaseClient) {
+      updateSupabaseStatus(
+        `Preview saved locally for ${targetLabel}, but Supabase is not ready. Refresh and try again to publish live.`,
+        "warning"
+      );
+      return;
+    }
+
+    updateSupabaseStatus(`Publishing ${targetLabel} to Supabase…`, "info");
+
+    try {
+      await saveCatalogToSupabase();
+    } catch (error) {
+      console.error("[admin] Failed to publish preview to Supabase", error);
+      updateSupabaseStatus(`Preview publish failed: ${formatError(error)}`, "danger");
+    }
+  });
+
   function showSection(target) {
     Object.entries(sections).forEach(([key, element]) => {
       if (!element) return;
