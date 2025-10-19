@@ -288,7 +288,7 @@
           <p class="brain-board__summary">Sketch branching journeys and implementation checkpoints side-by-side with the sticky note toolkit.</p>
         </div>
         <div class="brain-board__workspace-wrapper">
-          <div class="brain-board__workspace brain-board__workspace--static" role="list" aria-label="Flowchart sticky board preview">
+          <div class="brain-board__workspace brain-board__workspace--static brain-board__workspace--flowchart" role="list" aria-label="Flowchart sticky board preview">
             <div class="brain-board__note" role="listitem" data-color="sunshine" style="--note-x:32px; --note-y:40px;">
               <div class="brain-board__handle">
                 <span class="brain-board__label">Kickoff</span>
@@ -312,6 +312,76 @@
                 <span class="brain-board__label">Wrap up</span>
               </div>
               <div class="brain-board__body">Capture the closing signals and follow-up steps that confirm the flow delivered its outcome.</div>
+            </div>
+          </div>
+          <div class="brain-board-menu brain-board-menu--flowchart" role="group" aria-label="Flowchart quick tools">
+            <div class="brain-board-menu__layout">
+              <div class="brain-board-menu__stack">
+                <div class="brain-board-menu__surface" role="group" aria-label="Flowchart layout controls">
+                  <div class="brain-board-menu__cluster" role="group" aria-label="Flowchart presets">
+                    <div class="brain-board-menu__primary" role="group" aria-label="Flowchart view options">
+                      <button class="brain-board-menu__placeholder" type="button" aria-label="Toggle smart grid"></button>
+                      <button class="brain-board-menu__placeholder" type="button" aria-label="Toggle anchors"></button>
+                      <button class="brain-board-menu__placeholder" type="button" aria-label="Toggle swimlanes"></button>
+                      <span class="brain-board-menu__divider" aria-hidden="true"></span>
+                      <button class="brain-board-menu__screen" type="button" aria-label="Wide canvas preset">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3.8" y="5.2" width="16.4" height="11.6" rx="2.4"></rect>
+                            <path d="M7.2 9.2h9.6"></path>
+                            <path d="M7.2 12h5.8"></path>
+                          </g>
+                        </svg>
+                      </button>
+                      <button class="brain-board-menu__screen" type="button" aria-label="Storyboard preset">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6" y="5" width="12" height="12" rx="2"></rect>
+                            <path d="M9 9h6"></path>
+                            <path d="M9 12h3.5"></path>
+                          </g>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="brain-board-menu__zoom" role="group" aria-label="Flowchart zoom controls">
+                  <button class="brain-board-menu__zoom-button" type="button" aria-label="Zoom out">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="6"></circle>
+                        <path d="M20 20l-4.2-4.2"></path>
+                        <path d="M8 11h6"></path>
+                      </g>
+                    </svg>
+                  </button>
+                  <div class="brain-board-menu__zoom-track">
+                    <input class="brain-board-menu__zoom-slider" type="range" min="60" max="140" value="85" step="1" aria-label="Zoom level">
+                    <span class="brain-board-menu__zoom-display">85%</span>
+                  </div>
+                  <button class="brain-board-menu__zoom-button" type="button" aria-label="Zoom in">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="6"></circle>
+                        <path d="M20 20l-4.2-4.2"></path>
+                        <path d="M11 8v6"></path>
+                        <path d="M8 11h6"></path>
+                      </g>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <button class="brain-board-menu__add" type="button">
+                <span class="sr-only">Add new flowchart note</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 4.8h7.2L19.2 9v8.2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6.8a2 2 0 0 1 2-2Z"></path>
+                    <path d="M14.2 4.8v3.4a1 1 0 0 0 1 1H18"></path>
+                    <path d="M12 11.2v6"></path>
+                    <path d="M9 14.2h6"></path>
+                  </g>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
