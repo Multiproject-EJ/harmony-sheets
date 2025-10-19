@@ -221,10 +221,10 @@ nav,nav *{pointer-events:auto;}
 .lovablesheet-eyebrow{font-size:.78rem;letter-spacing:.28em;text-transform:uppercase;font-weight:700;color:#64748b;margin:0}
 .lovablesheet-workflow__intro h1{font-size:clamp(2rem,4vw,3.4rem);line-height:1.08;margin:0;color:#0f172a}
 .lovablesheet-workflow__description{margin:0;font-size:1.05rem;color:#475569;max-width:680px}
-html.lovablesheet-scroll-snap{scroll-snap-type:y proximity;scroll-padding-top:calc(var(--header-height) + 16px)}
-body.page-lovablesheet [data-sticky-board]{scroll-snap-align:start;scroll-snap-stop:always;scroll-margin-top:calc(var(--header-height) + 32px)}
+html.lovablesheet-scroll-snap{scroll-snap-type:y proximity;scroll-padding-top:var(--header-height)}
+body.page-lovablesheet [data-sticky-board]{scroll-snap-align:start;scroll-snap-stop:always;scroll-margin-top:var(--header-height)}
 @media (max-width:768px){
-  body.page-lovablesheet [data-sticky-board]{scroll-margin-top:calc(var(--header-height) + 20px)}
+  body.page-lovablesheet [data-sticky-board]{scroll-margin-top:var(--header-height)}
 }
 @media (prefers-reduced-motion:reduce){
   html.lovablesheet-scroll-snap{scroll-snap-type:none}
