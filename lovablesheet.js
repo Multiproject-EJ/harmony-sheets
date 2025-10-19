@@ -106,8 +106,8 @@ function applyNoteTransform(note, x, y) {
   if (!note) return;
   const scale = boardScale || 1;
   note.style.setProperty("--note-scale", `${scale}`);
-  note.style.setProperty("--note-translate-x", `${x}px`);
-  note.style.setProperty("--note-translate-y", `${y}px`);
+  note.style.setProperty("--note-translate-x", `${x * scale}px`);
+  note.style.setProperty("--note-translate-y", `${y * scale}px`);
 }
 
 function setNotePosition(note, x, y) {
@@ -121,9 +121,10 @@ function setNotePosition(note, x, y) {
 function getNoteCenter(note) {
   const x = Number.parseFloat(note.dataset.x || "0");
   const y = Number.parseFloat(note.dataset.y || "0");
+  const scale = boardScale || 1;
   return {
-    x: x + (note.offsetWidth * boardScale) / 2,
-    y: y + (note.offsetHeight * boardScale) / 2
+    x: x * scale + (note.offsetWidth * scale) / 2,
+    y: y * scale + (note.offsetHeight * scale) / 2
   };
 }
 
@@ -215,16 +216,18 @@ function getNearbyColorNotes(activeNote) {
   if (!workspaceEl) return [];
   const color = activeNote.dataset.color;
   if (!color) return [];
+  const scale = boardScale || 1;
   const origin = getNoteCenter(activeNote);
+  const radius = BRAIN_BOARD_GROUP_RADIUS * scale;
   return Array.from(workspaceEl.querySelectorAll("[data-note]"))
     .filter((candidate) => candidate !== activeNote && candidate.dataset.color === color)
-    .filter((candidate) => distanceBetween(origin, getNoteCenter(candidate)) <= BRAIN_BOARD_GROUP_RADIUS)
+    .filter((candidate) => distanceBetween(origin, getNoteCenter(candidate)) <= radius)
     .map((candidate) => ({
       note: candidate,
       startX: Number.parseFloat(candidate.dataset.x || "0"),
       startY: Number.parseFloat(candidate.dataset.y || "0"),
-      width: candidate.offsetWidth * boardScale,
-      height: candidate.offsetHeight * boardScale
+      width: candidate.offsetWidth * scale,
+      height: candidate.offsetHeight * scale
     }));
 }
 
@@ -250,12 +253,13 @@ function setupNote(note) {
       event.preventDefault();
 
       const pointerId = event.pointerId;
+      const scale = boardScale || 1;
       const boardWidth = workspaceEl.clientWidth;
       const boardHeight = workspaceEl.clientHeight;
-      const noteWidth = note.offsetWidth * boardScale;
-      const noteHeight = note.offsetHeight * boardScale;
-      const maxX = Math.max(0, boardWidth - noteWidth);
-      const maxY = Math.max(0, boardHeight - noteHeight);
+      const noteWidth = note.offsetWidth * scale;
+      const noteHeight = note.offsetHeight * scale;
+      const maxX = Math.max(0, (boardWidth - noteWidth) / scale);
+      const maxY = Math.max(0, (boardHeight - noteHeight) / scale);
 
       const startX = Number.parseFloat(note.dataset.x || "0");
       const startY = Number.parseFloat(note.dataset.y || "0");
@@ -268,8 +272,8 @@ function setupNote(note) {
       handle.setPointerCapture(pointerId);
 
       const onPointerMove = (moveEvent) => {
-        const deltaX = moveEvent.clientX - originPointer.x;
-        const deltaY = moveEvent.clientY - originPointer.y;
+        const deltaX = (moveEvent.clientX - originPointer.x) / scale;
+        const deltaY = (moveEvent.clientY - originPointer.y) / scale;
 
         const targetX = clamp(startX + deltaX, 0, maxX);
         const targetY = clamp(startY + deltaY, 0, maxY);
@@ -277,8 +281,8 @@ function setupNote(note) {
 
         if (groupEnabled && nearbyNotes.length) {
           nearbyNotes.forEach((entry) => {
-            const neighborMaxX = Math.max(0, boardWidth - entry.width);
-            const neighborMaxY = Math.max(0, boardHeight - entry.height);
+            const neighborMaxX = Math.max(0, (boardWidth - entry.width) / scale);
+            const neighborMaxY = Math.max(0, (boardHeight - entry.height) / scale);
             const neighborX = clamp(entry.startX + deltaX, 0, neighborMaxX);
             const neighborY = clamp(entry.startY + deltaY, 0, neighborMaxY);
             setNotePosition(entry.note, neighborX, neighborY);
@@ -407,12 +411,13 @@ function createNewStickyNote() {
   setupNote(noteElement);
 
   window.requestAnimationFrame(() => {
-    const noteWidth = noteElement.offsetWidth * boardScale;
-    const noteHeight = noteElement.offsetHeight * boardScale;
+    const scale = boardScale || 1;
+    const noteWidth = noteElement.offsetWidth * scale;
+    const noteHeight = noteElement.offsetHeight * scale;
     const boardWidth = workspaceEl.clientWidth;
     const boardHeight = workspaceEl.clientHeight;
-    const maxX = Math.max(0, boardWidth - noteWidth);
-    const maxY = Math.max(0, boardHeight - noteHeight);
+    const maxX = Math.max(0, (boardWidth - noteWidth) / scale);
+    const maxY = Math.max(0, (boardHeight - noteHeight) / scale);
 
     let targetX = maxX;
     let targetY = 0;
@@ -421,10 +426,11 @@ function createNewStickyNote() {
       const workspaceRect = workspaceEl.getBoundingClientRect();
       const menuRect = boardMenuEl.getBoundingClientRect();
       const gap = 4;
-      const relativeMenuLeft = menuRect.left - workspaceRect.left;
-      const relativeMenuTop = menuRect.top - workspaceRect.top;
+      const relativeMenuLeft = (menuRect.left - workspaceRect.left) / scale;
+      const relativeMenuTop = (menuRect.top - workspaceRect.top) / scale;
+      const adjustedGap = gap / scale;
 
-      targetX = clamp(relativeMenuLeft - noteWidth - gap, 0, maxX);
+      targetX = clamp(relativeMenuLeft - noteElement.offsetWidth - adjustedGap, 0, maxX);
       targetY = clamp(relativeMenuTop, 0, maxY);
     }
 
