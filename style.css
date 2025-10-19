@@ -1129,6 +1129,7 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin__search input{min-width:220px;border-radius:12px;border:1px solid rgba(148,163,184,.5);padding:10px 14px;font:inherit}
 .admin__filter select{border-radius:12px;border:1px solid rgba(148,163,184,.5);padding:10px 12px;font:inherit;min-width:180px}
 .admin__table-wrap{border:1px solid rgba(148,163,184,.3);border-radius:18px;overflow:hidden;background:#f8fafc;max-height:520px;display:flex;flex-direction:column}
+.admin__table-scroll{flex:1 1 auto;max-height:100%;overflow:auto}
 .admin-table{width:100%;border-collapse:collapse;background:#fff}
 .admin-table thead{background:#f1f5f9}
 .admin-table th{font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;color:#475569;padding:14px 18px;text-align:left;border-bottom:1px solid rgba(148,163,184,.25)}
@@ -1149,6 +1150,15 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-table__sort:hover,.admin-table__sort:focus-visible{color:#1d4ed8}
 .admin-table tbody tr.is-active{background:rgba(99,102,241,.08)}
 .admin__panel-foot{display:flex;justify-content:space-between;align-items:center;color:#64748b;font-size:.85rem}
+
+.admin__performance{display:grid;gap:14px;padding:18px 20px;border:1px solid rgba(148,163,184,.22);border-radius:18px;background:#f1f5f9}
+.admin__performance-head{display:flex;flex-direction:column;gap:6px}
+.admin__performance-head h3{margin:0;font-size:1.1rem;color:#0f172a}
+.admin__performance-sub{margin:0;color:#475569;font-size:.92rem}
+.admin__performance-body{overflow:hidden;border-radius:14px;border:1px solid rgba(148,163,184,.26);background:#fff}
+.admin-table--compact thead th{font-size:.7rem}
+.admin-table--compact td{font-size:.88rem;line-height:1.5}
+.admin-table--compact tbody tr:nth-child(even){background:rgba(148,163,184,.08)}
 
 .admin__editor{background:#fff;border:1px solid rgba(148,163,184,.28);border-radius:24px;box-shadow:0 24px 60px rgba(15,23,42,.08);padding:24px;min-height:620px}
 .admin__editor-tools{display:flex;justify-content:flex-end;margin-bottom:16px}
