@@ -102,54 +102,86 @@
 
   <section class="admin-dashboard-content" data-admin-dashboard-content hidden>
     <section class="admin__intro">
+      <div class="admin__status-group">
+        <div class="admin__status-card" role="status">
+          <div class="admin__status-indicator" data-status-indicator></div>
+          <div>
+            <p class="admin__status-label">Workspace status</p>
+            <p class="admin__status-value" data-status>Loading products…</p>
+          </div>
+        </div>
+        <div class="admin__status-card admin__supabase-card" data-supabase-card>
+          <div class="admin__status-indicator" data-supabase-indicator data-tone="neutral"></div>
+          <div class="admin__supabase-body">
+            <p class="admin__status-label">Supabase sync</p>
+            <p class="admin__status-value" data-supabase-status>Run a test to verify Supabase updates.</p>
+            <div class="admin__supabase-metrics" data-supabase-metrics hidden>
+              <dl class="admin__supabase-metric">
+                <dt>Supabase products</dt>
+                <dd data-supabase-products>—</dd>
+              </dl>
+              <dl class="admin__supabase-metric">
+                <dt>Latest change</dt>
+                <dd data-supabase-latest>—</dd>
+              </dl>
+              <dl class="admin__supabase-metric">
+                <dt>Local catalog</dt>
+                <dd data-supabase-local>—</dd>
+              </dl>
+            </div>
+            <p class="admin__supabase-updated" data-supabase-updated hidden>
+              Last checked <time data-supabase-updated-time datetime=""></time>
+            </p>
+          </div>
+          <div class="admin__supabase-actions">
+            <button class="btn primary admin__btn" type="button" data-supabase-save disabled>
+              <span data-supabase-save-label>Save to Supabase</span>
+            </button>
+            <button class="btn-ghost admin__btn" type="button" data-supabase-test disabled>
+              <span data-supabase-test-label>Run test</span>
+            </button>
+          </div>
+        </div>
+      </div>
       <div class="admin__headline">
         <span class="admin__eyebrow">Product Operations</span>
         <h1 class="admin__title">Harmony Sheets Control Center</h1>
         <p class="admin__lede">Review every template in one smart table, edit product details on the fly, manage life-area labels, and export an updated catalog for the storefront.</p>
       </div>
-      <div class="admin__status-card" role="status">
-        <div class="admin__status-indicator" data-status-indicator></div>
-        <div>
-          <p class="admin__status-label">Workspace status</p>
-          <p class="admin__status-value" data-status>Loading products…</p>
-        </div>
-      </div>
-      <div class="admin__status-card admin__supabase-card" data-supabase-card>
-        <div class="admin__status-indicator" data-supabase-indicator data-tone="neutral"></div>
-        <div class="admin__supabase-body">
-          <p class="admin__status-label">Supabase sync</p>
-          <p class="admin__status-value" data-supabase-status>Run a test to verify Supabase updates.</p>
-          <div class="admin__supabase-metrics" data-supabase-metrics hidden>
-            <dl class="admin__supabase-metric">
-              <dt>Supabase products</dt>
-              <dd data-supabase-products>—</dd>
-            </dl>
-            <dl class="admin__supabase-metric">
-              <dt>Latest change</dt>
-              <dd data-supabase-latest>—</dd>
-            </dl>
-            <dl class="admin__supabase-metric">
-              <dt>Local catalog</dt>
-              <dd data-supabase-local>—</dd>
-            </dl>
-          </div>
-          <p class="admin__supabase-updated" data-supabase-updated hidden>
-            Last checked <time data-supabase-updated-time datetime=""></time>
-          </p>
-        </div>
-        <div class="admin__supabase-actions">
-          <button class="btn primary admin__btn" type="button" data-supabase-save disabled>
-            <span data-supabase-save-label>Save to Supabase</span>
-          </button>
-          <button class="btn-ghost admin__btn" type="button" data-supabase-test disabled>
-            <span data-supabase-test-label>Run test</span>
-          </button>
-        </div>
-      </div>
     </section>
 
     <section class="admin__grid">
       <div class="admin__panel" aria-labelledby="product-table-title">
+        <section class="admin__panel-insight admin__performance" aria-labelledby="product-performance-title">
+          <div class="admin__performance-head">
+            <h3 id="product-performance-title">Product performance KPIs</h3>
+            <p class="admin__performance-sub">Track key health indicators across the catalog.</p>
+          </div>
+          <div class="admin__performance-body">
+            <table class="admin-table admin-table--compact">
+              <thead>
+                <tr>
+                  <th scope="col">KPI</th>
+                  <th scope="col">Ask ChatGPT on how too fix it!</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Conversion rate</td>
+                  <td>Landing page traffic is steady but sales are dipping — ask ChatGPT how to refine messaging and offers.</td>
+                </tr>
+                <tr>
+                  <td>Repeat purchase rate</td>
+                  <td>Customers love the templates but aren’t coming back. Ask ChatGPT for ideas to increase follow-up engagement.</td>
+                </tr>
+                <tr>
+                  <td>Refund requests</td>
+                  <td>Support tickets are inching up. Ask ChatGPT for steps to tighten onboarding and documentation.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
         <div class="admin__panel-head">
           <div>
             <h2 id="product-table-title">Product catalog</h2>
@@ -228,36 +260,6 @@
             </table>
           </div>
         </div>
-        <section class="admin__performance" aria-labelledby="product-performance-title">
-          <div class="admin__performance-head">
-            <h3 id="product-performance-title">Product performance KPIs</h3>
-            <p class="admin__performance-sub">Track key health indicators across the catalog.</p>
-          </div>
-          <div class="admin__performance-body">
-            <table class="admin-table admin-table--compact">
-              <thead>
-                <tr>
-                  <th scope="col">KPI</th>
-                  <th scope="col">Ask ChatGPT on how too fix it!</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Conversion rate</td>
-                  <td>Landing page traffic is steady but sales are dipping — ask ChatGPT how to refine messaging and offers.</td>
-                </tr>
-                <tr>
-                  <td>Repeat purchase rate</td>
-                  <td>Customers love the templates but aren’t coming back. Ask ChatGPT for ideas to increase follow-up engagement.</td>
-                </tr>
-                <tr>
-                  <td>Refund requests</td>
-                  <td>Support tickets are inching up. Ask ChatGPT for steps to tighten onboarding and documentation.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
         <footer class="admin__panel-foot">
           <p data-table-meta>0 products</p>
         </footer>

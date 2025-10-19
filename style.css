@@ -1105,6 +1105,9 @@ details.faq summary{cursor:pointer;font-weight:600}
 ----------------------------------------------------- */
 .admin{padding:48px 20px 80px;max-width:1200px;margin:0 auto;display:grid;gap:40px}
 .admin__intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:24px}
+.admin__status-group{display:flex;flex-wrap:wrap;gap:16px;width:100%}
+.admin__status-group>.admin__status-card{flex:1 1 260px}
+.admin__panel-insight{width:100%}
 .admin__headline{max-width:640px;display:grid;gap:12px}
 .admin__eyebrow{font-size:.82rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#6366f1}
 .admin__title{margin:0;font-size:2.4rem;line-height:1.1}
