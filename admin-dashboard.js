@@ -1085,6 +1085,8 @@ if (!rootHook) {
     if (!kpiModalEls.context) return;
     const trigger = button || activeKpiButton;
     const productId = trigger?.dataset?.kpiProductId || null;
+    const productName = trigger?.dataset?.kpiProductName?.trim() || "";
+    const loadingMessage = "Product context is still loading.";
 
     try {
       const context = await buildKpiContext({ productId });
@@ -1096,13 +1098,23 @@ if (!rootHook) {
       } else {
         setKpiStatus("Product context is still loading.", "info");
       }
-      kpiModalEls.context.value = context || "Product context is still loading.";
+      let resolvedContext = context || loadingMessage;
+      if (productName) {
+        resolvedContext = resolvedContext
+          ? `Focus product: ${productName}\n\n${resolvedContext}`
+          : `Focus product: ${productName}`;
+      }
+      kpiModalEls.context.value = resolvedContext;
     } catch (error) {
       console.warn("[admin] Failed to populate Ask AI dialog", error);
       if (!kpiModalOpen || activeKpiButton !== trigger) {
         return;
       }
-      kpiModalEls.context.value = "We couldn't load product context. Try again in a moment.";
+      const errorMessage = "We couldn't load product context. Try again in a moment.";
+      const resolvedContext = productName
+        ? `Focus product: ${productName}\n\n${errorMessage}`
+        : errorMessage;
+      kpiModalEls.context.value = resolvedContext;
       setKpiStatus("We couldn't load product context. Try again in a moment.", "error");
     }
   }
@@ -1118,11 +1130,20 @@ if (!rootHook) {
     }
 
     let questionText = button?.dataset?.kpiQuestion || "";
+    let productName = button?.dataset?.kpiProductName || "";
+    const row = button?.closest("tr");
     if (!questionText && button) {
-      const descriptionCell = button.closest("tr")?.querySelector("td:nth-child(2)");
+      const descriptionCell = row?.querySelector("[data-kpi-description]");
       if (descriptionCell) {
         questionText = descriptionCell.textContent?.trim() || "";
       }
+    }
+    if (!productName && row) {
+      const productCell = row.querySelector("[data-kpi-product]");
+      productName = productCell?.textContent?.trim() || "";
+    }
+    if (productName) {
+      button.dataset.kpiProductName = productName;
     }
     if (kpiModalEls.question) {
       kpiModalEls.question.value = questionText;
