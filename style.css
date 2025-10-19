@@ -1148,6 +1148,22 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin__title{margin:0;font-size:2.4rem;line-height:1.1}
 .admin__lede{margin:0;color:#475569;font-size:1.05rem}
 .admin__status-card{display:flex;align-items:center;gap:16px;background:#0f172a;color:#fff;padding:20px 24px;border-radius:18px;box-shadow:0 20px 50px rgba(15,23,42,.28);min-width:260px}
+.admin__status-card--workspace{flex-direction:column;align-items:stretch;gap:24px}
+.admin__workspace-status{display:flex;align-items:center;gap:16px}
+.admin__sales{display:grid;gap:16px}
+.admin__sales-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.admin__sales-source{margin:0;font-size:.85rem;color:rgba(226,232,240,.75);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin__sales-updated{display:flex;align-items:center;gap:4px}
+.admin__sales-updated time{color:#fff;font-weight:600}
+.admin__sales-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 24px;margin:0}
+.admin__sales-metric{margin:0;display:grid;gap:4px}
+.admin__sales-metric dt{margin:0;font-size:.82rem;font-weight:600;color:rgba(226,232,240,.76);text-transform:uppercase;letter-spacing:.08em}
+.admin__sales-metric dd{margin:0;font-size:1rem;font-weight:600;display:grid;gap:4px;color:#fff}
+.admin__sales-metric dd span:first-child{font-size:1.08rem}
+.admin__sales-change{font-size:.82rem;font-weight:600;color:rgba(226,232,240,.7);display:inline-flex;align-items:center;gap:4px}
+.admin__sales-change[data-trend="up"],.admin__sales-change[data-trend="new"]{color:#4ade80}
+.admin__sales-change[data-trend="down"]{color:#fca5a5}
+.admin__sales-change[data-trend="flat"],.admin__sales-change[data-trend="neutral"]{color:rgba(226,232,240,.65)}
 .admin__status-indicator{width:16px;height:16px;border-radius:50%;background:#38bdf8;box-shadow:0 0 0 4px rgba(56,189,248,.25);transition:background .2s ease,box-shadow .2s ease}
 .admin__status-indicator[data-tone="success"]{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.25)}
 .admin__status-indicator[data-tone="danger"]{background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.28)}
@@ -1285,6 +1301,8 @@ body.admin-guide-open{overflow:hidden}
   .admin__toolbar{width:100%}
   .admin__search input,.admin__filter select{width:100%}
   .admin__status-card{width:100%}
+  .admin__status-card--workspace{gap:20px}
+  .admin__sales-metrics{grid-template-columns:1fr}
   .admin-table__tagline{max-width:none}
   .admin-form__header{flex-direction:column;align-items:flex-start}
   .admin-form__header-actions{width:100%;justify-content:flex-start}
@@ -1293,6 +1311,8 @@ body.admin-guide-open{overflow:hidden}
 @media (max-width:640px){
   .admin__intro{gap:20px}
   .admin__status-card{flex-direction:column;align-items:flex-start}
+  .admin__status-card--workspace{align-items:stretch}
+  .admin__workspace-status{align-items:flex-start}
   .admin__supabase-body{flex-basis:100%}
   .admin__supabase-actions{margin-left:0;width:100%;justify-content:flex-start;gap:10px;flex-wrap:wrap}
   .admin__supabase-actions .btn,.admin__supabase-actions .btn-ghost{flex:1 1 160px;justify-content:center}
