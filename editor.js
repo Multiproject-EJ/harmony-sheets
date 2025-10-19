@@ -1014,16 +1014,21 @@ function handlePreviewPublish() {
     window.localStorage.setItem(PREVIEW_STORAGE_KEY, JSON.stringify(payload));
     const count = products.length;
     setStatus(
-      `Preview updated for ${count} product${count === 1 ? '' : 's'}. Reload storefront pages to review.`,
+      `Preview updated for ${count} product${count === 1 ? '' : 's'}. Publishing live via Supabase…`,
       'success'
     );
     setFormFeedback(
-      'Preview data saved locally for the next 12 hours. Open product pages, the catalog, or the Discover Templates menu to see the changes.',
+      'Preview data saved locally for the next 12 hours and is being published to Supabase so everyone can see the latest catalog.',
       'info'
     );
     window.dispatchEvent(
       new CustomEvent('admin:preview-published', {
-        detail: { count, updatedAt: payload.updatedAt, expiresAt: payload.expiresAt }
+        detail: {
+          count,
+          updatedAt: payload.updatedAt,
+          expiresAt: payload.expiresAt,
+          shouldPublish: true
+        }
       })
     );
   } catch (error) {
