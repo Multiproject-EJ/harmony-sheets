@@ -46,6 +46,10 @@ if (!rootHook) {
     saveButtonLabel: document.querySelector("[data-supabase-save-label]")
   };
 
+  const supabaseImportEls = {
+    button: document.querySelector("[data-import-supabase]")
+  };
+
   const adminSheetLink = document.querySelector("[data-admin-sheet-link]");
 
   if (adminSheetLink) {
@@ -104,6 +108,11 @@ if (!rootHook) {
       "Save to Supabase"
   };
 
+  const supabaseImportDefaults = {
+    label:
+      supabaseImportEls.button?.textContent?.trim() || "Fetch last data from Supabase"
+  };
+
   const supabaseMetricsState = {
     count: null,
     latest: null,
@@ -148,6 +157,8 @@ if (!rootHook) {
   let supabaseTestPromise = null;
   let supabaseSavePromise = null;
   let supabaseSaverReady = false;
+  let supabaseImportPromise = null;
+  let supabaseImporterReady = false;
   let editorModule = null;
   let catalogSnapshot = null;
   let catalogUnsubscribe = null;
@@ -205,6 +216,24 @@ if (!rootHook) {
       } else {
         saveButton.textContent = label;
       }
+    }
+  }
+
+  function setSupabaseImportButtonState({ disabled, label } = {}) {
+    const { button } = supabaseImportEls;
+    if (!button) return;
+
+    if (typeof disabled === "boolean") {
+      button.disabled = disabled;
+      if (disabled) {
+        button.setAttribute("aria-disabled", "true");
+      } else {
+        button.removeAttribute("aria-disabled");
+      }
+    }
+
+    if (typeof label === "string") {
+      button.textContent = label;
     }
   }
 
@@ -694,6 +723,309 @@ if (!rootHook) {
       count: typeof count === "number" ? count : null,
       latest
     };
+  }
+
+  function toNumber(value) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === "string") {
+      const parsed = Number.parseFloat(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+    return null;
+  }
+
+  function formatPriceDisplayValue(amount, currency, display) {
+    if (typeof display === "string" && display.trim()) {
+      return display.trim();
+    }
+
+    const numericAmount = toNumber(amount);
+    if (!Number.isFinite(numericAmount)) {
+      return "";
+    }
+
+    const resolvedCurrency = (typeof currency === "string" && currency.trim()) || "USD";
+
+    try {
+      const formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: resolvedCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+      return formatter.format(numericAmount);
+    } catch (error) {
+      console.warn("[admin] Failed to format Supabase price", error);
+      return `${numericAmount} ${resolvedCurrency}`.trim();
+    }
+  }
+
+  function sortByPosition(rows) {
+    if (!Array.isArray(rows)) {
+      return [];
+    }
+    return rows
+      .slice()
+      .sort((a, b) => {
+        const aPos = typeof a?.position === "number" ? a.position : Number.MAX_SAFE_INTEGER;
+        const bPos = typeof b?.position === "number" ? b.position : Number.MAX_SAFE_INTEGER;
+        return aPos - bPos;
+      });
+  }
+
+  function mapSupabaseRowToProduct(row) {
+    if (!row || typeof row !== "object") {
+      return null;
+    }
+
+    const slug = cleanIdentifier(row.slug) || cleanIdentifier(row.id);
+    if (!slug) {
+      return null;
+    }
+
+    const priceAmount = toNumber(row.price_amount);
+    const priceCurrency = cleanText(row.price_currency)?.toUpperCase() || null;
+    const priceDisplay = formatPriceDisplayValue(priceAmount, priceCurrency, cleanText(row.price_display));
+
+    const lifeAreas = sortByPosition(row.product_life_areas)
+      .map((item) => cleanText(item?.life_area || item?.lifeArea))
+      .filter(Boolean);
+
+    const badges = sortByPosition(row.product_badges)
+      .map((item) => cleanText(item?.badge))
+      .filter(Boolean);
+
+    const features = sortByPosition(row.product_features)
+      .map((item) => cleanText(item?.feature))
+      .filter(Boolean);
+
+    const included = sortByPosition(row.product_included_items)
+      .map((item) => cleanText(item?.included_item || item?.item))
+      .filter(Boolean);
+
+    const gallery = sortByPosition(row.product_gallery)
+      .map((item) => {
+        if (!item || typeof item !== "object") return null;
+        const src = cleanText(item.image_src || item.src);
+        if (!src) return null;
+        const alt = cleanText(item.image_alt || item.alt);
+        return { src, alt: alt || "" };
+      })
+      .filter(Boolean);
+
+    const faqs = sortByPosition(row.product_faqs)
+      .map((item) => {
+        if (!item || typeof item !== "object") return null;
+        const question = cleanText(item.question || item.q);
+        const answer = cleanText(item.answer || item.a);
+        if (!question || !answer) return null;
+        return { q: question, a: answer };
+      })
+      .filter(Boolean);
+
+    const benefits = sortByPosition(row.product_benefits)
+      .map((item) => {
+        if (!item || typeof item !== "object") return null;
+        const title = cleanText(item.title);
+        const description = cleanText(item.description || item.desc);
+        if (!title || !description) return null;
+        return { title, desc: description };
+      })
+      .filter(Boolean);
+
+    const socialSource = Array.isArray(row.product_social_proof)
+      ? row.product_social_proof.find((entry) => entry && typeof entry === "object")
+      : row.product_social_proof;
+
+    let socialProof = null;
+    if (socialSource && typeof socialSource === "object") {
+      const stars = cleanText(socialSource.stars);
+      const quote = cleanText(socialSource.quote);
+      if (stars || quote) {
+        socialProof = { stars: stars || null, quote: quote || null };
+      }
+    }
+
+    const product = {
+      id: slug,
+      slug,
+      name: cleanText(row.name) || slug,
+      tagline: cleanText(row.tagline),
+      description: cleanText(row.description),
+      price: priceDisplay || "",
+      heroImage: cleanText(row.hero_image),
+      colorImage: cleanText(row.color_image),
+      colorCaption: cleanText(row.color_caption),
+      demoVideo: cleanText(row.demo_video),
+      demoPoster: cleanText(row.demo_poster),
+      virtualDemo: cleanText(row.virtual_demo),
+      pricingTitle: cleanText(row.pricing_title),
+      pricingSub: cleanText(row.pricing_sub),
+      stripe: cleanText(row.stripe_url),
+      etsy: cleanText(row.etsy_url),
+      lifeAreas,
+      badges,
+      features,
+      included,
+      gallery,
+      faqs,
+      benefits,
+      draft: Boolean(row.draft)
+    };
+
+    if (socialProof) {
+      product.socialProof = socialProof;
+    }
+
+    if (Number.isFinite(priceAmount)) {
+      product.priceAmount = priceAmount;
+    }
+
+    if (priceCurrency) {
+      product.priceCurrency = priceCurrency;
+    }
+
+    return product;
+  }
+
+  async function fetchSupabaseCatalogRows() {
+    if (!supabaseClient) {
+      throw new Error("Supabase client is not ready.");
+    }
+
+    const query = supabaseClient
+      .from("products")
+      .select(
+        `
+          id,
+          slug,
+          name,
+          tagline,
+          description,
+          price_amount,
+          price_currency,
+          price_display,
+          draft,
+          hero_image,
+          color_image,
+          color_caption,
+          demo_video,
+          demo_poster,
+          virtual_demo,
+          pricing_title,
+          pricing_sub,
+          stripe_url,
+          etsy_url,
+          product_life_areas ( life_area, position ),
+          product_badges ( badge, position ),
+          product_features ( feature, position ),
+          product_included_items ( included_item, position ),
+          product_gallery ( image_src, image_alt, position ),
+          product_faqs ( question, answer, position ),
+          product_benefits ( title, description, position ),
+          product_social_proof ( stars, quote )
+        `
+      )
+      .order("slug", { ascending: true })
+      .order("position", { foreignTable: "product_life_areas", ascending: true })
+      .order("position", { foreignTable: "product_badges", ascending: true })
+      .order("position", { foreignTable: "product_features", ascending: true })
+      .order("position", { foreignTable: "product_included_items", ascending: true })
+      .order("position", { foreignTable: "product_gallery", ascending: true })
+      .order("position", { foreignTable: "product_faqs", ascending: true })
+      .order("position", { foreignTable: "product_benefits", ascending: true });
+
+    const { data, error } = await query;
+    if (error) {
+      throw error;
+    }
+
+    return Array.isArray(data) ? data : [];
+  }
+
+  function importSupabaseCatalog() {
+    if (!rootHook) {
+      return Promise.resolve();
+    }
+
+    if (supabaseImportPromise) {
+      return supabaseImportPromise;
+    }
+
+    supabaseImportPromise = (async () => {
+      if (!supabaseClient) {
+        throw new Error("Supabase client is not ready.");
+      }
+
+      setSupabaseImportButtonState({ disabled: true, label: "Fetching…" });
+
+      let workspaceModule = null;
+
+      try {
+        workspaceModule = await loadEditorModule();
+        if (!workspaceModule || typeof workspaceModule.replaceCatalog !== "function") {
+          throw new Error("Catalog workspace is not ready.");
+        }
+
+        updateSupabaseStatus("Fetching latest catalog from Supabase…", "info");
+        if (typeof workspaceModule.setWorkspaceStatus === "function") {
+          workspaceModule.setWorkspaceStatus("Fetching latest catalog from Supabase…", "info");
+        }
+
+        const rows = await fetchSupabaseCatalogRows();
+        const products = rows.map((row) => mapSupabaseRowToProduct(row)).filter(Boolean);
+        const count = products.length;
+        const statusMessage = count
+          ? `Loaded ${count} product${count === 1 ? "" : "s"} from Supabase.`
+          : "Supabase catalog is empty.";
+
+        workspaceModule.replaceCatalog(products, {
+          sourceLabel: "Supabase",
+          statusMessage,
+          statusTone: count ? "success" : "warning",
+          persistLocal: true,
+          updateBaseline: true,
+          reason: "supabase-import"
+        });
+
+        updateSupabaseStatus("Supabase catalog imported into workspace.", "success");
+        setSupabaseUpdated(new Date());
+
+        await runSupabaseTest({ source: "supabase-import" });
+      } catch (error) {
+        const formatted = formatError(error);
+        console.error("[admin] Supabase import failed", error);
+        updateSupabaseStatus(`Supabase import failed: ${formatted}`, "danger");
+        if (workspaceModule && typeof workspaceModule.setWorkspaceStatus === "function") {
+          workspaceModule.setWorkspaceStatus(`Supabase import failed: ${formatted}`, "danger");
+        }
+        throw error;
+      } finally {
+        setSupabaseImportButtonState({ disabled: false, label: supabaseImportDefaults.label });
+      }
+    })();
+
+    return supabaseImportPromise.finally(() => {
+      supabaseImportPromise = null;
+    });
+  }
+
+  function initializeSupabaseImporter() {
+    if (supabaseImporterReady) return;
+    if (!supabaseImportEls.button) return;
+
+    supabaseImportEls.button.addEventListener("click", () => {
+      importSupabaseCatalog().catch(() => {
+        // Error handling is managed inside importSupabaseCatalog via status updates.
+      });
+    });
+
+    supabaseImporterReady = true;
+    setSupabaseImportButtonState({ disabled: false, label: supabaseImportDefaults.label });
   }
 
   function formatError(error) {
@@ -1820,6 +2152,7 @@ if (!rootHook) {
         initializeSupabaseTester();
         initializeSupabaseSaver();
         await loadEditorModule();
+        initializeSupabaseImporter();
         await runSupabaseTest({ initial: true, source: "initial" });
       }
     } catch (error) {
@@ -1840,6 +2173,7 @@ if (!rootHook) {
       initializeSupabaseTester();
       initializeSupabaseSaver();
       await loadEditorModule();
+      initializeSupabaseImporter();
       await runSupabaseTest({ initial: true, source: "initial" });
     });
     authSubscription = listener;

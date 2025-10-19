@@ -983,6 +983,59 @@ function handleReset() {
   closeProductModal({ restoreFocus: false });
 }
 
+export function replaceCatalog(products, options = {}) {
+  const {
+    sourceLabel = 'Catalog workspace',
+    statusMessage = null,
+    statusTone = 'success',
+    persistLocal = true,
+    updateBaseline = false,
+    reason = 'replace'
+  } = options || {};
+
+  const normalized = Array.isArray(products) ? products.map((product) => normalizeProduct(product)) : [];
+  state.products = clone(normalized);
+  if (updateBaseline) {
+    state.baseline = clone(normalized);
+  }
+
+  state.selectedId = null;
+
+  if (persistLocal && window.localStorage) {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state.products));
+    } catch (error) {
+      console.warn('[editor] Failed to persist catalog', error);
+    }
+  }
+
+  setWorkspaceSource(sourceLabel);
+  if (statusMessage) {
+    setStatus(statusMessage, statusTone);
+  }
+
+  setFormFeedback(null);
+  renderTable();
+  notifyCatalogSubscribers(reason);
+
+  if (els.formPlaceholder) {
+    els.formPlaceholder.hidden = false;
+  }
+  if (els.form) {
+    els.form.reset();
+  }
+  if (formFields.draft) {
+    formFields.draft.checked = false;
+  }
+
+  updateViewProductButton(null);
+  closeProductModal({ restoreFocus: false });
+}
+
+export function setWorkspaceStatus(message, tone = 'neutral') {
+  setStatus(message, tone);
+}
+
 function handleKeyboardNavigation(event) {
   if (!['ArrowUp', 'ArrowDown'].includes(event.key)) return;
   const rows = Array.from(els.tableBody?.querySelectorAll('[data-row]') || []);
