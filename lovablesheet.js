@@ -31,6 +31,7 @@ let zoomOutButton = null;
 let zoomInButton = null;
 let zoomDisplayEl = null;
 let zoomSliderEl = null;
+let zoomFitButton = null;
 let currentBoardId = DEFAULT_BOARD_ID;
 let defaultBoardSnapshot = [];
 let boardsCache = new Map();
@@ -167,6 +168,11 @@ function updateZoomControls() {
   if (zoomInButton) {
     zoomInButton.disabled = boardScale >= BOARD_SCALE_MAX - BOARD_SCALE_TOLERANCE;
   }
+
+  if (zoomFitButton) {
+    const hasNotes = Boolean(workspaceEl?.querySelector("[data-note]"));
+    zoomFitButton.disabled = !hasNotes;
+  }
 }
 
 function applyBoardScale() {
@@ -197,6 +203,48 @@ function setBoardScale(nextScale) {
 
 function adjustBoardScale(delta) {
   setBoardScale(boardScale + delta);
+}
+
+function getBoardFitScale() {
+  if (!workspaceEl) return boardScale;
+  const notes = Array.from(workspaceEl.querySelectorAll("[data-note]"));
+  if (!notes.length) {
+    return boardScale;
+  }
+
+  const boardWidth = workspaceEl.clientWidth;
+  const boardHeight = workspaceEl.clientHeight;
+  if (boardWidth <= 0 || boardHeight <= 0) {
+    return boardScale;
+  }
+
+  let maxRight = 0;
+  let maxBottom = 0;
+
+  notes.forEach((note) => {
+    const x = Number.parseFloat(note.dataset.x || "0");
+    const y = Number.parseFloat(note.dataset.y || "0");
+    const width = note.offsetWidth;
+    const height = note.offsetHeight;
+
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      return;
+    }
+
+    maxRight = Math.max(maxRight, x + width);
+    maxBottom = Math.max(maxBottom, y + height);
+  });
+
+  if (maxRight <= 0 || maxBottom <= 0) {
+    return boardScale;
+  }
+
+  const fitScale = Math.min(boardWidth / maxRight, boardHeight / maxBottom);
+  if (!Number.isFinite(fitScale) || fitScale <= 0) {
+    return boardScale;
+  }
+
+  return clamp(fitScale, BOARD_SCALE_MIN, BOARD_SCALE_MAX);
 }
 
 function updateGroupButtonState(note, isActive) {
@@ -440,6 +488,8 @@ function createNewStickyNote() {
     bodyEl?.focus?.({ preventScroll: true });
   });
 
+  updateZoomControls();
+
   return noteElement;
 }
 
@@ -458,6 +508,8 @@ function renderBoard(notes = []) {
       setupNote(noteElement);
     }
   });
+
+  updateZoomControls();
 }
 
 function setBoardStatus(message, tone = "neutral") {
@@ -728,6 +780,7 @@ function initializeBrainBoard() {
   zoomInButton = boardMenuEl?.querySelector("[data-board-zoom-in]") || null;
   zoomDisplayEl = boardMenuEl?.querySelector("[data-board-zoom-display]") || null;
   zoomSliderEl = boardMenuEl?.querySelector("[data-board-zoom-slider]") || null;
+  zoomFitButton = boardMenuEl?.querySelector("[data-board-zoom-fit]") || null;
 
   const notes = Array.from(workspaceEl.querySelectorAll("[data-note]"));
   notes.forEach((note) => setupNote(note));
@@ -770,6 +823,12 @@ function initializeBrainBoard() {
   if (zoomInButton) {
     zoomInButton.addEventListener("click", () => {
       adjustBoardScale(BOARD_SCALE_STEP);
+    });
+  }
+
+  if (zoomFitButton) {
+    zoomFitButton.addEventListener("click", () => {
+      setBoardScale(getBoardFitScale());
     });
   }
 
