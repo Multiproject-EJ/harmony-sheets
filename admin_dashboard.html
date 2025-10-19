@@ -206,20 +206,57 @@
                 <tr>
                   <th scope="col">KPI</th>
                   <th scope="col">Ask ChatGPT on how too fix it!</th>
+                  <th scope="col">Ask AI</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td>Conversion rate</td>
                   <td>Landing page traffic is steady but sales are dipping — ask ChatGPT how to refine messaging and offers.</td>
+                  <td class="admin-kpi__ask-cell" data-label="Ask AI">
+                    <button
+                      type="button"
+                      class="admin-kpi__ask-btn"
+                      data-kpi-ask-button
+                      data-kpi-name="Conversion rate"
+                      data-kpi-product-id="pomodoro"
+                      data-kpi-question="Landing page traffic is steady but sales are dipping. How can we refine the product messaging and offers to improve conversion rates?"
+                    >
+                      Ask
+                    </button>
+                  </td>
                 </tr>
                 <tr>
                   <td>Repeat purchase rate</td>
                   <td>Customers love the templates but aren’t coming back. Ask ChatGPT for ideas to increase follow-up engagement.</td>
+                  <td class="admin-kpi__ask-cell" data-label="Ask AI">
+                    <button
+                      type="button"
+                      class="admin-kpi__ask-btn"
+                      data-kpi-ask-button
+                      data-kpi-name="Repeat purchase rate"
+                      data-kpi-product-id="budget-dashboard"
+                      data-kpi-question="Customers enjoy the templates but rarely return. What retention and follow-up strategies should we try to increase repeat purchases?"
+                    >
+                      Ask
+                    </button>
+                  </td>
                 </tr>
                 <tr>
                   <td>Refund requests</td>
                   <td>Support tickets are inching up. Ask ChatGPT for steps to tighten onboarding and documentation.</td>
+                  <td class="admin-kpi__ask-cell" data-label="Ask AI">
+                    <button
+                      type="button"
+                      class="admin-kpi__ask-btn"
+                      data-kpi-ask-button
+                      data-kpi-name="Refund requests"
+                      data-kpi-product-id="pomodoro-pro"
+                      data-kpi-question="Refund requests are increasing alongside support tickets. How can we tighten onboarding and documentation to reduce refunds?"
+                    >
+                      Ask
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -468,6 +505,39 @@
     </section>
   </section>
 </main>
+
+<div class="admin-ai-modal" data-kpi-modal hidden>
+  <div class="admin-ai-modal__backdrop" data-kpi-modal-dismiss></div>
+  <div
+    class="admin-ai-modal__dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="kpi-ask-title"
+    data-kpi-modal-dialog
+    tabindex="-1"
+  >
+    <button class="admin-ai-modal__close" type="button" data-kpi-modal-dismiss aria-label="Close Ask AI dialog">×</button>
+    <div class="admin-ai-modal__body">
+      <p class="admin-ai-modal__eyebrow">Ask Harmony AI</p>
+      <h2 class="admin-ai-modal__title" id="kpi-ask-title">Ask about <span data-kpi-topic>your KPI</span></h2>
+      <p class="admin-ai-modal__intro">Review the suggested prompt and context, then send it to your AI assistant.</p>
+      <label class="admin-ai-modal__field" for="kpi-question">
+        <span>Question for ChatGPT</span>
+        <textarea id="kpi-question" rows="4" data-kpi-question-field></textarea>
+      </label>
+      <label class="admin-ai-modal__field" for="kpi-context">
+        <span>Product context</span>
+        <textarea id="kpi-context" rows="6" data-kpi-context-field readonly></textarea>
+      </label>
+      <p class="admin-ai-modal__status" data-kpi-status aria-live="polite"></p>
+      <div class="admin-ai-modal__actions">
+        <button class="btn-pill" type="button" data-kpi-submit>Ask AI</button>
+        <button class="btn-ghost" type="button" data-kpi-modal-dismiss>Cancel</button>
+      </div>
+      <p class="admin-ai-modal__footnote">Copy this prompt and paste it into ChatGPT to continue the conversation.</p>
+    </div>
+  </div>
+</div>
 
 <div class="admin-guide-modal" data-editing-guide-modal hidden>
   <div class="admin-guide-modal__backdrop" data-editing-guide-dismiss></div>
