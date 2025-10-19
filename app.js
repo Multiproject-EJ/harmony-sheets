@@ -717,6 +717,26 @@ App.escapeHtml = function(value) {
     .replace(/'/g, "&#39;");
 };
 
+App.formatDebugValue = function(value) {
+  if (value === null) return "null";
+  if (typeof value === "undefined") return "undefined";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (value instanceof Error) {
+    const base = value.message ? `${value.name || "Error"}: ${value.message}` : value.toString();
+    return value.stack || base;
+  }
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch (err) {
+    try {
+      return String(value);
+    } catch (fallbackErr) {
+      return "[unserializable value]";
+    }
+  }
+};
+
 App.slugify = function(value) {
   if (!value) return "";
   return String(value)
@@ -3766,81 +3786,218 @@ App.showAddToCartFeedback = function(productId) {
 };
 
 /*****************************************************
+ * Product debug utilities (temporary)
+ *****************************************************/
+App.productDebugEntries = [];
+
+App.recordProductDebugEntry = function(entry) {
+  if (!entry || typeof entry !== "object") return;
+  if (!Array.isArray(App.productDebugEntries)) {
+    App.productDebugEntries = [];
+  }
+  App.productDebugEntries.push(entry);
+  if (App.productDebugEntries.length > 6) {
+    App.productDebugEntries.shift();
+  }
+  App.renderProductDebugPanel();
+};
+
+App.renderProductDebugPanel = function() {
+  const wrapper = App.qs("#product-debug");
+  const content = App.qs("#product-debug-content");
+  if (!wrapper || !content) return;
+
+  const entries = Array.isArray(App.productDebugEntries) ? App.productDebugEntries : [];
+  if (!entries.length) {
+    wrapper.hidden = true;
+    content.innerHTML = "";
+    return;
+  }
+
+  const createSection = (title, data, { showWhenEmpty = false } = {}) => {
+    if (!showWhenEmpty && (data === undefined || data === null)) {
+      return "";
+    }
+    const formatted = App.escapeHtml(App.formatDebugValue(data));
+    const safeTitle = App.escapeHtml(title);
+    return `
+      <details class="product-debug__section" open>
+        <summary>${safeTitle}</summary>
+        <pre class="product-debug__code">${formatted}</pre>
+      </details>
+    `;
+  };
+
+  const html = entries
+    .map(entry => {
+      const summaryParts = [
+        entry.stage ? `<span><strong>Stage:</strong> ${App.escapeHtml(entry.stage)}</span>` : "",
+        entry.timestamp ? `<span><strong>Timestamp:</strong> ${App.escapeHtml(entry.timestamp)}</span>` : "",
+        entry.productId ? `<span><strong>Product ID:</strong> ${App.escapeHtml(entry.productId)}</span>` : ""
+      ].filter(Boolean);
+
+      if (entry.hasError) {
+        summaryParts.push(`<span class="product-debug__badge">Error</span>`);
+      }
+
+      const sections = [
+        createSection("Location", entry.location, { showWhenEmpty: true }),
+        createSection("Supabase config", entry.supabaseConfig, { showWhenEmpty: true }),
+        createSection("Supabase products", entry.supabaseProducts),
+        createSection("Supabase products error", entry.supabaseProductsError),
+        createSection("Supabase status overrides", entry.supabaseStatusOverrides),
+        createSection("Supabase status overrides error", entry.supabaseStatusOverridesError),
+        createSection("Loaded products", entry.loadedProducts),
+        createSection("Matched product", entry.matchedProduct),
+        createSection("DOM checks", entry.domChecks, { showWhenEmpty: true }),
+        createSection("Product match check", entry.productMatchCheck)
+      ].filter(Boolean);
+
+      return `
+        <article class="product-debug__entry${entry.hasError ? " product-debug__entry--error" : ""}">
+          <div class="product-debug__summary">${summaryParts.join(" ")}</div>
+          <div class="product-debug__details">${sections.join("")}</div>
+        </article>
+      `;
+    })
+    .join("");
+
+  wrapper.hidden = false;
+  content.innerHTML = html;
+};
+
+/*****************************************************
  * Product detail (product.html)
  *****************************************************/
 App.debugProductPage = async function(context = {}) {
   const stage = context.stage || "unknown";
   const productId = context.productId || null;
   const label = `[HS Product Debug][${stage}]`;
-
-  if (typeof console === "undefined" || !console.groupCollapsed) {
-    return;
+  const canGroup = typeof console !== "undefined" && typeof console.groupCollapsed === "function";
+  if (canGroup) {
+    console.groupCollapsed(label);
   }
 
-  console.groupCollapsed(label);
-  try {
-    const timestamp = new Date().toISOString();
-    console.log("timestamp", timestamp);
-    console.log("productId", productId);
-    console.log("location", {
+  const entry = {
+    stage,
+    productId,
+    timestamp: new Date().toISOString(),
+    location: {
       href: window.location.href,
       search: window.location.search,
       pathname: window.location.pathname
-    });
+    }
+  };
+
+  try {
+    if (typeof console !== "undefined") {
+      console.log("timestamp", entry.timestamp);
+      console.log("productId", productId);
+      console.log("location", entry.location);
+    }
 
     const config = App.getSupabaseConfig();
-    console.log("supabaseConfig", config ? { hasConfig: true, url: config.url } : { hasConfig: false });
+    entry.supabaseConfig = config ? { hasConfig: true, url: config.url } : { hasConfig: false };
+    if (typeof console !== "undefined") {
+      console.log("supabaseConfig", entry.supabaseConfig);
+    }
 
     try {
       const supabaseProducts = await App.fetchSupabaseProducts();
-      console.log("supabaseProducts", {
+      entry.supabaseProducts = {
         received: Array.isArray(supabaseProducts),
         count: Array.isArray(supabaseProducts) ? supabaseProducts.length : 0,
         sample: Array.isArray(supabaseProducts) && supabaseProducts.length ? supabaseProducts[0] : null
-      });
+      };
+      if (typeof console !== "undefined") {
+        console.log("supabaseProducts", entry.supabaseProducts);
+      }
     } catch (error) {
-      console.error("supabaseProductsError", error);
+      entry.supabaseProductsError = {
+        message: error && error.message ? error.message : String(error)
+      };
+      if (error && typeof error === "object" && "stack" in error) {
+        entry.supabaseProductsError.stack = error.stack;
+      }
+      if (typeof console !== "undefined") {
+        console.error("supabaseProductsError", error);
+      }
     }
 
     try {
       const overrides = await App.fetchSupabaseProductStatuses();
-      console.log("supabaseStatusOverrides", {
-        type: overrides instanceof Map ? "Map" : typeof overrides,
-        size: overrides instanceof Map ? overrides.size : null
-      });
+      entry.supabaseStatusOverrides = overrides instanceof Map
+        ? {
+            type: "Map",
+            size: overrides.size,
+            entries: Array.from(overrides.entries()).slice(0, 10)
+          }
+        : overrides;
+      if (typeof console !== "undefined") {
+        console.log("supabaseStatusOverrides", {
+          type: overrides instanceof Map ? "Map" : typeof overrides,
+          size: overrides instanceof Map ? overrides.size : null
+        });
+      }
     } catch (error) {
-      console.error("supabaseStatusOverridesError", error);
+      entry.supabaseStatusOverridesError = {
+        message: error && error.message ? error.message : String(error)
+      };
+      if (error && typeof error === "object" && "stack" in error) {
+        entry.supabaseStatusOverridesError.stack = error.stack;
+      }
+      if (typeof console !== "undefined") {
+        console.error("supabaseStatusOverridesError", error);
+      }
     }
 
     if (context.products) {
-      console.log("loadedProducts", {
-        count: Array.isArray(context.products) ? context.products.length : 0
-      });
+      entry.loadedProducts = {
+        count: Array.isArray(context.products) ? context.products.length : 0,
+        sample: Array.isArray(context.products) && context.products.length ? context.products[0] : null
+      };
+      if (typeof console !== "undefined") {
+        console.log("loadedProducts", { count: entry.loadedProducts.count });
+      }
     }
 
     if (context.product) {
-      console.log("matchedProduct", {
+      entry.matchedProduct = {
         id: context.product.id,
         name: context.product.name,
         draft: context.product.draft || false,
         hasDescription: Boolean(context.product.description)
-      });
+      };
+      if (typeof console !== "undefined") {
+        console.log("matchedProduct", entry.matchedProduct);
+      }
     }
 
-    const domChecks = {
+    entry.domChecks = {
       nameEl: Boolean(App.qs("#p-name")),
       priceEl: Boolean(App.qs("#p-price")),
       descriptionEl: Boolean(App.qs("#p-description")),
       heroEl: Boolean(App.qs("#p-parallax"))
     };
-    console.log("domChecks", domChecks);
+    if (typeof console !== "undefined") {
+      console.log("domChecks", entry.domChecks);
+    }
 
     if (context.products && productId && Array.isArray(context.products)) {
-      const hasMatch = context.products.some(p => p && p.id === productId);
-      console.log("productMatchCheck", { productId, hasMatch });
+      entry.productMatchCheck = {
+        productId,
+        hasMatch: context.products.some(p => p && p.id === productId)
+      };
+      if (typeof console !== "undefined") {
+        console.log("productMatchCheck", entry.productMatchCheck);
+      }
     }
   } finally {
-    console.groupEnd();
+    entry.hasError = Boolean(entry.supabaseProductsError || entry.supabaseStatusOverridesError);
+    App.recordProductDebugEntry(entry);
+    if (canGroup) {
+      console.groupEnd();
+    }
   }
 };
 
