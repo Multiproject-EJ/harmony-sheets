@@ -10,7 +10,21 @@ const PAGE_PATH = (() => {
   return SUPPORTED_PAGE_PATHS.has(currentPath) ? currentPath : DEFAULT_PAGE_PATH;
 })();
 const BRAIN_BOARD_GROUP_RADIUS = 220;
-const BRAIN_BOARD_COLORS = new Set(["sunshine", "meadow", "ocean", "blossom"]);
+const CUSTOM_COLOR_ID = "custom";
+const BRAIN_BOARD_COLOR_PRESETS = [
+  { id: "sunshine", label: "Sunshine yellow", value: "#fef3c7" },
+  { id: "meadow", label: "Meadow green", value: "#dcfce7" },
+  { id: "ocean", label: "Ocean blue", value: "#dbeafe" },
+  { id: "blossom", label: "Blossom pink", value: "#fde2e7" },
+  { id: "amber", label: "Amber glow", value: "#fef9c3" },
+  { id: "coral", label: "Coral sunrise", value: "#ffedd5" },
+  { id: "lavender", label: "Lavender bloom", value: "#ede9fe" },
+  { id: "mint", label: "Mint fresh", value: "#ccfbf1" },
+  { id: "sky", label: "Sky blue", value: "#bae6fd" },
+  { id: "graphite", label: "Graphite gray", value: "#e2e8f0" }
+];
+const BRAIN_BOARD_COLOR_PRESET_MAP = new Map(BRAIN_BOARD_COLOR_PRESETS.map((preset) => [preset.id, preset]));
+const BRAIN_BOARD_PRESET_IDS = new Set(BRAIN_BOARD_COLOR_PRESETS.map((preset) => preset.id));
 const DEFAULT_BOARD_ID = "default";
 const BOARD_STATUS_CLEAR_DELAY = 4000;
 const BOARD_SCALE_DEFAULT = 1;
@@ -102,10 +116,77 @@ function distanceBetween(a, b) {
   return Math.hypot(dx, dy);
 }
 
+function normalizeHexColor(value) {
+  if (typeof value !== "string") return "";
+  const cleaned = value.trim();
+  if (!/^#?[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/.test(cleaned)) {
+    return "";
+  }
+  const hex = cleaned.startsWith("#") ? cleaned.slice(1) : cleaned;
+  const normalized = hex.length === 3
+    ? hex.split("").map((char) => char + char).join("")
+    : hex.padStart(6, "0");
+  return `#${normalized.toLowerCase()}`;
+}
+
+function hexToRgb(hex) {
+  const normalized = normalizeHexColor(hex);
+  if (!normalized) return null;
+  const value = normalized.slice(1);
+  const bigint = Number.parseInt(value, 16);
+  if (!Number.isFinite(bigint)) return null;
+  return {
+    r: (bigint >> 16) & 255,
+    g: (bigint >> 8) & 255,
+    b: bigint & 255
+  };
+}
+
+function relativeLuminance(hex) {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return 0;
+  const normalizeChannel = (channel) => {
+    const c = channel / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  const r = normalizeChannel(rgb.r);
+  const g = normalizeChannel(rgb.g);
+  const b = normalizeChannel(rgb.b);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function mixHexColors(colorA, colorB, weight = 0.5) {
+  const rgbA = hexToRgb(colorA);
+  const rgbB = hexToRgb(colorB);
+  if (!rgbA || !rgbB) return normalizeHexColor(colorA) || "";
+  const clampedWeight = clamp(Number(weight), 0, 1);
+  const mix = (a, b) => Math.round(a * (1 - clampedWeight) + b * clampedWeight);
+  const componentToHex = (component) => component.toString(16).padStart(2, "0");
+  const r = mix(rgbA.r, rgbB.r);
+  const g = mix(rgbA.g, rgbB.g);
+  const b = mix(rgbA.b, rgbB.b);
+  return `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
+}
+
+function normalizeNoteColorValue(color) {
+  if (typeof color !== "string") {
+    return "sunshine";
+  }
+  const trimmed = color.trim();
+  if (BRAIN_BOARD_PRESET_IDS.has(trimmed)) {
+    return trimmed;
+  }
+  const normalizedHex = normalizeHexColor(trimmed);
+  if (normalizedHex) {
+    return normalizedHex;
+  }
+  return "sunshine";
+}
+
 function cloneNotes(notes = []) {
   if (!Array.isArray(notes)) return [];
   return notes.map((note) => ({
-    color: BRAIN_BOARD_COLORS.has(note.color) ? note.color : "sunshine",
+    color: normalizeNoteColorValue(note.color),
     x: Number.isFinite(Number(note.x)) ? Number(note.x) : 0,
     y: Number.isFinite(Number(note.y)) ? Number(note.y) : 0,
     label: typeof note.label === "string" ? note.label : "",
@@ -130,7 +211,9 @@ class StickyBoard {
     this.scaleStep = BOARD_SCALE_STEP;
     this.scaleTolerance = BOARD_SCALE_TOLERANCE;
     this.groupRadius = BRAIN_BOARD_GROUP_RADIUS;
-    this.colors = BRAIN_BOARD_COLORS;
+    this.colorPresets = BRAIN_BOARD_COLOR_PRESET_MAP;
+    this.presetIds = BRAIN_BOARD_PRESET_IDS;
+    this.defaultPreset = this.colorPresets.get("sunshine") ?? { value: "#fef3c7" };
 
     this.scale = BOARD_SCALE_DEFAULT;
     const initialScaleAttr = this.root?.dataset.boardInitialScale;
@@ -150,6 +233,24 @@ class StickyBoard {
     this.zoomFitButton = this.menu?.querySelector("[data-board-zoom-fit]") ?? null;
 
     this.controlsBound = false;
+    this.activeColorMenu = null;
+    this.handleDocumentPointerDown = (event) => {
+      if (!this.activeColorMenu) return;
+      const { menu, toggle } = this.activeColorMenu;
+      if (menu.contains(event.target) || toggle.contains(event.target)) {
+        return;
+      }
+      this.closeColorMenu();
+    };
+    this.handleDocumentKeyDown = (event) => {
+      if (!this.activeColorMenu) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        const { toggle } = this.activeColorMenu;
+        this.closeColorMenu();
+        toggle?.focus?.();
+      }
+    };
   }
 
   initialize() {
@@ -334,18 +435,135 @@ class StickyBoard {
   }
 
   updateColorControls(note) {
-    const currentColor = note.dataset.color;
+    if (!note) return;
+
+    let currentColor = note.dataset.color || "sunshine";
+    const customColor = note.dataset.customColor;
+    let activePresetId = "";
+    let previewColor = "";
+
+    if (this.presetIds.has(currentColor)) {
+      activePresetId = currentColor;
+      previewColor = this.colorPresets.get(currentColor)?.value || this.defaultPreset.value;
+    } else if (customColor && normalizeHexColor(customColor)) {
+      currentColor = CUSTOM_COLOR_ID;
+      previewColor = normalizeHexColor(customColor);
+      note.dataset.color = CUSTOM_COLOR_ID;
+    } else if (!this.presetIds.has(currentColor) && normalizeHexColor(currentColor)) {
+      const normalized = normalizeHexColor(currentColor);
+      note.dataset.color = CUSTOM_COLOR_ID;
+      note.dataset.customColor = normalized;
+      previewColor = normalized;
+    } else {
+      note.dataset.color = "sunshine";
+      activePresetId = "sunshine";
+      previewColor = this.defaultPreset.value;
+      delete note.dataset.customColor;
+    }
+
+    const resolvedColor = previewColor || this.defaultPreset.value;
+    const previewEl = note.querySelector("[data-note-color-preview]");
+    if (previewEl) {
+      previewEl.style.setProperty("--note-color-preview", resolvedColor);
+      previewEl.style.background = resolvedColor;
+    }
+
+    const colorPicker = note.querySelector("[data-note-color-picker]");
+    if (colorPicker && resolvedColor) {
+      colorPicker.value = resolvedColor;
+    }
+
     note.querySelectorAll("[data-note-color]").forEach((swatch) => {
-      const isActive = swatch.dataset.noteColor === currentColor;
-      swatch.classList.toggle("is-active", isActive);
+      const isActive = activePresetId && swatch.dataset.noteColor === activePresetId;
+      swatch.classList.toggle("is-active", Boolean(isActive));
       swatch.setAttribute("aria-pressed", isActive ? "true" : "false");
     });
   }
 
   setNoteColor(note, color) {
-    if (!this.colors.has(color)) return;
-    note.dataset.color = color;
+    if (!note || typeof color !== "string") return;
+
+    const trimmed = color.trim();
+    if (this.presetIds.has(trimmed)) {
+      this.applyPresetColor(note, trimmed);
+      this.updateColorControls(note);
+      return;
+    }
+
+    const normalizedHex = normalizeHexColor(trimmed);
+    if (!normalizedHex) return;
+    this.applyCustomColor(note, normalizedHex);
     this.updateColorControls(note);
+  }
+
+  applyPresetColor(note, presetId) {
+    note.dataset.color = presetId;
+    delete note.dataset.customColor;
+    note.style.removeProperty("--note-custom-bg");
+    note.style.removeProperty("--note-custom-ink");
+    note.style.removeProperty("--note-custom-border");
+    note.style.removeProperty("--note-custom-shadow");
+    note.style.removeProperty("--note-custom-glow");
+  }
+
+  applyCustomColor(note, hexColor) {
+    note.dataset.color = CUSTOM_COLOR_ID;
+    note.dataset.customColor = hexColor;
+
+    const textColor = relativeLuminance(hexColor) > 0.6 ? "#0f172a" : "#f8fafc";
+    const borderBlendTarget = textColor === "#f8fafc" ? "#0f172a" : "#ffffff";
+    const borderColor = mixHexColors(hexColor, borderBlendTarget, textColor === "#f8fafc" ? 0.6 : 0.35) || textColor;
+    const glowColor = mixHexColors(hexColor, "#0f172a", 0.45) || hexColor;
+
+    note.style.setProperty("--note-custom-bg", hexColor);
+    note.style.setProperty("--note-custom-ink", textColor);
+    note.style.setProperty("--note-custom-border", borderColor);
+    note.style.setProperty("--note-custom-shadow", "0 20px 34px rgba(15,23,42,.24)");
+    note.style.setProperty("--note-custom-glow", glowColor);
+  }
+
+  openColorMenu(note, toggle, menu) {
+    if (!toggle || !menu) return;
+    const alreadyOpen = this.activeColorMenu?.menu === menu;
+    if (alreadyOpen) return;
+
+    this.closeColorMenu();
+
+    toggle.setAttribute("aria-expanded", "true");
+    menu.hidden = false;
+    window.requestAnimationFrame(() => {
+      menu.classList.add("is-open");
+    });
+
+    this.activeColorMenu = { note, toggle, menu };
+    document.addEventListener("pointerdown", this.handleDocumentPointerDown);
+    document.addEventListener("keydown", this.handleDocumentKeyDown);
+  }
+
+  closeColorMenu(targetMenu) {
+    if (!this.activeColorMenu) return;
+    if (targetMenu && this.activeColorMenu.menu !== targetMenu) {
+      return;
+    }
+
+    const { menu, toggle } = this.activeColorMenu;
+    toggle.setAttribute("aria-expanded", "false");
+    menu.classList.remove("is-open");
+
+    const hideMenu = () => {
+      menu.hidden = true;
+      menu.removeEventListener("transitionend", hideMenu);
+    };
+    menu.addEventListener("transitionend", hideMenu, { once: true });
+    window.setTimeout(() => {
+      if (!menu.classList.contains("is-open")) {
+        menu.hidden = true;
+      }
+    }, 180);
+
+    document.removeEventListener("pointerdown", this.handleDocumentPointerDown);
+    document.removeEventListener("keydown", this.handleDocumentKeyDown);
+    this.activeColorMenu = null;
   }
 
   updateGroupButtonState(note, isActive) {
@@ -396,7 +614,12 @@ class StickyBoard {
       handle.addEventListener("pointerdown", (event) => {
         if (!this.workspace) return;
         if (event.button && event.button !== 0) return;
-        if (event.target.closest("[data-note-color]") || event.target.closest("[data-note-group]")) {
+        if (
+          event.target.closest("[data-note-color]") ||
+          event.target.closest("[data-note-group]") ||
+          event.target.closest("[data-note-color-toggle]") ||
+          event.target.closest("[data-note-color-picker]")
+        ) {
           return;
         }
         event.preventDefault();
@@ -468,11 +691,47 @@ class StickyBoard {
       });
     }
 
+    const colorToggle = note.querySelector("[data-note-color-toggle]");
+    const colorMenu = note.querySelector("[data-note-color-menu]");
+    const colorPicker = note.querySelector("[data-note-color-picker]");
+
+    if (colorToggle && colorMenu) {
+      colorToggle.addEventListener("click", (event) => {
+        event.preventDefault();
+        const isOpen = this.activeColorMenu?.menu === colorMenu;
+        if (isOpen) {
+          this.closeColorMenu(colorMenu);
+        } else {
+          this.openColorMenu(note, colorToggle, colorMenu);
+        }
+      });
+    }
+
+    if (colorMenu) {
+      colorMenu.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          this.closeColorMenu(colorMenu);
+          colorToggle?.focus?.();
+        }
+      });
+    }
+
     note.querySelectorAll("[data-note-color]").forEach((swatch) => {
       swatch.addEventListener("click", () => {
         this.setNoteColor(note, swatch.dataset.noteColor);
+        this.closeColorMenu(colorMenu);
       });
     });
+
+    if (colorPicker) {
+      colorPicker.addEventListener("input", () => {
+        this.setNoteColor(note, colorPicker.value);
+      });
+      colorPicker.addEventListener("change", () => {
+        this.closeColorMenu(colorMenu);
+      });
+    }
   }
 
   createNoteElement(noteData) {
@@ -498,12 +757,8 @@ class StickyBoard {
       }
     }
 
-    const color = noteData?.color;
-    if (color && this.colors.has(color)) {
-      this.setNoteColor(element, color);
-    } else {
-      this.setNoteColor(element, "sunshine");
-    }
+    const color = normalizeNoteColorValue(noteData?.color);
+    this.setNoteColor(element, color);
 
     const x = Number.isFinite(Number(noteData?.x)) ? Number(noteData.x) : 0;
     const y = Number.isFinite(Number(noteData?.y)) ? Number(noteData.y) : 0;
@@ -569,7 +824,7 @@ class StickyBoard {
       const bodyEl = note.querySelector("[data-note-body]");
       const labelEl = note.querySelector("[data-note-label]");
       return {
-        color: note.dataset.color || "sunshine",
+        color: note.dataset.customColor || note.dataset.color || "sunshine",
         x: Number.parseFloat(note.dataset.x || "0") || 0,
         y: Number.parseFloat(note.dataset.y || "0") || 0,
         label: labelEl ? labelEl.textContent?.trim() || "" : "",
