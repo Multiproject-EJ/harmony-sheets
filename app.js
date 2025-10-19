@@ -3768,15 +3768,95 @@ App.showAddToCartFeedback = function(productId) {
 /*****************************************************
  * Product detail (product.html)
  *****************************************************/
+App.debugProductPage = async function(context = {}) {
+  const stage = context.stage || "unknown";
+  const productId = context.productId || null;
+  const label = `[HS Product Debug][${stage}]`;
+
+  if (typeof console === "undefined" || !console.groupCollapsed) {
+    return;
+  }
+
+  console.groupCollapsed(label);
+  try {
+    const timestamp = new Date().toISOString();
+    console.log("timestamp", timestamp);
+    console.log("productId", productId);
+    console.log("location", {
+      href: window.location.href,
+      search: window.location.search,
+      pathname: window.location.pathname
+    });
+
+    const config = App.getSupabaseConfig();
+    console.log("supabaseConfig", config ? { hasConfig: true, url: config.url } : { hasConfig: false });
+
+    try {
+      const supabaseProducts = await App.fetchSupabaseProducts();
+      console.log("supabaseProducts", {
+        received: Array.isArray(supabaseProducts),
+        count: Array.isArray(supabaseProducts) ? supabaseProducts.length : 0,
+        sample: Array.isArray(supabaseProducts) && supabaseProducts.length ? supabaseProducts[0] : null
+      });
+    } catch (error) {
+      console.error("supabaseProductsError", error);
+    }
+
+    try {
+      const overrides = await App.fetchSupabaseProductStatuses();
+      console.log("supabaseStatusOverrides", {
+        type: overrides instanceof Map ? "Map" : typeof overrides,
+        size: overrides instanceof Map ? overrides.size : null
+      });
+    } catch (error) {
+      console.error("supabaseStatusOverridesError", error);
+    }
+
+    if (context.products) {
+      console.log("loadedProducts", {
+        count: Array.isArray(context.products) ? context.products.length : 0
+      });
+    }
+
+    if (context.product) {
+      console.log("matchedProduct", {
+        id: context.product.id,
+        name: context.product.name,
+        draft: context.product.draft || false,
+        hasDescription: Boolean(context.product.description)
+      });
+    }
+
+    const domChecks = {
+      nameEl: Boolean(App.qs("#p-name")),
+      priceEl: Boolean(App.qs("#p-price")),
+      descriptionEl: Boolean(App.qs("#p-description")),
+      heroEl: Boolean(App.qs("#p-parallax"))
+    };
+    console.log("domChecks", domChecks);
+
+    if (context.products && productId && Array.isArray(context.products)) {
+      const hasMatch = context.products.some(p => p && p.id === productId);
+      console.log("productMatchCheck", { productId, hasMatch });
+    }
+  } finally {
+    console.groupEnd();
+  }
+};
+
 App.initProduct = async function() {
   const params = new URLSearchParams(window.location.search);
   const productId = params.get("id");
   if (!productId) return;
 
+  await App.debugProductPage({ stage: "before-load", productId });
+
   try {
     const products = await App.loadProducts();
     const product = products.find(p => p.id === productId);
     if (!product) return;
+
+    await App.debugProductPage({ stage: "after-load", productId, products, product });
 
     // Hero background image
     const parallaxEl = App.qs("#p-parallax");
