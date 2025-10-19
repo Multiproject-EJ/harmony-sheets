@@ -858,6 +858,8 @@ App.filterActiveProducts = function(products) {
 App.supabaseConfigCache = undefined;
 App.supabaseStatusCache = null;
 App.supabaseStatusPromise = null;
+App.supabaseProductsCache = null;
+App.supabaseProductsPromise = null;
 
 App.getSupabaseConfig = function() {
   if (App.supabaseConfigCache !== undefined) {
@@ -1028,26 +1030,249 @@ App.applySupabaseDraftOverrides = function(products, overrides) {
   return products;
 };
 
+App.fetchSupabaseProducts = function() {
+  const config = App.getSupabaseConfig();
+  if (!config) {
+    return Promise.resolve(null);
+  }
+
+  if (Array.isArray(App.supabaseProductsCache)) {
+    return Promise.resolve(App.supabaseProductsCache);
+  }
+
+  if (App.supabaseProductsPromise) {
+    return App.supabaseProductsPromise;
+  }
+
+  const { url, anonKey } = config;
+  const endpointBase = typeof url === "string" ? url.replace(/\/?$/, "") : "";
+  const select = [
+    "id",
+    "slug",
+    "name",
+    "tagline",
+    "description",
+    "price_amount",
+    "price_currency",
+    "price_display",
+    "draft",
+    "hero_image",
+    "color_image",
+    "color_caption",
+    "demo_video",
+    "demo_poster",
+    "virtual_demo",
+    "pricing_title",
+    "pricing_sub",
+    "stripe_url",
+    "etsy_url",
+    "product_social_proof(*)",
+    "product_life_areas(*)",
+    "product_badges(*)",
+    "product_features(*)",
+    "product_gallery(*)",
+    "product_included_items(*)",
+    "product_faqs(*)",
+    "product_benefits(*)"
+  ].join(",");
+  const endpoint = `${endpointBase}/rest/v1/products?select=${encodeURIComponent(select)}&order=created_at.asc`;
+
+  const headers = {
+    apikey: anonKey,
+    Authorization: `Bearer ${anonKey}`,
+    Accept: "application/json",
+    "Content-Type": "application/json"
+  };
+
+  const toArray = value => (Array.isArray(value) ? value : value ? [value] : []);
+  const getPosition = entry => {
+    if (!entry || typeof entry !== "object") return Number.MAX_SAFE_INTEGER;
+    const raw = entry.position;
+    const num = typeof raw === "number" ? raw : parseFloat(raw);
+    return Number.isFinite(num) ? num : Number.MAX_SAFE_INTEGER;
+  };
+  const sortByPosition = list => toArray(list).slice().sort((a, b) => getPosition(a) - getPosition(b));
+  const toText = value => (typeof value === "string" ? value : "");
+  const toTrimmed = value => (typeof value === "string" ? value.trim() : "");
+  const buildPriceDisplay = row => {
+    const display = toTrimmed(row.price_display);
+    if (display) return display;
+    const rawAmount = typeof row.price_amount === "number" ? row.price_amount : parseFloat(row.price_amount);
+    if (Number.isFinite(rawAmount)) {
+      if (typeof App.formatPrice === "function") {
+        return App.formatPrice(rawAmount);
+      }
+      return `$${rawAmount.toFixed(2)}`;
+    }
+    return "";
+  };
+
+  App.supabaseProductsPromise = fetch(endpoint, {
+    headers,
+    mode: "cors",
+    cache: "no-store"
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Supabase responded with ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(rows => {
+      if (!Array.isArray(rows)) {
+        return null;
+      }
+
+      const products = rows
+        .map(row => {
+          if (!row || typeof row !== "object") return null;
+
+          const slug = toTrimmed(row.slug) || toTrimmed(row.id);
+          const priceAmount = typeof row.price_amount === "number" ? row.price_amount : parseFloat(row.price_amount);
+          const priceCurrency = toTrimmed(row.price_currency);
+
+          const lifeAreas = sortByPosition(row.product_life_areas)
+            .map(item => toTrimmed(item.life_area || item.lifeArea))
+            .filter(Boolean);
+
+          const badges = sortByPosition(row.product_badges)
+            .map(item => toTrimmed(item.badge))
+            .filter(Boolean);
+
+          const features = sortByPosition(row.product_features)
+            .map(item => toTrimmed(item.feature))
+            .filter(Boolean);
+
+          const included = sortByPosition(row.product_included_items)
+            .map(item => toTrimmed(item.included_item || item.item))
+            .filter(Boolean);
+
+          const gallery = sortByPosition(row.product_gallery)
+            .map(item => {
+              if (!item || typeof item !== "object") return null;
+              const src = toTrimmed(item.image_src || item.src);
+              if (!src) return null;
+              const alt = toText(item.image_alt || item.alt || "");
+              return { src, alt };
+            })
+            .filter(Boolean);
+
+          const faqs = sortByPosition(row.product_faqs)
+            .map(item => {
+              if (!item || typeof item !== "object") return null;
+              const question = toTrimmed(item.question || item.q);
+              const answer = toText(item.answer || item.a);
+              if (!question || !answer) return null;
+              return { q: question, a: answer };
+            })
+            .filter(Boolean);
+
+          const benefits = sortByPosition(row.product_benefits)
+            .map(item => {
+              if (!item || typeof item !== "object") return null;
+              const title = toTrimmed(item.title);
+              const description = toText(item.description || item.desc);
+              if (!title || !description) return null;
+              return { title, desc: description };
+            })
+            .filter(Boolean);
+
+          const socialSource = row.product_social_proof;
+          const socialRaw = Array.isArray(socialSource)
+            ? socialSource.find(entry => entry && typeof entry === "object")
+            : socialSource;
+          const socialProof = socialRaw && typeof socialRaw === "object"
+            ? {
+                stars: toTrimmed(socialRaw.stars),
+                quote: toText(socialRaw.quote)
+              }
+            : null;
+
+          const product = {
+            id: slug || toTrimmed(row.id) || undefined,
+            slug: slug || undefined,
+            name: toTrimmed(row.name) || slug || "",
+            tagline: toTrimmed(row.tagline),
+            description: toText(row.description),
+            price: buildPriceDisplay(row),
+            heroImage: toTrimmed(row.hero_image),
+            colorImage: toTrimmed(row.color_image),
+            colorCaption: toText(row.color_caption),
+            demoVideo: toTrimmed(row.demo_video),
+            demoPoster: toTrimmed(row.demo_poster),
+            virtualDemo: toTrimmed(row.virtual_demo),
+            pricingTitle: toTrimmed(row.pricing_title),
+            pricingSub: toTrimmed(row.pricing_sub),
+            stripe: toTrimmed(row.stripe_url),
+            etsy: toTrimmed(row.etsy_url),
+            lifeAreas,
+            badges,
+            features,
+            gallery,
+            included,
+            faqs,
+            benefits
+          };
+
+          if (socialProof && (socialProof.stars || socialProof.quote)) {
+            product.socialProof = socialProof;
+          }
+
+          if (Number.isFinite(priceAmount)) {
+            product.priceAmount = priceAmount;
+          }
+          if (priceCurrency) {
+            product.priceCurrency = priceCurrency;
+          }
+
+          if (Object.prototype.hasOwnProperty.call(row, "draft")) {
+            product.draft = App.normalizeDraftFlag(row.draft);
+          }
+
+          return App.normalizeProduct(product);
+        })
+        .filter(Boolean);
+
+      App.supabaseProductsCache = products;
+      return products;
+    })
+    .catch(error => {
+      console.warn("[App] Failed to load Supabase products", error);
+      return null;
+    })
+    .finally(() => {
+      App.supabaseProductsPromise = null;
+    });
+
+  return App.supabaseProductsPromise;
+};
+
 App.loadProducts = function() {
   if (!App.productsPromise) {
-    const supabasePromise = App.fetchSupabaseProductStatuses();
-    App.productsPromise = fetch("products.json")
-      .then(res => res.json())
-      .then(async data => {
-        const normalized = Array.isArray(data) ? data.map(App.normalizeProduct) : [];
-        let overrides = null;
-        try {
-          overrides = await supabasePromise;
-        } catch (error) {
-          console.warn("[App] Supabase overrides failed", error);
-        }
+    App.productsPromise = App.fetchSupabaseProducts().then(async products => {
+      if (Array.isArray(products)) {
+        return products;
+      }
 
-        if (overrides instanceof Map && overrides.size) {
-          App.applySupabaseDraftOverrides(normalized, overrides);
-        }
+      const supabasePromise = App.fetchSupabaseProductStatuses();
+      return fetch("products.json")
+        .then(res => res.json())
+        .then(async data => {
+          const normalized = Array.isArray(data) ? data.map(App.normalizeProduct) : [];
+          let overrides = null;
+          try {
+            overrides = await supabasePromise;
+          } catch (error) {
+            console.warn("[App] Supabase overrides failed", error);
+          }
 
-        return normalized;
-      })
+          if (overrides instanceof Map && overrides.size) {
+            App.applySupabaseDraftOverrides(normalized, overrides);
+          }
+
+          return normalized;
+        });
+    })
       .catch(err => {
         App.productsPromise = null;
         throw err;
