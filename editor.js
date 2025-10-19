@@ -472,20 +472,25 @@ function renderProductRow(product) {
     .join(' ');
 
   const statusLabel = product.draft ? 'Draft' : 'Active';
+  const productName = product.name || 'Untitled product';
+  const productTagline = product.tagline || '';
+  const lifeAreas = formatLifeAreas(product.lifeAreas);
+  const badges = formatBadges(product.badges);
+  const price = product.price || '—';
   const labelName = escapeAttribute(product.name || product.id || 'product');
 
   return `
     <tr ${attributes}>
-      <th scope="row">
+      <th scope="row" data-label="Product">
         <button type="button" class="admin-table__select" data-id="${product.id}">
-          <span class="admin-table__name">${product.name || 'Untitled product'}</span>
-          <span class="admin-table__tagline">${product.tagline || ''}</span>
+          <span class="admin-table__name">${productName}</span>
+          <span class="admin-table__tagline">${productTagline}</span>
         </button>
       </th>
-      <td>${formatLifeAreas(product.lifeAreas)}</td>
-      <td>${formatBadges(product.badges)}</td>
-      <td class="admin-table__price">${product.price || '—'}</td>
-      <td class="admin-table__status">
+      <td data-label="Life areas">${lifeAreas}</td>
+      <td data-label="Labels">${badges}</td>
+      <td class="admin-table__price" data-label="Price">${price}</td>
+      <td class="admin-table__status" data-label="Draft">
         <label class="admin-table__status-toggle">
           <input type="checkbox" data-draft-toggle data-id="${product.id}" ${
             product.draft ? 'checked' : ''
