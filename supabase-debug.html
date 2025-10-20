@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Supabase Diagnostics — Harmony Sheets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-neutral">
+  <header class="site-header">
+    <a class="brand" href="/">
+      <img class="brand__logo" src="assets/logoHarmonySheets.webp" alt="">
+      <span class="brand__text">
+        <span class="brand__name">Harmony Sheets</span>
+        <span class="brand__notice">Plan Better. Live Smarter.</span>
+      </span>
+    </a>
+  </header>
+
+  <main class="page" id="main-content">
+    <section class="page__section" data-supabase-debug-root>
+      <div class="account-card">
+        <h1>Supabase diagnostics</h1>
+        <p>
+          Use this sandbox to inspect Supabase configuration, run the catalog overview query, and compare the
+          remote product count against the bundled <code>products.json</code>. Nothing on this page writes to Supabase
+          or touches the admin dashboard.
+        </p>
+
+        <section class="admin__summary" aria-labelledby="debug-summary-heading">
+          <div class="admin__summary__header">
+            <h2 id="debug-summary-heading">Debug objective &amp; status</h2>
+            <p class="admin__summary__intro">
+              Keep an at-a-glance record of what you are investigating, the signals you have collected, and which
+              hypotheses still need to be validated. Entries are saved locally so you can revisit the same browser and
+              continue where you left off.
+            </p>
+          </div>
+
+          <form class="admin__summary__grid" data-debug-summary-form>
+            <label class="admin__summary__field">
+              <span class="admin__summary__label">Objective — what we are trying to solve</span>
+              <textarea
+                class="admin__summary__textarea"
+                name="objective"
+                rows="3"
+                data-debug-summary-field="objective"
+                placeholder="Describe the core problem or question you are debugging."
+              ></textarea>
+            </label>
+
+            <label class="admin__summary__field">
+              <span class="admin__summary__label">Findings — what we have confirmed so far</span>
+              <textarea
+                class="admin__summary__textarea"
+                name="findings"
+                rows="3"
+                data-debug-summary-field="findings"
+                placeholder="List observations, logs, or metrics that are verified."
+              ></textarea>
+            </label>
+
+            <label class="admin__summary__field">
+              <span class="admin__summary__label">Tried — approaches that did not work</span>
+              <textarea
+                class="admin__summary__textarea"
+                name="tried"
+                rows="3"
+                data-debug-summary-field="tried"
+                placeholder="Document experiments or fixes that failed and why."
+              ></textarea>
+            </label>
+
+            <label class="admin__summary__field">
+              <span class="admin__summary__label">Next — scenarios that still need testing</span>
+              <textarea
+                class="admin__summary__textarea"
+                name="next"
+                rows="3"
+                data-debug-summary-field="next"
+                placeholder="Outline hypotheses or flows you still need to validate."
+              ></textarea>
+            </label>
+          </form>
+
+          <div class="admin__summary__footer">
+            <p class="admin__summary__status" data-debug-summary-status>Summary has not been saved yet.</p>
+            <div class="admin__supabase-actions admin__supabase-actions--wrap">
+              <button class="btn-ghost admin__btn" type="button" data-debug-summary-clear>Clear summary</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="admin__status-group admin__status-group--stacked">
+          <article class="admin__status-card admin__supabase-card" data-debug-status-card data-debug-section="config">
+            <div class="admin__status-indicator" data-debug-indicator data-tone="neutral"></div>
+            <div class="admin__supabase-body">
+              <p class="admin__status-label">Configuration</p>
+              <p class="admin__status-value" data-debug-config-status>Configuration has not been checked.</p>
+              <dl class="admin__supabase-metrics" data-debug-config-details hidden>
+                <div class="admin__supabase-metric">
+                  <dt>Supabase URL</dt>
+                  <dd data-debug-config-url>—</dd>
+                </div>
+                <div class="admin__supabase-metric">
+                  <dt>Anon key</dt>
+                  <dd data-debug-config-key>—</dd>
+                </div>
+              </dl>
+            </div>
+            <div class="admin__supabase-actions">
+              <button class="btn primary admin__btn" type="button" data-debug-check-config>
+                Check configuration
+              </button>
+            </div>
+          </article>
+
+          <article class="admin__status-card admin__supabase-card" data-debug-status-card data-debug-section="overview">
+            <div class="admin__status-indicator" data-debug-indicator data-tone="neutral"></div>
+            <div class="admin__supabase-body">
+              <p class="admin__status-label">Supabase overview</p>
+              <p class="admin__status-value" data-debug-overview-status>Run a test to load the latest Supabase data.</p>
+              <dl class="admin__supabase-metrics" data-debug-overview-details hidden>
+                <div class="admin__supabase-metric">
+                  <dt>Product count</dt>
+                  <dd data-debug-overview-count>—</dd>
+                </div>
+                <div class="admin__supabase-metric">
+                  <dt>Latest update</dt>
+                  <dd data-debug-overview-latest>—</dd>
+                </div>
+              </dl>
+              <p class="admin__supabase-updated" data-debug-overview-updated hidden>
+                Last checked <time data-debug-overview-time datetime=""></time>
+              </p>
+            </div>
+            <div class="admin__supabase-actions">
+              <button class="btn primary admin__btn" type="button" data-debug-run-overview>
+                Run overview query
+              </button>
+            </div>
+          </article>
+
+          <article class="admin__status-card admin__supabase-card" data-debug-status-card data-debug-section="compare">
+            <div class="admin__status-indicator" data-debug-indicator data-tone="neutral"></div>
+            <div class="admin__supabase-body">
+              <p class="admin__status-label">Count comparison</p>
+              <p class="admin__status-value" data-debug-compare-status>
+                Compare Supabase products against <code>products.json</code>.
+              </p>
+              <dl class="admin__supabase-metrics" data-debug-compare-details hidden>
+                <div class="admin__supabase-metric">
+                  <dt>Supabase products</dt>
+                  <dd data-debug-compare-remote>—</dd>
+                </div>
+                <div class="admin__supabase-metric">
+                  <dt>Local catalog</dt>
+                  <dd data-debug-compare-local>—</dd>
+                </div>
+              </dl>
+              <p class="admin__supabase-updated" data-debug-compare-updated hidden>
+                Last checked <time data-debug-compare-time datetime=""></time>
+              </p>
+            </div>
+            <div class="admin__supabase-actions">
+              <button class="btn primary admin__btn" type="button" data-debug-run-compare>
+                Compare counts
+              </button>
+            </div>
+          </article>
+
+          <article class="admin__status-card admin__supabase-card" data-debug-status-card data-debug-section="permissions">
+            <div class="admin__status-indicator" data-debug-indicator data-tone="neutral"></div>
+            <div class="admin__supabase-body">
+              <p class="admin__status-label">Permission check</p>
+              <p class="admin__status-value" data-debug-permission-status>
+                Verify that the current Supabase user can insert and delete catalog data using temporary rows that are cleaned up
+                automatically.
+              </p>
+              <dl class="admin__supabase-metrics" data-debug-permission-details hidden>
+                <div class="admin__supabase-metric">
+                  <dt>Test slug</dt>
+                  <dd data-debug-permission-slug>—</dd>
+                </div>
+                <div class="admin__supabase-metric">
+                  <dt>Product ID</dt>
+                  <dd data-debug-permission-id>—</dd>
+                </div>
+              </dl>
+              <p class="admin__supabase-updated" data-debug-permission-updated hidden>
+                Last checked <time data-debug-permission-time datetime=""></time>
+              </p>
+            </div>
+            <div class="admin__supabase-actions">
+              <button class="btn primary admin__btn" type="button" data-debug-run-permission>
+                Run permission test
+              </button>
+            </div>
+          </article>
+
+          <article class="admin__status-card admin__supabase-card admin__supabase-card--workspace" data-debug-status-card data-debug-section="sql">
+            <div class="admin__status-indicator" data-debug-indicator data-tone="neutral"></div>
+            <div class="admin__supabase-body admin__sql">
+              <p class="admin__status-label">SQL worksheet</p>
+              <p class="admin__status-value" data-debug-sql-status>
+                Curated SQL snippets to inspect Supabase tables, policies, and permissions. Copy a preset and run it in the
+                Supabase SQL editor or CLI.
+              </p>
+              <p class="admin__sql__intro">
+                This sandbox cannot execute SQL directly. Paste the snippets into Supabase's SQL editor to confirm what the
+                admin dashboard sees on production data.
+              </p>
+
+              <label class="admin__sql__field">
+                <span class="admin__sql__label">Preset</span>
+                <select class="admin__sql__select" data-debug-sql-template></select>
+                <p class="admin__sql__description" data-debug-sql-description></p>
+              </label>
+
+              <label class="admin__sql__field" data-debug-sql-editor-wrap>
+                <span class="admin__sql__label">SQL snippet</span>
+                <textarea
+                  class="admin__sql__textarea"
+                  data-debug-sql-editor
+                  rows="10"
+                  spellcheck="false"
+                  placeholder="Select a preset or write your own SQL to copy into Supabase."
+                ></textarea>
+              </label>
+            </div>
+            <div class="admin__supabase-actions admin__supabase-actions--column">
+              <button class="btn primary admin__btn" type="button" data-debug-sql-copy>Copy SQL</button>
+              <button class="btn-ghost admin__btn" type="button" data-debug-sql-reset>Reset to preset</button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <section class="admin__kpis">
+        <div class="account-card">
+          <h2>Debug log</h2>
+          <p>Entries include timestamped results from each action. Use the clear button to start a fresh session.</p>
+          <div class="admin__supabase-actions admin__supabase-actions--end">
+            <button class="btn-ghost admin__btn" type="button" data-debug-copy-log>Copy log</button>
+            <button class="btn-ghost admin__btn" type="button" data-debug-clear-log>Clear log</button>
+          </div>
+          <div class="admin__supabase-log" data-debug-log aria-live="polite"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./supabase-debug.js"></script>
+</body>
+</html>
