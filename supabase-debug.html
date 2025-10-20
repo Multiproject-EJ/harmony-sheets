@@ -211,6 +211,10 @@
                 This sandbox cannot execute SQL directly. Paste the snippets into Supabase's SQL editor to confirm what the
                 admin dashboard sees on production data.
               </p>
+              <p class="admin__sql__intro">
+                All built-in presets issue read-only <code>SELECT</code> statements so they reveal state without mutating your
+                database. Modify the SQL if you need to run custom checks.
+              </p>
 
               <label class="admin__sql__field">
                 <span class="admin__sql__label">Preset</span>

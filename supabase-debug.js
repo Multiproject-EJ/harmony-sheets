@@ -88,8 +88,8 @@ const SQL_SNIPPETS = [
   policyname,
   permissive,
   roles,
-  command,
-  using,
+  cmd as command,
+  qual as using_expression,
   with_check
 from pg_policies
 where schemaname = 'public'
@@ -195,10 +195,39 @@ order by c.table_name;`
   }
 ];
 
+const SQL_MUTATING_PATTERN = /\b(
+  insert|
+  update|
+  delete|
+  truncate|
+  alter|
+  drop|
+  create|
+  replace|
+  merge|
+  call|
+  execute|
+  grant|
+  revoke|
+  policy|
+  security
+)\b/i;
+
 const SUMMARY_STORAGE_KEY = "hs-debug-summary-v1";
 let summarySaveHandle = null;
 let activeSqlSnippetId = SQL_SNIPPETS[0]?.id ?? null;
 let isSqlDirty = false;
+let lastReadOnlyPreset = true;
+
+const SQL_COMMENT_PATTERN = /(--.*?$|\/\*[\s\S]*?\*\/)/gm;
+
+function isReadOnlySql(statement) {
+  if (typeof statement !== "string") {
+    return true;
+  }
+  const sanitized = statement.replace(SQL_COMMENT_PATTERN, " ");
+  return !SQL_MUTATING_PATTERN.test(sanitized);
+}
 
 function setIndicatorTone(indicator, tone) {
   if (!indicator) return;
@@ -552,6 +581,7 @@ function applySqlSnippet(snippet) {
     sqlTextarea.value = snippet.statement;
     sqlTextarea.disabled = false;
   }
+  lastReadOnlyPreset = isReadOnlySql(snippet.statement);
   if (sqlDescriptionEl) {
     sqlDescriptionEl.textContent = snippet.description;
   }
@@ -593,26 +623,38 @@ function initialiseSqlSection() {
 
   const initialSnippet = getSqlSnippet(activeSqlSnippetId);
   applySqlSnippet(initialSnippet);
-  setSqlStatus(
-    initialSnippet
-      ? `Loaded “${initialSnippet.label}”. Copy the snippet into Supabase to run it.`
-      : "Select a SQL preset to begin.",
-    "neutral"
-  );
+  if (initialSnippet) {
+    const message = lastReadOnlyPreset
+      ? `Loaded “${initialSnippet.label}”. Preset is read-only; copy it into Supabase to inspect data.`
+      : `Loaded “${initialSnippet.label}”. Review carefully before running because it contains mutating keywords.`;
+    setSqlStatus(message, lastReadOnlyPreset ? "neutral" : "danger");
+  } else {
+    setSqlStatus("Select a SQL preset to begin.", "neutral");
+  }
 }
 
 function handleSqlTemplateChange(event) {
   const snippet = getSqlSnippet(event?.target?.value);
   if (!snippet) return;
   applySqlSnippet(snippet);
-  setSqlStatus(`Loaded preset “${snippet.label}”.`, "info");
-  appendLog("info", `Loaded SQL preset: ${snippet.label}.`, { presetId: snippet.id });
+  const readOnlyMessage = lastReadOnlyPreset
+    ? "Preset verified as read-only."
+    : "Preset includes mutating keywords—double-check before running.";
+  setSqlStatus(`Loaded preset “${snippet.label}”. ${readOnlyMessage}`, lastReadOnlyPreset ? "info" : "danger");
+  appendLog("info", `Loaded SQL preset: ${snippet.label}.`, {
+    presetId: snippet.id,
+    readOnly: lastReadOnlyPreset
+  });
 }
 
 function handleSqlEditorInput() {
   if (!sqlTextarea) return;
   isSqlDirty = true;
-  setSqlStatus("SQL modified. Copy to share or run in Supabase.", "info");
+  lastReadOnlyPreset = isReadOnlySql(sqlTextarea.value);
+  const message = lastReadOnlyPreset
+    ? "SQL modified. Current content appears read-only."
+    : "SQL modified. Detected mutating keywords—review before running.";
+  setSqlStatus(message, lastReadOnlyPreset ? "info" : "warning");
 }
 
 async function handleSqlCopy() {
@@ -632,12 +674,17 @@ async function handleSqlCopy() {
       : snippet
       ? `Copied preset “${snippet.label}” to clipboard.`
       : "Copied SQL to clipboard.";
-    setSqlStatus(message, "success");
+    const tone = lastReadOnlyPreset ? "success" : "warning";
+    const suffix = lastReadOnlyPreset
+      ? " Preset contains read-only SELECT statements."
+      : " Review before running; snippet includes mutating keywords.";
+    setSqlStatus(`${message}${suffix}`, tone);
     appendLog("success", message, {
       presetId: snippet?.id ?? null,
       preset: snippet?.label ?? null,
       modified: isSqlDirty,
-      length: text.length
+      length: text.length,
+      readOnlyPreset: lastReadOnlyPreset
     });
   } catch (error) {
     const message = `Failed to copy SQL: ${formatError(error)}`;
@@ -652,8 +699,14 @@ function handleSqlReset() {
     return;
   }
   applySqlSnippet(snippet);
-  setSqlStatus(`Reset SQL editor to preset “${snippet.label}”.`, "info");
-  appendLog("info", `SQL editor reset to preset: ${snippet.label}.`, { presetId: snippet.id });
+  const statusMessage = lastReadOnlyPreset
+    ? `Reset SQL editor to preset “${snippet.label}”. Preset is read-only.`
+    : `Reset SQL editor to preset “${snippet.label}”. Review before running; preset has mutating keywords.`;
+  setSqlStatus(statusMessage, lastReadOnlyPreset ? "info" : "danger");
+  appendLog("info", `SQL editor reset to preset: ${snippet.label}.`, {
+    presetId: snippet.id,
+    readOnly: lastReadOnlyPreset
+  });
 }
 
 function describeLatest(latest) {
