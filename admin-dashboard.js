@@ -95,6 +95,66 @@ if (!rootHook) {
     }
   }
 
+  const pipelineTable = document.querySelector("[data-pipeline-table]");
+
+  if (pipelineTable) {
+    const fallbackPreviewCount = 3;
+    const parsedPreviewCount = Number.parseInt(
+      pipelineTable.dataset.previewCount || "",
+      10
+    );
+    const previewCount =
+      Number.isFinite(parsedPreviewCount) && parsedPreviewCount > 0
+        ? parsedPreviewCount
+        : fallbackPreviewCount;
+    const tableBody =
+      pipelineTable.tBodies?.[0] || pipelineTable.querySelector("tbody");
+    const rows = tableBody ? Array.from(tableBody.rows) : [];
+    const expandableRows = rows.slice(previewCount);
+
+    if (expandableRows.length > 0) {
+      pipelineTable.classList.add("admin-table--collapsible");
+      pipelineTable.dataset.previewCount = String(previewCount);
+      pipelineTable.dataset.pipelineCollapsed = "true";
+      pipelineTable.setAttribute("aria-expanded", "false");
+      pipelineTable.setAttribute("tabindex", "0");
+
+      expandableRows.forEach((row) => {
+        row.hidden = true;
+      });
+
+      const revealRows = () => {
+        expandableRows.forEach((row) => {
+          row.hidden = false;
+        });
+        pipelineTable.dataset.pipelineCollapsed = "false";
+        pipelineTable.setAttribute("aria-expanded", "true");
+        pipelineTable.removeEventListener("click", handleClick);
+        pipelineTable.removeEventListener("keydown", handleKeydown);
+      };
+
+      const handleClick = () => {
+        if (pipelineTable.dataset.pipelineCollapsed !== "true") {
+          return;
+        }
+        revealRows();
+      };
+
+      const handleKeydown = (event) => {
+        if (pipelineTable.dataset.pipelineCollapsed !== "true") {
+          return;
+        }
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          revealRows();
+        }
+      };
+
+      pipelineTable.addEventListener("click", handleClick);
+      pipelineTable.addEventListener("keydown", handleKeydown);
+    }
+  }
+
   const salesEls = {
     source: document.querySelector("[data-sales-source]"),
     updated: document.querySelector("[data-sales-updated]"),
