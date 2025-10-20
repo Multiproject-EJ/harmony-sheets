@@ -3967,14 +3967,16 @@ App.initProduct = async function() {
 
     // Virtual demo
     const virtualDemoFrame = App.qs('[data-virtual-demo]');
+    const DEFAULT_VIRTUAL_DEMO = 'demos/pomodoro.html';
     if (virtualDemoFrame) {
       const screen = virtualDemoFrame.querySelector('.device-frame__screen');
-      if (product.virtualDemo && screen) {
+      const virtualDemoUrl = product.virtualDemo || DEFAULT_VIRTUAL_DEMO;
+      if (virtualDemoUrl && screen) {
         virtualDemoFrame.setAttribute('data-loading', 'true');
         screen.innerHTML = `
           <div class="virtual-demo">
             <div class="virtual-demo__viewport" data-demo-viewport>
-              <iframe src="${product.virtualDemo}" title="${product.name} interactive demo" loading="lazy"></iframe>
+              <iframe src="${virtualDemoUrl}" title="${product.name} interactive demo" loading="lazy"></iframe>
             </div>
           </div>`;
 
