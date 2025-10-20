@@ -198,6 +198,42 @@
               </button>
             </div>
           </article>
+
+          <article class="admin__status-card admin__supabase-card admin__supabase-card--workspace" data-debug-status-card data-debug-section="sql">
+            <div class="admin__status-indicator" data-debug-indicator data-tone="neutral"></div>
+            <div class="admin__supabase-body admin__sql">
+              <p class="admin__status-label">SQL worksheet</p>
+              <p class="admin__status-value" data-debug-sql-status>
+                Curated SQL snippets to inspect Supabase tables, policies, and permissions. Copy a preset and run it in the
+                Supabase SQL editor or CLI.
+              </p>
+              <p class="admin__sql__intro">
+                This sandbox cannot execute SQL directly. Paste the snippets into Supabase's SQL editor to confirm what the
+                admin dashboard sees on production data.
+              </p>
+
+              <label class="admin__sql__field">
+                <span class="admin__sql__label">Preset</span>
+                <select class="admin__sql__select" data-debug-sql-template></select>
+                <p class="admin__sql__description" data-debug-sql-description></p>
+              </label>
+
+              <label class="admin__sql__field" data-debug-sql-editor-wrap>
+                <span class="admin__sql__label">SQL snippet</span>
+                <textarea
+                  class="admin__sql__textarea"
+                  data-debug-sql-editor
+                  rows="10"
+                  spellcheck="false"
+                  placeholder="Select a preset or write your own SQL to copy into Supabase."
+                ></textarea>
+              </label>
+            </div>
+            <div class="admin__supabase-actions admin__supabase-actions--column">
+              <button class="btn primary admin__btn" type="button" data-debug-sql-copy>Copy SQL</button>
+              <button class="btn-ghost admin__btn" type="button" data-debug-sql-reset>Reset to preset</button>
+            </div>
+          </article>
         </div>
       </div>
 
@@ -206,6 +242,7 @@
           <h2>Debug log</h2>
           <p>Entries include timestamped results from each action. Use the clear button to start a fresh session.</p>
           <div class="admin__supabase-actions admin__supabase-actions--end">
+            <button class="btn-ghost admin__btn" type="button" data-debug-copy-log>Copy log</button>
             <button class="btn-ghost admin__btn" type="button" data-debug-clear-log>Clear log</button>
           </div>
           <div class="admin__supabase-log" data-debug-log aria-live="polite"></div>

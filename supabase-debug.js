@@ -51,10 +51,154 @@ const permissionTimeEl = root?.querySelector("[data-debug-permission-time]");
 const permissionButton = root?.querySelector("[data-debug-run-permission]");
 const permissionIndicator = root?.querySelector('[data-debug-section="permissions"] [data-debug-indicator]');
 
+const sqlStatusEl = root?.querySelector("[data-debug-sql-status]");
+const sqlDescriptionEl = root?.querySelector("[data-debug-sql-description]");
+const sqlTemplateSelect = root?.querySelector("[data-debug-sql-template]");
+const sqlTextarea = root?.querySelector("[data-debug-sql-editor]");
+const sqlCopyButton = root?.querySelector("[data-debug-sql-copy]");
+const sqlResetButton = root?.querySelector("[data-debug-sql-reset]");
+const sqlIndicator = root?.querySelector('[data-debug-section="sql"] [data-debug-indicator]');
+
 const clearLogButton = root?.querySelector("[data-debug-clear-log]");
+const copyLogButton = root?.querySelector("[data-debug-copy-log]");
+
+const CATALOG_TABLES = [
+  "products",
+  "product_badges",
+  "product_benefits",
+  "product_features",
+  "product_faqs",
+  "product_gallery",
+  "product_included_items",
+  "product_life_areas",
+  "product_social_proof"
+];
+
+const SQL_TABLE_LIST = CATALOG_TABLES.map((table) => `'${table}'`).join(",\n    ");
+const SQL_ARRAY_LIST = `ARRAY[${CATALOG_TABLES.map((table) => `'${table}'`).join(", ")}]`;
+
+const SQL_SNIPPETS = [
+  {
+    id: "catalog_policy_overview",
+    label: "Inspect RLS policies for catalog tables",
+    description:
+      "Lists row-level security policies currently applied to the catalog tables so you can confirm admin access rules.",
+    statement: String.raw`select
+  tablename,
+  policyname,
+  permissive,
+  roles,
+  command,
+  using,
+  with_check
+from pg_policies
+where schemaname = 'public'
+  and tablename in (
+    ${SQL_TABLE_LIST}
+  )
+order by tablename, policyname;`
+  },
+  {
+    id: "catalog_table_privileges",
+    label: "Table privileges for current Supabase role",
+    description:
+      "Shows which INSERT, UPDATE, and DELETE privileges the signed-in role has on every catalog table.",
+    statement: String.raw`select
+  table_name,
+  has_table_privilege(current_user, format('public.%s', table_name), 'INSERT') as can_insert,
+  has_table_privilege(current_user, format('public.%s', table_name), 'UPDATE') as can_update,
+  has_table_privilege(current_user, format('public.%s', table_name), 'DELETE') as can_delete
+from unnest(${SQL_ARRAY_LIST}) as table_name
+order by table_name;`
+  },
+  {
+    id: "catalog_grants",
+    label: "Granted privileges from information_schema",
+    description:
+      "Queries information_schema.table_privileges to confirm how Supabase granted rights to the current role.",
+    statement: String.raw`select
+  table_name,
+  privilege_type,
+  is_grantable
+from information_schema.table_privileges
+where table_schema = 'public'
+  and grantee = current_user
+  and table_name in (
+    ${SQL_TABLE_LIST}
+  )
+order by table_name, privilege_type;`
+  },
+  {
+    id: "catalog_row_health",
+    label: "Row counts and orphan detection",
+    description:
+      "Counts rows for each catalog table and highlights related rows whose product_id no longer matches a product.",
+    statement: String.raw`with counts as (
+  select 'products' as table_name, count(*) as row_count from products
+  union all select 'product_badges', count(*) from product_badges
+  union all select 'product_benefits', count(*) from product_benefits
+  union all select 'product_features', count(*) from product_features
+  union all select 'product_faqs', count(*) from product_faqs
+  union all select 'product_gallery', count(*) from product_gallery
+  union all select 'product_included_items', count(*) from product_included_items
+  union all select 'product_life_areas', count(*) from product_life_areas
+  union all select 'product_social_proof', count(*) from product_social_proof
+),
+orphans as (
+  select 'product_badges' as table_name, count(*) as orphan_rows
+  from product_badges pb
+  left join products p on pb.product_id = p.id
+  where p.id is null
+  union all
+  select 'product_benefits', count(*)
+  from product_benefits pb
+  left join products p on pb.product_id = p.id
+  where p.id is null
+  union all
+  select 'product_features', count(*)
+  from product_features pf
+  left join products p on pf.product_id = p.id
+  where p.id is null
+  union all
+  select 'product_faqs', count(*)
+  from product_faqs pf
+  left join products p on pf.product_id = p.id
+  where p.id is null
+  union all
+  select 'product_gallery', count(*)
+  from product_gallery pg
+  left join products p on pg.product_id = p.id
+  where p.id is null
+  union all
+  select 'product_included_items', count(*)
+  from product_included_items pii
+  left join products p on pii.product_id = p.id
+  where p.id is null
+  union all
+  select 'product_life_areas', count(*)
+  from product_life_areas pla
+  left join products p on pla.product_id = p.id
+  where p.id is null
+  union all
+  select 'product_social_proof', count(*)
+  from product_social_proof psp
+  left join products p on psp.product_id = p.id
+  where p.id is null
+)
+select
+  c.table_name,
+  c.row_count,
+  coalesce(o.orphan_rows, 0) as orphan_rows
+from counts c
+left join orphans o on c.table_name = o.table_name
+order by c.table_name;`
+  }
+];
 
 const SUMMARY_STORAGE_KEY = "hs-debug-summary-v1";
 let summarySaveHandle = null;
+let activeSqlSnippetId = SQL_SNIPPETS[0]?.id ?? null;
+let isSqlDirty = false;
 
 function setIndicatorTone(indicator, tone) {
   if (!indicator) return;
@@ -95,6 +239,15 @@ function formatTimestamp(date) {
 function setSummaryStatus(message) {
   if (summaryStatusEl) {
     summaryStatusEl.textContent = message;
+  }
+}
+
+function setSqlStatus(message, tone = null) {
+  if (sqlStatusEl) {
+    sqlStatusEl.textContent = message;
+  }
+  if (tone) {
+    setIndicatorTone(sqlIndicator, tone);
   }
 }
 
@@ -275,6 +428,232 @@ function appendLog(tone, message, details) {
 function clearLog() {
   if (!logContainer) return;
   logContainer.innerHTML = "";
+}
+
+function buildLogTranscript() {
+  if (!logContainer) return "";
+  const entries = Array.from(logContainer.querySelectorAll(".admin__supabase-log-entry"));
+  if (!entries.length) {
+    return "";
+  }
+
+  return entries
+    .slice()
+    .reverse()
+    .map((entry) => {
+      const tone = entry.getAttribute("data-tone") ?? "info";
+      const timeEl = entry.querySelector("time");
+      const messageEl = entry.querySelector(".admin__supabase-log-entry__message");
+      const detailsEl = entry.querySelector(".admin__supabase-log-entry__details");
+
+      const iso = timeEl?.dateTime;
+      let timestamp = timeEl?.textContent ?? "";
+      if (iso) {
+        const parsed = new Date(iso);
+        if (!Number.isNaN(parsed.getTime())) {
+          timestamp = parsed.toISOString();
+        }
+      }
+
+      const message = messageEl?.textContent ?? "";
+      const lines = [`[${timestamp}] (${tone}) ${message}`];
+
+      if (detailsEl?.textContent) {
+        const detailLines = detailsEl.textContent.split("\n").map((line) => `  ${line}`);
+        lines.push(detailLines.join("\n"));
+      }
+
+      return lines.join("\n");
+    })
+    .join("\n\n");
+}
+
+async function copyToClipboard(text) {
+  if (typeof text !== "string") {
+    throw new Error("Clipboard payload must be a string.");
+  }
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  if (!document?.body) {
+    throw new Error("Clipboard API is unavailable in this environment.");
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "absolute";
+  textarea.style.left = "-9999px";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+
+  const selection = document.getSelection();
+  const previousRange = selection?.rangeCount ? selection.getRangeAt(0) : null;
+
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+
+  const succeeded = document.execCommand("copy");
+
+  textarea.remove();
+  if (selection) {
+    selection.removeAllRanges();
+    if (previousRange) {
+      selection.addRange(previousRange);
+    }
+  }
+
+  if (!succeeded) {
+    throw new Error("Copy command was blocked by the browser.");
+  }
+}
+
+async function copyLogToClipboard() {
+  if (!logContainer) return;
+
+  const transcript = buildLogTranscript();
+  if (!transcript.trim()) {
+    appendLog("info", "Debug log is empty. Run a test before copying.");
+    return;
+  }
+
+  try {
+    const entryCount = logContainer.childElementCount;
+    await copyToClipboard(transcript);
+    appendLog("success", "Debug log copied to clipboard.", { entries: entryCount });
+  } catch (error) {
+    appendLog("error", "Failed to copy debug log to clipboard.", formatError(error));
+  }
+}
+
+function getSqlSnippet(snippetId) {
+  if (!SQL_SNIPPETS.length) {
+    return null;
+  }
+  if (snippetId) {
+    const found = SQL_SNIPPETS.find((snippet) => snippet.id === snippetId);
+    if (found) {
+      return found;
+    }
+  }
+  return SQL_SNIPPETS[0];
+}
+
+function applySqlSnippet(snippet) {
+  if (!snippet) return;
+  activeSqlSnippetId = snippet.id;
+  if (sqlTemplateSelect) {
+    sqlTemplateSelect.value = snippet.id;
+  }
+  if (sqlTextarea) {
+    sqlTextarea.value = snippet.statement;
+    sqlTextarea.disabled = false;
+  }
+  if (sqlDescriptionEl) {
+    sqlDescriptionEl.textContent = snippet.description;
+  }
+  isSqlDirty = false;
+}
+
+function initialiseSqlSection() {
+  if (!sqlTemplateSelect || !sqlTextarea || !sqlStatusEl) {
+    return;
+  }
+
+  if (!SQL_SNIPPETS.length) {
+    sqlTemplateSelect.innerHTML = "";
+    sqlTemplateSelect.disabled = true;
+    if (sqlDescriptionEl) {
+      sqlDescriptionEl.textContent = "Add entries to SQL_SNIPPETS in supabase-debug.js to expose presets here.";
+    }
+    sqlTextarea.value = "";
+    sqlTextarea.placeholder = "No SQL presets are defined yet.";
+    sqlTextarea.disabled = true;
+    if (sqlCopyButton) sqlCopyButton.disabled = true;
+    if (sqlResetButton) sqlResetButton.disabled = true;
+    setSqlStatus("SQL presets are not configured.", "danger");
+    return;
+  }
+
+  sqlTemplateSelect.disabled = false;
+  sqlTextarea.disabled = false;
+  if (sqlCopyButton) sqlCopyButton.disabled = false;
+  if (sqlResetButton) sqlResetButton.disabled = false;
+
+  sqlTemplateSelect.innerHTML = "";
+  for (const snippet of SQL_SNIPPETS) {
+    const option = document.createElement("option");
+    option.value = snippet.id;
+    option.textContent = snippet.label;
+    sqlTemplateSelect.append(option);
+  }
+
+  const initialSnippet = getSqlSnippet(activeSqlSnippetId);
+  applySqlSnippet(initialSnippet);
+  setSqlStatus(
+    initialSnippet
+      ? `Loaded “${initialSnippet.label}”. Copy the snippet into Supabase to run it.`
+      : "Select a SQL preset to begin.",
+    "neutral"
+  );
+}
+
+function handleSqlTemplateChange(event) {
+  const snippet = getSqlSnippet(event?.target?.value);
+  if (!snippet) return;
+  applySqlSnippet(snippet);
+  setSqlStatus(`Loaded preset “${snippet.label}”.`, "info");
+  appendLog("info", `Loaded SQL preset: ${snippet.label}.`, { presetId: snippet.id });
+}
+
+function handleSqlEditorInput() {
+  if (!sqlTextarea) return;
+  isSqlDirty = true;
+  setSqlStatus("SQL modified. Copy to share or run in Supabase.", "info");
+}
+
+async function handleSqlCopy() {
+  if (!sqlTextarea) return;
+  const text = sqlTextarea.value ?? "";
+  if (!text.trim()) {
+    setSqlStatus("SQL snippet is empty. Add content before copying.", "danger");
+    appendLog("warning", "Attempted to copy an empty SQL snippet.");
+    return;
+  }
+
+  try {
+    await copyToClipboard(text);
+    const snippet = getSqlSnippet(activeSqlSnippetId);
+    const message = isSqlDirty
+      ? "Copied modified SQL to clipboard."
+      : snippet
+      ? `Copied preset “${snippet.label}” to clipboard.`
+      : "Copied SQL to clipboard.";
+    setSqlStatus(message, "success");
+    appendLog("success", message, {
+      presetId: snippet?.id ?? null,
+      preset: snippet?.label ?? null,
+      modified: isSqlDirty,
+      length: text.length
+    });
+  } catch (error) {
+    const message = `Failed to copy SQL: ${formatError(error)}`;
+    setSqlStatus(message, "danger");
+    appendLog("error", message, formatError(error));
+  }
+}
+
+function handleSqlReset() {
+  const snippet = getSqlSnippet(activeSqlSnippetId);
+  if (!snippet) {
+    return;
+  }
+  applySqlSnippet(snippet);
+  setSqlStatus(`Reset SQL editor to preset “${snippet.label}”.`, "info");
+  appendLog("info", `SQL editor reset to preset: ${snippet.label}.`, { presetId: snippet.id });
 }
 
 function describeLatest(latest) {
@@ -659,6 +1038,22 @@ if (summaryClearButton) {
   summaryClearButton.addEventListener("click", clearSummary);
 }
 
+if (sqlTemplateSelect) {
+  sqlTemplateSelect.addEventListener("change", handleSqlTemplateChange);
+}
+
+if (sqlTextarea) {
+  sqlTextarea.addEventListener("input", handleSqlEditorInput);
+}
+
+if (sqlCopyButton) {
+  sqlCopyButton.addEventListener("click", handleSqlCopy);
+}
+
+if (sqlResetButton) {
+  sqlResetButton.addEventListener("click", handleSqlReset);
+}
+
 if (configButton) {
   configButton.addEventListener("click", runConfigCheck);
 }
@@ -678,6 +1073,12 @@ if (permissionButton) {
 if (clearLogButton) {
   clearLogButton.addEventListener("click", clearLog);
 }
+
+if (copyLogButton) {
+  copyLogButton.addEventListener("click", copyLogToClipboard);
+}
+
+initialiseSqlSection();
 
 // Auto-run the configuration check when the page loads to surface missing credentials quickly.
 if (document.readyState === "complete" || document.readyState === "interactive") {
