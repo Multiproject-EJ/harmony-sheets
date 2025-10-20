@@ -1028,6 +1028,24 @@ if (!rootHook) {
     setSupabaseImportButtonState({ disabled: false, label: supabaseImportDefaults.label });
   }
 
+  async function bootstrapAdminWorkspace({ autoImport = false } = {}) {
+    initializeSupabaseTester();
+    initializeSupabaseSaver();
+    await loadEditorModule();
+    initializeSupabaseImporter();
+
+    if (autoImport) {
+      try {
+        await importSupabaseCatalog();
+        return;
+      } catch (error) {
+        console.error("[admin] Automatic Supabase import failed", error);
+      }
+    }
+
+    await runSupabaseTest({ initial: true, source: "initial" });
+  }
+
   function formatError(error) {
     if (!error) return "Unknown error.";
     if (typeof error.message === "string" && error.message.trim()) {
@@ -2182,11 +2200,7 @@ if (!rootHook) {
       if (error) throw error;
       const sessionUser = data?.session?.user || null;
       if (requireAdmin(sessionUser)) {
-        initializeSupabaseTester();
-        initializeSupabaseSaver();
-        await loadEditorModule();
-        initializeSupabaseImporter();
-        await runSupabaseTest({ initial: true, source: "initial" });
+        await bootstrapAdminWorkspace({ autoImport: true });
       }
     } catch (error) {
       console.error("[admin] Failed to verify session", error);
@@ -2203,11 +2217,7 @@ if (!rootHook) {
       if (!requireAdmin(user)) {
         return;
       }
-      initializeSupabaseTester();
-      initializeSupabaseSaver();
-      await loadEditorModule();
-      initializeSupabaseImporter();
-      await runSupabaseTest({ initial: true, source: "initial" });
+      await bootstrapAdminWorkspace({ autoImport: true });
     });
     authSubscription = listener;
   }
