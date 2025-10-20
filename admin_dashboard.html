@@ -206,14 +206,9 @@
             <button class="btn-ghost admin__btn" type="button" data-supabase-test disabled>
               <span data-supabase-test-label>Run test</span>
             </button>
-            <a
-              class="btn-ghost admin__btn"
-              href="supabase-debug.html"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <button class="btn-ghost admin__btn" type="button" data-supabase-debug-open>
               Open Supabase debug tools
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -1128,6 +1123,43 @@
     </div>
   </section>
 </main>
+
+<div class="admin-editor-modal admin-debug-modal" data-supabase-debug-modal hidden>
+  <div class="admin-editor-modal__backdrop" data-supabase-debug-dismiss></div>
+  <div
+    class="admin-editor-modal__dialog admin-debug-modal__dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="supabase-debug-title"
+    data-supabase-debug-dialog
+    tabindex="-1"
+  >
+    <button
+      class="admin-editor-modal__close"
+      type="button"
+      data-supabase-debug-dismiss
+      aria-label="Close Supabase debug tools"
+    >
+      ×
+    </button>
+    <header class="admin-debug-modal__header">
+      <p class="admin-debug-modal__eyebrow">Supabase tools</p>
+      <h2 class="admin-debug-modal__title" id="supabase-debug-title">Supabase debug tools</h2>
+      <p class="admin-debug-modal__intro">
+        Inspect and test Supabase data without leaving the dashboard. Changes made here do not automatically sync.
+      </p>
+    </header>
+    <div class="admin-debug-modal__body">
+      <iframe
+        class="admin-debug-modal__frame"
+        title="Supabase debug tools"
+        data-supabase-debug-frame
+        data-src="supabase-debug.html"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </div>
+</div>
 
 <div class="admin-ai-modal" data-kpi-modal hidden>
   <div class="admin-ai-modal__backdrop" data-kpi-modal-dismiss></div>
