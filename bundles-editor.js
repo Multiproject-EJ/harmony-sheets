@@ -1,3 +1,5 @@
+import { SUPABASE_URL, SUPABASE_ANON_KEY, isSupabaseConfigured } from "./supabase-config.js";
+
 const STORAGE_KEY = "harmony-sheets-bundles-v1";
 
 const state = {
@@ -8,6 +10,8 @@ const state = {
   sortDir: "asc",
   filter: "all"
 };
+
+let baselineSourceLabel = "Supabase dataset";
 
 const subscribers = new Set();
 
@@ -63,6 +67,174 @@ let productSuggestions = [];
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function coerceText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function coerceNumber(value) {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function toArray(value) {
+  if (Array.isArray(value)) return value;
+  if (value == null) return [];
+  return [value];
+}
+
+function getPosition(entry) {
+  if (!entry || typeof entry !== "object") return Number.MAX_SAFE_INTEGER;
+  const position = coerceNumber(entry.position);
+  return position == null ? Number.MAX_SAFE_INTEGER : position;
+}
+
+function sortByPosition(list) {
+  return toArray(list)
+    .slice()
+    .sort((a, b) => getPosition(a) - getPosition(b));
+}
+
+function getSupabaseRestUrl(path) {
+  if (typeof SUPABASE_URL !== "string") return null;
+  const base = SUPABASE_URL.replace(/\/+$/, "");
+  const cleaned = typeof path === "string" ? path.replace(/^\/+/, "") : "";
+  return `${base}/${cleaned}`;
+}
+
+function getSupabaseHeaders() {
+  return {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    Accept: "application/json",
+    "Content-Type": "application/json"
+  };
+}
+
+function buildPriceDisplay(row) {
+  const explicit = coerceText(row?.price_display);
+  if (explicit) return explicit;
+
+  const amount = coerceNumber(row?.price_amount);
+  if (amount == null) return "";
+
+  const currency = coerceText(row?.price_currency) || "USD";
+  if (typeof Intl !== "undefined" && typeof Intl.NumberFormat === "function") {
+    try {
+      return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
+    } catch (error) {
+      // Ignore formatter failures and fall back to a basic display.
+    }
+  }
+
+  return `$${amount.toFixed(2)}`;
+}
+
+function normalizeSupabaseBundleRow(row) {
+  if (!row || typeof row !== "object") return null;
+
+  const slug = coerceText(row.slug) || coerceText(row.id);
+  const priceAmount = coerceNumber(row.price_amount);
+  const priceCurrency = coerceText(row.price_currency) || "USD";
+
+  const includes = sortByPosition(row.bundle_includes)
+    .map((item) => coerceText(item?.item))
+    .filter(Boolean);
+
+  const products = sortByPosition(row.bundle_products)
+    .map((item) => coerceText(item?.product_slug ?? item?.productSlug))
+    .filter(Boolean);
+
+  const bundle = {
+    slug: slug || undefined,
+    name: coerceText(row.name) || slug || "",
+    badge: coerceText(row.badge),
+    tagline: coerceText(row.tagline),
+    navTagline: coerceText(row.nav_tagline),
+    navCta: coerceText(row.nav_cta),
+    price: buildPriceDisplay(row),
+    savings: coerceText(row.savings_display),
+    category: coerceText(row.category),
+    color: coerceText(row.color_hex),
+    navColor: coerceText(row.nav_color_hex),
+    cta: coerceText(row.cta_label),
+    page: coerceText(row.page_url),
+    stripe: coerceText(row.stripe_url),
+    includes,
+    products,
+    navFeatured: row.nav_featured,
+    draft: row.draft
+  };
+
+  if (priceAmount != null) {
+    bundle.priceAmount = priceAmount;
+  }
+  if (priceCurrency) {
+    bundle.priceCurrency = priceCurrency;
+  }
+
+  return normalizeBundle(bundle);
+}
+
+async function fetchSupabaseBundles() {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+
+  const base = getSupabaseRestUrl("rest/v1/bundles");
+  if (!base) {
+    return null;
+  }
+
+  const select = [
+    "id",
+    "slug",
+    "name",
+    "badge",
+    "tagline",
+    "nav_tagline",
+    "nav_cta",
+    "price_amount",
+    "price_currency",
+    "price_display",
+    "savings_display",
+    "category",
+    "color_hex",
+    "nav_color_hex",
+    "cta_label",
+    "page_url",
+    "stripe_url",
+    "draft",
+    "nav_featured",
+    "bundle_includes(*)",
+    "bundle_products(*)"
+  ].join(",");
+
+  const endpoint = `${base}?select=${encodeURIComponent(select)}&order=created_at.asc`;
+
+  const response = await fetch(endpoint, {
+    headers: getSupabaseHeaders(),
+    mode: "cors",
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error(`Supabase responded with ${response.status}`);
+  }
+
+  const rows = await response.json();
+  if (!Array.isArray(rows)) {
+    return [];
+  }
+
+  return rows.map((row) => normalizeSupabaseBundleRow(row)).filter(Boolean);
 }
 
 function normalizeFlag(value) {
@@ -575,15 +747,16 @@ function handleExport() {
   anchor.click();
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
-  setStatus("Download started. Upload the JSON wherever you host bundles.", "info");
+  setStatus("Download started. Import the JSON into Supabase or share it with your team.", "info");
 }
 
 function handleReset() {
   state.bundles = clone(state.baseline);
   state.selectedSlug = null;
   clearStorage();
-  setWorkspaceSource("Source JSON");
-  setStatus("Reverted bundles to source JSON.", "info");
+  const label = baselineSourceLabel || "Supabase dataset";
+  setWorkspaceSource(label);
+  setStatus(`Reverted bundles to ${label}.`, "info");
   setFormFeedback(null);
   if (els.form) {
     els.form.reset();
@@ -699,29 +872,62 @@ function notifySubscribers(reason = "update") {
 }
 
 async function loadBundles() {
+  const stored = loadFromStorage();
+  const supabaseReady = isSupabaseConfigured();
+
   try {
-    const response = await fetch("bundles.json", { cache: "no-store" });
-    if (!response.ok) throw new Error("Failed to load bundles");
-    const data = await response.json();
-    const baseline = Array.isArray(data) ? data.map((bundle) => normalizeBundle(bundle)) : [];
-    state.baseline = clone(baseline);
-    const stored = loadFromStorage();
-    if (stored && Array.isArray(stored)) {
-      state.bundles = stored.map((bundle) => normalizeBundle(bundle));
-      setWorkspaceSource("Local workspace");
-      setStatus("Loaded bundles from local workspace.", "success");
-    } else {
-      state.bundles = clone(baseline);
-      setWorkspaceSource("Source JSON");
-      setStatus("Loaded bundles from source JSON.");
+    if (supabaseReady) {
+      const supabaseBundles = await fetchSupabaseBundles();
+      if (Array.isArray(supabaseBundles)) {
+        const baseline = supabaseBundles.map((bundle) => normalizeBundle(bundle));
+        state.baseline = clone(baseline);
+        baselineSourceLabel = "Supabase dataset";
+
+        if (stored && Array.isArray(stored) && stored.length) {
+          state.bundles = stored.map((bundle) => normalizeBundle(bundle));
+          setWorkspaceSource("Local workspace");
+          setStatus("Loaded bundles from local workspace. Save to Supabase when you're ready.", "info");
+        } else {
+          state.bundles = clone(state.baseline);
+          setWorkspaceSource(baselineSourceLabel);
+          const tone = state.bundles.length ? "success" : "info";
+          const message = state.bundles.length
+            ? "Loaded bundles from Supabase."
+            : "Supabase is ready. Add your first bundle to get started.";
+          setStatus(message, tone);
+        }
+
+        renderTable();
+        notifySubscribers("load");
+        return;
+      }
     }
+  } catch (error) {
+    console.warn("[bundles] Supabase bundles unavailable", error);
+  }
+
+  if (stored && Array.isArray(stored) && stored.length) {
+    const normalized = stored.map((bundle) => normalizeBundle(bundle));
+    state.baseline = clone(normalized);
+    baselineSourceLabel = "Local workspace";
+    state.bundles = clone(state.baseline);
+    setWorkspaceSource("Local workspace");
+    const tone = supabaseReady ? "warning" : "info";
+    const message = supabaseReady
+      ? "Supabase unavailable. Loaded bundles from local workspace."
+      : "Loaded bundles from local workspace.";
+    setStatus(message, tone);
     renderTable();
     notifySubscribers("load");
-  } catch (error) {
-    console.error(error);
-    setStatus("Unable to load bundles. Refresh to try again.", "danger");
-    renderEmptyTable("Could not load bundles.");
+    return;
   }
+
+  if (!supabaseReady) {
+    setStatus("Supabase is not configured. Update supabase-config.js to sync bundle data.", "danger");
+  } else {
+    setStatus("Unable to load bundles. Refresh to try again.", "danger");
+  }
+  renderEmptyTable("Could not load bundles.");
 }
 
 function updateProductOptions() {
@@ -786,6 +992,7 @@ export function replaceBundles(bundles, options = {}) {
   state.bundles = clone(normalized);
   if (updateBaseline) {
     state.baseline = clone(normalized);
+    baselineSourceLabel = sourceLabel || "Bundle workspace";
   }
   state.selectedSlug = null;
 

@@ -668,15 +668,7 @@ if (!rootHook) {
       return bundlesSnapshot.length;
     }
 
-    try {
-      const response = await fetch("bundles.json", { cache: "no-store" });
-      if (!response.ok) return null;
-      const data = await response.json();
-      return Array.isArray(data) ? data.length : null;
-    } catch (error) {
-      console.warn("[admin] Failed to inspect local bundles", error);
-      return null;
-    }
+    return null;
   }
 
   function cloneCatalog(products) {
