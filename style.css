@@ -1334,6 +1334,16 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-table--compact thead th{font-size:.7rem}
 .admin-table--compact td{font-size:.88rem;line-height:1.5}
 .admin-table--compact tbody tr:nth-child(even){background:rgba(148,163,184,.08)}
+.admin__pipeline-body{overflow-x:auto}
+.admin-table--pipeline td{vertical-align:top}
+.admin-pipeline__life-area{display:block;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:#64748b;font-weight:600}
+.admin-pipeline__product{display:block;margin-top:4px;font-weight:600;font-size:1.02rem;color:#0f172a}
+.admin-pipeline__badge{display:inline-flex;align-items:center;justify-content:center;padding:4px 12px;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:rgba(148,163,184,.12);font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#475569;min-width:0}
+.admin-pipeline__badge[data-badge="best-seller"]{background:linear-gradient(140deg,rgba(34,197,94,.14),rgba(240,253,244,.9));border-color:rgba(34,197,94,.38);color:#047857}
+.admin-pipeline__badge[data-badge="popular"]{background:linear-gradient(140deg,rgba(251,191,36,.18),rgba(254,243,199,.8));border-color:rgba(251,191,36,.4);color:#b45309}
+.admin-pipeline__badge[data-badge="new"]{background:linear-gradient(140deg,rgba(99,102,241,.2),rgba(224,231,255,.9));border-color:rgba(99,102,241,.45);color:#3730a3}
+.admin-pipeline__badge--empty{border-style:dashed;color:#94a3b8;background:rgba(148,163,184,.1)}
+.admin-table--pipeline .admin-table__price{font-weight:600}
 
 .admin__editor{background:#fff;border:1px solid rgba(148,163,184,.28);border-radius:24px;box-shadow:0 24px 60px rgba(15,23,42,.08);padding:24px;min-height:620px}
 .admin__editor-tools{display:flex;justify-content:flex-end;margin-bottom:16px}
