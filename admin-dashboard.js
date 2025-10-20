@@ -52,6 +52,18 @@ if (!rootHook) {
     button: document.querySelector("[data-import-supabase]")
   };
 
+  const supabaseDebugEls = {
+    openTriggers: Array.from(
+      document.querySelectorAll("[data-supabase-debug-open]")
+    ),
+    modal: document.querySelector("[data-supabase-debug-modal]"),
+    dialog: document.querySelector("[data-supabase-debug-dialog]"),
+    dismissTriggers: Array.from(
+      document.querySelectorAll("[data-supabase-debug-dismiss]")
+    ),
+    frame: document.querySelector("[data-supabase-debug-frame]")
+  };
+
   const adminSheetLink = document.querySelector("[data-admin-sheet-link]");
 
   if (adminSheetLink) {
@@ -148,6 +160,10 @@ if (!rootHook) {
     dismissTriggers: Array.from(document.querySelectorAll("[data-kpi-modal-dismiss]"))
   };
 
+  let supabaseDebugReady = false;
+  let supabaseDebugOpen = false;
+  let supabaseDebugLoaded = false;
+  let supabaseDebugTrigger = null;
   let kpiModalReady = false;
   let kpiModalOpen = false;
   let activeKpiButton = null;
@@ -243,6 +259,107 @@ if (!rootHook) {
     if (typeof label === "string") {
       button.textContent = label;
     }
+  }
+
+  function openSupabaseDebugModal(trigger) {
+    const { modal, dialog, frame } = supabaseDebugEls;
+    if (!modal || !dialog) return;
+    if (supabaseDebugOpen) {
+      return;
+    }
+
+    supabaseDebugTrigger = trigger || null;
+    supabaseDebugOpen = true;
+
+    if (!supabaseDebugLoaded && frame) {
+      const dataSrc = frame.dataset?.src || frame.getAttribute("data-src");
+      const resolvedSrc =
+        typeof dataSrc === "string" && dataSrc.trim().length > 0
+          ? dataSrc.trim()
+          : "supabase-debug.html";
+      frame.src = resolvedSrc;
+      supabaseDebugLoaded = true;
+    }
+
+    modal.hidden = false;
+    modal.classList.add("is-open");
+
+    if (document?.body) {
+      document.body.classList.add("admin-editor-open");
+    }
+
+    window.requestAnimationFrame(() => {
+      dialog.focus();
+    });
+  }
+
+  function closeSupabaseDebugModal() {
+    const { modal } = supabaseDebugEls;
+    if (!modal) return;
+
+    modal.classList.remove("is-open");
+    modal.hidden = true;
+    supabaseDebugOpen = false;
+
+    if (document?.body) {
+      const remainingOpenModals = document.querySelectorAll(
+        ".admin-editor-modal.is-open"
+      );
+      if (remainingOpenModals.length === 0) {
+        document.body.classList.remove("admin-editor-open");
+      }
+    }
+
+    const trigger = supabaseDebugTrigger;
+    supabaseDebugTrigger = null;
+    if (trigger && typeof trigger.focus === "function") {
+      trigger.focus();
+    }
+  }
+
+  function initializeSupabaseDebugModal() {
+    if (supabaseDebugReady) {
+      return;
+    }
+
+    const { modal, dialog, dismissTriggers, openTriggers } = supabaseDebugEls;
+    if (!modal || !dialog) {
+      return;
+    }
+
+    if (Array.isArray(openTriggers) && openTriggers.length > 0) {
+      openTriggers.forEach((trigger) => {
+        trigger.addEventListener("click", () => {
+          openSupabaseDebugModal(trigger);
+        });
+      });
+    }
+
+    if (Array.isArray(dismissTriggers) && dismissTriggers.length > 0) {
+      dismissTriggers.forEach((element) => {
+        element.addEventListener("click", () => {
+          closeSupabaseDebugModal();
+        });
+      });
+    }
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeSupabaseDebugModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (!supabaseDebugOpen) {
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSupabaseDebugModal();
+      }
+    });
+
+    supabaseDebugReady = true;
   }
 
   function setSupabaseMetrics(updates = {}) {
@@ -2680,6 +2797,7 @@ if (!rootHook) {
     }
     showSection("content");
     updateSalesSnapshot(salesSnapshot);
+    initializeSupabaseDebugModal();
     initializeKpiAsk();
   }
 
