@@ -179,12 +179,20 @@
                 <dd data-supabase-products>—</dd>
               </dl>
               <dl class="admin__supabase-metric">
+                <dt>Supabase bundles</dt>
+                <dd data-supabase-bundles>—</dd>
+              </dl>
+              <dl class="admin__supabase-metric">
                 <dt>Latest change</dt>
                 <dd data-supabase-latest>—</dd>
               </dl>
               <dl class="admin__supabase-metric">
-                <dt>Local catalog</dt>
+                <dt>Local products</dt>
                 <dd data-supabase-local>—</dd>
+              </dl>
+              <dl class="admin__supabase-metric">
+                <dt>Local bundles</dt>
+                <dd data-supabase-local-bundles>—</dd>
               </dl>
             </div>
             <p class="admin__supabase-updated" data-supabase-updated hidden>
@@ -539,6 +547,212 @@
         </div>
       </div>
     </section>
+    <div class="admin__panel admin__panel--bundles" aria-labelledby="bundle-table-title">
+      <div class="admin__panel-head">
+        <div>
+          <h2 id="bundle-table-title">Bundle catalog</h2>
+          <p class="admin__panel-sub">Manage bundle pricing, featured status, and included products for the storefront.</p>
+        </div>
+        <div class="admin__panel-actions">
+          <button class="btn-pill admin__btn" type="button" data-add-bundle>
+            <span aria-hidden="true">＋</span>
+            <span>Add bundle</span>
+          </button>
+          <button class="btn-ghost admin__btn" type="button" data-bundles-export>
+            <span aria-hidden="true">⇩</span>
+            <span>Download JSON</span>
+          </button>
+          <button class="btn-ghost admin__btn" type="button" data-bundles-reset>
+            <span aria-hidden="true">⟲</span>
+            <span>Reset data</span>
+          </button>
+        </div>
+      </div>
+      <div class="admin__workspace-status admin__workspace-status--bundles">
+        <div class="admin__status-indicator" data-bundles-status-indicator></div>
+        <div>
+          <p class="admin__status-label" data-bundles-workspace-label>Bundle workspace</p>
+          <p class="admin__status-value" data-bundles-status>Loading bundles…</p>
+        </div>
+      </div>
+      <div class="admin__toolbar" role="search">
+        <label class="admin__search">
+          <span class="sr-only">Search bundles</span>
+          <input type="search" placeholder="Search by name or tagline" data-bundles-search>
+        </label>
+        <label class="admin__filter">
+          <span class="sr-only">Filter bundles</span>
+          <select data-bundles-filter>
+            <option value="all">All bundles</option>
+            <option value="active">Active only</option>
+            <option value="draft">Draft only</option>
+            <option value="nav">Featured in menu</option>
+          </select>
+        </label>
+      </div>
+      <div class="admin__table-wrap" data-bundles-table-container>
+        <div class="admin__table-scroll" role="presentation">
+          <table class="admin-table" aria-describedby="bundle-table-title">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <button type="button" class="admin-table__sort" data-bundles-sort="name">Bundle</button>
+                </th>
+                <th scope="col">
+                  <button type="button" class="admin-table__sort" data-bundles-sort="products">Products</button>
+                </th>
+                <th scope="col" class="admin-table__price">
+                  <button type="button" class="admin-table__sort" data-bundles-sort="price">Price</button>
+                </th>
+                <th scope="col" class="admin-table__status">Draft</th>
+                <th scope="col">
+                  <button type="button" class="admin-table__sort" data-bundles-sort="featured">Menu</button>
+                </th>
+              </tr>
+            </thead>
+            <tbody data-bundles-table>
+              <tr>
+                <td colspan="5" class="admin-table__empty">Loading bundles…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <footer class="admin__panel-foot">
+        <p data-bundles-meta>0 bundles</p>
+      </footer>
+    </div>
+    <div class="admin-editor-modal" data-bundle-modal hidden>
+      <div class="admin-editor-modal__backdrop" data-bundle-modal-dismiss></div>
+      <div
+        class="admin-editor-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="bundle-editor-title"
+        data-bundle-modal-dialog
+        tabindex="-1"
+      >
+        <button class="admin-editor-modal__close" type="button" data-bundle-modal-dismiss aria-label="Close bundle editor">×</button>
+        <div class="admin-form__placeholder" data-bundle-editor-empty>
+          <p>Select a bundle from the table or create a new bundle to start editing.</p>
+        </div>
+        <form class="admin-form" data-bundle-form hidden>
+          <header class="admin-form__header">
+            <div>
+              <span class="admin-form__mode" data-bundle-form-mode>Editing</span>
+              <h2 class="admin-form__title" data-bundle-form-title id="bundle-editor-title">Untitled bundle</h2>
+            </div>
+            <div class="admin-form__header-actions">
+              <button class="btn-ghost" type="button" data-bundle-cancel>Edit another bundle</button>
+              <button class="btn-ghost danger" type="button" data-bundle-delete>Delete</button>
+              <button class="btn primary" type="submit" data-bundle-save>Save changes</button>
+            </div>
+          </header>
+          <p
+            class="admin-form__feedback"
+            data-bundle-form-feedback
+            role="status"
+            aria-live="polite"
+            hidden
+          ></p>
+          <section class="admin-form__grid">
+            <div class="admin-form__field">
+              <label for="bundle-id">Bundle slug</label>
+              <input id="bundle-id" name="slug" type="text" required>
+              <p class="admin-form__help">Used in URLs. Lowercase and hyphenated.</p>
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-name">Name</label>
+              <input id="bundle-name" name="name" type="text" required>
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-tagline">Tagline</label>
+              <input id="bundle-tagline" name="tagline" type="text">
+            </div>
+            <div class="admin-form__field admin-form__field--checkbox">
+              <span>Status</span>
+              <label class="admin-form__checkbox" for="bundle-draft">
+                <input id="bundle-draft" name="draft" type="checkbox">
+                <span>Mark as draft (hide from storefront)</span>
+              </label>
+              <label class="admin-form__checkbox" for="bundle-nav-featured">
+                <input id="bundle-nav-featured" name="navFeatured" type="checkbox">
+                <span>Feature in bundles menu</span>
+              </label>
+            </div>
+          </section>
+          <section class="admin-form__grid">
+            <div class="admin-form__field">
+              <label for="bundle-nav-tagline">Navigation tagline</label>
+              <input id="bundle-nav-tagline" name="navTagline" type="text">
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-nav-cta">Navigation CTA</label>
+              <input id="bundle-nav-cta" name="navCta" type="text" placeholder="View bundle">
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-badge">Badge</label>
+              <input id="bundle-badge" name="badge" type="text" placeholder="Pro Essentials">
+            </div>
+          </section>
+          <section class="admin-form__grid">
+            <div class="admin-form__field">
+              <label for="bundle-price">Price</label>
+              <input id="bundle-price" name="price" type="text" placeholder="$99">
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-savings">Savings</label>
+              <input id="bundle-savings" name="savings" type="text" placeholder="$18">
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-category">Category</label>
+              <input id="bundle-category" name="category" type="text" placeholder="planning">
+            </div>
+          </section>
+          <section class="admin-form__grid">
+            <div class="admin-form__field">
+              <label for="bundle-color">Accent color</label>
+              <input id="bundle-color" name="color" type="text" placeholder="#6366f1">
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-nav-color">Menu accent color</label>
+              <input id="bundle-nav-color" name="navColor" type="text" placeholder="#6366f1">
+              <p class="admin-form__help">Optional override for navigation cards.</p>
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-cta">Primary CTA label</label>
+              <input id="bundle-cta" name="cta" type="text" placeholder="View bundle details">
+            </div>
+          </section>
+          <section class="admin-form__grid">
+            <div class="admin-form__field">
+              <label for="bundle-page">Detail page URL</label>
+              <input id="bundle-page" name="page" type="text" placeholder="bundle-premium.html">
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-stripe">Stripe checkout URL</label>
+              <input id="bundle-stripe" name="stripe" type="url" placeholder="https://">
+            </div>
+            <div class="admin-form__field">
+              <label for="bundle-products">Products included</label>
+              <input
+                id="bundle-products"
+                name="products"
+                type="text"
+                placeholder="planner, finance-suite"
+                list="bundle-product-options"
+              >
+              <p class="admin-form__help">Comma separated product IDs or slugs. Suggestions populate from the product catalog.</p>
+              <datalist id="bundle-product-options" data-bundle-product-options></datalist>
+            </div>
+          </section>
+          <label class="admin-form__field" for="bundle-includes">
+            <span>What's inside</span>
+            <textarea id="bundle-includes" name="includes" rows="4" placeholder="One item per line"></textarea>
+          </label>
+        </form>
+      </div>
+    </div>
   </section>
 </main>
 
