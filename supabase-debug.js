@@ -83,20 +83,31 @@ const SQL_SNIPPETS = [
     label: "Inspect RLS policies for catalog tables",
     description:
       "Lists row-level security policies currently applied to the catalog tables so you can confirm admin access rules.",
-    statement: String.raw`select
-  tablename,
-  policyname,
-  permissive,
-  roles,
-  cmd as command,
-  qual as using_expression,
-  with_check
-from pg_policies
-where schemaname = 'public'
-  and tablename in (
-    ${SQL_TABLE_LIST}
-  )
-order by tablename, policyname;`
+    statement: String.raw`with policy_targets as (
+  select
+    schemaname,
+    tablename,
+    format('%I.%I', schemaname, tablename)::regclass as relid
+  from pg_policies
+  where schemaname = 'public'
+    and tablename in (
+      ${SQL_TABLE_LIST}
+    )
+  group by schemaname, tablename
+)
+select
+  p.tablename,
+  p.policyname,
+  p.permissive,
+  p.roles,
+  p.cmd as command,
+  pg_get_expr(p.qual, t.relid) as using_expression,
+  pg_get_expr(p.with_check, t.relid) as check_expression
+from pg_policies p
+join policy_targets t
+  on p.schemaname = t.schemaname
+  and p.tablename = t.tablename
+order by p.tablename, p.policyname;`
   },
   {
     id: "catalog_table_privileges",
