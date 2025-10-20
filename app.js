@@ -1656,13 +1656,8 @@ App.loadBundles = function() {
         return App.filterActiveBundles(supabaseBundles);
       }
 
-      const response = await fetch("bundles.json");
-      if (!response.ok) {
-        throw new Error(`Failed to load bundles: ${response.status}`);
-      }
-      const data = await response.json();
-      const normalized = Array.isArray(data) ? data.map(App.normalizeBundle) : [];
-      return App.filterActiveBundles(normalized);
+      console.warn("[App] Supabase bundles not available. Returning empty bundle list.");
+      return [];
     })().catch(err => {
       App.bundlesPromise = null;
       throw err;
@@ -3157,35 +3152,7 @@ App.initNavDropdown = function() {
     })
     .catch(err => {
       console.warn("Unable to load bundle menu:", err);
-      renderBundlesMenu(
-        [
-          {
-            slug: "back-to-school",
-            name: "Back to School Bundle",
-            navTagline: "Class schedules, assignments, and study flow in one dashboard.",
-            color: "#2563eb"
-          },
-          {
-            slug: "premium",
-            name: "Premium Bundle",
-            navTagline: "Unlock the complete toolkit of flagship templates.",
-            color: "#7c3aed"
-          },
-          {
-            slug: "full-life-hack",
-            name: "Full Life Hack Bundle",
-            navTagline: "Transform every area with aligned rituals and dashboards.",
-            color: "#0ea5e9"
-          },
-          {
-            slug: "personal-finance",
-            name: "Personal Finance Bundle",
-            navTagline: "Budgets, debt payoff, and savings snapshots at a glance.",
-            color: "#22c55e"
-          }
-        ],
-        true
-      );
+      renderBundlesMenu([]);
       scheduleBundleReposition();
     });
 
