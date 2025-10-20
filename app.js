@@ -4251,59 +4251,117 @@ App.initProduct = async function() {
         requestAnimationFrame(() => scaleFrame());
 
         if (viewport) {
-          const ensureFocusOverlay = () => {
-            let overlayEl = document.querySelector('.virtual-demo-focus-overlay');
-            if (!overlayEl) {
-              overlayEl = document.createElement('div');
-              overlayEl.className = 'virtual-demo-focus-overlay';
-              overlayEl.setAttribute('aria-hidden', 'true');
-              document.body.appendChild(overlayEl);
-            }
-            return overlayEl;
-          };
+          viewport.setAttribute('tabindex', '0');
+          viewport.setAttribute('role', 'button');
+          viewport.setAttribute('aria-haspopup', 'dialog');
+          viewport.setAttribute('aria-expanded', 'false');
+          viewport.setAttribute('aria-label', `Open the interactive ${product.name} demo`);
 
-          const overlayEl = ensureFocusOverlay();
-          let focusActive = false;
-
-          const exitFocus = () => {
-            if (!focusActive) return;
-            focusActive = false;
-            overlayEl.classList.remove('is-active');
-            document.body.classList.remove('virtual-demo-focus-active');
-            virtualDemoFrame.classList.remove('is-focused');
-            viewport.classList.remove('is-focused');
-            viewport.classList.remove('is-flashing');
-          };
-
-          const triggerFlash = () => {
-            viewport.classList.add('is-flashing');
-            window.setTimeout(() => viewport.classList.remove('is-flashing'), 900);
-          };
-
-          const enterFocus = () => {
-            if (!focusActive) {
-              focusActive = true;
-              overlayEl.classList.add('is-active');
-              document.body.classList.add('virtual-demo-focus-active');
-              virtualDemoFrame.classList.add('is-focused');
-              viewport.classList.add('is-focused');
-            }
-            triggerFlash();
-          };
-
-          if (!overlayEl.dataset.bound) {
-            overlayEl.addEventListener('click', exitFocus);
-            document.addEventListener('keydown', event => {
-              if (event.key === 'Escape') exitFocus();
-            });
-            overlayEl.dataset.bound = 'true';
+          if (!viewport.querySelector('.virtual-demo__cta')) {
+            viewport.insertAdjacentHTML('beforeend', `
+              <div class="virtual-demo__cta">
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+                  <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+                <span>Launch interactive demo</span>
+              </div>
+            `);
           }
 
-          viewport.addEventListener('click', () => {
-            if (focusActive) {
-              exitFocus();
-            } else {
-              enterFocus();
+          let modalInstance;
+          let modalKeybound = false;
+
+          const closeModal = () => {
+            if (!modalInstance || modalInstance.hasAttribute('hidden')) return;
+            modalInstance.classList.remove('is-active');
+            document.body.classList.remove('virtual-demo-modal-open');
+            viewport.setAttribute('aria-expanded', 'false');
+
+            const iframeEl = modalInstance.querySelector('iframe');
+            if (iframeEl) iframeEl.blur();
+
+            const finalizeClose = () => {
+              modalInstance.setAttribute('hidden', '');
+            };
+
+            const onTransitionEnd = () => {
+              finalizeClose();
+              modalInstance.removeEventListener('transitionend', onTransitionEnd);
+            };
+
+            modalInstance.addEventListener('transitionend', onTransitionEnd, { once: true });
+            window.setTimeout(() => {
+              if (modalInstance && !modalInstance.classList.contains('is-active')) finalizeClose();
+            }, 320);
+
+            window.setTimeout(() => viewport.focus(), 50);
+          };
+
+          const handleGlobalKeydown = event => {
+            if (event.key === 'Escape') closeModal();
+          };
+
+          const getModal = () => {
+            if (!modalInstance) {
+              modalInstance = document.createElement('div');
+              modalInstance.className = 'virtual-demo-modal';
+              modalInstance.setAttribute('data-demo-modal', '');
+              modalInstance.setAttribute('hidden', '');
+              modalInstance.innerHTML = `
+                <div class="virtual-demo-modal__backdrop" data-demo-dismiss></div>
+                <div class="virtual-demo-modal__content" role="dialog" aria-modal="true">
+                  <button type="button" class="virtual-demo-modal__close" data-demo-dismiss aria-label="Close interactive demo">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                  <div class="virtual-demo-modal__body">
+                    <iframe loading="lazy" allowfullscreen></iframe>
+                  </div>
+                </div>`;
+
+              document.body.appendChild(modalInstance);
+
+              modalInstance.querySelectorAll('[data-demo-dismiss]').forEach(element => {
+                element.addEventListener('click', () => closeModal());
+              });
+            }
+
+            if (!modalKeybound) {
+              document.addEventListener('keydown', handleGlobalKeydown);
+              modalKeybound = true;
+            }
+
+            return modalInstance;
+          };
+
+          const openModal = () => {
+            const modalEl = getModal();
+            const dialogEl = modalEl.querySelector('.virtual-demo-modal__content');
+            if (dialogEl) dialogEl.setAttribute('aria-label', `${product.name} interactive demo`);
+
+            const iframeEl = modalEl.querySelector('iframe');
+            if (iframeEl) {
+              iframeEl.title = `${product.name} interactive demo`;
+              if (iframeEl.src !== virtualDemoUrl) iframeEl.src = virtualDemoUrl;
+            }
+
+            modalEl.removeAttribute('hidden');
+            requestAnimationFrame(() => modalEl.classList.add('is-active'));
+            document.body.classList.add('virtual-demo-modal-open');
+            viewport.setAttribute('aria-expanded', 'true');
+
+            const closeButton = modalEl.querySelector('.virtual-demo-modal__close');
+            window.setTimeout(() => closeButton && closeButton.focus(), 150);
+          };
+
+          viewport.addEventListener('click', event => {
+            event.preventDefault();
+            openModal();
+          });
+
+          viewport.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              openModal();
             }
           });
         }
