@@ -36,8 +36,10 @@ if (!rootHook) {
     status: document.querySelector("[data-supabase-status]"),
     metrics: document.querySelector("[data-supabase-metrics]"),
     products: document.querySelector("[data-supabase-products]"),
+    bundles: document.querySelector("[data-supabase-bundles]"),
     latest: document.querySelector("[data-supabase-latest]"),
     local: document.querySelector("[data-supabase-local]"),
+    localBundles: document.querySelector("[data-supabase-local-bundles]"),
     updated: document.querySelector("[data-supabase-updated]"),
     updatedTime: document.querySelector("[data-supabase-updated-time]"),
     button: document.querySelector("[data-supabase-test]"),
@@ -114,9 +116,11 @@ if (!rootHook) {
   };
 
   const supabaseMetricsState = {
-    count: null,
+    products: null,
+    bundles: null,
     latest: null,
-    localCount: null
+    localProducts: null,
+    localBundles: null
   };
 
   const salesSnapshot = {
@@ -153,6 +157,7 @@ if (!rootHook) {
   let supabaseClient = null;
   let authSubscription = null;
   let editorLoaded = false;
+  let bundlesEditorLoaded = false;
   let supabaseTesterReady = false;
   let supabaseTestPromise = null;
   let supabaseSavePromise = null;
@@ -160,8 +165,11 @@ if (!rootHook) {
   let supabaseImportPromise = null;
   let supabaseImporterReady = false;
   let editorModule = null;
+  let bundlesModule = null;
   let catalogSnapshot = null;
   let catalogUnsubscribe = null;
+  let bundlesSnapshot = null;
+  let bundlesUnsubscribe = null;
   let relativeTimeSupported =
     typeof Intl !== "undefined" && typeof Intl.RelativeTimeFormat === "function";
   let redirecting = false;
@@ -238,19 +246,32 @@ if (!rootHook) {
   }
 
   function setSupabaseMetrics(updates = {}) {
-    const hasCount = Object.prototype.hasOwnProperty.call(updates, "count");
+    const hasProducts = Object.prototype.hasOwnProperty.call(updates, "products");
+    const hasBundles = Object.prototype.hasOwnProperty.call(updates, "bundles");
     const hasLatest = Object.prototype.hasOwnProperty.call(updates, "latest");
-    const hasLocalCount = Object.prototype.hasOwnProperty.call(updates, "localCount");
+    const hasLocalProducts = Object.prototype.hasOwnProperty.call(updates, "localProducts");
+    const hasLocalBundles = Object.prototype.hasOwnProperty.call(updates, "localBundles");
 
-    if (hasCount) {
-      const value = updates.count;
-      supabaseMetricsState.count =
+    if (hasProducts) {
+      const value = updates.products;
+      supabaseMetricsState.products =
         typeof value === "number" && Number.isFinite(value) ? value : null;
-
       if (supabaseTestEls.products) {
         supabaseTestEls.products.textContent =
-          typeof supabaseMetricsState.count === "number"
-            ? supabaseMetricsState.count.toLocaleString()
+          typeof supabaseMetricsState.products === "number"
+            ? supabaseMetricsState.products.toLocaleString()
+            : "—";
+      }
+    }
+
+    if (hasBundles) {
+      const value = updates.bundles;
+      supabaseMetricsState.bundles =
+        typeof value === "number" && Number.isFinite(value) ? value : null;
+      if (supabaseTestEls.bundles) {
+        supabaseTestEls.bundles.textContent =
+          typeof supabaseMetricsState.bundles === "number"
+            ? supabaseMetricsState.bundles.toLocaleString()
             : "—";
       }
     }
@@ -259,41 +280,60 @@ if (!rootHook) {
       const value = updates.latest;
       supabaseMetricsState.latest =
         typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
-
       if (supabaseTestEls.latest) {
         supabaseTestEls.latest.textContent = supabaseMetricsState.latest || "—";
       }
     }
 
-    if (hasLocalCount) {
-      const value = updates.localCount;
+    if (hasLocalProducts) {
+      const value = updates.localProducts;
       if (typeof value === "number" && Number.isFinite(value)) {
-        supabaseMetricsState.localCount = value;
-      } else if (typeof value === "string" && value.trim().length > 0) {
-        supabaseMetricsState.localCount = value.trim();
+        supabaseMetricsState.localProducts = value;
+      } else if (typeof value === "string" && value.trim()) {
+        supabaseMetricsState.localProducts = value.trim();
       } else {
-        supabaseMetricsState.localCount = null;
+        supabaseMetricsState.localProducts = null;
       }
-
       if (supabaseTestEls.local) {
-        if (typeof supabaseMetricsState.localCount === "number") {
-          supabaseTestEls.local.textContent = supabaseMetricsState.localCount.toLocaleString();
-        } else if (typeof supabaseMetricsState.localCount === "string") {
-          supabaseTestEls.local.textContent = supabaseMetricsState.localCount;
+        if (typeof supabaseMetricsState.localProducts === "number") {
+          supabaseTestEls.local.textContent = supabaseMetricsState.localProducts.toLocaleString();
+        } else if (typeof supabaseMetricsState.localProducts === "string") {
+          supabaseTestEls.local.textContent = supabaseMetricsState.localProducts;
         } else {
           supabaseTestEls.local.textContent = "—";
         }
       }
     }
 
-    if (supabaseTestEls.metrics && (hasCount || hasLatest || hasLocalCount)) {
+    if (hasLocalBundles) {
+      const value = updates.localBundles;
+      if (typeof value === "number" && Number.isFinite(value)) {
+        supabaseMetricsState.localBundles = value;
+      } else if (typeof value === "string" && value.trim()) {
+        supabaseMetricsState.localBundles = value.trim();
+      } else {
+        supabaseMetricsState.localBundles = null;
+      }
+      if (supabaseTestEls.localBundles) {
+        if (typeof supabaseMetricsState.localBundles === "number") {
+          supabaseTestEls.localBundles.textContent = supabaseMetricsState.localBundles.toLocaleString();
+        } else if (typeof supabaseMetricsState.localBundles === "string") {
+          supabaseTestEls.localBundles.textContent = supabaseMetricsState.localBundles;
+        } else {
+          supabaseTestEls.localBundles.textContent = "—";
+        }
+      }
+    }
+
+    if (supabaseTestEls.metrics && (hasProducts || hasBundles || hasLatest || hasLocalProducts || hasLocalBundles)) {
       const hasData =
-        typeof supabaseMetricsState.count === "number" ||
-        typeof supabaseMetricsState.localCount === "number" ||
-        (typeof supabaseMetricsState.localCount === "string" &&
-          supabaseMetricsState.localCount.trim().length > 0) ||
-        (typeof supabaseMetricsState.latest === "string" &&
-          supabaseMetricsState.latest.trim().length > 0);
+        typeof supabaseMetricsState.products === "number" ||
+        typeof supabaseMetricsState.bundles === "number" ||
+        typeof supabaseMetricsState.localProducts === "number" ||
+        typeof supabaseMetricsState.localBundles === "number" ||
+        (typeof supabaseMetricsState.localProducts === "string" && supabaseMetricsState.localProducts.trim().length > 0) ||
+        (typeof supabaseMetricsState.localBundles === "string" && supabaseMetricsState.localBundles.trim().length > 0) ||
+        (typeof supabaseMetricsState.latest === "string" && supabaseMetricsState.latest.trim().length > 0);
       supabaseTestEls.metrics.hidden = !hasData;
     }
   }
@@ -585,7 +625,7 @@ if (!rootHook) {
     updatedTime.setAttribute("datetime", formatted.iso);
   }
 
-  async function fetchLocalCatalogCount() {
+  async function fetchLocalProductCount() {
     if (editorModule && typeof editorModule.getCatalogSnapshot === "function") {
       try {
         const snapshot = editorModule.getCatalogSnapshot();
@@ -612,6 +652,33 @@ if (!rootHook) {
     }
   }
 
+  async function fetchLocalBundleCount() {
+    if (bundlesModule && typeof bundlesModule.getBundlesSnapshot === "function") {
+      try {
+        const snapshot = bundlesModule.getBundlesSnapshot();
+        if (Array.isArray(snapshot)) {
+          return snapshot.length;
+        }
+      } catch (error) {
+        console.warn("[admin] Failed to read bundle snapshot", error);
+      }
+    }
+
+    if (Array.isArray(bundlesSnapshot)) {
+      return bundlesSnapshot.length;
+    }
+
+    try {
+      const response = await fetch("bundles.json", { cache: "no-store" });
+      if (!response.ok) return null;
+      const data = await response.json();
+      return Array.isArray(data) ? data.length : null;
+    } catch (error) {
+      console.warn("[admin] Failed to inspect local bundles", error);
+      return null;
+    }
+  }
+
   function cloneCatalog(products) {
     if (!Array.isArray(products)) return null;
     try {
@@ -627,8 +694,9 @@ if (!rootHook) {
     if (supabaseSavePromise) return;
     const hasClient = Boolean(supabaseClient);
     const hasCatalog = Array.isArray(catalogSnapshot);
+    const hasBundles = Array.isArray(bundlesSnapshot);
     setSupabaseSaveButtonState({
-      disabled: !(hasClient && hasCatalog),
+      disabled: !(hasClient && hasCatalog && hasBundles),
       label: supabaseSaveDefaults.label
     });
   }
@@ -636,13 +704,13 @@ if (!rootHook) {
   function updateCatalogSnapshot(products) {
     catalogSnapshot = cloneCatalog(products);
     if (Array.isArray(catalogSnapshot)) {
-      setSupabaseMetrics({ localCount: catalogSnapshot.length });
+      setSupabaseMetrics({ localProducts: catalogSnapshot.length });
       kpiCatalogFallback = cloneCatalog(catalogSnapshot) || catalogSnapshot;
       if (kpiModalOpen && activeKpiButton) {
         populateKpiModal(activeKpiButton);
       }
     } else {
-      setSupabaseMetrics({ localCount: null });
+      setSupabaseMetrics({ localProducts: null });
       if (kpiModalOpen) {
         setKpiStatus("Product context is still loading.", "info");
       }
@@ -650,6 +718,21 @@ if (!rootHook) {
 
     if (!supabaseSavePromise) {
       refreshSaveButtonState();
+    }
+  }
+
+  function updateBundlesSnapshot(bundles) {
+    if (Array.isArray(bundles)) {
+      try {
+        bundlesSnapshot = JSON.parse(JSON.stringify(bundles));
+      } catch (error) {
+        console.warn("[admin] Failed to clone bundles snapshot", error);
+        bundlesSnapshot = bundles.slice();
+      }
+      setSupabaseMetrics({ localBundles: bundlesSnapshot.length });
+    } else {
+      bundlesSnapshot = null;
+      setSupabaseMetrics({ localBundles: null });
     }
   }
 
@@ -661,6 +744,9 @@ if (!rootHook) {
         const snapshot = editorModule.getCatalogSnapshot();
         if (Array.isArray(snapshot)) {
           updateCatalogSnapshot(snapshot);
+          if (bundlesModule && typeof bundlesModule.setAvailableProducts === "function") {
+            bundlesModule.setAvailableProducts(snapshot);
+          }
         }
       } catch (error) {
         console.warn("[admin] Failed to load catalog snapshot", error);
@@ -672,9 +758,12 @@ if (!rootHook) {
         const unsubscribe = editorModule.subscribeToCatalog(({ products }) => {
           if (Array.isArray(products)) {
             updateCatalogSnapshot(products);
+            if (bundlesModule && typeof bundlesModule.setAvailableProducts === "function") {
+              bundlesModule.setAvailableProducts(products);
+            }
           } else {
             catalogSnapshot = null;
-            setSupabaseMetrics({ localCount: null });
+            setSupabaseMetrics({ localProducts: null });
             if (!supabaseSavePromise) {
               refreshSaveButtonState();
             }
@@ -685,6 +774,34 @@ if (!rootHook) {
         }
       } catch (error) {
         console.warn("[admin] Failed to subscribe to catalog updates", error);
+      }
+    }
+  }
+
+  function initializeBundlesSync() {
+    if (!bundlesModule) return;
+
+    if (typeof bundlesModule.getBundlesSnapshot === "function") {
+      try {
+        const snapshot = bundlesModule.getBundlesSnapshot();
+        if (Array.isArray(snapshot)) {
+          updateBundlesSnapshot(snapshot);
+        }
+      } catch (error) {
+        console.warn("[admin] Failed to load bundle snapshot", error);
+      }
+    }
+
+    if (typeof bundlesModule.subscribeToBundles === "function" && !bundlesUnsubscribe) {
+      try {
+        const unsubscribe = bundlesModule.subscribeToBundles(({ bundles }) => {
+          if (Array.isArray(bundles)) {
+            updateBundlesSnapshot(bundles);
+          }
+        });
+        bundlesUnsubscribe = unsubscribe;
+      } catch (error) {
+        console.warn("[admin] Failed to subscribe to bundle updates", error);
       }
     }
   }
@@ -706,22 +823,41 @@ if (!rootHook) {
       throw new Error("Supabase client is not ready.");
     }
 
-    const query = supabaseClient
+    const productQuery = supabaseClient
       .from("products")
       .select("id, name, updated_at, created_at", { count: "exact" })
       .order("updated_at", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(1);
 
-    const { data, error, count } = await query;
-    if (error) {
-      throw error;
+    const bundleQuery = supabaseClient
+      .from("bundles")
+      .select("id, name, updated_at, created_at", { count: "exact" })
+      .order("updated_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    const [productResult, bundleResult] = await Promise.all([productQuery, bundleQuery]);
+
+    if (productResult.error) {
+      throw productResult.error;
+    }
+    if (bundleResult.error) {
+      throw bundleResult.error;
     }
 
-    const latest = Array.isArray(data) && data.length ? data[0] : null;
+    const productLatest = Array.isArray(productResult.data) && productResult.data.length ? productResult.data[0] : null;
+    const bundleLatest = Array.isArray(bundleResult.data) && bundleResult.data.length ? bundleResult.data[0] : null;
+
     return {
-      count: typeof count === "number" ? count : null,
-      latest
+      products: {
+        count: typeof productResult.count === "number" ? productResult.count : null,
+        latest: productLatest
+      },
+      bundles: {
+        count: typeof bundleResult.count === "number" ? bundleResult.count : null,
+        latest: bundleLatest
+      }
     };
   }
 
@@ -892,6 +1028,61 @@ if (!rootHook) {
     return product;
   }
 
+  function mapSupabaseRowToBundle(row) {
+    if (!row || typeof row !== "object") {
+      return null;
+    }
+
+    const slug = cleanIdentifier(row.slug) || cleanIdentifier(row.id);
+    if (!slug) {
+      return null;
+    }
+
+    const priceAmount = toNumber(row.price_amount);
+    const priceCurrency = cleanText(row.price_currency)?.toUpperCase() || null;
+    const priceDisplay = formatPriceDisplayValue(priceAmount, priceCurrency, cleanText(row.price_display));
+    const savingsDisplay = cleanText(row.savings_display);
+
+    const includes = sortByPosition(row.bundle_includes)
+      .map((item) => cleanText(item?.item))
+      .filter(Boolean);
+
+    const products = sortByPosition(row.bundle_products)
+      .map((item) => cleanIdentifier(item?.product_slug || item?.productSlug))
+      .filter(Boolean);
+
+    const bundle = {
+      slug,
+      name: cleanText(row.name) || slug,
+      badge: cleanText(row.badge),
+      tagline: cleanText(row.tagline),
+      navTagline: cleanText(row.nav_tagline),
+      navCta: cleanText(row.nav_cta) || cleanText(row.cta_label),
+      price: priceDisplay || "",
+      savings: savingsDisplay || "",
+      category: cleanText(row.category),
+      color: cleanText(row.color_hex || row.color),
+      navColor: cleanText(row.nav_color_hex || row.nav_color),
+      cta: cleanText(row.cta_label) || cleanText(row.nav_cta),
+      page: cleanText(row.page_url),
+      stripe: cleanText(row.stripe_url),
+      draft: Boolean(row.draft),
+      navFeatured: Boolean(row.nav_featured),
+      products,
+      includes
+    };
+
+    if (Number.isFinite(priceAmount)) {
+      bundle.priceAmount = priceAmount;
+    }
+
+    if (priceCurrency) {
+      bundle.priceCurrency = priceCurrency;
+    }
+
+    return bundle;
+  }
+
   async function fetchSupabaseCatalogRows() {
     if (!supabaseClient) {
       throw new Error("Supabase client is not ready.");
@@ -947,6 +1138,50 @@ if (!rootHook) {
     return Array.isArray(data) ? data : [];
   }
 
+  async function fetchSupabaseBundleRows() {
+    if (!supabaseClient) {
+      throw new Error("Supabase client is not ready.");
+    }
+
+    const query = supabaseClient
+      .from("bundles")
+      .select(
+        `
+          id,
+          slug,
+          name,
+          badge,
+          tagline,
+          nav_tagline,
+          nav_cta,
+          price_amount,
+          price_currency,
+          price_display,
+          savings_display,
+          category,
+          color_hex,
+          nav_color_hex,
+          cta_label,
+          page_url,
+          stripe_url,
+          draft,
+          nav_featured,
+          bundle_includes ( item, position ),
+          bundle_products ( product_slug, position )
+        `
+      )
+      .order("slug", { ascending: true })
+      .order("position", { foreignTable: "bundle_includes", ascending: true })
+      .order("position", { foreignTable: "bundle_products", ascending: true });
+
+    const { data, error } = await query;
+    if (error) {
+      throw error;
+    }
+
+    return Array.isArray(data) ? data : [];
+  }
+
   function importSupabaseCatalog() {
     if (!rootHook) {
       return Promise.resolve();
@@ -964,11 +1199,17 @@ if (!rootHook) {
       setSupabaseImportButtonState({ disabled: true, label: "Fetching…" });
 
       let workspaceModule = null;
+      let bundlesWorkspace = null;
 
       try {
-        workspaceModule = await loadEditorModule();
+        const [productModule, bundleModule] = await Promise.all([loadEditorModule(), loadBundlesModule()]);
+        workspaceModule = productModule;
+        bundlesWorkspace = bundleModule;
         if (!workspaceModule || typeof workspaceModule.replaceCatalog !== "function") {
           throw new Error("Catalog workspace is not ready.");
+        }
+        if (!bundlesWorkspace || typeof bundlesWorkspace.replaceBundles !== "function") {
+          throw new Error("Bundle workspace is not ready.");
         }
 
         updateSupabaseStatus("Fetching latest catalog from Supabase…", "info");
@@ -976,21 +1217,43 @@ if (!rootHook) {
           workspaceModule.setWorkspaceStatus("Fetching latest catalog from Supabase…", "info");
         }
 
-        const rows = await fetchSupabaseCatalogRows();
-        const products = rows.map((row) => mapSupabaseRowToProduct(row)).filter(Boolean);
-        const count = products.length;
-        const statusMessage = count
-          ? `Loaded ${count} product${count === 1 ? "" : "s"} from Supabase.`
+        const [productRows, bundleRows] = await Promise.all([
+          fetchSupabaseCatalogRows(),
+          fetchSupabaseBundleRows()
+        ]);
+
+        const products = productRows.map((row) => mapSupabaseRowToProduct(row)).filter(Boolean);
+        const bundles = bundleRows.map((row) => mapSupabaseRowToBundle(row)).filter(Boolean);
+
+        const productCount = products.length;
+        const bundleCount = bundles.length;
+
+        const productStatusMessage = productCount
+          ? `Loaded ${productCount} product${productCount === 1 ? "" : "s"} from Supabase.`
           : "Supabase catalog is empty.";
 
         workspaceModule.replaceCatalog(products, {
           sourceLabel: "Supabase",
-          statusMessage,
-          statusTone: count ? "success" : "warning",
+          statusMessage: productStatusMessage,
+          statusTone: productCount ? "success" : "warning",
           persistLocal: true,
           updateBaseline: true,
           reason: "supabase-import"
         });
+
+        if (typeof bundlesWorkspace.replaceBundles === "function") {
+          const bundleStatusMessage = bundleCount
+            ? `Loaded ${bundleCount} bundle${bundleCount === 1 ? "" : "s"} from Supabase.`
+            : "Supabase bundle catalog is empty.";
+          bundlesWorkspace.replaceBundles(bundles, {
+            sourceLabel: "Supabase",
+            statusMessage: bundleStatusMessage,
+            statusTone: bundleCount ? "success" : "warning",
+            persistLocal: true,
+            updateBaseline: true,
+            reason: "supabase-import"
+          });
+        }
 
         updateSupabaseStatus("Supabase catalog imported into workspace.", "success");
         setSupabaseUpdated(new Date());
@@ -1032,6 +1295,7 @@ if (!rootHook) {
     initializeSupabaseTester();
     initializeSupabaseSaver();
     await loadEditorModule();
+    await loadBundlesModule();
     initializeSupabaseImporter();
 
     if (autoImport) {
@@ -1716,6 +1980,66 @@ if (!rootHook) {
     return { lifeAreas, badges, features, included, gallery, faqs, benefits, socialProof };
   }
 
+  function buildBaseBundleRow(bundle) {
+    const slug = cleanIdentifier(bundle?.slug);
+    if (!slug) {
+      throw new Error("A bundle is missing its slug.");
+    }
+
+    const price = extractPriceDetails(bundle);
+    const name = cleanText(bundle?.name) || slug;
+
+    return {
+      slug,
+      name,
+      badge: cleanText(bundle?.badge),
+      tagline: cleanText(bundle?.tagline),
+      nav_tagline: cleanText(bundle?.navTagline || bundle?.nav_tagline),
+      nav_cta: cleanText(bundle?.navCta || bundle?.nav_cta || bundle?.cta),
+      price_amount: price.amount,
+      price_currency: price.currency,
+      price_display: price.display,
+      savings_display: cleanText(bundle?.savings || bundle?.savings_display),
+      category: cleanText(bundle?.category),
+      color_hex: cleanText(bundle?.color || bundle?.color_hex),
+      nav_color_hex: cleanText(bundle?.navColor || bundle?.nav_color_hex),
+      cta_label: cleanText(bundle?.cta || bundle?.navCta || bundle?.cta_label),
+      page_url: cleanText(bundle?.page || bundle?.page_url),
+      stripe_url: cleanText(bundle?.stripe || bundle?.stripe_url),
+      draft: Boolean(bundle?.draft),
+      nav_featured: Boolean(bundle?.navFeatured || bundle?.nav_featured),
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  function buildBundleRelatedRows(bundles, slugToId) {
+    const includes = [];
+    const bundleProducts = [];
+
+    bundles.forEach((bundle) => {
+      const slug = cleanIdentifier(bundle?.slug);
+      if (!slug) return;
+      const bundleId = slugToId.get(slug);
+      if (!bundleId) return;
+
+      (Array.isArray(bundle?.includes) ? bundle.includes : [])
+        .map((item) => cleanText(item))
+        .filter(Boolean)
+        .forEach((item, index) => {
+          includes.push({ bundle_id: bundleId, item, position: index + 1 });
+        });
+
+      (Array.isArray(bundle?.products) ? bundle.products : [])
+        .map((item) => cleanIdentifier(item))
+        .filter(Boolean)
+        .forEach((productSlug, index) => {
+          bundleProducts.push({ bundle_id: bundleId, product_slug: productSlug, position: index + 1 });
+        });
+    });
+
+    return { includes, products: bundleProducts };
+  }
+
   async function clearRelatedTables(productIds) {
     if (!Array.isArray(productIds) || !productIds.length) return;
 
@@ -1735,6 +2059,25 @@ if (!rootHook) {
         .from(table.name)
         .delete()
         .in("product_id", productIds);
+      if (error) {
+        throw new Error(`Failed to reset ${table.label}: ${formatError(error)}`);
+      }
+    }
+  }
+
+  async function clearBundleRelatedTables(bundleIds) {
+    if (!Array.isArray(bundleIds) || !bundleIds.length) return;
+
+    const tables = [
+      { name: "bundle_includes", label: "bundle includes" },
+      { name: "bundle_products", label: "bundle product relationships" }
+    ];
+
+    for (const table of tables) {
+      const { error } = await supabaseClient
+        .from(table.name)
+        .delete()
+        .in("bundle_id", bundleIds);
       if (error) {
         throw new Error(`Failed to reset ${table.label}: ${formatError(error)}`);
       }
@@ -1850,6 +2193,95 @@ if (!rootHook) {
     return { saved: baseRecords.length };
   }
 
+  async function syncBundlesWithSupabase(bundles) {
+    if (!Array.isArray(bundles)) {
+      throw new Error("No bundle data is available to save.");
+    }
+
+    const baseRecords = bundles.map((bundle) => buildBaseBundleRow(bundle));
+    const seenSlugs = new Set();
+    for (const record of baseRecords) {
+      if (seenSlugs.has(record.slug)) {
+        throw new Error(`Duplicate bundle slug detected: "${record.slug}".`);
+      }
+      seenSlugs.add(record.slug);
+    }
+
+    if (!baseRecords.length) {
+      const { data: existing, error: fetchError } = await supabaseClient.from("bundles").select("id");
+      if (fetchError) {
+        throw new Error(`Failed to inspect Supabase bundles: ${formatError(fetchError)}`);
+      }
+      const ids = (existing || []).map((row) => row.id).filter(Boolean);
+      if (ids.length) {
+        const { error: deleteError } = await supabaseClient.from("bundles").delete().in("id", ids);
+        if (deleteError) {
+          throw new Error(`Failed to clear Supabase bundles: ${formatError(deleteError)}`);
+        }
+      }
+      return { saved: 0 };
+    }
+
+    const { error: upsertError } = await supabaseClient
+      .from("bundles")
+      .upsert(baseRecords, { onConflict: "slug" });
+    if (upsertError) {
+      throw new Error(`Failed to upsert bundles: ${formatError(upsertError)}`);
+    }
+
+    const localSlugs = baseRecords.map((record) => record.slug);
+    const { data: idRows, error: idError } = await supabaseClient
+      .from("bundles")
+      .select("id, slug")
+      .in("slug", localSlugs);
+    if (idError) {
+      throw new Error(`Failed to confirm bundle IDs: ${formatError(idError)}`);
+    }
+
+    const slugToId = new Map();
+    (idRows || []).forEach((row) => {
+      if (row && row.slug && row.id) {
+        slugToId.set(row.slug, row.id);
+      }
+    });
+
+    for (const slug of localSlugs) {
+      if (!slugToId.has(slug)) {
+        throw new Error(`Supabase did not return an ID for bundle "${slug}".`);
+      }
+    }
+
+    const bundleIds = Array.from(slugToId.values());
+
+    const { data: remoteRows, error: remoteError } = await supabaseClient.from("bundles").select("id, slug");
+    if (remoteError) {
+      throw new Error(`Failed to inspect Supabase bundles: ${formatError(remoteError)}`);
+    }
+
+    const localSlugSet = new Set(localSlugs);
+    const staleIds = (remoteRows || [])
+      .filter((row) => row && row.slug && !localSlugSet.has(row.slug))
+      .map((row) => row.id)
+      .filter(Boolean);
+    if (staleIds.length) {
+      const { error: deleteStaleError } = await supabaseClient
+        .from("bundles")
+        .delete()
+        .in("id", staleIds);
+      if (deleteStaleError) {
+        throw new Error(`Failed to remove stale bundles: ${formatError(deleteStaleError)}`);
+      }
+    }
+
+    await clearBundleRelatedTables(bundleIds);
+
+    const relatedRows = buildBundleRelatedRows(bundles, slugToId);
+    await insertRows("bundle_includes", relatedRows.includes, "bundle includes");
+    await insertRows("bundle_products", relatedRows.products, "bundle product relationships");
+
+    return { saved: baseRecords.length };
+  }
+
   function saveCatalogToSupabase() {
     if (!rootHook) {
       return Promise.resolve();
@@ -1865,9 +2297,9 @@ if (!rootHook) {
     if (supabaseSavePromise) {
       return supabaseSavePromise;
     }
-    if (!Array.isArray(catalogSnapshot)) {
+    if (!Array.isArray(catalogSnapshot) || !Array.isArray(bundlesSnapshot)) {
       updateSupabaseStatus(
-        "Local catalog is still loading. Try again once your products appear.",
+        "Local catalog is still loading. Try again once your products and bundles appear.",
         "info"
       );
       refreshSaveButtonState();
@@ -1875,6 +2307,7 @@ if (!rootHook) {
     }
 
     supabaseSavePromise = (async () => {
+      await loadBundlesModule();
       let snapshot = catalogSnapshot;
       if (editorModule && typeof editorModule.getCatalogSnapshot === "function") {
         try {
@@ -1887,10 +2320,25 @@ if (!rootHook) {
         }
       }
 
-      const productCount = Array.isArray(snapshot) ? snapshot.length : 0;
+      let bundleSnapshot = bundlesSnapshot;
+      if (bundlesModule && typeof bundlesModule.getBundlesSnapshot === "function") {
+        try {
+          const latestBundles = bundlesModule.getBundlesSnapshot();
+          if (Array.isArray(latestBundles)) {
+            bundleSnapshot = latestBundles;
+          }
+        } catch (error) {
+          console.warn("[admin] Failed to read bundle snapshot before saving", error);
+        }
+      }
 
+      const productCount = Array.isArray(snapshot) ? snapshot.length : 0;
+      const bundleCount = Array.isArray(bundleSnapshot) ? bundleSnapshot.length : 0;
+
+      const statusLabelProducts = `${productCount} product${productCount === 1 ? "" : "s"}`;
+      const statusLabelBundles = `${bundleCount} bundle${bundleCount === 1 ? "" : "s"}`;
       updateSupabaseStatus(
-        `Saving ${productCount} product${productCount === 1 ? "" : "s"} to Supabase…`,
+        `Saving ${statusLabelProducts} and ${statusLabelBundles} to Supabase…`,
         "info"
       );
       setSupabaseButtonState({ disabled: true });
@@ -1898,6 +2346,7 @@ if (!rootHook) {
 
       try {
         await syncCatalogWithSupabase(Array.isArray(snapshot) ? snapshot : []);
+        await syncBundlesWithSupabase(Array.isArray(bundleSnapshot) ? bundleSnapshot : []);
         setSupabaseUpdated(new Date());
         updateSupabaseStatus("Supabase updated. Verifying sync…", "success");
         await runSupabaseTest({ initial: true, source: "save-to-supabase" });
@@ -1956,56 +2405,115 @@ if (!rootHook) {
       setSupabaseButtonState({ disabled: true, label: loadingLabel });
 
       try {
-        const localCountPromise = fetchLocalCatalogCount();
+        const [localProductsPromise, localBundlesPromise] = [
+          fetchLocalProductCount(),
+          fetchLocalBundleCount()
+        ];
         const overview = await fetchSupabaseOverview();
-        const localCount = await localCountPromise;
+        const localProducts = await localProductsPromise;
+        const localBundles = await localBundlesPromise;
 
-        const latestDescription =
-          describeLatestChange(overview.latest) ||
-          (typeof overview.count === "number" && overview.count === 0
-            ? "No product records found."
-            : "No change details available.");
+        const productOverview = overview?.products || {};
+        const bundleOverview = overview?.bundles || {};
 
-        const matchesLocal =
-          typeof overview.count === "number" &&
-          typeof localCount === "number" &&
-          overview.count === localCount;
+        const productCount =
+          typeof productOverview.count === "number" ? productOverview.count : null;
+        const bundleCount =
+          typeof bundleOverview.count === "number" ? bundleOverview.count : null;
+
+        const productLatest = describeLatestChange(productOverview.latest);
+        const bundleLatest = describeLatestChange(bundleOverview.latest);
+        const latestParts = [];
+        if (productLatest) {
+          latestParts.push(`Products: ${productLatest}`);
+        }
+        if (bundleLatest) {
+          latestParts.push(`Bundles: ${bundleLatest}`);
+        }
+        const latestFallback =
+          (productCount === 0 && bundleCount === 0)
+            ? "No catalog records found."
+            : "No change details available.";
+        const latestDescription = latestParts.length ? latestParts.join(" | ") : latestFallback;
+
+        const productsMatch =
+          typeof productCount === "number" &&
+          typeof localProducts === "number" &&
+          productCount === localProducts;
+        const bundlesMatch =
+          typeof bundleCount === "number" &&
+          typeof localBundles === "number" &&
+          bundleCount === localBundles;
 
         setSupabaseMetrics({
-          count: overview.count,
+          products: productCount,
+          bundles: bundleCount,
           latest: latestDescription,
-          localCount: localCount ?? "Unavailable"
+          localProducts: localProducts ?? "Unavailable",
+          localBundles: localBundles ?? "Unavailable"
         });
 
-        let statusMessage = "Supabase connection verified.";
-        if (typeof overview.count === "number") {
-          if (overview.count === 0) {
-            statusMessage = "Supabase connection verified. No products are stored in Supabase.";
-          } else if (overview.count === 1) {
-            statusMessage = "Supabase connection verified. 1 product found.";
+        const statusParts = ["Supabase connection verified."];
+
+        if (typeof productCount === "number") {
+          if (productCount === 0) {
+            statusParts.push("No products are stored in Supabase.");
           } else {
-            statusMessage = `Supabase connection verified. ${overview.count} products found.`;
+            statusParts.push(
+              `${productCount} product${productCount === 1 ? "" : "s"} found in Supabase.`
+            );
           }
         }
 
-        if (typeof overview.count === "number" && typeof localCount === "number") {
-          if (matchesLocal) {
-            statusMessage += ` Product count matches the local catalog (${localCount}).`;
+        if (typeof bundleCount === "number") {
+          if (bundleCount === 0) {
+            statusParts.push("No bundles are stored in Supabase.");
           } else {
-            const difference = overview.count - localCount;
+            statusParts.push(
+              `${bundleCount} bundle${bundleCount === 1 ? "" : "s"} found in Supabase.`
+            );
+          }
+        }
+
+        if (typeof productCount === "number" && typeof localProducts === "number") {
+          if (productsMatch) {
+            statusParts.push(`Product count matches the local catalog (${localProducts}).`);
+          } else {
+            const difference = productCount - localProducts;
             const diffWord = difference > 0 ? "more" : "fewer";
             const diffAbsolute = Math.abs(difference);
-            statusMessage += ` Supabase has ${diffAbsolute} ${diffWord} product${
-              diffAbsolute === 1 ? "" : "s"
-            } than the local catalog (${localCount}).`;
+            statusParts.push(
+              `Supabase has ${diffAbsolute} ${diffWord} product${diffAbsolute === 1 ? "" : "s"} than the local catalog (${localProducts}).`
+            );
           }
-        } else if (typeof localCount === "number") {
-          statusMessage += ` Local catalog contains ${localCount} product${
-            localCount === 1 ? "" : "s"
-          }.`;
-        } else if (localCount == null) {
-          statusMessage += " Local catalog could not be loaded.";
+        } else if (typeof localProducts === "number") {
+          statusParts.push(
+            `Local workspace contains ${localProducts} product${localProducts === 1 ? "" : "s"}.`
+          );
+        } else if (localProducts == null) {
+          statusParts.push("Local product catalog could not be loaded.");
         }
+
+        if (typeof bundleCount === "number" && typeof localBundles === "number") {
+          if (bundlesMatch) {
+            statusParts.push(`Bundle count matches the local catalog (${localBundles}).`);
+          } else {
+            const difference = bundleCount - localBundles;
+            const diffWord = difference > 0 ? "more" : "fewer";
+            const diffAbsolute = Math.abs(difference);
+            statusParts.push(
+              `Supabase has ${diffAbsolute} ${diffWord} bundle${diffAbsolute === 1 ? "" : "s"} than the local catalog (${localBundles}).`
+            );
+          }
+        } else if (typeof localBundles === "number") {
+          statusParts.push(
+            `Local workspace contains ${localBundles} bundle${localBundles === 1 ? "" : "s"}.`
+          );
+        } else if (localBundles == null) {
+          statusParts.push("Local bundle catalog could not be loaded.");
+        }
+
+        const statusMessage = statusParts.join(" ");
 
         updateSupabaseStatus(statusMessage, "success");
         setSupabaseUpdated(new Date());
@@ -2017,9 +2525,12 @@ if (!rootHook) {
               message: statusMessage,
               source,
               token,
-              count: typeof overview.count === "number" ? overview.count : null,
-              localCount: typeof localCount === "number" ? localCount : null,
-              matchesLocal,
+              count: productCount,
+              bundleCount,
+              localCount: typeof localProducts === "number" ? localProducts : null,
+              localBundleCount: typeof localBundles === "number" ? localBundles : null,
+              matchesLocal: productsMatch,
+              bundlesMatch,
               latest: latestDescription
             }
           })
@@ -2028,7 +2539,7 @@ if (!rootHook) {
         console.error("[admin] Supabase test failed", error);
         const formattedError = formatError(error);
         updateSupabaseStatus(`Supabase test failed: ${formattedError}`, "danger");
-        setSupabaseMetrics({ count: null, latest: null });
+        setSupabaseMetrics({ products: null, bundles: null, latest: null });
         setSupabaseUpdated(new Date());
 
         window.dispatchEvent(
@@ -2156,6 +2667,21 @@ if (!rootHook) {
     }
   }
 
+  async function loadBundlesModule() {
+    if (bundlesEditorLoaded && bundlesModule) {
+      return bundlesModule;
+    }
+    try {
+      bundlesModule = await import("./bundles-editor.js");
+      bundlesEditorLoaded = true;
+      initializeBundlesSync();
+      return bundlesModule;
+    } catch (error) {
+      console.error("[admin] Failed to load bundle workspace", error);
+      return null;
+    }
+  }
+
   function enableContent() {
     if (contentSection) {
       contentSection.hidden = false;
@@ -2236,6 +2762,14 @@ if (!rootHook) {
           console.warn("[admin] Failed to remove catalog subscription", error);
         }
         catalogUnsubscribe = null;
+      }
+      if (typeof bundlesUnsubscribe === "function") {
+        try {
+          bundlesUnsubscribe();
+        } catch (error) {
+          console.warn("[admin] Failed to remove bundle subscription", error);
+        }
+        bundlesUnsubscribe = null;
       }
     });
   }

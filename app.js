@@ -873,10 +873,120 @@ App.filterActiveProducts = function(products) {
     .filter(item => item && !item.draft);
 };
 
+App.normalizeBundle = function(bundle) {
+  if (!bundle || typeof bundle !== "object") return bundle;
+
+  const normalized = { ...bundle };
+
+  const coerceText = value => (typeof value === "string" ? value.trim() : "");
+  const coerceFlag = value => {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") return Number.isFinite(value) && value !== 0;
+    if (typeof value === "string") {
+      const normalizedValue = value.trim().toLowerCase();
+      if (!normalizedValue) return false;
+      return ["true", "1", "yes", "y", "on", "featured", "menu", "primary"].includes(normalizedValue);
+    }
+    if (value == null) return false;
+    return Boolean(value);
+  };
+
+  const slug = coerceText(normalized.slug) || coerceText(normalized.id);
+  if (slug) {
+    normalized.slug = slug;
+  }
+
+  const status = coerceText(normalized.status).toLowerCase();
+  let draft = Boolean(status && ["draft", "inactive", "disabled", "hidden", "archived", "unlisted", "private"].includes(status));
+  if (Object.prototype.hasOwnProperty.call(normalized, "draft")) {
+    draft = App.normalizeDraftFlag(normalized.draft);
+  } else if (Object.prototype.hasOwnProperty.call(normalized, "active")) {
+    draft = !coerceFlag(normalized.active);
+    delete normalized.active;
+  }
+  normalized.draft = Boolean(draft);
+
+  let navFeatured = null;
+  if (Object.prototype.hasOwnProperty.call(normalized, "navFeatured")) {
+    navFeatured = coerceFlag(normalized.navFeatured);
+  }
+
+  const altFeatureKeys = ["nav_featured", "featured", "featuredInNav", "menuFeatured", "menu_featured"];
+  altFeatureKeys.forEach(key => {
+    if (!Object.prototype.hasOwnProperty.call(normalized, key)) return;
+    const flag = coerceFlag(normalized[key]);
+    if (navFeatured === null) {
+      navFeatured = flag;
+    } else if (!Object.prototype.hasOwnProperty.call(normalized, "navFeatured")) {
+      navFeatured = navFeatured || flag;
+    }
+    delete normalized[key];
+  });
+
+  normalized.navFeatured = Boolean(navFeatured);
+
+  const toStringList = value => {
+    if (Array.isArray(value)) {
+      return value
+        .map(entry => coerceText(entry))
+        .filter(Boolean);
+    }
+    const text = coerceText(value);
+    if (!text) return [];
+    return text
+      .split(/[\n,]/)
+      .map(entry => entry.trim())
+      .filter(Boolean);
+  };
+
+  const productSources = [
+    normalized.products,
+    normalized.productIds,
+    normalized.product_ids,
+    normalized.productSlugs,
+    normalized.product_slugs
+  ];
+  normalized.products = [];
+  productSources.forEach(source => {
+    toStringList(source).forEach(item => {
+      if (!normalized.products.includes(item)) {
+        normalized.products.push(item);
+      }
+    });
+  });
+
+  const includeSources = [normalized.includes, normalized.items, normalized.bundleItems];
+  normalized.includes = [];
+  includeSources.forEach(source => {
+    toStringList(source).forEach(item => {
+      if (!normalized.includes.includes(item)) {
+        normalized.includes.push(item);
+      }
+    });
+  });
+
+  return normalized;
+};
+
+App.isBundleActive = function(bundle) {
+  if (!bundle || typeof bundle !== "object") return false;
+  const normalized = App.normalizeBundle(bundle);
+  return normalized ? !normalized.draft : false;
+};
+
+App.filterActiveBundles = function(bundles) {
+  if (!Array.isArray(bundles)) return [];
+  return bundles
+    .map(item => App.normalizeBundle(item))
+    .filter(item => item && !item.draft);
+};
+
 App.supabaseConfigCache = undefined;
 App.supabaseStatusCache = null;
 App.supabaseStatusPromise = null;
 App.supabaseProductsCache = null;
+App.supabaseBundlesCache = null;
+App.supabaseBundlesPromise = null;
 App.supabaseProductsPromise = null;
 
 App.getSupabaseConfig = function() {
@@ -1266,6 +1376,157 @@ App.fetchSupabaseProducts = function() {
   return App.supabaseProductsPromise;
 };
 
+App.fetchSupabaseBundles = function() {
+  const config = App.getSupabaseConfig();
+  if (!config) {
+    return Promise.resolve(null);
+  }
+
+  if (Array.isArray(App.supabaseBundlesCache)) {
+    return Promise.resolve(App.supabaseBundlesCache);
+  }
+
+  if (App.supabaseBundlesPromise) {
+    return App.supabaseBundlesPromise;
+  }
+
+  const { url, anonKey } = config;
+  const endpointBase = typeof url === "string" ? url.replace(/\/?$/, "") : "";
+  const select = [
+    "id",
+    "slug",
+    "name",
+    "badge",
+    "tagline",
+    "nav_tagline",
+    "nav_cta",
+    "price_amount",
+    "price_currency",
+    "price_display",
+    "savings_display",
+    "category",
+    "color_hex",
+    "nav_color_hex",
+    "cta_label",
+    "page_url",
+    "stripe_url",
+    "draft",
+    "nav_featured",
+    "bundle_includes(*)",
+    "bundle_products(*)"
+  ].join(",");
+  const endpoint = `${endpointBase}/rest/v1/bundles?select=${encodeURIComponent(select)}&order=created_at.asc`;
+
+  const headers = {
+    apikey: anonKey,
+    Authorization: `Bearer ${anonKey}`,
+    Accept: "application/json",
+    "Content-Type": "application/json"
+  };
+
+  const toArray = value => (Array.isArray(value) ? value : value ? [value] : []);
+  const getPosition = entry => {
+    if (!entry || typeof entry !== "object") return Number.MAX_SAFE_INTEGER;
+    const raw = entry.position;
+    const num = typeof raw === "number" ? raw : parseFloat(raw);
+    return Number.isFinite(num) ? num : Number.MAX_SAFE_INTEGER;
+  };
+  const sortByPosition = list => toArray(list).slice().sort((a, b) => getPosition(a) - getPosition(b));
+  const toTrimmed = value => (typeof value === "string" ? value.trim() : "");
+  const toText = value => (typeof value === "string" ? value : "");
+  const buildPriceDisplay = row => {
+    const display = toTrimmed(row.price_display);
+    if (display) return display;
+    const rawAmount = typeof row.price_amount === "number" ? row.price_amount : parseFloat(row.price_amount);
+    if (Number.isFinite(rawAmount)) {
+      if (typeof App.formatPrice === "function") {
+        return App.formatPrice(rawAmount);
+      }
+      return `$${rawAmount.toFixed(2)}`;
+    }
+    return "";
+  };
+
+  App.supabaseBundlesPromise = fetch(endpoint, {
+    headers,
+    mode: "cors",
+    cache: "no-store"
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Supabase responded with ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(rows => {
+      if (!Array.isArray(rows)) {
+        return null;
+      }
+
+      const bundles = rows
+        .map(row => {
+          if (!row || typeof row !== "object") return null;
+
+          const slug = toTrimmed(row.slug) || toTrimmed(row.id);
+          const priceAmount = typeof row.price_amount === "number" ? row.price_amount : parseFloat(row.price_amount);
+          const priceCurrency = toTrimmed(row.price_currency);
+
+          const includes = sortByPosition(row.bundle_includes)
+            .map(item => toTrimmed(item.item))
+            .filter(Boolean);
+
+          const products = sortByPosition(row.bundle_products)
+            .map(item => toTrimmed(item.product_slug || item.productSlug))
+            .filter(Boolean);
+
+          const raw = {
+            slug: slug || undefined,
+            name: toTrimmed(row.name) || slug || "",
+            badge: toTrimmed(row.badge),
+            tagline: toTrimmed(row.tagline),
+            navTagline: toTrimmed(row.nav_tagline),
+            navCta: toTrimmed(row.nav_cta),
+            price: buildPriceDisplay(row),
+            savings: toTrimmed(row.savings_display),
+            category: toTrimmed(row.category),
+            color: toTrimmed(row.color_hex),
+            navColor: toTrimmed(row.nav_color_hex),
+            cta: toTrimmed(row.cta_label),
+            page: toTrimmed(row.page_url),
+            stripe: toTrimmed(row.stripe_url),
+            includes,
+            products,
+            navFeatured: Boolean(row.nav_featured),
+            draft: App.normalizeDraftFlag(row.draft)
+          };
+
+          const bundle = App.normalizeBundle(raw);
+
+          if (bundle && Number.isFinite(priceAmount)) {
+            bundle.priceAmount = priceAmount;
+          }
+          if (bundle && priceCurrency) {
+            bundle.priceCurrency = priceCurrency;
+          }
+
+          return bundle;
+        })
+        .filter(Boolean);
+
+      App.supabaseBundlesCache = bundles;
+      return bundles;
+    })
+    .catch(error => {
+      console.warn("[App] Failed to load Supabase bundles", error);
+      return null;
+    })
+    .finally(() => {
+      App.supabaseBundlesPromise = null;
+    });
+
+  return App.supabaseBundlesPromise;
+};
+
 App.PREVIEW_STORAGE_KEY = "hs-admin-preview-products-v1";
 App.PREVIEW_TTL_MS = 1000 * 60 * 60 * 12;
 App.previewProductsMeta = null;
@@ -1389,15 +1650,23 @@ App.loadProducts = function() {
 App.bundlesPromise = null;
 App.loadBundles = function() {
   if (!App.bundlesPromise) {
-    App.bundlesPromise = fetch("bundles.json")
-      .then(res => {
-        if (!res.ok) throw new Error(`Failed to load bundles: ${res.status}`);
-        return res.json();
-      })
-      .catch(err => {
-        App.bundlesPromise = null;
-        throw err;
-      });
+    App.bundlesPromise = (async () => {
+      const supabaseBundles = await App.fetchSupabaseBundles();
+      if (Array.isArray(supabaseBundles)) {
+        return App.filterActiveBundles(supabaseBundles);
+      }
+
+      const response = await fetch("bundles.json");
+      if (!response.ok) {
+        throw new Error(`Failed to load bundles: ${response.status}`);
+      }
+      const data = await response.json();
+      const normalized = Array.isArray(data) ? data.map(App.normalizeBundle) : [];
+      return App.filterActiveBundles(normalized);
+    })().catch(err => {
+      App.bundlesPromise = null;
+      throw err;
+    });
   }
   return App.bundlesPromise;
 };
