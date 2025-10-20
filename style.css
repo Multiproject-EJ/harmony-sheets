@@ -1247,10 +1247,35 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin__supabase-metric dt{margin:0;font-weight:600;color:rgba(248,250,252,.72)}
 .admin__supabase-metric dd{margin:0;font-weight:500;color:#fff}
 .admin__supabase-actions{display:flex;align-items:center;margin-left:auto;gap:12px}
+.admin__supabase-actions--wrap{flex-wrap:wrap;justify-content:flex-end}
 .admin__supabase-actions .btn-ghost{background:#fff;color:#0f172a;border-color:rgba(248,250,252,.4)}
 .admin__supabase-actions .btn-ghost:hover,.admin__supabase-actions .btn-ghost:focus-visible{background:#cbd5f5;color:#0f172a;box-shadow:0 14px 32px rgba(29,78,216,.18)}
 .admin__supabase-actions .btn[disabled]{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none}
 .admin__supabase-updated{margin:0;font-size:.78rem;color:rgba(226,232,240,.65)}
+.admin__summary{margin:28px 0 34px;display:grid;gap:20px;padding:20px;border-radius:18px;background:#f8fafc;border:1px solid rgba(148,163,184,.28)}
+.admin__summary__header{display:grid;gap:10px}
+.admin__summary__header h2{margin:0;font-size:1.35rem}
+.admin__summary__intro{margin:0;color:#475569;font-size:.96rem;line-height:1.5}
+.admin__summary__grid{display:grid;gap:16px}
+@media (min-width:900px){
+  .admin__summary__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+}
+.admin__summary__field{display:grid;gap:8px}
+.admin__summary__label{font-weight:600;font-size:.88rem;color:#1f2937;letter-spacing:.01em}
+.admin__summary__textarea{border:1px solid rgba(148,163,184,.5);border-radius:14px;padding:12px 14px;font:inherit;min-height:120px;resize:vertical;background:#fff;color:#0f172a;box-shadow:inset 0 1px 2px rgba(15,23,42,.06)}
+.admin__summary__textarea:focus{outline:2px solid rgba(37,99,235,.35);outline-offset:2px;box-shadow:0 0 0 1px rgba(37,99,235,.35)}
+.admin__summary__footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.admin__summary__status{margin:0;font-size:.9rem;color:#475569}
+.admin__supabase-log{margin-top:18px;display:grid;gap:12px;max-height:420px;overflow:auto;padding:12px;border-radius:12px;background:rgba(15,23,42,.6);box-shadow:inset 0 0 0 1px rgba(148,163,184,.2)}
+.admin__supabase-log-entry{padding:12px;border-radius:10px;background:rgba(15,23,42,.85);box-shadow:0 1px 2px rgba(15,23,42,.45);display:grid;gap:8px;border-left:4px solid rgba(148,163,184,.6)}
+.admin__supabase-log-entry[data-tone="success"]{border-left-color:#22c55e}
+.admin__supabase-log-entry[data-tone="info"]{border-left-color:#38bdf8}
+.admin__supabase-log-entry[data-tone="warning"]{border-left-color:#facc15}
+.admin__supabase-log-entry[data-tone="error"],.admin__supabase-log-entry[data-tone="danger"]{border-left-color:#f87171}
+.admin__supabase-log-entry__header{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:.85rem;color:rgba(226,232,240,.88)}
+.admin__supabase-log-entry__header time{font-variant-numeric:tabular-nums;font-weight:600;color:rgba(248,250,252,.8)}
+.admin__supabase-log-entry__message{margin:0;font-weight:500;color:#fff}
+.admin__supabase-log-entry__details{margin:0;padding:8px 10px;border-radius:8px;background:rgba(15,23,42,.7);color:#e2e8f0;font-size:.8rem;line-height:1.4;overflow:auto;max-height:220px}
 
 .admin__grid{display:grid;grid-template-columns:1fr;gap:32px;align-items:start}
 .admin__panel{background:#fff;border:1px solid rgba(148,163,184,.28);border-radius:24px;box-shadow:0 24px 60px rgba(15,23,42,.1);padding:24px;display:grid;gap:18px}
