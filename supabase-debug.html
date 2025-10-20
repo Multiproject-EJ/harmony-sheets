@@ -27,6 +27,71 @@
           remote product count against the bundled <code>products.json</code>. Nothing on this page writes to Supabase
           or touches the admin dashboard.
         </p>
+
+        <section class="admin__summary" aria-labelledby="debug-summary-heading">
+          <div class="admin__summary__header">
+            <h2 id="debug-summary-heading">Debug objective &amp; status</h2>
+            <p class="admin__summary__intro">
+              Keep an at-a-glance record of what you are investigating, the signals you have collected, and which
+              hypotheses still need to be validated. Entries are saved locally so you can revisit the same browser and
+              continue where you left off.
+            </p>
+          </div>
+
+          <form class="admin__summary__grid" data-debug-summary-form>
+            <label class="admin__summary__field">
+              <span class="admin__summary__label">Objective — what we are trying to solve</span>
+              <textarea
+                class="admin__summary__textarea"
+                name="objective"
+                rows="3"
+                data-debug-summary-field="objective"
+                placeholder="Describe the core problem or question you are debugging."
+              ></textarea>
+            </label>
+
+            <label class="admin__summary__field">
+              <span class="admin__summary__label">Findings — what we have confirmed so far</span>
+              <textarea
+                class="admin__summary__textarea"
+                name="findings"
+                rows="3"
+                data-debug-summary-field="findings"
+                placeholder="List observations, logs, or metrics that are verified."
+              ></textarea>
+            </label>
+
+            <label class="admin__summary__field">
+              <span class="admin__summary__label">Tried — approaches that did not work</span>
+              <textarea
+                class="admin__summary__textarea"
+                name="tried"
+                rows="3"
+                data-debug-summary-field="tried"
+                placeholder="Document experiments or fixes that failed and why."
+              ></textarea>
+            </label>
+
+            <label class="admin__summary__field">
+              <span class="admin__summary__label">Next — scenarios that still need testing</span>
+              <textarea
+                class="admin__summary__textarea"
+                name="next"
+                rows="3"
+                data-debug-summary-field="next"
+                placeholder="Outline hypotheses or flows you still need to validate."
+              ></textarea>
+            </label>
+          </form>
+
+          <div class="admin__summary__footer">
+            <p class="admin__summary__status" data-debug-summary-status>Summary has not been saved yet.</p>
+            <div class="admin__supabase-actions admin__supabase-actions--wrap">
+              <button class="btn-ghost admin__btn" type="button" data-debug-summary-clear>Clear summary</button>
+            </div>
+          </div>
+        </section>
+
         <div class="admin__status-group admin__status-group--stacked">
           <article class="admin__status-card admin__supabase-card" data-debug-status-card data-debug-section="config">
             <div class="admin__status-indicator" data-debug-indicator data-tone="neutral"></div>

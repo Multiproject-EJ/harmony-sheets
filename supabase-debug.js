@@ -11,6 +11,12 @@ if (!root) {
 }
 
 const logContainer = root?.querySelector("[data-debug-log]");
+const summaryForm = root?.querySelector("[data-debug-summary-form]");
+const summaryFields = summaryForm
+  ? Array.from(summaryForm.querySelectorAll("[data-debug-summary-field]"))
+  : [];
+const summaryStatusEl = root?.querySelector("[data-debug-summary-status]");
+const summaryClearButton = root?.querySelector("[data-debug-summary-clear]");
 const configStatusEl = root?.querySelector("[data-debug-config-status]");
 const configDetailsEl = root?.querySelector("[data-debug-config-details]");
 const configUrlEl = root?.querySelector("[data-debug-config-url]");
@@ -47,6 +53,9 @@ const permissionIndicator = root?.querySelector('[data-debug-section="permission
 
 const clearLogButton = root?.querySelector("[data-debug-clear-log]");
 
+const SUMMARY_STORAGE_KEY = "hs-debug-summary-v1";
+let summarySaveHandle = null;
+
 function setIndicatorTone(indicator, tone) {
   if (!indicator) return;
   indicator.setAttribute("data-tone", tone);
@@ -81,6 +90,114 @@ function formatTimestamp(date) {
     second: "2-digit"
   });
   return formatter.format(date);
+}
+
+function setSummaryStatus(message) {
+  if (summaryStatusEl) {
+    summaryStatusEl.textContent = message;
+  }
+}
+
+function loadSummaryFromStorage() {
+  if (!summaryFields.length) return;
+
+  try {
+    const stored = localStorage.getItem(SUMMARY_STORAGE_KEY);
+    if (!stored) {
+      setSummaryStatus("Summary is ready to edit.");
+      return;
+    }
+
+    const parsed = JSON.parse(stored);
+    for (const field of summaryFields) {
+      const key = field.dataset.debugSummaryField;
+      const value = key && typeof parsed[key] === "string" ? parsed[key] : "";
+      field.value = value;
+    }
+
+    if (parsed.updatedAt) {
+      const updatedAt = new Date(parsed.updatedAt);
+      if (!Number.isNaN(updatedAt.getTime())) {
+        setSummaryStatus(`Summary loaded. Last saved ${formatTimestamp(updatedAt)}.`);
+        return;
+      }
+    }
+    setSummaryStatus("Summary loaded from a previous session.");
+  } catch (error) {
+    setSummaryStatus("Could not load saved summary from local storage.");
+    appendLog("warning", "Failed to load debug summary.", formatError(error));
+  }
+}
+
+function persistSummary() {
+  if (!summaryFields.length) return;
+
+  const payload = {};
+  let hasContent = false;
+
+  for (const field of summaryFields) {
+    const key = field.dataset.debugSummaryField;
+    if (!key) continue;
+    payload[key] = field.value;
+    if (!hasContent && typeof field.value === "string" && field.value.trim()) {
+      hasContent = true;
+    }
+  }
+
+  try {
+    if (!hasContent) {
+      localStorage.removeItem(SUMMARY_STORAGE_KEY);
+      setSummaryStatus("Summary is empty. Add notes to save them locally.");
+      return;
+    }
+
+    const timestamp = new Date();
+    payload.updatedAt = timestamp.toISOString();
+    localStorage.setItem(SUMMARY_STORAGE_KEY, JSON.stringify(payload));
+    setSummaryStatus(`Saved locally at ${formatTimestamp(timestamp)}.`);
+  } catch (error) {
+    setSummaryStatus("Could not save summary (local storage is unavailable).");
+    appendLog("warning", "Failed to persist debug summary.", formatError(error));
+  }
+}
+
+function scheduleSummarySave() {
+  if (!summaryFields.length) return;
+  if (summarySaveHandle) {
+    clearTimeout(summarySaveHandle);
+  }
+  summarySaveHandle = setTimeout(() => {
+    summarySaveHandle = null;
+    persistSummary();
+  }, 400);
+}
+
+function handleSummaryInput() {
+  scheduleSummarySave();
+}
+
+function clearSummary() {
+  if (!summaryFields.length) return;
+
+  if (summarySaveHandle) {
+    clearTimeout(summarySaveHandle);
+    summarySaveHandle = null;
+  }
+
+  for (const field of summaryFields) {
+    field.value = "";
+  }
+
+  try {
+    localStorage.removeItem(SUMMARY_STORAGE_KEY);
+    setSummaryStatus("Summary cleared. Start capturing new notes.");
+  } catch (error) {
+    setSummaryStatus("Summary cleared, but local storage could not be updated.");
+    appendLog("warning", "Failed to fully clear debug summary from storage.", formatError(error));
+    return;
+  }
+
+  appendLog("info", "Debug summary cleared.");
 }
 
 function maskKey(value) {
@@ -529,6 +646,17 @@ async function runPermissionCheck() {
 
     permissionButton.disabled = false;
   }
+}
+
+if (summaryFields.length) {
+  for (const field of summaryFields) {
+    field.addEventListener("input", handleSummaryInput);
+  }
+  loadSummaryFromStorage();
+}
+
+if (summaryClearButton) {
+  summaryClearButton.addEventListener("click", clearSummary);
 }
 
 if (configButton) {
