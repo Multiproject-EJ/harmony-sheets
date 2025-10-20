@@ -104,6 +104,35 @@
               </button>
             </div>
           </article>
+
+          <article class="admin__status-card admin__supabase-card" data-debug-status-card data-debug-section="permissions">
+            <div class="admin__status-indicator" data-debug-indicator data-tone="neutral"></div>
+            <div class="admin__supabase-body">
+              <p class="admin__status-label">Permission check</p>
+              <p class="admin__status-value" data-debug-permission-status>
+                Verify that the current Supabase user can insert and delete catalog data using temporary rows that are cleaned up
+                automatically.
+              </p>
+              <dl class="admin__supabase-metrics" data-debug-permission-details hidden>
+                <div class="admin__supabase-metric">
+                  <dt>Test slug</dt>
+                  <dd data-debug-permission-slug>—</dd>
+                </div>
+                <div class="admin__supabase-metric">
+                  <dt>Product ID</dt>
+                  <dd data-debug-permission-id>—</dd>
+                </div>
+              </dl>
+              <p class="admin__supabase-updated" data-debug-permission-updated hidden>
+                Last checked <time data-debug-permission-time datetime=""></time>
+              </p>
+            </div>
+            <div class="admin__supabase-actions">
+              <button class="btn primary admin__btn" type="button" data-debug-run-permission>
+                Run permission test
+              </button>
+            </div>
+          </article>
         </div>
       </div>
 

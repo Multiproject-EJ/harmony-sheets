@@ -36,6 +36,15 @@ const compareTimeEl = root?.querySelector("[data-debug-compare-time]");
 const compareButton = root?.querySelector("[data-debug-run-compare]");
 const compareIndicator = root?.querySelector('[data-debug-section="compare"] [data-debug-indicator]');
 
+const permissionStatusEl = root?.querySelector("[data-debug-permission-status]");
+const permissionDetailsEl = root?.querySelector("[data-debug-permission-details]");
+const permissionSlugEl = root?.querySelector("[data-debug-permission-slug]");
+const permissionIdEl = root?.querySelector("[data-debug-permission-id]");
+const permissionUpdatedEl = root?.querySelector("[data-debug-permission-updated]");
+const permissionTimeEl = root?.querySelector("[data-debug-permission-time]");
+const permissionButton = root?.querySelector("[data-debug-run-permission]");
+const permissionIndicator = root?.querySelector('[data-debug-section="permissions"] [data-debug-indicator]');
+
 const clearLogButton = root?.querySelector("[data-debug-clear-log]");
 
 function setIndicatorTone(indicator, tone) {
@@ -83,6 +92,36 @@ function maskKey(value) {
     return trimmed;
   }
   return `${trimmed.slice(0, 4)}…${trimmed.slice(-4)}`;
+}
+
+function generateTestSlug() {
+  const random = Math.random().toString(36).slice(2, 8);
+  const timestamp = Date.now().toString(36);
+  return `debug-${timestamp}-${random}`;
+}
+
+function buildTestProduct(slug, now) {
+  return {
+    slug,
+    name: `Debug diagnostics ${slug.slice(-4)}`,
+    tagline: "Temporary row created by supabase-debug",
+    description: "This product verifies Supabase permissions and is deleted immediately after the test.",
+    price_amount: 0,
+    price_currency: "USD",
+    price_display: "$0.00",
+    draft: true,
+    hero_image: null,
+    color_image: null,
+    color_caption: null,
+    demo_video: null,
+    demo_poster: null,
+    virtual_demo: null,
+    pricing_title: null,
+    pricing_sub: null,
+    stripe_url: null,
+    etsy_url: null,
+    updated_at: now.toISOString()
+  };
 }
 
 function appendLog(tone, message, details) {
@@ -340,6 +379,158 @@ async function runCompare() {
   }
 }
 
+async function runPermissionCheck() {
+  if (!permissionButton) return;
+  permissionButton.disabled = true;
+  setIndicatorTone(permissionIndicator, "info");
+  setStatus(permissionStatusEl, "Running Supabase permission test…");
+  setDetailsVisibility(permissionDetailsEl, false);
+  setDetailsVisibility(permissionUpdatedEl, false);
+  appendLog("info", "Running Supabase permission test using temporary catalog rows.");
+
+  let client;
+  try {
+    client = ensureSupabaseClient();
+  } catch (error) {
+    setIndicatorTone(permissionIndicator, "danger");
+    const message = `Permission test failed: ${formatError(error)}`;
+    setStatus(permissionStatusEl, message);
+    appendLog("error", message, error);
+    permissionButton.disabled = false;
+    return;
+  }
+
+  const now = new Date();
+  const slug = generateTestSlug();
+  const productPayload = buildTestProduct(slug, now);
+  let productId = null;
+  let productInserted = false;
+  let productDeleted = false;
+  const touchedTables = [];
+  const relationTemplates = [
+    {
+      table: "product_social_proof",
+      buildRows: (id) => [{ product_id: id, quote: "Debug permission check", stars: "★★★★★" }]
+    },
+    {
+      table: "product_life_areas",
+      buildRows: (id) => [{ product_id: id, life_area: "Diagnostics", position: 1 }]
+    },
+    {
+      table: "product_badges",
+      buildRows: (id) => [{ product_id: id, badge: "Permission test", position: 1 }]
+    },
+    {
+      table: "product_features",
+      buildRows: (id) => [{ product_id: id, feature: "Able to insert", position: 1 }]
+    },
+    {
+      table: "product_included_items",
+      buildRows: (id) => [{ product_id: id, included_item: "Cleanup after test", position: 1 }]
+    },
+    {
+      table: "product_gallery",
+      buildRows: (id) => [
+        { product_id: id, image_src: "diagnostics-placeholder.png", image_alt: "Diagnostics", position: 1 }
+      ]
+    },
+    {
+      table: "product_faqs",
+      buildRows: (id) => [
+        { product_id: id, question: "Why does this exist?", answer: "To verify Supabase policies.", position: 1 }
+      ]
+    },
+    {
+      table: "product_benefits",
+      buildRows: (id) => [
+        { product_id: id, title: "Confidence", description: "Confirms insert/delete permissions.", position: 1 }
+      ]
+    }
+  ];
+
+  try {
+    const { data, error } = await client
+      .from("products")
+      .upsert(productPayload, { onConflict: "slug" })
+      .select("id, slug")
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to insert test product: ${formatError(error)}`);
+    }
+
+    if (!data || !data.id) {
+      throw new Error("Supabase did not return an ID for the test product.");
+    }
+
+    productId = data.id;
+    productInserted = true;
+
+    if (permissionSlugEl) {
+      permissionSlugEl.textContent = slug;
+    }
+    if (permissionIdEl) {
+      permissionIdEl.textContent = productId;
+    }
+    setDetailsVisibility(permissionDetailsEl, true);
+
+    for (const { table, buildRows } of relationTemplates) {
+      const rows = buildRows(productId);
+      const { error: insertError } = await client.from(table).insert(rows);
+      if (insertError) {
+        throw new Error(`Failed to insert into ${table}: ${formatError(insertError)}`);
+      }
+      touchedTables.push(table);
+    }
+
+    for (const table of [...touchedTables].reverse()) {
+      const { error: deleteError } = await client.from(table).delete().eq("product_id", productId);
+      if (deleteError) {
+        throw new Error(`Failed to delete test rows from ${table}: ${formatError(deleteError)}`);
+      }
+    }
+
+    const { error: deleteProductError } = await client.from("products").delete().eq("id", productId);
+    if (deleteProductError) {
+      throw new Error(`Failed to delete test product: ${formatError(deleteProductError)}`);
+    }
+    productDeleted = true;
+
+    const finishedAt = new Date();
+    setDetailsVisibility(permissionUpdatedEl, true);
+    setTime(permissionTimeEl, finishedAt);
+    const message = "Permission checks passed. Supabase allowed catalog inserts and deletes.";
+    setIndicatorTone(permissionIndicator, "success");
+    setStatus(permissionStatusEl, message);
+    appendLog("success", message, { slug, productId, tables: touchedTables });
+  } catch (error) {
+    setIndicatorTone(permissionIndicator, "danger");
+    const message = `Permission test failed: ${formatError(error)}`;
+    setStatus(permissionStatusEl, message);
+    appendLog("error", message, { error: formatError(error), slug, productId, tables: touchedTables });
+  } finally {
+    if (productInserted && !productDeleted && productId) {
+      const tablesToClean = relationTemplates.map((template) => template.table);
+
+      for (const table of tablesToClean) {
+        try {
+          await client.from(table).delete().eq("product_id", productId);
+        } catch (cleanupError) {
+          appendLog("warning", `Cleanup failed for ${table}.`, formatError(cleanupError));
+        }
+      }
+
+      try {
+        await client.from("products").delete().eq("id", productId);
+      } catch (cleanupError) {
+        appendLog("warning", "Cleanup failed for products table.", formatError(cleanupError));
+      }
+    }
+
+    permissionButton.disabled = false;
+  }
+}
+
 if (configButton) {
   configButton.addEventListener("click", runConfigCheck);
 }
@@ -350,6 +541,10 @@ if (overviewButton) {
 
 if (compareButton) {
   compareButton.addEventListener("click", runCompare);
+}
+
+if (permissionButton) {
+  permissionButton.addEventListener("click", runPermissionCheck);
 }
 
 if (clearLogButton) {
