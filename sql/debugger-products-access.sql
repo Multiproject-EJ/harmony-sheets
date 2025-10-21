@@ -231,6 +231,9 @@ order by pr.table_name;
 -- 5. Surface anon role privileges and active RLS policies
 --    Summaries flag when anon lacks SELECT grants entirely or when
 --    policies exist but include restrictive qualifiers (e.g. admin-only).
+--    The `overall_status` column rolls the privilege & policy checks into a
+--    single verdict, while `policy_note` calls out common blockers like
+--    `auth.uid()` filters or admin-only plan requirements.
 with target_tables as (
     select * from (values
         ('products'),
@@ -260,6 +263,16 @@ with target_tables as (
             and (pol.roles && array['anon'::name, 'public'::name])
             and regexp_replace(coalesce(pol.qual, ''), '\s+', '', 'g') in ('', 'true', '(true)')
         ) as has_unrestricted_select,
+        bool_or(
+            pol.cmd in ('SELECT', 'ALL')
+            and (pol.roles && array['anon'::name, 'public'::name])
+            and position('auth.uid()' in lower(coalesce(pol.qual, ''))) > 0
+        ) as requires_auth_uid,
+        bool_or(
+            pol.cmd in ('SELECT', 'ALL')
+            and (pol.roles && array['anon'::name, 'public'::name])
+            and position('plan=''admin''' in replace(lower(coalesce(pol.qual, '')), ' ', '')) > 0
+        ) as requires_admin_plan,
         array_agg(pol.policyname order by pol.policyname) filter (
             where pol.cmd in ('SELECT', 'ALL') and (pol.roles && array['anon'::name, 'public'::name])
         ) as anon_select_policy_names
@@ -280,7 +293,30 @@ select
         when coalesce(ap.has_anon_select_policy, false) = false then 'missing anon select policy'
         when coalesce(ap.has_unrestricted_select, false) = false then 'anon policy restricted (review qual)'
         else 'ok'
-    end as policy_status
+    end as policy_status,
+    case
+        when ag.anon_privileges is not null
+             and coalesce(ap.has_unrestricted_select, false)
+             and coalesce(ap.has_anon_select_policy, false)
+        then 'ok'
+        when ag.anon_privileges is null
+             and coalesce(ap.has_anon_select_policy, false) = false
+        then 'missing grant & anon policy'
+        when ag.anon_privileges is null then 'missing grant'
+        when coalesce(ap.has_anon_select_policy, false) = false then 'missing anon select policy'
+        when coalesce(ap.has_unrestricted_select, false) = false then 'anon policy restricted'
+        else 'review'
+    end as overall_status,
+    case
+        when coalesce(ap.has_unrestricted_select, false) = false
+            and coalesce(ap.has_anon_select_policy, false)
+        then concat_ws(' ',
+            case when coalesce(ap.requires_auth_uid, false) then 'Policy filters by auth.uid().' end,
+            case when coalesce(ap.requires_admin_plan, false) then 'Only admin plan passes.' end,
+            'Anon users remain blocked.'
+        )
+        else null
+    end as policy_note
 from target_tables tt
 left join anon_grants ag on ag.table_name = tt.table_name
 left join anon_policies ap on ap.tablename = tt.table_name
