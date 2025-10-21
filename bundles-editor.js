@@ -25,6 +25,8 @@ const els = {
   search: document.querySelector("[data-bundles-search]"),
   filter: document.querySelector("[data-bundles-filter]"),
   addButton: document.querySelector("[data-add-bundle]"),
+  fetchButton: document.querySelector("[data-bundles-fetch]"),
+  fetchButtonLabel: document.querySelector("[data-bundles-fetch-label]"),
   exportButton: document.querySelector("[data-bundles-export]"),
   resetButton: document.querySelector("[data-bundles-reset]"),
   form: document.querySelector("[data-bundle-form]"),
@@ -39,6 +41,13 @@ const els = {
   modalDialog: document.querySelector("[data-bundle-modal-dialog]"),
   modalDismissTriggers: document.querySelectorAll("[data-bundle-modal-dismiss]"),
   productOptions: document.querySelector("[data-bundle-product-options]")
+};
+
+const fetchSupabaseDefaults = {
+  label:
+    els.fetchButtonLabel?.textContent?.trim() ||
+    els.fetchButton?.textContent?.trim() ||
+    "Fetch Supabase bundles"
 };
 
 const formFields = {
@@ -67,6 +76,22 @@ let productSuggestions = [];
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function formatError(error) {
+  if (!error) return "Unknown error.";
+  if (error instanceof Error) {
+    return error.message || error.toString();
+  }
+  if (typeof error === "string" && error.trim()) {
+    return error.trim();
+  }
+  try {
+    return JSON.stringify(error);
+  } catch (jsonError) {
+    console.warn("[bundles] Failed to serialise error", jsonError);
+    return "Unknown error.";
+  }
 }
 
 function coerceText(value) {
@@ -342,6 +367,36 @@ function setStatus(message, tone = "neutral") {
   if (!els.status || !els.statusIndicator) return;
   els.status.textContent = message;
   els.statusIndicator.dataset.tone = tone;
+}
+
+function setFetchButtonState({ disabled, label } = {}) {
+  if (!els.fetchButton) return;
+
+  if (typeof disabled === "boolean") {
+    els.fetchButton.disabled = disabled;
+    if (disabled) {
+      els.fetchButton.setAttribute("aria-disabled", "true");
+    } else {
+      els.fetchButton.removeAttribute("aria-disabled");
+    }
+  }
+
+  if (typeof label === "string") {
+    if (els.fetchButtonLabel) {
+      els.fetchButtonLabel.textContent = label;
+    } else {
+      els.fetchButton.textContent = label;
+    }
+  }
+}
+
+function refreshFetchButtonAvailability() {
+  if (!els.fetchButton) return;
+  const supabaseReady = isSupabaseConfigured();
+  setFetchButtonState({
+    disabled: !supabaseReady,
+    label: fetchSupabaseDefaults.label
+  });
 }
 
 function setFormFeedback(message, tone = "info") {
@@ -750,6 +805,13 @@ function handleExport() {
   setStatus("Download started. Import the JSON into Supabase or share it with your team.", "info");
 }
 
+function handleFetchSupabaseClick(event) {
+  event.preventDefault();
+  reloadBundlesFromSupabase().catch(() => {
+    // Errors are surfaced via status messaging.
+  });
+}
+
 function handleReset() {
   state.bundles = clone(state.baseline);
   state.selectedSlug = null;
@@ -766,6 +828,7 @@ function handleReset() {
     els.formPlaceholder.hidden = false;
   }
   renderTable();
+  refreshFetchButtonAvailability();
   notifySubscribers("reset");
 }
 
@@ -840,6 +903,7 @@ function registerEvents() {
   els.search?.addEventListener("input", handleSearch);
   els.filter?.addEventListener("change", handleFilterChange);
   els.addButton?.addEventListener("click", handleAddBundle);
+  els.fetchButton?.addEventListener("click", handleFetchSupabaseClick);
   els.exportButton?.addEventListener("click", handleExport);
   els.resetButton?.addEventListener("click", handleReset);
   els.deleteButton?.addEventListener("click", handleDelete);
@@ -871,9 +935,54 @@ function notifySubscribers(reason = "update") {
   });
 }
 
+async function reloadBundlesFromSupabase({ reason = "supabase-fetch" } = {}) {
+  if (!isSupabaseConfigured()) {
+    setStatus("Supabase is not configured. Update supabase-config.js to sync bundle data.", "danger");
+    refreshFetchButtonAvailability();
+    return;
+  }
+
+  setFetchButtonState({ disabled: true, label: "Fetching…" });
+  setStatus("Fetching bundles from Supabase…", "info");
+
+  try {
+    const supabaseBundles = await fetchSupabaseBundles();
+    const baseline = Array.isArray(supabaseBundles)
+      ? supabaseBundles.map((bundle) => normalizeBundle(bundle))
+      : [];
+
+    const count = baseline.length;
+    const statusMessage = count
+      ? `Loaded ${count} bundle${count === 1 ? "" : "s"} from Supabase.`
+      : "Supabase bundle catalog is empty.";
+    const statusTone = count ? "success" : "warning";
+
+    replaceBundles(baseline, {
+      sourceLabel: "Supabase dataset",
+      statusMessage,
+      statusTone,
+      persistLocal: true,
+      updateBaseline: true,
+      reason
+    });
+  } catch (error) {
+    console.warn("[bundles] Supabase bundles unavailable", error);
+    const formatted = formatError(error);
+    setStatus(`Supabase fetch failed: ${formatted}`, "danger");
+  } finally {
+    refreshFetchButtonAvailability();
+  }
+}
+
 async function loadBundles() {
   const stored = loadFromStorage();
   const supabaseReady = isSupabaseConfigured();
+
+  refreshFetchButtonAvailability();
+
+  if (supabaseReady) {
+    setFetchButtonState({ disabled: true, label: "Fetching…" });
+  }
 
   try {
     if (supabaseReady) {
@@ -904,6 +1013,10 @@ async function loadBundles() {
     }
   } catch (error) {
     console.warn("[bundles] Supabase bundles unavailable", error);
+  } finally {
+    if (supabaseReady) {
+      refreshFetchButtonAvailability();
+    }
   }
 
   if (stored && Array.isArray(stored) && stored.length) {
@@ -919,6 +1032,7 @@ async function loadBundles() {
     setStatus(message, tone);
     renderTable();
     notifySubscribers("load");
+    refreshFetchButtonAvailability();
     return;
   }
 
@@ -928,6 +1042,7 @@ async function loadBundles() {
     setStatus("Unable to load bundles. Refresh to try again.", "danger");
   }
   renderEmptyTable("Could not load bundles.");
+  refreshFetchButtonAvailability();
 }
 
 function updateProductOptions() {
