@@ -113,45 +113,85 @@ if (!rootHook) {
     const expandableRows = rows.slice(previewCount);
 
     if (expandableRows.length > 0) {
+      const pipelineToggleButton = document.querySelector(
+        "[data-pipeline-toggle]"
+      );
+      const pipelineToggleLabel = pipelineToggleButton?.querySelector(
+        "[data-pipeline-toggle-label]"
+      );
+
+      const setPipelineCollapsed = (shouldCollapse) => {
+        expandableRows.forEach((row) => {
+          row.hidden = shouldCollapse;
+        });
+        const collapsedValue = shouldCollapse ? "true" : "false";
+        pipelineTable.dataset.pipelineCollapsed = collapsedValue;
+        pipelineTable.setAttribute(
+          "aria-expanded",
+          shouldCollapse ? "false" : "true"
+        );
+        if (pipelineToggleButton) {
+          pipelineToggleButton.setAttribute(
+            "aria-expanded",
+            shouldCollapse ? "false" : "true"
+          );
+          if (pipelineToggleLabel) {
+            pipelineToggleLabel.textContent = shouldCollapse
+              ? "Expand full pipeline"
+              : "Collapse pipeline";
+          }
+        }
+      };
+
       pipelineTable.classList.add("admin-table--collapsible");
       pipelineTable.dataset.previewCount = String(previewCount);
-      pipelineTable.dataset.pipelineCollapsed = "true";
-      pipelineTable.setAttribute("aria-expanded", "false");
       pipelineTable.setAttribute("tabindex", "0");
 
-      expandableRows.forEach((row) => {
-        row.hidden = true;
-      });
+      setPipelineCollapsed(true);
 
-      const revealRows = () => {
-        expandableRows.forEach((row) => {
-          row.hidden = false;
+      if (pipelineToggleButton && expandableRows.length > 0) {
+        pipelineToggleButton.hidden = false;
+      }
+
+      if (pipelineToggleButton) {
+        pipelineToggleButton.addEventListener("click", () => {
+          const isCollapsed = pipelineTable.dataset.pipelineCollapsed === "true";
+          setPipelineCollapsed(!isCollapsed);
         });
-        pipelineTable.dataset.pipelineCollapsed = "false";
-        pipelineTable.setAttribute("aria-expanded", "true");
-        pipelineTable.removeEventListener("click", handleClick);
-        pipelineTable.removeEventListener("keydown", handleKeydown);
-      };
+      } else {
+        const revealRows = () => {
+          setPipelineCollapsed(false);
+          pipelineTable.removeEventListener("click", handleClick);
+          pipelineTable.removeEventListener("keydown", handleKeydown);
+        };
 
-      const handleClick = () => {
-        if (pipelineTable.dataset.pipelineCollapsed !== "true") {
-          return;
-        }
-        revealRows();
-      };
-
-      const handleKeydown = (event) => {
-        if (pipelineTable.dataset.pipelineCollapsed !== "true") {
-          return;
-        }
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
+        const handleClick = () => {
+          if (pipelineTable.dataset.pipelineCollapsed !== "true") {
+            return;
+          }
           revealRows();
-        }
-      };
+        };
 
-      pipelineTable.addEventListener("click", handleClick);
-      pipelineTable.addEventListener("keydown", handleKeydown);
+        const handleKeydown = (event) => {
+          if (pipelineTable.dataset.pipelineCollapsed !== "true") {
+            return;
+          }
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            revealRows();
+          }
+        };
+
+        pipelineTable.addEventListener("click", handleClick);
+        pipelineTable.addEventListener("keydown", handleKeydown);
+      }
+    } else {
+      const pipelineToggleButton = document.querySelector(
+        "[data-pipeline-toggle]"
+      );
+      if (pipelineToggleButton) {
+        pipelineToggleButton.hidden = true;
+      }
     }
   }
 
