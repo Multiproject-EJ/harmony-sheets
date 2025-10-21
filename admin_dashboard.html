@@ -228,10 +228,33 @@
               Track upcoming spreadsheet experiences and align launch priorities for the Todo do mini product line.
             </p>
           </div>
+          <div class="admin__panel-actions admin__panel-actions--pipeline">
+            <button
+              type="button"
+              class="admin__pipeline-toggle"
+              data-pipeline-toggle
+              aria-controls="todo-pipeline-table"
+              aria-expanded="false"
+              hidden
+            >
+              <span class="admin__pipeline-toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span data-pipeline-toggle-label>Expand full pipeline</span>
+            </button>
+          </div>
         </div>
         <div class="admin__pipeline-body">
-          <p id="todo-pipeline-hint" class="sr-only">This table shows the first three Todo do products. Activate the table to reveal the remaining items.</p>
-          <table class="admin-table admin-table--compact admin-table--pipeline" aria-describedby="todo-pipeline-title todo-pipeline-hint" data-pipeline-table data-preview-count="3">
+          <p id="todo-pipeline-hint" class="sr-only">This table shows the first three Todo do products. Use the pipeline toggle button to reveal or collapse the remaining items.</p>
+          <table
+            class="admin-table admin-table--compact admin-table--pipeline"
+            aria-describedby="todo-pipeline-title todo-pipeline-hint"
+            data-pipeline-table
+            data-preview-count="3"
+            id="todo-pipeline-table"
+          >
             <thead>
               <tr>
                 <th scope="col">Product</th>

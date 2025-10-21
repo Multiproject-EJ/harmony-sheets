@@ -1296,6 +1296,15 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin__panel-head h2{margin:0;font-size:1.5rem}
 .admin__panel-sub{margin:6px 0 0;color:#64748b;max-width:440px}
 .admin__panel-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.admin__panel-actions--pipeline{align-items:center}
+.admin__pipeline-toggle{display:inline-flex;align-items:center;gap:12px;padding:10px 18px;border-radius:999px;border:1px solid rgba(99,102,241,.32);background:linear-gradient(140deg,rgba(99,102,241,.16) 0,rgba(129,140,248,.08) 100%);color:#1e1b4b;font-weight:600;font-size:.92rem;letter-spacing:.02em;text-decoration:none;cursor:pointer;box-shadow:0 16px 42px rgba(79,70,229,.16);transition:background .2s ease,border-color .2s ease,box-shadow .2s ease,color .2s ease,transform .2s ease}
+.admin__pipeline-toggle:hover,.admin__pipeline-toggle:focus-visible{background:linear-gradient(140deg,rgba(99,102,241,.22) 0,rgba(129,140,248,.16) 100%);border-color:rgba(99,102,241,.48);box-shadow:0 22px 48px rgba(79,70,229,.22);color:#0f172a;outline:none}
+.admin__pipeline-toggle:active{transform:translateY(1px)}
+.admin__pipeline-toggle[aria-expanded="true"]{background:#fff;border-color:rgba(148,163,184,.38);box-shadow:0 18px 36px rgba(15,23,42,.12);color:#1f2937}
+.admin__pipeline-toggle[aria-expanded="true"]:hover,.admin__pipeline-toggle[aria-expanded="true"]:focus-visible{border-color:rgba(99,102,241,.4);box-shadow:0 22px 48px rgba(79,70,229,.18);outline:none}
+.admin__pipeline-toggle-icon{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(79,70,229,.16);color:#4f46e5;transition:background .2s ease,color .2s ease,transform .25s ease}
+.admin__pipeline-toggle svg{width:16px;height:16px}
+.admin__pipeline-toggle[aria-expanded="true"] .admin__pipeline-toggle-icon{background:rgba(15,23,42,.08);color:#1f2937;transform:rotate(180deg)}
 .admin__btn{display:inline-flex;align-items:center;gap:8px;font-size:.92rem;font-weight:600}
 .admin__toolbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .admin__search input{min-width:220px;border-radius:12px;border:1px solid rgba(148,163,184,.5);padding:10px 14px;font:inherit}
@@ -1347,10 +1356,10 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-pipeline__badge--empty{border-style:dashed;color:#94a3b8;background:rgba(148,163,184,.1)}
 .admin-table--pipeline .admin-table__price{font-weight:600}
 .admin-table--collapsible{position:relative;transition:box-shadow .2s ease}
-.admin-table--collapsible[data-pipeline-collapsed="true"]{cursor:pointer}
-.admin-table--collapsible[data-pipeline-collapsed="true"]:hover{box-shadow:0 18px 36px rgba(15,23,42,.14)}
+.admin-table--collapsible[data-pipeline-collapsed="true"]{cursor:default;box-shadow:0 14px 28px rgba(15,23,42,.08)}
+.admin-table--collapsible[data-pipeline-collapsed="true"]:hover{box-shadow:0 18px 36px rgba(79,70,229,.18)}
 .admin-table--collapsible:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
-.admin-table--collapsible[data-pipeline-collapsed="true"]::after{content:"Click to expand for the full pipeline";position:absolute;left:0;right:0;bottom:0;padding:12px 16px;font-size:.78rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#fff;text-align:center;background:linear-gradient(0deg,rgba(15,23,42,.82) 0,rgba(15,23,42,0) 82%);border-bottom-left-radius:inherit;border-bottom-right-radius:inherit;pointer-events:none}
+.admin-table--collapsible[data-pipeline-collapsed="true"]::after{content:"Showing first " attr(data-preview-count) " pipeline entries — use the toggle to explore all";position:absolute;left:0;right:0;bottom:0;padding:14px 18px;font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1f2937;text-align:center;background:linear-gradient(0deg,rgba(255,255,255,.95) 0,rgba(255,255,255,0) 82%);border-bottom-left-radius:inherit;border-bottom-right-radius:inherit;pointer-events:none}
 .admin-table--collapsible[data-pipeline-collapsed="false"]::after{content:none}
 
 .admin__editor{background:#fff;border:1px solid rgba(148,163,184,.28);border-radius:24px;box-shadow:0 24px 60px rgba(15,23,42,.08);padding:24px;min-height:620px}
