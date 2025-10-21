@@ -287,6 +287,19 @@ left join anon_policies ap on ap.tablename = tt.table_name
 order by tt.table_name;
 
 -- Detailed policy listing for reference
+with target_tables as (
+    select * from (values
+        ('products'),
+        ('product_social_proof'),
+        ('product_life_areas'),
+        ('product_badges'),
+        ('product_features'),
+        ('product_gallery'),
+        ('product_included_items'),
+        ('product_faqs'),
+        ('product_benefits')
+    ) as t(table_name)
+)
 select
     pol.schemaname,
     pol.tablename,
