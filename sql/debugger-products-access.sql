@@ -229,28 +229,64 @@ group by pr.table_name
 order by pr.table_name;
 
 -- 5. Surface anon role privileges and active RLS policies
+--    Summaries flag when anon lacks SELECT grants entirely or when
+--    policies exist but include restrictive qualifiers (e.g. admin-only).
+with target_tables as (
+    select * from (values
+        ('products'),
+        ('product_social_proof'),
+        ('product_life_areas'),
+        ('product_badges'),
+        ('product_features'),
+        ('product_gallery'),
+        ('product_included_items'),
+        ('product_faqs'),
+        ('product_benefits')
+    ) as t(table_name)
+), anon_grants as (
+    select
+        table_name,
+        string_agg(privilege_type, ', ' order by privilege_type) as anon_privileges
+    from information_schema.role_table_grants
+    where table_schema = 'public'
+      and grantee = 'anon'
+    group by table_name
+), anon_policies as (
+    select
+        pol.tablename,
+        bool_or(pol.cmd in ('SELECT', 'ALL') and (pol.roles && array['anon', 'public'])) as has_anon_select_policy,
+        bool_or(
+            pol.cmd in ('SELECT', 'ALL')
+            and (pol.roles && array['anon', 'public'])
+            and regexp_replace(coalesce(pol.qual, ''), '\s+', '', 'g') in ('', 'true', '(true)')
+        ) as has_unrestricted_select,
+        array_agg(pol.policyname order by pol.policyname) filter (
+            where pol.cmd in ('SELECT', 'ALL') and (pol.roles && array['anon', 'public'])
+        ) as anon_select_policy_names
+    from pg_policies pol
+    where pol.schemaname = 'public'
+      and pol.tablename in (select table_name from target_tables)
+    group by pol.tablename
+)
 select
-    grants.table_schema,
-    grants.table_name,
-    grants.grantee,
-    string_agg(grants.privilege_type, ', ' order by grants.privilege_type) as privileges
-from information_schema.role_table_grants grants
-where grants.table_schema = 'public'
-  and grants.table_name in (
-        'products',
-        'product_social_proof',
-        'product_life_areas',
-        'product_badges',
-        'product_features',
-        'product_gallery',
-        'product_included_items',
-        'product_faqs',
-        'product_benefits'
-    )
-  and grants.grantee in ('anon', 'authenticated')
-group by grants.table_schema, grants.table_name, grants.grantee
-order by grants.table_name, grants.grantee;
+    tt.table_name,
+    coalesce(ag.anon_privileges, 'none') as anon_privileges,
+    coalesce(ap.anon_select_policy_names::text, '{}') as anon_select_policies,
+    case
+        when ag.anon_privileges is null then 'missing grant'
+        else 'ok'
+    end as privilege_status,
+    case
+        when coalesce(ap.has_anon_select_policy, false) = false then 'missing anon select policy'
+        when coalesce(ap.has_unrestricted_select, false) = false then 'anon policy restricted (review qual)'
+        else 'ok'
+    end as policy_status
+from target_tables tt
+left join anon_grants ag on ag.table_name = tt.table_name
+left join anon_policies ap on ap.tablename = tt.table_name
+order by tt.table_name;
 
+-- Detailed policy listing for reference
 select
     pol.schemaname,
     pol.tablename,
@@ -261,15 +297,5 @@ select
     pol.with_check
 from pg_policies pol
 where pol.schemaname = 'public'
-  and pol.tablename in (
-        'products',
-        'product_social_proof',
-        'product_life_areas',
-        'product_badges',
-        'product_features',
-        'product_gallery',
-        'product_included_items',
-        'product_faqs',
-        'product_benefits'
-    )
+  and pol.tablename in (select table_name from target_tables)
 order by pol.tablename, pol.policyname;
