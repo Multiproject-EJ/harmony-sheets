@@ -254,14 +254,14 @@ with target_tables as (
 ), anon_policies as (
     select
         pol.tablename,
-        bool_or(pol.cmd in ('SELECT', 'ALL') and (pol.roles && array['anon', 'public'])) as has_anon_select_policy,
+        bool_or(pol.cmd in ('SELECT', 'ALL') and (pol.roles && array['anon'::name, 'public'::name])) as has_anon_select_policy,
         bool_or(
             pol.cmd in ('SELECT', 'ALL')
-            and (pol.roles && array['anon', 'public'])
+            and (pol.roles && array['anon'::name, 'public'::name])
             and regexp_replace(coalesce(pol.qual, ''), '\s+', '', 'g') in ('', 'true', '(true)')
         ) as has_unrestricted_select,
         array_agg(pol.policyname order by pol.policyname) filter (
-            where pol.cmd in ('SELECT', 'ALL') and (pol.roles && array['anon', 'public'])
+            where pol.cmd in ('SELECT', 'ALL') and (pol.roles && array['anon'::name, 'public'::name])
         ) as anon_select_policy_names
     from pg_policies pol
     where pol.schemaname = 'public'
