@@ -142,7 +142,10 @@ left join pg_attribute a
    and not a.attisdropped
 order by rc.table_name, rc.column_name;
 
--- 3. Data quality checks for storefront-critical fields
+--    Note: Supporting tables reuse the unified column layout from the first SELECT.
+--          When a table lacks an equivalent attribute the metric remains NULL,
+--          while the "missing_slug" / "missing_name" columns reflect each table's
+--          primary and secondary text presence checks respectively.
 select
     'products' as table_name,
     count(*) as total_rows,
@@ -158,45 +161,49 @@ union all
 select
     'product_features' as table_name,
     count(*) as total_rows,
-    null,
-    count(*) filter (where feature is null or feature = '') as missing_primary_text,
-    null,
-    null,
-    null,
-    null
+    null::bigint as published_rows,
+    count(*) filter (where feature is null or feature = '') as missing_slug,
+    null::bigint as missing_name,
+    null::bigint as missing_price_display,
+    null::bigint as missing_stripe_url,
+    null::bigint as missing_etsy_url,
+    null::bigint as missing_hero_image
 from public.product_features
 union all
 select
     'product_benefits' as table_name,
     count(*) as total_rows,
-    null,
-    count(*) filter (where title is null or title = '') as missing_primary_text,
-    count(*) filter (where description is null or description = '') as missing_secondary_text,
-    null,
-    null,
-    null
+    null::bigint as published_rows,
+    count(*) filter (where title is null or title = '') as missing_slug,
+    count(*) filter (where description is null or description = '') as missing_name,
+    null::bigint as missing_price_display,
+    null::bigint as missing_stripe_url,
+    null::bigint as missing_etsy_url,
+    null::bigint as missing_hero_image
 from public.product_benefits
 union all
 select
     'product_faqs' as table_name,
     count(*) as total_rows,
-    null,
-    count(*) filter (where question is null or question = '') as missing_primary_text,
-    count(*) filter (where answer is null or answer = '') as missing_secondary_text,
-    null,
-    null,
-    null
+    null::bigint as published_rows,
+    count(*) filter (where question is null or question = '') as missing_slug,
+    count(*) filter (where answer is null or answer = '') as missing_name,
+    null::bigint as missing_price_display,
+    null::bigint as missing_stripe_url,
+    null::bigint as missing_etsy_url,
+    null::bigint as missing_hero_image
 from public.product_faqs
 union all
 select
     'product_gallery' as table_name,
     count(*) as total_rows,
-    null,
-    count(*) filter (where image_src is null or image_src = '') as missing_primary_text,
-    null,
-    null,
-    null,
-    null
+    null::bigint as published_rows,
+    count(*) filter (where image_src is null or image_src = '') as missing_slug,
+    null::bigint as missing_name,
+    null::bigint as missing_price_display,
+    null::bigint as missing_stripe_url,
+    null::bigint as missing_etsy_url,
+    null::bigint as missing_hero_image
 from public.product_gallery
 order by table_name;
 
