@@ -1362,6 +1362,11 @@ App.fetchSupabaseProducts = function() {
         })
         .filter(Boolean);
 
+      if (!products.length) {
+        App.supabaseProductsCache = null;
+        return null;
+      }
+
       App.supabaseProductsCache = products;
       return products;
     })
@@ -1619,7 +1624,7 @@ App.loadProducts = function() {
 
       App.previewProductsMeta = null;
       const supabaseProducts = await App.fetchSupabaseProducts();
-      if (Array.isArray(supabaseProducts)) {
+      if (Array.isArray(supabaseProducts) && supabaseProducts.length) {
         return supabaseProducts;
       }
 
