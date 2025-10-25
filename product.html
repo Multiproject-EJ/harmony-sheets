@@ -94,14 +94,24 @@
           <h1 id="p-name"></h1>
           <p id="p-tagline" class="tagline"></p>
 
+          <div id="p-status" class="product-status" hidden></div>
+
           <div id="p-badges" class="badges"></div>
           <p id="p-price" class="price"></p>
 
-          <div class="actions">
+          <div id="p-draft-actions" class="product-draft-actions" data-draft-visible hidden>
+            <p class="muted">This listing is in internal draft review. Use the links below to keep iterating.</p>
+            <div class="product-draft-actions__buttons">
+              <a class="btn ghost" href="admin_dashboard.html#products">Open admin dashboard</a>
+              <a id="p-draft-demo" class="btn secondary" target="_blank" rel="noopener">Open draft demo</a>
+            </div>
+          </div>
+
+          <div class="actions" data-purchase-only>
             <button id="p-add-cart" class="btn ghost" type="button" data-add-to-cart>Add to cart</button>
             <a id="p-stripe" class="btn primary" target="_blank" rel="noopener">Buy now</a>
           </div>
-          <p class="muted action-hint">Prefer Etsy? <a id="p-etsy" class="text-link" target="_blank" rel="noopener">Buy on Etsy</a></p>
+          <p class="muted action-hint" data-purchase-only>Prefer Etsy? <a id="p-etsy" class="text-link" target="_blank" rel="noopener">Buy on Etsy</a></p>
 
           <ul id="p-features" class="features"></ul>
           <div id="p-description" class="desc"></div>
@@ -148,7 +158,7 @@
       <h3>FAQs</h3>
     </section>
 
-    <section class="container section">
+    <section class="container section" data-purchase-only>
       <div class="pricing">
         <h3 id="p-pricing-title">Get this product</h3>
         <p id="p-pricing-sub" class="muted"></p>

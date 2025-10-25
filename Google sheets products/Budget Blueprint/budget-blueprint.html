@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8" />
+    <title>Budget Blueprint Sidebar</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 16px 18px 20px;
+        background: #f8fafc;
+        color: #0f172a;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      h1 {
+        font-size: 1.1rem;
+        margin: 0;
+        line-height: 1.35;
+      }
+      .timestamp {
+        font-size: 0.75rem;
+        color: #64748b;
+      }
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .summary-card {
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 15px -12px rgba(15, 23, 42, 0.32);
+      }
+      .summary-card h2 {
+        margin: 0 0 4px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #475569;
+      }
+      .summary-card strong {
+        font-size: 1.35rem;
+        font-weight: 700;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+        font-size: 0.82rem;
+      }
+      thead {
+        background: #e2e8f0;
+        color: #1e293b;
+      }
+      th,
+      td {
+        padding: 8px 10px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      tbody tr:nth-child(even) {
+        background: #f1f5f9;
+      }
+      .transactions {
+        margin-bottom: 24px;
+      }
+      .transactions h2,
+      .form-section h2 {
+        margin: 0 0 12px;
+        font-size: 0.95rem;
+      }
+      .transactions__list {
+        display: grid;
+        gap: 10px;
+        max-height: 240px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      .transaction {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+      }
+      .transaction__meta {
+        font-size: 0.75rem;
+        color: #64748b;
+      }
+      form {
+        display: grid;
+        gap: 10px;
+      }
+      label {
+        display: grid;
+        gap: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #475569;
+      }
+      input,
+      select,
+      button {
+        font: inherit;
+      }
+      input,
+      select {
+        border-radius: 10px;
+        border: 1px solid #cbd5f5;
+        padding: 8px 10px;
+        transition: border-color 160ms ease;
+      }
+      input:focus,
+      select:focus {
+        border-color: #6366f1;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+      }
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 120ms ease, box-shadow 120ms ease;
+      }
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px -12px rgba(79, 70, 229, 0.45);
+      }
+      .status {
+        min-height: 18px;
+        font-size: 0.75rem;
+        color: #475569;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Budget Blueprint</h1>
+      <div class="timestamp" id="generated"></div>
+    </header>
+
+    <section class="summary-grid" id="summary"></section>
+
+    <section>
+      <h2>Monthly momentum</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Planned</th>
+            <th>Spent</th>
+            <th>Saved</th>
+          </tr>
+        </thead>
+        <tbody id="monthly-body"></tbody>
+      </table>
+    </section>
+
+    <section class="transactions">
+      <h2>Recent activity</h2>
+      <div class="transactions__list" id="transactions"></div>
+    </section>
+
+    <section class="form-section">
+      <h2>Log a transaction</h2>
+      <form id="transaction-form">
+        <label>
+          Date
+          <input type="date" name="date" required />
+        </label>
+        <label>
+          Description
+          <input type="text" name="description" placeholder="Groceries" required />
+        </label>
+        <label>
+          Category
+          <select name="category" id="category"></select>
+        </label>
+        <label>
+          Amount
+          <input type="number" name="amount" step="0.01" placeholder="45.90" required />
+        </label>
+        <label>
+          Account
+          <input type="text" name="account" placeholder="Checking" />
+        </label>
+        <button type="submit">Save transaction</button>
+        <div class="status" id="status"></div>
+      </form>
+    </section>
+
+    <script>
+      const initialDashboard = <?!= JSON.stringify(dashboard, null, 2) ?>;
+
+      function formatCurrency(value) {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          maximumFractionDigits: 0
+        }).format(Number(value || 0));
+      }
+
+      function renderSummary(data) {
+        const summary = document.getElementById("summary");
+        summary.innerHTML = "";
+        const cards = [
+          { label: "Budgeted this month", value: data.budgeted },
+          { label: "Savings target", value: data.savingsTarget }
+        ];
+        cards.forEach((card) => {
+          const el = document.createElement("article");
+          el.className = "summary-card";
+          el.innerHTML = `<h2>${card.label}</h2><strong>${formatCurrency(card.value)}</strong>`;
+          summary.appendChild(el);
+        });
+      }
+
+      function renderMonthlyTable(data) {
+        const body = document.getElementById("monthly-body");
+        body.innerHTML = "";
+        if (!data.totals?.length) {
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.colSpan = 4;
+          cell.textContent = "No monthly totals yet.";
+          row.appendChild(cell);
+          body.appendChild(row);
+          return;
+        }
+        data.totals.forEach((item) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.month}</td>
+            <td>${formatCurrency(item.planned)}</td>
+            <td>${formatCurrency(item.spent)}</td>
+            <td>${formatCurrency(item.saved)}</td>
+          `;
+          body.appendChild(row);
+        });
+      }
+
+      function renderTransactions(data) {
+        const list = document.getElementById("transactions");
+        list.innerHTML = "";
+        if (!data.recentTransactions?.length) {
+          const empty = document.createElement("p");
+          empty.textContent = "No transactions have been logged this month.";
+          list.appendChild(empty);
+          return;
+        }
+        data.recentTransactions.forEach((item) => {
+          const entry = document.createElement("article");
+          entry.className = "transaction";
+          entry.innerHTML = `
+            <div>
+              <strong>${item.description || "Untitled"}</strong>
+              <div class="transaction__meta">${item.date} • ${item.category}</div>
+            </div>
+            <div><strong>${formatCurrency(item.amount)}</strong></div>
+          `;
+          list.appendChild(entry);
+        });
+      }
+
+      function renderGeneratedAt(isoString) {
+        const generated = document.getElementById("generated");
+        if (!isoString) {
+          generated.textContent = "";
+          return;
+        }
+        const date = new Date(isoString);
+        generated.textContent = `Updated ${date.toLocaleString()}`;
+      }
+
+      function renderDashboard(data) {
+        renderSummary(data);
+        renderMonthlyTable(data);
+        renderTransactions(data);
+        renderGeneratedAt(data.generatedAt);
+      }
+
+      function populateCategories(categories) {
+        const select = document.getElementById("category");
+        select.innerHTML = "";
+        const options = categories?.length ? categories : ["Housing", "Groceries", "Transportation", "Savings"];
+        options.forEach((name) => {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          select.appendChild(option);
+        });
+      }
+
+      function refreshCategories() {
+        google.script.run.withSuccessHandler(populateCategories).getCategories();
+      }
+
+      function handleTransactionSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = Object.fromEntries(new FormData(form).entries());
+        const status = document.getElementById("status");
+        status.textContent = "Saving…";
+        google.script.run
+          .withSuccessHandler((data) => {
+            status.textContent = "Transaction saved.";
+            form.reset();
+            renderDashboard(data);
+          })
+          .withFailureHandler((error) => {
+            status.textContent = error?.message || "Unable to save transaction.";
+          })
+          .addTransaction(formData);
+      }
+
+      document.getElementById("transaction-form").addEventListener("submit", handleTransactionSubmit);
+
+      renderDashboard(initialDashboard || {});
+      refreshCategories();
+    </script>
+  </body>
+</html>
