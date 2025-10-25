@@ -433,6 +433,59 @@ function normalizeProduct(product) {
   return normalized;
 }
 
+function mergeBaselineWithStored(baseline, stored) {
+  const merged = [];
+  const addedIds = [];
+
+  if (!Array.isArray(baseline)) {
+    return {
+      merged: Array.isArray(stored) ? stored.slice() : [],
+      addedIds
+    };
+  }
+
+  const storedMap = new Map();
+  const storedExtras = [];
+
+  if (Array.isArray(stored)) {
+    stored.forEach((product) => {
+      if (!product || typeof product !== 'object') return;
+      const id = typeof product.id === 'string' ? product.id : null;
+      if (id) {
+        if (!storedMap.has(id)) {
+          storedMap.set(id, product);
+        }
+      } else {
+        storedExtras.push(product);
+      }
+    });
+  }
+
+  baseline.forEach((product) => {
+    if (!product || typeof product !== 'object') return;
+    const id = typeof product.id === 'string' ? product.id : null;
+    if (id && storedMap.has(id)) {
+      merged.push(storedMap.get(id));
+      storedMap.delete(id);
+    } else {
+      merged.push(product);
+      if (id) {
+        addedIds.push(id);
+      }
+    }
+  });
+
+  storedMap.forEach((product) => {
+    merged.push(product);
+  });
+
+  if (storedExtras.length > 0) {
+    merged.push(...storedExtras);
+  }
+
+  return { merged, addedIds };
+}
+
 function loadFromStorage() {
   if (!window.localStorage) return null;
   const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -463,9 +516,28 @@ async function loadProducts() {
     state.baseline = baseline;
     const stored = loadFromStorage();
     if (stored && Array.isArray(stored)) {
-      state.products = stored.map(normalizeProduct);
+      const normalizedStored = stored.map(normalizeProduct);
+      const { merged, addedIds } = mergeBaselineWithStored(
+        baseline,
+        normalizedStored
+      );
+      state.products = merged;
       setWorkspaceSource('Local workspace');
-      setStatus('Loaded from local workspace.');
+      if (addedIds.length > 0) {
+        const addedLabels = addedIds
+          .map((id) => baseline.find((product) => product?.id === id)?.name)
+          .filter(Boolean);
+        const addedMessage =
+          addedLabels.length > 0
+            ? `Loaded local workspace and merged ${addedLabels.join(', ')} from source JSON.`
+            : `Loaded local workspace and merged ${addedIds.length} new catalog entr${
+                addedIds.length === 1 ? 'y' : 'ies'
+              } from source JSON.`;
+        setStatus(addedMessage, 'info');
+        persist({ message: null });
+      } else {
+        setStatus('Loaded from local workspace.');
+      }
     } else {
       state.products = clone(baseline);
       setWorkspaceSource('Source JSON');
