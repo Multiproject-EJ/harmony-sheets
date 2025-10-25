@@ -53,6 +53,55 @@
     ]
   },
   {
+    "id": "budget-blueprint",
+    "name": "Budget Blueprint — Cashflow Planning System",
+    "tagline": "Map your money plan and track cash flow in minutes each week.",
+    "draft": true,
+    "price": "$29",
+    "lifeAreas": ["finances", "family", "career"],
+    "badges": [
+      "Best-seller pipeline pick",
+      "Google Sheets + Web demo",
+      "One-time purchase"
+    ],
+    "heroImage": "assets/imgBudgetPro1.webp",
+    "features": [
+      "Monthly overview board with budget vs. actuals",
+      "Auto-generated insights for spending, saving, and cash flow",
+      "Quick-add transaction form synced to Sheets",
+      "Sidebar dashboard for weekly money reviews"
+    ],
+    "description": "<p><strong>Budget Blueprint</strong> is a guided cash-flow planning system that pairs Google Sheets with an interactive sidebar dashboard. Capture spending quickly, see planned versus actual totals, and keep savings goals in view every time you review your money.</p>",
+    "gallery": [
+      { "src": "assets/imgBudgetPro1.webp", "alt": "Budget Blueprint dashboard mockup in Google Sheets" }
+    ],
+    "colorImage": "assets/imgBudgetPro1.webp",
+    "colorCaption": "Prototype dashboard layout for the Budget Blueprint experience.",
+    "virtualDemo": "Google sheets products/Budget Blueprint/budget-blueprint.html",
+    "included": [
+      "Budget Blueprint Google Sheet",
+      "Apps Script automation for quick logging",
+      "Sidebar dashboard HTML demo",
+      "Draft launch copy and messaging"
+    ],
+    "faqs": [
+      { "q": "Is this product live?", "a": "Not yet — the Budget Blueprint is currently an internal draft for review." },
+      { "q": "Can I test the dashboard?", "a": "Yes. Open the sidebar demo to explore the interactions without leaving your browser." },
+      { "q": "Will it sync with bank feeds?", "a": "The draft focuses on guided manual reviews. Bank import research is on the roadmap." }
+    ],
+    "pricingTitle": "Preview the Budget Blueprint",
+    "pricingSub": "Draft concept for internal review — not yet for sale.",
+    "socialProof": {
+      "stars": "",
+      "quote": ""
+    },
+    "benefits": [
+      { "title": "Plan with confidence", "desc": "Compare planned spending to reality every week with guided prompts." },
+      { "title": "Stay on top of cash flow", "desc": "Dashboard callouts highlight overspending and savings progress automatically." },
+      { "title": "Review faster together", "desc": "Quick-add forms and menu actions make shared budget rituals easy." }
+    ]
+  },
+  {
     "id": "budget-dashboard",
     "name": "Budget Dashboard — Personal Finance Tracker",
     "tagline": "Take control of your money with clarity and confidence.",
@@ -108,6 +157,7 @@
     "id": "pomodoro-pro",
     "name": "Pomodoro Pro — Advanced Productivity System",
     "tagline": "The upgraded Pomodoro with analytics, goals, and smart focus tools.",
+    "draft": true,
     "price": "$29",
     "lifeAreas": ["career", "health", "fun", "family", "spirituality"],
     "badges": [
@@ -207,6 +257,7 @@
     "id": "ultimate-study-planner",
     "name": "Ultimate Study Planner",
     "tagline": "Plan deep work, assignments, and exams with a calm weekly rhythm.",
+    "draft": true,
     "price": "$15",
     "lifeAreas": ["career", "health", "fun", "spirituality"],
     "badges": [
@@ -257,6 +308,7 @@
     "id": "smart-savings-tracker",
     "name": "Smart Savings Tracker",
     "tagline": "Turn your savings goals into clear milestones you'll actually reach.",
+    "draft": true,
     "price": "$14",
     "lifeAreas": ["finances", "family", "love"],
     "badges": [
