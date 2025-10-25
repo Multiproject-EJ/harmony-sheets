@@ -157,6 +157,7 @@
     "id": "pomodoro-pro",
     "name": "Pomodoro Pro — Advanced Productivity System",
     "tagline": "The upgraded Pomodoro with analytics, goals, and smart focus tools.",
+    "draft": true,
     "price": "$29",
     "lifeAreas": ["career", "health", "fun", "family", "spirituality"],
     "badges": [
@@ -256,6 +257,7 @@
     "id": "ultimate-study-planner",
     "name": "Ultimate Study Planner",
     "tagline": "Plan deep work, assignments, and exams with a calm weekly rhythm.",
+    "draft": true,
     "price": "$15",
     "lifeAreas": ["career", "health", "fun", "spirituality"],
     "badges": [
@@ -306,6 +308,7 @@
     "id": "smart-savings-tracker",
     "name": "Smart Savings Tracker",
     "tagline": "Turn your savings goals into clear milestones you'll actually reach.",
+    "draft": true,
     "price": "$14",
     "lifeAreas": ["finances", "family", "love"],
     "badges": [
