@@ -4126,6 +4126,42 @@ App.initProduct = async function() {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
+    App.currentProduct = product;
+
+    if (product.draft) {
+      document.body.classList.add("product-draft");
+      const statusEl = App.qs("#p-status");
+      if (statusEl) {
+        statusEl.innerHTML = "<strong>Draft preview</strong> This listing is hidden from the public catalog. Use the demo below to keep iterating.";
+        statusEl.removeAttribute("hidden");
+      }
+      const draftActions = App.qs("#p-draft-actions");
+      if (draftActions) draftActions.removeAttribute("hidden");
+      const draftDemoLink = App.qs("#p-draft-demo");
+      if (draftDemoLink) {
+        if (product.virtualDemo) {
+          draftDemoLink.href = product.virtualDemo;
+          draftDemoLink.removeAttribute("hidden");
+        } else {
+          draftDemoLink.setAttribute("hidden", "");
+        }
+      }
+    } else {
+      document.body.classList.remove("product-draft");
+      const statusEl = App.qs("#p-status");
+      if (statusEl) {
+        statusEl.innerHTML = "";
+        statusEl.setAttribute("hidden", "");
+      }
+      const draftActions = App.qs("#p-draft-actions");
+      if (draftActions) draftActions.setAttribute("hidden", "");
+      const draftDemoLink = App.qs("#p-draft-demo");
+      if (draftDemoLink) {
+        draftDemoLink.removeAttribute("href");
+        draftDemoLink.setAttribute("hidden", "");
+      }
+    }
+
     // Hero background image
     const parallaxEl = App.qs("#p-parallax");
     if (parallaxEl) {
@@ -4410,7 +4446,28 @@ App.initProduct = async function() {
       if (el && product.etsy) el.href = product.etsy;
     });
 
-    App.prepareProductCart(product);
+    if (product.draft) {
+      App.qsa("[data-add-to-cart]").forEach(btn => {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.textContent = "Draft preview";
+        btn.classList.add("is-disabled");
+        btn.setAttribute("aria-disabled", "true");
+      });
+      if (App.qs("#p-pricing-title")) App.qs("#p-pricing-title").textContent = "Product in draft review";
+      if (App.qs("#p-pricing-sub")) App.qs("#p-pricing-sub").textContent = "Purchasing is disabled until this template is ready to launch.";
+    } else {
+      App.qsa("[data-add-to-cart]").forEach(btn => {
+        if (!btn) return;
+        btn.disabled = false;
+        btn.removeAttribute("aria-disabled");
+        btn.classList.remove("is-disabled");
+        if (!btn.dataset.cartProductId) {
+          btn.textContent = "Add to cart";
+        }
+      });
+      App.prepareProductCart(product);
+    }
 
     // Suggestion form product_id
     const pid = App.qs("#product_id");
