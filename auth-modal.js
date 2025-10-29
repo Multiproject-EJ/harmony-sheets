@@ -2,6 +2,7 @@ import { isSupabaseConfigured } from "./supabase-config.js";
 import {
   ACCOUNT_PAGE_PATH,
   ADMIN_DASHBOARD_PATH,
+  ADMIN_WORKSPACE_PATH,
   getPostSignInRedirect,
   isAdminUser
 } from "./auth-helpers.js";
@@ -21,6 +22,7 @@ const labelEl = toggle?.querySelector("[data-account-label]");
 let accountLinkEl = dropdown?.querySelector("[data-account-link='account']");
 let adminLinkEl = dropdown?.querySelector("[data-account-link='admin']");
 let lovableSheetLinkEl = dropdown?.querySelector("[data-account-link='lovablesheet']");
+let adminWorkspaceLinkEl = dropdown?.querySelector("[data-account-link='admin-workspace']");
 const skipModal = document.body.classList.contains("page-auth");
 const hasSupabaseConfig = isSupabaseConfigured();
 
@@ -114,6 +116,43 @@ function ensureLovableSheetLink() {
   return lovableSheetLinkEl;
 }
 
+function ensureAdminWorkspaceLink() {
+  if (!dropdown) return null;
+
+  if (!adminWorkspaceLinkEl || !dropdown.contains(adminWorkspaceLinkEl)) {
+    adminWorkspaceLinkEl = dropdown.querySelector(
+      "[data-account-link='admin-workspace']"
+    );
+  }
+
+  if (adminWorkspaceLinkEl) {
+    return adminWorkspaceLinkEl;
+  }
+
+  const link = document.createElement("a");
+  link.className = "nav-dropdown__link";
+  link.textContent = "Admin Workspace";
+  link.href = ADMIN_WORKSPACE_PATH || "admin_workspace.html";
+  link.dataset.accountLink = "admin-workspace";
+  link.hidden = true;
+  link.setAttribute("aria-hidden", "true");
+
+  const lovableLink = ensureLovableSheetLink();
+  if (lovableLink?.parentElement) {
+    lovableLink.insertAdjacentElement("afterend", link);
+  } else {
+    const productsLink = dropdown.querySelector("[data-account-link='products']");
+    if (productsLink) {
+      dropdown.insertBefore(link, productsLink);
+    } else {
+      dropdown.appendChild(link);
+    }
+  }
+
+  adminWorkspaceLinkEl = link;
+  return adminWorkspaceLinkEl;
+}
+
 function updateAccountLink(user) {
   if (!dropdown) return;
   if (!accountLinkEl || !dropdown.contains(accountLinkEl)) {
@@ -123,6 +162,7 @@ function updateAccountLink(user) {
     adminLinkEl = dropdown.querySelector("[data-account-link='admin']");
   }
   const lovableLink = ensureLovableSheetLink();
+  const adminWorkspaceLink = ensureAdminWorkspaceLink();
   if (!accountLinkEl) return;
 
   if (!user) {
@@ -140,6 +180,10 @@ function updateAccountLink(user) {
     if (lovableLink) {
       lovableLink.hidden = true;
       lovableLink.setAttribute("aria-hidden", "true");
+    }
+    if (adminWorkspaceLink) {
+      adminWorkspaceLink.hidden = true;
+      adminWorkspaceLink.setAttribute("aria-hidden", "true");
     }
     return;
   }
@@ -162,6 +206,14 @@ function updateAccountLink(user) {
     lovableLink.setAttribute("aria-hidden", isAdmin ? "false" : "true");
     if (isAdmin) {
       lovableLink.href = "lovablesheet.html";
+    }
+  }
+
+  if (adminWorkspaceLink) {
+    adminWorkspaceLink.hidden = !isAdmin;
+    adminWorkspaceLink.setAttribute("aria-hidden", isAdmin ? "false" : "true");
+    if (isAdmin) {
+      adminWorkspaceLink.href = ADMIN_WORKSPACE_PATH || "admin_workspace.html";
     }
   }
 }
