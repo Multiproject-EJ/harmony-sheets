@@ -26,7 +26,7 @@
     "colorCaption": "Pick a theme that feels calm and keeps you focused.",
     "demoVideo": "assets/pomodoro-demo.mp4",
     "demoPoster": "assets/pomodoro-demo-poster.jpg",
-    "virtualDemo": "demos/pomodoro.html",
+    "virtualDemo": "Google sheets products/demo/pomodoro.html",
     "included": [
       "Pomodoro Timer (Web + Google Sheets sidebar compatible)",
       "Free updates",
@@ -127,7 +127,7 @@
     "colorCaption": "Choose a theme that fits your financial journey.",
     "demoVideo": "assets/budget-demo.mp4",
     "demoPoster": "assets/budget-demo-poster.jpg",
-    "virtualDemo": "demos/pomodoro.html",
+    "virtualDemo": "Google sheets products/demo/pomodoro.html",
     "included": [
       "Budget Dashboard Google Sheet",
       "Setup guide",
@@ -177,7 +177,7 @@
     "colorCaption": "Premium themes and advanced layouts included.",
     "demoVideo": "assets/pomodoro-pro-demo.mp4",
     "demoPoster": "assets/pomodoro-pro-demo-poster.jpg",
-    "virtualDemo": "demos/pomodoro.html",
+    "virtualDemo": "Google sheets products/demo/pomodoro.html",
     "included": [
       "Pomodoro Pro app (Web + Sheets sidebar)",
       "Analytics dashboard",
@@ -227,7 +227,7 @@
     ],
     "colorImage": "assets/imgSubscriptions1.webp",
     "colorCaption": "Minimal dashboard view with renewal alerts and spending totals.",
-    "virtualDemo": "demos/pomodoro.html",
+    "virtualDemo": "Google sheets products/demo/pomodoro.html",
     "included": [
       "Subscription Tracker Google Sheet",
       "Renewal reminder template",
@@ -278,7 +278,7 @@
     ],
     "colorImage": "assets/imgStudyPlanner1.webp",
     "colorCaption": "Weekly view with color-coded focus blocks and energy check-ins.",
-    "virtualDemo": "demos/pomodoro.html",
+    "virtualDemo": "Google sheets products/demo/pomodoro.html",
     "included": [
       "Study Planner Google Sheet",
       "Semester roadmap template",
@@ -329,7 +329,7 @@
     ],
     "colorImage": "assets/imgSavings1.webp",
     "colorCaption": "Savings goal dashboard with automatic progress tracking.",
-    "virtualDemo": "demos/pomodoro.html",
+    "virtualDemo": "Google sheets products/demo/pomodoro.html",
     "included": [
       "Savings Tracker Google Sheet",
       "Goal planning mini-guide",
