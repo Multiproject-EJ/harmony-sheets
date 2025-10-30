@@ -4244,7 +4244,7 @@ App.initProduct = async function() {
 
     // Virtual demo
     const virtualDemoFrame = App.qs('[data-virtual-demo]');
-    const DEFAULT_VIRTUAL_DEMO = 'demos/pomodoro.html';
+    const DEFAULT_VIRTUAL_DEMO = 'Google sheets products/demo/pomodoro.html';
     if (virtualDemoFrame) {
       const screen = virtualDemoFrame.querySelector('.device-frame__screen');
       const virtualDemoUrl = product.virtualDemo || DEFAULT_VIRTUAL_DEMO;

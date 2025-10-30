@@ -99,7 +99,7 @@ with upserted as (
             'Pick a theme that feels calm and keeps you focused.',
             'assets/pomodoro-demo.mp4',
             'assets/pomodoro-demo-poster.jpg',
-            'demos/pomodoro.html',
+            'Google sheets products/demo/pomodoro.html',
             'Get the Pomodoro Timer',
             'One-time purchase. Instant access.',
             'https://buy.stripe.com/test_pomodoro_example',
