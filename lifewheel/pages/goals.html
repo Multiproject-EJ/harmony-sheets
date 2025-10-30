@@ -1,0 +1,26 @@
+<section class="lwapp-grid lwapp-grid--two">
+  <article class="lwapp-card">
+    <header class="lwapp-section-title">
+      <h2>Vision Drafting</h2>
+      <button class="lwapp-button" type="button" data-lw-ai-vision>Draft with AI</button>
+    </header>
+    <label class="lwapp-visually-hidden" for="vision-area">Vision context</label>
+    <textarea id="vision-area" class="lwapp-textarea" rows="4" placeholder="Describe the area" data-lw-vision-input></textarea>
+    <div data-lw-vision-output class="lwapp-card"></div>
+  </article>
+  <article class="lwapp-card">
+    <header class="lwapp-section-title">
+      <h2>SMART-ify Goal</h2>
+      <button class="lwapp-button" type="button" data-lw-ai-goal>SMART Assist</button>
+    </header>
+    <label class="lwapp-visually-hidden" for="goal-area">Goal text</label>
+    <textarea id="goal-area" class="lwapp-textarea" rows="4" placeholder="What goal are you working on?" data-lw-goal-input></textarea>
+    <div data-lw-goal-output class="lwapp-card"></div>
+  </article>
+</section>
+<section class="lwapp-card">
+  <header class="lwapp-section-title">
+    <h2>Goals · Steps · Tasks</h2>
+  </header>
+  <div data-lw-goal-tree class="lwapp-goal-tree"></div>
+</section>
