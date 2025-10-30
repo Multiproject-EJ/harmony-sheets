@@ -1,0 +1,61 @@
+<section class="lwapp-settings-grid">
+  <section class="lwapp-card">
+    <header class="lwapp-section-title">
+      <h2>Theme</h2>
+    </header>
+    <div class="lwapp-theme-selector">
+      <button type="button" class="lwapp-theme-card" data-lw-theme-option="light">
+        <strong>Light</strong>
+        <p>Balanced daylight palette.</p>
+      </button>
+      <button type="button" class="lwapp-theme-card" data-lw-theme-option="dark">
+        <strong>Dark</strong>
+        <p>Low-light focus.</p>
+      </button>
+      <button type="button" class="lwapp-theme-card" data-lw-theme-option="cozy">
+        <strong>Cozy Minimal</strong>
+        <p>Warm and grounded.</p>
+      </button>
+      <button type="button" class="lwapp-theme-card" data-lw-theme-option="vibrant">
+        <strong>Vibrant Coach</strong>
+        <p>High energy pop.</p>
+      </button>
+    </div>
+  </section>
+  <section class="lwapp-card">
+    <header class="lwapp-section-title">
+      <h2>Timezone</h2>
+    </header>
+    <label for="lw-timezone" class="lwapp-visually-hidden">Timezone</label>
+    <input id="lw-timezone" class="lwapp-input" data-lw-timezone placeholder="e.g. America/Chicago" />
+  </section>
+  <section class="lwapp-card">
+    <header class="lwapp-section-title">
+      <h2>Data Export</h2>
+    </header>
+    <div class="lwapp-grid">
+      <button type="button" class="lwapp-button" data-lw-export-responses>Export Responses CSV</button>
+      <button type="button" class="lwapp-button" data-lw-export-habits>Export Habit Logs CSV</button>
+      <button type="button" class="lwapp-button" data-lw-export-ics>Export Deadlines ICS</button>
+    </div>
+  </section>
+  <section class="lwapp-card">
+    <header class="lwapp-section-title">
+      <h2>Reminders</h2>
+    </header>
+    <label class="lwapp-checkin-row">
+      <span>Email reminders</span>
+      <input type="checkbox" data-lw-reminder-email disabled>
+      <small class="lwapp-text-muted">Connect Supabase credentials to enable scheduling.</small>
+    </label>
+    <label class="lwapp-checkin-row">
+      <span>Web push notifications</span>
+      <input type="checkbox" data-lw-reminder-push disabled>
+      <small class="lwapp-text-muted">Disabled in demo mode.</small>
+    </label>
+  </section>
+  <section class="lwapp-card lwapp-banner lwapp-banner--demo" data-lw-demo-banner-settings>
+    <h2>Demo Mode</h2>
+    <p>Supabase credentials missing. Email & push reminders disabled. Data stays on this device.</p>
+  </section>
+</section>
