@@ -110,43 +110,88 @@
 
       <section class="lovablesheet-library" aria-label="LovableSheet board library">
         <div class="lovablesheet-library__grid">
-          <article class="lovablesheet-library__card lovablesheet-library__card--brain">
-            <div class="lovablesheet-library__preview lovablesheet-library__preview--brain" aria-hidden="true"></div>
-            <div class="lovablesheet-library__content">
-              <p class="lovablesheet-library__eyebrow">Sticky board</p>
-              <h2 class="lovablesheet-library__title">Brain board</h2>
-              <p class="lovablesheet-library__description">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
-              <ul class="lovablesheet-library__list">
-                <li>Drag, recolor, and cluster quick ideas in real time.</li>
-                <li>Switch between saved Supabase boards in a click.</li>
-                <li>Rally similar notes with grouped color moves.</li>
-              </ul>
-            </div>
-            <div class="lovablesheet-library__actions">
-              <button class="btn primary lovablesheet-library__button" type="button" data-board-launch="brain">
-                Launch brain board
-              </button>
-            </div>
-          </article>
+          <div class="lovablesheet-library__column lovablesheet-library__column--boards">
+            <article class="lovablesheet-library__card lovablesheet-library__card--brain">
+              <div class="lovablesheet-library__preview lovablesheet-library__preview--brain" aria-hidden="true"></div>
+              <div class="lovablesheet-library__content">
+                <p class="lovablesheet-library__eyebrow">Sticky board</p>
+                <h2 class="lovablesheet-library__title">Brain board</h2>
+                <p class="lovablesheet-library__description">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
+                <ul class="lovablesheet-library__list">
+                  <li>Drag, recolor, and cluster quick ideas in real time.</li>
+                  <li>Switch between saved Supabase boards in a click.</li>
+                  <li>Rally similar notes with grouped color moves.</li>
+                </ul>
+              </div>
+              <div class="lovablesheet-library__actions">
+                <button class="btn primary lovablesheet-library__button" type="button" data-board-launch="brain">
+                  Launch brain board
+                </button>
+              </div>
+            </article>
 
-          <article class="lovablesheet-library__card lovablesheet-library__card--flowchart">
-            <div class="lovablesheet-library__preview lovablesheet-library__preview--flowchart" aria-hidden="true"></div>
-            <div class="lovablesheet-library__content">
-              <p class="lovablesheet-library__eyebrow">Sticky board</p>
-              <h2 class="lovablesheet-library__title">Flowchart board</h2>
-              <p class="lovablesheet-library__description">Sketch branching journeys and implementation checkpoints side-by-side with the sticky note toolkit.</p>
-              <ul class="lovablesheet-library__list">
-                <li>Map kickoff triggers, decisions, and wrap-up steps.</li>
-                <li>Compile every note into a ready-to-share AI prompt.</li>
-                <li>Stay zoomed-in on swimlanes with precision controls.</li>
-              </ul>
-            </div>
-            <div class="lovablesheet-library__actions">
-              <button class="btn secondary lovablesheet-library__button" type="button" data-board-launch="flowchart">
-                Launch flowchart board
-              </button>
-            </div>
-          </article>
+            <article class="lovablesheet-library__card lovablesheet-library__card--flowchart">
+              <div class="lovablesheet-library__preview lovablesheet-library__preview--flowchart" aria-hidden="true"></div>
+              <div class="lovablesheet-library__content">
+                <p class="lovablesheet-library__eyebrow">Sticky board</p>
+                <h2 class="lovablesheet-library__title">Flowchart board</h2>
+                <p class="lovablesheet-library__description">Sketch branching journeys and implementation checkpoints side-by-side with the sticky note toolkit.</p>
+                <ul class="lovablesheet-library__list">
+                  <li>Map kickoff triggers, decisions, and wrap-up steps.</li>
+                  <li>Compile every note into a ready-to-share AI prompt.</li>
+                  <li>Stay zoomed-in on swimlanes with precision controls.</li>
+                </ul>
+              </div>
+              <div class="lovablesheet-library__actions">
+                <button class="btn secondary lovablesheet-library__button" type="button" data-board-launch="flowchart">
+                  Launch flowchart board
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <div class="lovablesheet-library__column lovablesheet-library__column--controls">
+            <section class="lovablesheet-controls lovablesheet-controls--brain" aria-labelledby="lovablesheet-brain-controls-title">
+              <p class="lovablesheet-controls__eyebrow">Brain board setup</p>
+              <h2 class="lovablesheet-controls__title" id="lovablesheet-brain-controls-title">Board library</h2>
+              <p class="lovablesheet-controls__description">Choose which Supabase board to load before launching the brain board, then save new sticky note sessions without leaving this page.</p>
+              <div class="brain-board__toolbar lovablesheet-controls__form">
+                <label class="brain-board__toolbar-label" for="brain-board-select">Boards</label>
+                <select class="brain-board__select" id="brain-board-select" data-board-select>
+                  <option value="default">Default Board (Demo)</option>
+                </select>
+                <button class="btn primary brain-board__save" type="button" data-board-save>Save to Supabase</button>
+              </div>
+              <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
+            </section>
+
+            <section class="lovablesheet-controls lovablesheet-controls--flowchart" aria-labelledby="lovablesheet-flowchart-controls-title">
+              <p class="lovablesheet-controls__eyebrow">Flowchart board</p>
+              <h2 class="lovablesheet-controls__title" id="lovablesheet-flowchart-controls-title">Prompt compiler</h2>
+              <p class="lovablesheet-controls__description">Stitch every flowchart note into an AI-ready brief. Generate, tweak, and copy the compiled prompt right beside the launcher.</p>
+              <div class="lovablesheet-controls__prompt">
+                <div class="flowchart-prompt" data-flowchart-prompt>
+                  <div class="flowchart-prompt__heading">
+                    <span class="flowchart-prompt__eyebrow">Putting it together</span>
+                    <p class="flowchart-prompt__description">Compile the notes from this flowchart into a single prompt. Each note is stitched together in sequence so you can quickly brief a teammate or power an AI workflow.</p>
+                  </div>
+                  <div class="flowchart-prompt__actions">
+                    <button class="flowchart-prompt__action flowchart-prompt__action--primary" type="button" data-flowchart-prompt-generate>
+                      Compile flowchart context
+                    </button>
+                    <button class="flowchart-prompt__action flowchart-prompt__action--ghost" type="button" data-flowchart-prompt-copy>
+                      Copy prompt
+                    </button>
+                  </div>
+                  <label class="flowchart-prompt__output">
+                    <span class="sr-only">Compiled flowchart prompt</span>
+                    <textarea class="flowchart-prompt__textarea" rows="6" readonly data-flowchart-prompt-output placeholder="Your compiled flowchart prompt will appear here."></textarea>
+                  </label>
+                  <p class="flowchart-prompt__status" data-flowchart-prompt-status role="status" aria-live="polite"></p>
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
       </section>
     </article>
@@ -165,15 +210,6 @@
                       <h2 id="brain-board-title">Brain board</h2>
                       <p class="brain-board__summary">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
                     </div>
-                    <div class="brain-board__toolbar" data-board-toolbar>
-                      <label class="brain-board__toolbar-label" for="brain-board-select">Boards</label>
-                      <select class="brain-board__select" id="brain-board-select" data-board-select>
-                        <option value="default">Default Board (Demo)</option>
-                      </select>
-                      <button class="btn primary brain-board__save" type="button" data-board-save>Save to Supabase</button>
-                      <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
-                    </div>
-
                     <div class="brain-board__workspace-wrapper">
                       <div class="brain-board__workspace" data-board-workspace role="list">
                         <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-x="32" data-y="40">
@@ -450,25 +486,6 @@
                     <div class="brain-board__header">
                       <h2 id="flowchart-board-title">Flowchart</h2>
                       <p class="brain-board__summary">Sketch branching journeys and implementation checkpoints side-by-side with the sticky note toolkit.</p>
-                      <div class="flowchart-prompt" data-flowchart-prompt>
-                        <div class="flowchart-prompt__heading">
-                          <span class="flowchart-prompt__eyebrow">Putting it together</span>
-                          <p class="flowchart-prompt__description">Compile the notes from this flowchart into a single prompt. Each note is stitched together in sequence so you can quickly brief a teammate or power an AI workflow.</p>
-                        </div>
-                        <div class="flowchart-prompt__actions">
-                          <button class="flowchart-prompt__action flowchart-prompt__action--primary" type="button" data-flowchart-prompt-generate>
-                            Compile flowchart context
-                          </button>
-                          <button class="flowchart-prompt__action flowchart-prompt__action--ghost" type="button" data-flowchart-prompt-copy>
-                            Copy prompt
-                          </button>
-                        </div>
-                        <label class="flowchart-prompt__output">
-                          <span class="sr-only">Compiled flowchart prompt</span>
-                          <textarea class="flowchart-prompt__textarea" rows="6" readonly data-flowchart-prompt-output placeholder="Your compiled flowchart prompt will appear here."></textarea>
-                        </label>
-                        <p class="flowchart-prompt__status" data-flowchart-prompt-status role="status" aria-live="polite"></p>
-                      </div>
                     </div>
                     <div class="brain-board__workspace-wrapper">
                       <div class="brain-board__workspace brain-board__workspace--flowchart" data-board-workspace role="list" aria-label="Flowchart sticky board preview">
