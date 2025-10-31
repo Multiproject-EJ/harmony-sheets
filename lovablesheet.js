@@ -75,6 +75,13 @@ const messageEl = document.querySelector("[data-lovablesheet-message]");
 let supabaseClient = null;
 let authSubscription = null;
 let redirecting = false;
+let boardLibraryInitialized = false;
+let boardLayerEl = null;
+let boardOverlayEl = null;
+const boardModals = new Map();
+let activeBoardModalId = null;
+let activeBoardTrigger = null;
+let boardModalKeydownRegistered = false;
 
 function showSection(target) {
   Object.entries(sections).forEach(([key, element]) => {
@@ -116,7 +123,7 @@ function requireAdmin(user) {
   }
 
   showSection("content");
-  initializeStickyBoards();
+  setupBoardLibrary();
   return true;
 }
 
@@ -1053,6 +1060,117 @@ function initializeStickyBoards() {
   enableStickyBoardScrollSnap();
   setupBrainBoard();
   setupFlowchartBoard();
+}
+
+function closeActiveBoardModal({ restoreFocus = true } = {}) {
+  if (!activeBoardModalId) return;
+  const modal = boardModals.get(activeBoardModalId);
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+  }
+  activeBoardModalId = null;
+  if (boardLayerEl) {
+    boardLayerEl.hidden = true;
+    boardLayerEl.setAttribute("aria-hidden", "true");
+  }
+  if (document.body) {
+    document.body.classList.remove("lovablesheet-modal-open");
+  }
+  if (restoreFocus && activeBoardTrigger && typeof activeBoardTrigger.focus === "function") {
+    activeBoardTrigger.focus();
+  }
+  activeBoardTrigger = null;
+}
+
+function openBoardModal(boardId, trigger) {
+  if (!boardLayerEl || !boardModals.has(boardId)) return;
+  if (activeBoardModalId && activeBoardModalId !== boardId) {
+    closeActiveBoardModal({ restoreFocus: false });
+  }
+
+  const modal = boardModals.get(boardId);
+  if (!modal) return;
+
+  boardLayerEl.hidden = false;
+  boardLayerEl.setAttribute("aria-hidden", "false");
+  boardModals.forEach((element, id) => {
+    if (id === boardId) {
+      element.hidden = false;
+      element.setAttribute("aria-hidden", "false");
+    } else {
+      element.hidden = true;
+      element.setAttribute("aria-hidden", "true");
+    }
+  });
+
+  if (document.body) {
+    document.body.classList.add("lovablesheet-modal-open");
+  }
+
+  activeBoardModalId = boardId;
+  activeBoardTrigger = trigger && typeof trigger.focus === "function" ? trigger : null;
+
+  const dialog = modal.querySelector("[data-board-modal-dialog]");
+  if (dialog) {
+    dialog.setAttribute("tabindex", "-1");
+    window.requestAnimationFrame(() => {
+      dialog.focus({ preventScroll: true });
+    });
+  }
+}
+
+function handleBoardModalKeydown(event) {
+  if (event.key === "Escape" && activeBoardModalId) {
+    event.preventDefault();
+    closeActiveBoardModal();
+  }
+}
+
+function setupBoardLibrary() {
+  if (boardLibraryInitialized) return;
+
+  boardLayerEl = document.querySelector("[data-board-layer]");
+  if (!boardLayerEl) {
+    boardLibraryInitialized = true;
+    return;
+  }
+
+  boardLayerEl.setAttribute("aria-hidden", boardLayerEl.hidden ? "true" : "false");
+
+  boardOverlayEl = boardLayerEl.querySelector("[data-board-modal-overlay]") ?? null;
+  boardModals.clear();
+  boardLayerEl.querySelectorAll("[data-board-modal]").forEach((modal) => {
+    const identifier = modal.dataset.boardModal;
+    if (!identifier) return;
+    boardModals.set(identifier, modal);
+    modal.setAttribute("aria-hidden", modal.hidden ? "true" : "false");
+  });
+
+  document.querySelectorAll("[data-board-launch]").forEach((button) => {
+    const targetId = button.dataset.boardLaunch;
+    if (!targetId) return;
+    button.addEventListener("click", () => {
+      openBoardModal(targetId, button);
+    });
+  });
+
+  boardLayerEl.querySelectorAll("[data-board-close]").forEach((button) => {
+    button.addEventListener("click", () => {
+      closeActiveBoardModal();
+    });
+  });
+
+  boardOverlayEl?.addEventListener("click", () => {
+    closeActiveBoardModal();
+  });
+
+  if (!boardModalKeydownRegistered) {
+    document.addEventListener("keydown", handleBoardModalKeydown);
+    boardModalKeydownRegistered = true;
+  }
+
+  boardLibraryInitialized = true;
 }
 
 function setupBrainBoard() {
