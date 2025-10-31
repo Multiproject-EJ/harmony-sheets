@@ -102,6 +102,55 @@
     ]
   },
   {
+    "id": "life-wheel-companion",
+    "name": "Life Wheel Companion — Vision & Habit Planner",
+    "tagline": "Guide weekly life-area reflections with a calm, offline-ready dashboard.",
+    "draft": true,
+    "price": "$39",
+    "heroImage": "assets/lifewheel-hero.svg",
+    "colorImage": "assets/lifewheel-hero.svg",
+    "colorCaption": "Preview of the Life Wheel Companion PWA experience.",
+    "lifeAreas": ["career", "health", "family", "spirituality"],
+    "badges": [
+      "PWA demo",
+      "Guided reflections",
+      "Offline ready"
+    ],
+    "features": [
+      "Weekly life wheel check-ins",
+      "Goal and habit tracking by life area",
+      "Vision planning canvas for each category",
+      "Offline-first progressive web app with sync"
+    ],
+    "description": "<p><strong>Life Wheel Companion</strong> guides your life-area rituals with a progressive web app you can load on any device. Map vision statements, set goals, and log habits with offline support that syncs when you're back online.</p>",
+    "gallery": [
+      { "src": "assets/lifewheel-hero.svg", "alt": "Life Wheel Companion dashboard with goals and habits." }
+    ],
+    "virtualDemo": "Google sheets products/demo/lifewheel.html",
+    "included": [
+      "Life Wheel Companion web app (draft)",
+      "Reflection and goal setting templates",
+      "Habit logging dashboards",
+      "Product roadmap feedback channel"
+    ],
+    "faqs": [
+      { "q": "Is the Life Wheel Companion available to customers yet?", "a": "Not yet. This draft is for internal review and testing while we finalize the launch." },
+      { "q": "Can I explore the interactive demo?", "a": "Yes. Launch the embedded PWA demo to explore the current experience in the browser." },
+      { "q": "Does it work offline?", "a": "The PWA caches data locally and syncs your updates once you reconnect." }
+    ],
+    "pricingTitle": "Preview the Life Wheel Companion",
+    "pricingSub": "Draft concept for guided life wheel rituals — not yet for sale.",
+    "socialProof": {
+      "stars": "",
+      "quote": "Draft preview available for Harmony Sheets reviewers."
+    },
+    "benefits": [
+      { "title": "See every life area clearly", "desc": "Visualize vision, goals, and habits in one guided dashboard." },
+      { "title": "Stay accountable gently", "desc": "Weekly reflections and habit logs keep progress visible without overwhelm." },
+      { "title": "Use it anywhere", "desc": "Offline-ready PWA works on desktop, tablet, or phone and syncs when connected." }
+    ]
+  },
+  {
     "id": "budget-dashboard",
     "name": "Budget Dashboard — Personal Finance Tracker",
     "tagline": "Take control of your money with clarity and confidence.",
