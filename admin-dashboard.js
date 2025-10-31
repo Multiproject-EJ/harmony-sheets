@@ -2221,15 +2221,15 @@ if (!rootHook) {
 
     let questionText = button?.dataset?.kpiQuestion || "";
     let productName = button?.dataset?.kpiProductName || "";
-    const row = button?.closest("tr");
+    const kpiCard = button?.closest("[data-kpi-card]");
     if (!questionText && button) {
-      const descriptionCell = row?.querySelector("[data-kpi-description]");
+      const descriptionCell = kpiCard?.querySelector("[data-kpi-description]");
       if (descriptionCell) {
         questionText = descriptionCell.textContent?.trim() || "";
       }
     }
-    if (!productName && row) {
-      const productCell = row.querySelector("[data-kpi-product]");
+    if (!productName && kpiCard) {
+      const productCell = kpiCard.querySelector("[data-kpi-product]");
       productName = productCell?.textContent?.trim() || "";
     }
     if (productName) {
