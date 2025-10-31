@@ -1391,6 +1391,17 @@ details.faq summary{cursor:pointer;font-weight:600}
 
 .admin__grid{display:grid;grid-template-columns:1fr;gap:32px;align-items:start}
 .admin__panel{background:#fff;border:1px solid rgba(148,163,184,.28);border-radius:24px;box-shadow:0 24px 60px rgba(15,23,42,.1);padding:24px;display:grid;gap:18px}
+.admin-control-center{display:grid;gap:24px}
+.admin-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.admin-tabs__list{display:inline-flex;align-items:center;gap:10px;padding:6px;border-radius:999px;background:rgba(148,163,184,.16);border:1px solid rgba(148,163,184,.26)}
+.admin-tabs__tab{border:none;background:transparent;padding:10px 18px;border-radius:999px;font:600 .92rem/1 "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#475569;cursor:pointer;transition:background .2s ease,color .2s ease,transform .2s ease}
+.admin-tabs__tab:is(:hover,:focus-visible){background:rgba(255,255,255,.92);color:#1f2937;outline:none}
+.admin-tabs__tab.is-active{background:#1d4ed8;color:#fff;box-shadow:0 16px 38px rgba(29,78,216,.28)}
+.admin-tabs__tab.is-active:is(:hover,:focus-visible){color:#fff;background:#2563eb}
+.admin-tabs__tab[tabindex="-1"]{outline:none}
+.admin-tabs__panels{display:grid;gap:24px}
+.admin-tabs__panel{display:grid;gap:24px}
+.admin-tabs__panel[hidden]{display:none!important}
 .admin__panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
 .admin__panel-head h2{margin:0;font-size:1.5rem}
 .admin__panel-sub{margin:6px 0 0;color:#64748b;max-width:440px}
@@ -1426,6 +1437,42 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-table__status-toggle input{width:18px;height:18px;cursor:pointer}
 .admin-table tbody tr[data-draft="true"] .admin-table__name::after{content:"Draft";display:inline-flex;align-items:center;justify-content:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(148,163,184,.32);color:#475569;font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .admin-table__empty{padding:40px;text-align:center;color:#94a3b8;font-size:.95rem}
+.admin-status-pill{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 12px;border-radius:14px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.12);color:#1f2937;min-width:120px;font-size:.85rem;font-weight:600;text-align:left;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
+.admin-status-pill__value{font-size:1.05rem;font-weight:700}
+.admin-status-pill__label{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#475569}
+.admin-status-pill:focus-visible{outline:2px solid #6366f1;outline-offset:2px;transform:translateY(-1px);box-shadow:0 16px 34px rgba(99,102,241,.18)}
+.admin-status-pill--success{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.32);color:#166534}
+.admin-status-pill--success .admin-status-pill__label{color:#166534}
+.admin-status-pill--warning{background:rgba(234,179,8,.16);border-color:rgba(234,179,8,.36);color:#92400e}
+.admin-status-pill--warning .admin-status-pill__label{color:#92400e}
+.admin-status-pill--danger{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.32);color:#b91c1c}
+.admin-status-pill--danger .admin-status-pill__label{color:#b91c1c}
+.admin-status-pill--empty{background:rgba(148,163,184,.14);border-color:rgba(148,163,184,.32);color:#334155}
+.admin-status-overlay{position:fixed;inset:0;z-index:1400;background:transparent}
+.admin-status-overlay[hidden]{display:none}
+.admin-status-popover{position:fixed;z-index:1410;width:min(380px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow:auto;padding:20px;border-radius:20px;background:#fff;box-shadow:0 32px 70px rgba(15,23,42,.24);display:grid;gap:16px}
+.admin-status-popover[hidden]{display:none!important}
+.admin-status-popover__header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.admin-status-popover__title{margin:0;font-size:1.2rem;color:#0f172a}
+.admin-status-popover__close{border:none;background:rgba(148,163,184,.18);color:#0f172a;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;transition:background .2s ease,transform .2s ease}
+.admin-status-popover__close:is(:hover,:focus-visible){background:rgba(148,163,184,.32);transform:scale(1.05);outline:none}
+.admin-status-popover__summary{margin:0;font-size:.9rem;color:#475569}
+.admin-status-popover[data-tone="success"] .admin-status-popover__summary{color:#15803d}
+.admin-status-popover[data-tone="warning"] .admin-status-popover__summary{color:#b45309}
+.admin-status-popover[data-tone="danger"] .admin-status-popover__summary{color:#b91c1c}
+.admin-status-popover__body{display:grid;gap:12px}
+.admin-status-popover__tasks{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.admin-status-task{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:14px;border:1px solid rgba(148,163,184,.28);background:#f8fafc}
+.admin-status-task[data-tone="success"]{border-color:rgba(34,197,94,.32);background:rgba(220,252,231,.6)}
+.admin-status-task[data-tone="warning"]{border-color:rgba(234,179,8,.32);background:rgba(254,240,138,.45)}
+.admin-status-task[data-tone="danger"]{border-color:rgba(239,68,68,.3);background:rgba(254,202,202,.45)}
+.admin-status-task__badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;font-size:.82rem;font-weight:700;color:inherit;background:rgba(255,255,255,.8);box-shadow:0 4px 12px rgba(15,23,42,.16)}
+.admin-status-task__body{display:grid;gap:6px}
+.admin-status-task__title{margin:0;font-size:.95rem;font-weight:600;color:#0f172a}
+.admin-status-task__note{margin:0;font-size:.85rem;color:#475569}
+.admin-status-popover__empty{margin:0;font-size:.88rem;color:#475569}
+.admin-status-popover__footer{margin:0}
+.admin-status-popover__note{margin:0;font-size:.85rem;color:#334155}
 .admin-table__sort{background:transparent;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .admin-table__sort::after{content:"";border:4px solid transparent;border-top-color:rgba(15,23,42,.35);transform:translateY(2px);opacity:.4}
 .admin-table__sort:hover,.admin-table__sort:focus-visible{color:#1d4ed8}

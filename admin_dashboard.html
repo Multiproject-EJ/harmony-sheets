@@ -214,12 +214,52 @@
       </div>
       <div class="admin__headline">
         <span class="admin__eyebrow">Product Operations</span>
-        <h1 class="admin__title">Harmony Sheets Control Center</h1>
+        <h1 class="admin__title" id="control-center-title">Harmony Sheets Control Center</h1>
         <p class="admin__lede">Review every template in one smart table, edit product details on the fly, manage life-area labels, and export an updated catalog for the storefront.</p>
       </div>
     </section>
 
     <section class="admin__grid">
+      <section
+        class="admin-control-center"
+        data-admin-control-center
+        aria-labelledby="control-center-title"
+      >
+        <nav class="admin-tabs" data-admin-tabs aria-label="Catalog views">
+          <div class="admin-tabs__list" role="tablist">
+            <button
+              type="button"
+              class="admin-tabs__tab is-active"
+              role="tab"
+              id="admin-tab-products-trigger"
+              aria-selected="true"
+              aria-controls="admin-tab-products"
+              data-admin-tab="products"
+            >
+              Products
+            </button>
+            <button
+              type="button"
+              class="admin-tabs__tab"
+              role="tab"
+              id="admin-tab-bundles-trigger"
+              aria-selected="false"
+              aria-controls="admin-tab-bundles"
+              data-admin-tab="bundles"
+              tabindex="-1"
+            >
+              Bundles
+            </button>
+          </div>
+        </nav>
+        <div class="admin-tabs__panels">
+          <div
+            class="admin-tabs__panel"
+            id="admin-tab-products"
+            role="tabpanel"
+            aria-labelledby="admin-tab-products-trigger"
+            data-admin-tab-panel="products"
+          >
       <div class="admin__panel" aria-labelledby="product-table-title">
         <section class="admin__panel-insight admin__performance" aria-labelledby="product-performance-title">
           <div class="admin__performance-head">
@@ -376,11 +416,15 @@
                     <button type="button" class="admin-table__sort" data-sort="price">Price</button>
                   </th>
                   <th scope="col" class="admin-table__status">Draft</th>
+                  <th scope="col">Marketing</th>
+                  <th scope="col">Optimization</th>
+                  <th scope="col">SAFE &amp; Legal</th>
+                  <th scope="col">Identity</th>
                 </tr>
               </thead>
               <tbody data-products-table>
                 <tr>
-                  <td colspan="5" class="admin-table__empty">Loading products…</td>
+                  <td colspan="9" class="admin-table__empty">Loading products…</td>
                 </tr>
               </tbody>
             </table>
@@ -550,6 +594,16 @@
         </div>
       </div>
     </section>
+          </div>
+          <div
+            class="admin-tabs__panel"
+            id="admin-tab-bundles"
+            role="tabpanel"
+            aria-labelledby="admin-tab-bundles-trigger"
+            data-admin-tab-panel="bundles"
+            hidden
+            aria-hidden="true"
+          >
     <div class="admin__panel admin__panel--bundles" aria-labelledby="bundle-table-title">
       <div class="admin__panel-head">
         <div>
@@ -615,11 +669,15 @@
                 <th scope="col">
                   <button type="button" class="admin-table__sort" data-bundles-sort="featured">Menu</button>
                 </th>
+                <th scope="col">Marketing</th>
+                <th scope="col">Optimization</th>
+                <th scope="col">SAFE &amp; Legal</th>
+                <th scope="col">Identity</th>
               </tr>
             </thead>
             <tbody data-bundles-table>
               <tr>
-                <td colspan="5" class="admin-table__empty">Loading bundles…</td>
+                <td colspan="9" class="admin-table__empty">Loading bundles…</td>
               </tr>
             </tbody>
           </table>
@@ -760,7 +818,33 @@
         </form>
       </div>
     </div>
-  </section>
+          </div>
+        </div>
+      </section>
+    </section>
+    <div class="admin-status-overlay" data-status-overlay hidden></div>
+    <div
+      class="admin-status-popover"
+      data-status-popover
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="status-popover-title"
+      hidden
+      tabindex="-1"
+    >
+      <div class="admin-status-popover__header">
+        <h3 class="admin-status-popover__title" id="status-popover-title"></h3>
+        <button class="admin-status-popover__close" type="button" data-status-popover-close aria-label="Close status details">×</button>
+      </div>
+      <p class="admin-status-popover__summary" data-status-summary></p>
+      <div class="admin-status-popover__body">
+        <p class="admin-status-popover__empty" data-status-empty hidden>No tasks documented yet.</p>
+        <ul class="admin-status-popover__tasks" data-status-tasks></ul>
+      </div>
+      <footer class="admin-status-popover__footer" data-status-note-wrap hidden>
+        <p class="admin-status-popover__note" data-status-note></p>
+      </footer>
+    </div>
 </main>
 
 <div class="admin-editor-modal admin-debug-modal" data-supabase-debug-modal hidden>
