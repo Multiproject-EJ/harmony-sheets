@@ -1,0 +1,88 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" rx="48" fill="url(#bg)"/>
+  <g opacity="0.4" filter="url(#glow1)">
+    <circle cx="360" cy="220" r="220" fill="url(#grad1)"/>
+  </g>
+  <g opacity="0.35" filter="url(#glow2)">
+    <circle cx="1110" cy="230" r="210" fill="url(#grad2)"/>
+  </g>
+  <g opacity="0.45" filter="url(#glow3)">
+    <circle cx="720" cy="780" r="260" fill="url(#grad3)"/>
+  </g>
+  <g opacity="0.6">
+    <path d="M720 220c132.548 0 240 107.452 240 240s-107.452 240-240 240-240-107.452-240-240 107.452-240 240-240zm0 54c-102.82 0-186 83.18-186 186s83.18 186 186 186 186-83.18 186-186-83.18-186-186-186z" stroke="url(#ringGrad)" stroke-width="6"/>
+    <path d="M720 170c160.361 0 290 129.639 290 290 0 160.36-129.639 290-290 290-160.36 0-290-129.64-290-290 0-160.361 129.64-290 290-290z" stroke="url(#ringOuter)" stroke-width="4" stroke-dasharray="14 18" stroke-linecap="round"/>
+    <path d="M720 510c-55.228 0-100-44.772-100-100s44.772-100 100-100 100 44.772 100 100-44.772 100-100 100zm0-46c29.823 0 54-24.177 54-54s-24.177-54-54-54-54 24.177-54 54 24.177 54 54 54z" stroke="url(#ringInner)" stroke-width="5"/>
+  </g>
+  <g opacity="0.9">
+    <path d="M720 272c-103.673 0-188 84.327-188 188 0 33.466 8.82 64.903 24.276 92.12l163.724 247.88 163.724-247.88C899.18 524.903 908 493.466 908 460c0-103.673-84.327-188-188-188z" fill="#0f172a" fill-opacity="0.65"/>
+    <path d="M720 310c-82.843 0-150 67.157-150 150 0 26.69 7.048 52.62 20.187 75.344L720 742l129.813-206.656C862.952 512.62 870 486.69 870 460c0-82.843-67.157-150-150-150z" fill="url(#coreGrad)"/>
+    <path d="M720 352c-60.751 0-110 49.249-110 110 0 19.565 5.153 38.565 14.766 55.252L720 664l95.234-146.748C824.847 500.565 830 481.565 830 462c0-60.751-49.249-110-110-110z" fill="url(#innerCore)"/>
+  </g>
+  <g opacity="0.82" stroke="url(#radar)" stroke-width="2.4">
+    <path d="M720 208v-74" stroke-linecap="round"/>
+    <path d="M936 460h74" stroke-linecap="round"/>
+    <path d="M720 674v74" stroke-linecap="round"/>
+    <path d="M504 460h-74" stroke-linecap="round"/>
+    <path d="M871 309l52-52" stroke-linecap="round"/>
+    <path d="M871 611l52 52" stroke-linecap="round"/>
+    <path d="M569 309l-52-52" stroke-linecap="round"/>
+    <path d="M569 611l-52 52" stroke-linecap="round"/>
+  </g>
+  <text x="720" y="210" text-anchor="middle" font-family="'Inter', 'Segoe UI', sans-serif" font-size="44" font-weight="600" fill="#f8fafc" opacity="0.9">Life Wheel Companion</text>
+  <text x="720" y="258" text-anchor="middle" font-family="'Inter', 'Segoe UI', sans-serif" font-size="20" fill="#cbd5f5" opacity="0.75">Vision • Goals • Habits</text>
+  <defs>
+    <radialGradient id="bg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="rotate(90 0 0) scale(900 1440)">
+      <stop offset="0" stop-color="#1f2844"/>
+      <stop offset="1" stop-color="#090f1f"/>
+    </radialGradient>
+    <radialGradient id="grad1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="rotate(90 0 0) scale(220)">
+      <stop stop-color="#38bdf8" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="grad2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="rotate(90 0 0) scale(210)">
+      <stop stop-color="#a855f7" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#a855f7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="grad3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="rotate(90 0 0) scale(260)">
+      <stop stop-color="#14b8a6" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#14b8a6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ringGrad" x1="720" y1="220" x2="720" y2="700" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e0f2fe" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#c4b5fd" stop-opacity="0.6"/>
+    </linearGradient>
+    <linearGradient id="ringOuter" x1="430" y1="180" x2="1004" y2="700" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22d3ee" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#c084fc" stop-opacity="0.65"/>
+    </linearGradient>
+    <linearGradient id="ringInner" x1="620" y1="360" x2="820" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#60a5fa" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="coreGrad" x1="584" y1="310" x2="856" y2="650" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1d4ed8" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#7c3aed" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="innerCore" x1="630" y1="352" x2="810" y2="590" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0ea5e9" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#a855f7" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="radar" x1="506" y1="134" x2="934" y2="798" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38bdf8" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#a855f7" stop-opacity="0.65"/>
+    </linearGradient>
+    <filter id="glow1" x="0" y="-140" width="720" height="720" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="80" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="glow2" x="900" y="20" width="420" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="90" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+    <filter id="glow3" x="380" y="440" width="680" height="680" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="120" result="blur"/>
+      <feBlend in="SourceGraphic" in2="blur" mode="screen"/>
+    </filter>
+  </defs>
+</svg>
