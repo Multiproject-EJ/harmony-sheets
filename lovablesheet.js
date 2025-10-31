@@ -36,6 +36,18 @@ const BRAIN_BOARD_COLOR_PRESETS = [
 ];
 const BRAIN_BOARD_COLOR_PRESET_MAP = new Map(BRAIN_BOARD_COLOR_PRESETS.map((preset) => [preset.id, preset]));
 const BRAIN_BOARD_PRESET_IDS = new Set(BRAIN_BOARD_COLOR_PRESETS.map((preset) => preset.id));
+const BRAIN_BOARD_NOTE_SHAPES = [
+  { id: "classic", label: "Rounded classic" },
+  { id: "square", label: "Square" },
+  { id: "diamond", label: "Diamond" },
+  { id: "triangle", label: "Triangle" },
+  { id: "heart", label: "Heart" },
+  { id: "flower", label: "Flower" },
+  { id: "cloud", label: "Cloud" }
+];
+const BRAIN_BOARD_NOTE_SHAPE_MAP = new Map(BRAIN_BOARD_NOTE_SHAPES.map((shape) => [shape.id, shape]));
+const BRAIN_BOARD_NOTE_SHAPE_IDS = new Set(BRAIN_BOARD_NOTE_SHAPES.map((shape) => shape.id));
+const BRAIN_BOARD_DEFAULT_SHAPE = "classic";
 const DEFAULT_BOARD_ID = "default";
 const BOARD_STATUS_CLEAR_DELAY = 4000;
 const BOARD_SCALE_DEFAULT = 1;
@@ -426,8 +438,20 @@ function cloneNotes(notes = []) {
     y: Number.isFinite(Number(note.y)) ? Number(note.y) : 0,
     label: typeof note.label === "string" ? note.label : "",
     body: typeof note.body === "string" ? note.body : "",
-    placeholder: typeof note.placeholder === "string" ? note.placeholder : ""
+    placeholder: typeof note.placeholder === "string" ? note.placeholder : "",
+    shape: normalizeNoteShapeValue(note.shape)
   }));
+}
+
+function normalizeNoteShapeValue(shape) {
+  if (typeof shape !== "string") {
+    return BRAIN_BOARD_DEFAULT_SHAPE;
+  }
+  const trimmed = shape.trim().toLocaleLowerCase();
+  if (BRAIN_BOARD_NOTE_SHAPE_IDS.has(trimmed)) {
+    return trimmed;
+  }
+  return BRAIN_BOARD_DEFAULT_SHAPE;
 }
 
 class StickyBoard {
@@ -455,6 +479,9 @@ class StickyBoard {
     this.colorPresets = BRAIN_BOARD_COLOR_PRESET_MAP;
     this.presetIds = BRAIN_BOARD_PRESET_IDS;
     this.defaultPreset = this.colorPresets.get("sunshine") ?? { value: "#fef3c7" };
+    this.noteShapes = BRAIN_BOARD_NOTE_SHAPE_MAP;
+    this.shapeIds = BRAIN_BOARD_NOTE_SHAPE_IDS;
+    this.defaultShape = BRAIN_BOARD_DEFAULT_SHAPE;
 
     this.scale = BOARD_SCALE_DEFAULT;
     const initialScaleAttr = this.root?.dataset.boardInitialScale;
@@ -511,6 +538,7 @@ class StickyBoard {
       }
       this.closeMenu();
     };
+    this.columnVisualFrame = null;
   }
 
   initialize() {
@@ -525,6 +553,7 @@ class StickyBoard {
 
     this.bindControls();
     this.applyScale();
+    this.scheduleColumnVisualUpdate();
     return true;
   }
 
@@ -757,6 +786,7 @@ class StickyBoard {
     const wasFocused = note.contains(document.activeElement);
     note.remove();
     this.updateZoomControls();
+    this.scheduleColumnVisualUpdate();
 
     if (wasFocused) {
       this.addButton?.focus?.({ preventScroll: true });
@@ -816,6 +846,9 @@ class StickyBoard {
       swatch.classList.toggle("is-active", Boolean(isActive));
       swatch.setAttribute("aria-pressed", isActive ? "true" : "false");
     });
+
+    this.ensureShapeControls(note);
+    this.updateShapeControls(note);
   }
 
   setNoteColor(note, color) {
@@ -858,6 +891,113 @@ class StickyBoard {
     note.style.setProperty("--note-custom-border", borderColor);
     note.style.setProperty("--note-custom-shadow", "0 20px 34px rgba(15,23,42,.24)");
     note.style.setProperty("--note-custom-glow", glowColor);
+  }
+
+  ensureNoteShape(note) {
+    if (!note) {
+      return this.defaultShape;
+    }
+    const normalized = normalizeNoteShapeValue(note.dataset.shape);
+    note.dataset.shape = normalized;
+    return normalized;
+  }
+
+  ensureShapeControls(note) {
+    if (!note) return;
+
+    const colorMenu = note.querySelector("[data-note-color-menu]");
+    if (!colorMenu) return;
+
+    let optionsContainer = colorMenu.querySelector("[data-note-shape-options]");
+    if (!optionsContainer) {
+      const section = document.createElement("div");
+      section.className = "brain-board__menu-section";
+      section.setAttribute("role", "group");
+      section.setAttribute("aria-label", "Sticky note design");
+      section.dataset.noteShapeSection = "true";
+
+      const heading = document.createElement("p");
+      heading.className = "brain-board__menu-heading";
+      heading.textContent = "Note shape";
+      section.appendChild(heading);
+
+      optionsContainer = document.createElement("div");
+      optionsContainer.className = "brain-board__menu-options brain-board__menu-options--shapes";
+      optionsContainer.dataset.noteShapeOptions = "true";
+      section.appendChild(optionsContainer);
+
+      const divider = colorMenu.querySelector(".brain-board__menu-divider");
+      if (divider) {
+        colorMenu.insertBefore(section, divider);
+      } else {
+        colorMenu.appendChild(section);
+      }
+    }
+
+    if (!optionsContainer) return;
+
+    if (!optionsContainer.dataset.shapeOptionsBuilt) {
+      optionsContainer.innerHTML = "";
+      const shapes = this.noteShapes ? Array.from(this.noteShapes.values()) : BRAIN_BOARD_NOTE_SHAPES;
+      shapes.forEach((shape) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "brain-board__shape-button";
+        button.dataset.noteShape = shape.id;
+        button.setAttribute("aria-pressed", "false");
+        button.setAttribute("aria-label", shape.label);
+        button.title = shape.label;
+
+        const preview = document.createElement("span");
+        preview.className = "brain-board__shape-preview";
+        preview.dataset.shapePreview = shape.id;
+        button.appendChild(preview);
+
+        const srLabel = document.createElement("span");
+        srLabel.className = "sr-only";
+        srLabel.textContent = shape.label;
+        button.appendChild(srLabel);
+
+        optionsContainer.appendChild(button);
+      });
+      optionsContainer.dataset.shapeOptionsBuilt = "true";
+    }
+
+    if (!optionsContainer.dataset.shapeOptionsBound) {
+      optionsContainer.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-note-shape]");
+        if (!button || !optionsContainer.contains(button)) {
+          return;
+        }
+        event.preventDefault();
+        this.setNoteShape(note, button.dataset.noteShape);
+        this.closeColorMenu(colorMenu);
+      });
+      optionsContainer.dataset.shapeOptionsBound = "true";
+    }
+  }
+
+  updateShapeControls(note) {
+    if (!note) return;
+    const activeShape = this.ensureNoteShape(note);
+    const colorMenu = note.querySelector("[data-note-color-menu]");
+    if (!colorMenu) return;
+    const optionsContainer = colorMenu.querySelector("[data-note-shape-options]");
+    if (!optionsContainer) return;
+
+    optionsContainer.querySelectorAll("[data-note-shape]").forEach((button) => {
+      const isActive = button.dataset.noteShape === activeShape;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+  }
+
+  setNoteShape(note, shapeId) {
+    if (!note) return;
+    const normalized = normalizeNoteShapeValue(shapeId);
+    note.dataset.shape = normalized;
+    this.updateShapeControls(note);
+    this.scheduleColumnVisualUpdate();
   }
 
   openColorMenu(note, toggle, menu) {
@@ -971,6 +1111,7 @@ class StickyBoard {
     }
 
     this.updateColumnStyles();
+    this.scheduleColumnVisualUpdate();
   }
 
   updateColumnStyles() {
@@ -1017,6 +1158,59 @@ class StickyBoard {
     }
 
     return { columnWidthUnits, gapUnits, metrics };
+  }
+
+  scheduleColumnVisualUpdate() {
+    if (this.columnVisualFrame) return;
+    this.columnVisualFrame = window.requestAnimationFrame(() => {
+      this.columnVisualFrame = null;
+      this.applyColumnVisuals();
+    });
+  }
+
+  applyColumnVisuals() {
+    if (!this.columnOverlay) {
+      return;
+    }
+
+    if (!this.workspace || !this.columnCount || this.columnCount <= 0) {
+      this.columnOverlay.querySelectorAll(".brain-board__column").forEach((column) => {
+        column.style.removeProperty("--brain-board-column-scale");
+        column.classList.remove("is-expanded");
+      });
+      return;
+    }
+
+    const boardWidth = this.workspace.clientWidth;
+    if (!(boardWidth > 0)) {
+      return;
+    }
+
+    const metrics = this.getColumnMetrics(boardWidth);
+    if (!metrics) {
+      return;
+    }
+
+    const baseWidth = metrics.columnWidthUnits;
+    const columnWidths = new Array(this.columnCount).fill(baseWidth);
+
+    this.workspace.querySelectorAll("[data-note][data-column]").forEach((note) => {
+      const columnIndex = Number.parseInt(note.dataset.column, 10) - 1;
+      if (!Number.isInteger(columnIndex) || columnIndex < 0 || columnIndex >= columnWidths.length) {
+        return;
+      }
+      const noteWidth = note.offsetWidth;
+      if (Number.isFinite(noteWidth) && noteWidth > columnWidths[columnIndex]) {
+        columnWidths[columnIndex] = noteWidth;
+      }
+    });
+
+    this.columnOverlay.querySelectorAll(".brain-board__column").forEach((columnEl, index) => {
+      const width = columnWidths[index] ?? baseWidth;
+      const scale = baseWidth > 0 ? Math.max(width / baseWidth, 1) : 1;
+      columnEl.style.setProperty("--brain-board-column-scale", `${scale}`);
+      columnEl.classList.toggle("is-expanded", scale > 1.01);
+    });
   }
 
   getColumnSnapTarget({ boardWidthPx, noteWidthUnits, targetX }) {
@@ -1081,6 +1275,7 @@ class StickyBoard {
     const x = Number.parseFloat(note.dataset.x || "0");
     const y = Number.parseFloat(note.dataset.y || "0");
     this.setNotePosition(note, x, y);
+    this.ensureNoteShape(note);
     this.updateColorControls(note);
 
     const isGroupMode = note.dataset.groupMode === "true";
@@ -1147,6 +1342,7 @@ class StickyBoard {
           }
 
           this.setNotePosition(note, appliedX, targetY);
+          this.scheduleColumnVisualUpdate();
 
           if (groupEnabled && nearbyNotes.length) {
             const offsetAdjustmentX = appliedX - targetX;
@@ -1180,6 +1376,8 @@ class StickyBoard {
           if (groupEnabled) {
             this.disableGroupMove(note);
           }
+
+          this.scheduleColumnVisualUpdate();
         };
 
         handle.addEventListener("pointermove", onPointerMove);
@@ -1231,6 +1429,8 @@ class StickyBoard {
       });
     });
 
+    this.ensureShapeControls(note);
+
     if (colorPicker) {
       colorPicker.addEventListener("input", () => {
         this.setNoteColor(note, colorPicker.value);
@@ -1273,6 +1473,9 @@ class StickyBoard {
 
     const color = normalizeNoteColorValue(noteData?.color);
     this.setNoteColor(element, color);
+
+    const shape = normalizeNoteShapeValue(noteData?.shape);
+    element.dataset.shape = shape;
 
     const x = Number.isFinite(Number(noteData?.x)) ? Number(noteData.x) : 0;
     const y = Number.isFinite(Number(noteData?.y)) ? Number(noteData.y) : 0;
@@ -1328,6 +1531,7 @@ class StickyBoard {
     });
 
     this.updateZoomControls();
+    this.scheduleColumnVisualUpdate();
 
     return noteElement;
   }
@@ -1343,7 +1547,8 @@ class StickyBoard {
         y: Number.parseFloat(note.dataset.y || "0") || 0,
         label: labelEl ? labelEl.textContent?.trim() || "" : "",
         body: bodyEl ? bodyEl.innerHTML : "",
-        placeholder: bodyEl?.getAttribute("data-placeholder") || ""
+        placeholder: bodyEl?.getAttribute("data-placeholder") || "",
+        shape: normalizeNoteShapeValue(note.dataset.shape)
       };
     });
   }
@@ -1359,6 +1564,7 @@ class StickyBoard {
       }
     });
     this.applyScale();
+    this.scheduleColumnVisualUpdate();
   }
 }
 
