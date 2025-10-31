@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Admin Workspace — Harmony Sheets</title>
+  <title>Admin Customer Service — Harmony Sheets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Private admin workspace for Harmony Sheets team members.">
+  <meta name="description" content="Dedicated space for Harmony Sheets customer service tools and data.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-neutral page-admin-workspace">
+<body class="theme-neutral page-admin-customer-service">
 <header class="site-header">
   <a class="brand" href="/">
     <img class="brand__logo" src="assets/logoHarmonySheets.webp" alt="">
@@ -48,7 +48,7 @@
           <a class="nav-dropdown__link" href="account.html" data-account-link="account">My account</a>
           <a class="nav-dropdown__link" href="admin_dashboard.html" data-account-link="admin" hidden aria-hidden="true">Admin dashboard</a>
           <a class="nav-dropdown__link" href="lovablesheet.html" data-account-link="lovablesheet" hidden aria-hidden="true">LovableSheet</a>
-          <a class="nav-dropdown__link" href="admin_workspace.html" data-account-link="admin-workspace" hidden aria-hidden="true">Admin Workspace</a>
+          <a class="nav-dropdown__link" href="admin_customer_service.html" data-account-link="admin-workspace" hidden aria-hidden="true">Admin Customer Service</a>
           <a class="nav-dropdown__link" href="products.html#my-products" data-account-link="products">My products</a>
           <button class="nav-dropdown__link nav-dropdown__link--action" type="button" data-account-cart>Shopping cart</button>
           <button class="nav-dropdown__link nav-dropdown__link--action" type="button" data-account-signout hidden disabled>Sign out</button>
@@ -87,10 +87,10 @@
   </div>
 </aside>
 
-<main class="admin-workspace" id="main-content">
+<main class="admin-customer-service" id="main-content">
   <section class="admin-workspace-state" data-admin-workspace-loading>
     <div class="account-card">
-      <h1>Loading admin workspace</h1>
+      <h1>Loading admin customer service</h1>
       <p>Verifying your admin access…</p>
     </div>
   </section>
@@ -98,17 +98,34 @@
   <section class="admin-workspace-state" data-admin-workspace-unauthorized hidden>
     <div class="account-card">
       <h1>Access restricted</h1>
-      <p data-admin-workspace-message>You need an admin account to view the admin workspace.</p>
+      <p data-admin-workspace-message>You need an admin account to view the customer service workspace.</p>
       <a class="btn secondary" href="login.html">Go to sign in</a>
     </div>
   </section>
 
   <section class="admin-workspace-content" data-admin-workspace-content hidden>
-    <div class="admin-workspace__empty">
-      <div class="account-card">
-        <h1>Admin workspace</h1>
-        <p>This private space is ready for upcoming Harmony Sheets admin tools.</p>
+    <div class="admin-customer-service__grid">
+      <div class="account-card admin-customer-service__intro">
+        <h1>Admin customer service</h1>
+        <p>This private workspace centralizes Harmony Sheets customer support updates and live dashboards.</p>
+        <p class="muted">Only authorized team members can view embedded Google Sheet reports and respond to customer inquiries.</p>
       </div>
+      <section class="account-card admin-customer-service__integration" aria-labelledby="customer-service-integration">
+        <h2 id="customer-service-integration">Google Sheets integration</h2>
+        <p>Connect a published Google Sheets web app to stream live customer service data into this dashboard. Paste the shareable web app URL below to load the embedded view.</p>
+        <form class="admin-customer-service__form" data-admin-customer-service-form>
+          <label class="admin-customer-service__label" for="google-web-app-url">Google Sheets web app URL</label>
+          <input class="admin-customer-service__input" type="url" id="google-web-app-url" name="google-web-app-url" placeholder="https://script.google.com/..." autocomplete="off" required>
+          <button class="btn primary admin-customer-service__button" type="submit">Load dashboard</button>
+        </form>
+        <p class="muted">The URL is stored locally in your browser for quick reloading. Replace it anytime to update the embedded data source.</p>
+      </section>
+      <section class="admin-customer-service__embed" data-admin-customer-service-embed aria-live="polite">
+        <div class="admin-customer-service__placeholder" data-admin-customer-service-placeholder>
+          <p>No Google Sheets dashboard loaded yet.</p>
+          <p class="muted">Enter a valid Google Sheets web app link above to preview customer service metrics directly in this workspace.</p>
+        </div>
+      </section>
     </div>
   </section>
 </main>
