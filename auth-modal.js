@@ -131,8 +131,8 @@ function ensureAdminWorkspaceLink() {
 
   const link = document.createElement("a");
   link.className = "nav-dropdown__link";
-  link.textContent = "Admin Workspace";
-  link.href = ADMIN_WORKSPACE_PATH || "admin_workspace.html";
+  link.textContent = "Admin Customer Service";
+  link.href = ADMIN_WORKSPACE_PATH || "admin_customer_service.html";
   link.dataset.accountLink = "admin-workspace";
   link.hidden = true;
   link.setAttribute("aria-hidden", "true");
@@ -213,7 +213,7 @@ function updateAccountLink(user) {
     adminWorkspaceLink.hidden = !isAdmin;
     adminWorkspaceLink.setAttribute("aria-hidden", isAdmin ? "false" : "true");
     if (isAdmin) {
-      adminWorkspaceLink.href = ADMIN_WORKSPACE_PATH || "admin_workspace.html";
+      adminWorkspaceLink.href = ADMIN_WORKSPACE_PATH || "admin_customer_service.html";
     }
   }
 }

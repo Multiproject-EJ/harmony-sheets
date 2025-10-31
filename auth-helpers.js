@@ -2,7 +2,7 @@ import { SUPABASE_ADMIN_EMAIL } from "./supabase-config.js";
 
 export const ACCOUNT_PAGE_PATH = "account.html";
 export const ADMIN_DASHBOARD_PATH = "admin_dashboard.html";
-export const ADMIN_WORKSPACE_PATH = "admin_workspace.html";
+export const ADMIN_WORKSPACE_PATH = "admin_customer_service.html";
 
 function normalizeEmail(value) {
   if (!value) return "";
