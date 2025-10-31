@@ -17,6 +17,10 @@ const PAGE_PATH = (() => {
   return SUPPORTED_PAGE_PATHS.has(currentPath) ? currentPath : DEFAULT_PAGE_PATH;
 })();
 const BRAIN_BOARD_GROUP_RADIUS = 220;
+const BRAIN_BOARD_DEFAULT_COLUMN_COUNT = 0;
+const BRAIN_BOARD_DEFAULT_COLUMN_GAP = 48;
+const BRAIN_BOARD_DEFAULT_SNAP_THRESHOLD = 64;
+const BRAIN_BOARD_SNAP_INDICATOR_DURATION = 260;
 const CUSTOM_COLOR_ID = "custom";
 const BRAIN_BOARD_COLOR_PRESETS = [
   { id: "sunshine", label: "Sunshine yellow", value: "#fef3c7" },
@@ -437,6 +441,12 @@ class StickyBoard {
     this.onNoteCreated = typeof onNoteCreated === "function" ? onNoteCreated : null;
     this.onScaleChange = typeof onScaleChange === "function" ? onScaleChange : null;
 
+    this.columnOverlay = null;
+    this.columnCount = BRAIN_BOARD_DEFAULT_COLUMN_COUNT;
+    this.columnGap = BRAIN_BOARD_DEFAULT_COLUMN_GAP;
+    this.columnSnapThreshold = BRAIN_BOARD_DEFAULT_SNAP_THRESHOLD;
+    this.snapIndicatorTimeouts = new WeakMap();
+
     this.scaleMin = BOARD_SCALE_MIN;
     this.scaleMax = BOARD_SCALE_MAX;
     this.scaleStep = BOARD_SCALE_STEP;
@@ -508,6 +518,7 @@ class StickyBoard {
       return false;
     }
 
+    this.setupColumns();
     this.workspace.querySelectorAll("[data-note]").forEach((note) => {
       this.setupNote(note);
     });
@@ -924,6 +935,146 @@ class StickyBoard {
       }));
   }
 
+  setupColumns() {
+    if (!this.workspace) return;
+
+    this.columnOverlay = this.workspace.querySelector("[data-board-columns-overlay]") ?? null;
+
+    const columnCountAttr = this.workspace.dataset.boardColumns;
+    const parsedCount = Number.parseInt(columnCountAttr ?? "", 10);
+    this.columnCount = Number.isFinite(parsedCount) && parsedCount > 0 ? parsedCount : BRAIN_BOARD_DEFAULT_COLUMN_COUNT;
+
+    const columnGapAttr = this.workspace.dataset.boardColumnGap;
+    const parsedGap = Number.parseFloat(columnGapAttr ?? "");
+    this.columnGap = Number.isFinite(parsedGap) && parsedGap >= 0 ? parsedGap : BRAIN_BOARD_DEFAULT_COLUMN_GAP;
+
+    const snapAttr = this.workspace.dataset.boardSnapThreshold;
+    const parsedSnap = Number.parseFloat(snapAttr ?? "");
+    this.columnSnapThreshold = Number.isFinite(parsedSnap) && parsedSnap >= 0 ? parsedSnap : BRAIN_BOARD_DEFAULT_SNAP_THRESHOLD;
+
+    if (this.columnOverlay) {
+      this.columnOverlay.innerHTML = "";
+      if (this.columnCount > 0) {
+        this.columnOverlay.dataset.active = "true";
+        const fragment = document.createDocumentFragment();
+        for (let index = 0; index < this.columnCount; index += 1) {
+          const columnEl = document.createElement("div");
+          columnEl.className = "brain-board__column";
+          columnEl.setAttribute("aria-hidden", "true");
+          columnEl.dataset.columnIndex = `${index}`;
+          fragment.appendChild(columnEl);
+        }
+        this.columnOverlay.appendChild(fragment);
+      } else {
+        this.columnOverlay.removeAttribute("data-active");
+      }
+    }
+
+    this.updateColumnStyles();
+  }
+
+  updateColumnStyles() {
+    if (!this.workspace) return;
+    const countValue = Math.max(0, Number.parseInt(`${this.columnCount}`, 10) || 0);
+    const gapValue = Math.max(0, Number.parseFloat(`${this.columnGap}`) || 0);
+    this.workspace.style.setProperty("--brain-board-column-count", `${countValue}`);
+    this.workspace.style.setProperty("--brain-board-column-gap", `${gapValue}px`);
+    if (this.columnOverlay) {
+      if (countValue > 0) {
+        this.columnOverlay.dataset.active = "true";
+      } else {
+        this.columnOverlay.removeAttribute("data-active");
+      }
+    }
+  }
+
+  getColumnMetrics(boardWidthPx) {
+    if (!this.workspace) return null;
+    if (!Number.isFinite(boardWidthPx) || boardWidthPx <= 0) return null;
+    if (!this.columnCount || this.columnCount <= 0) return null;
+
+    const boardWidthUnits = boardWidthPx / this.scale;
+    const gapUnits = Math.max(0, this.columnGap) / this.scale;
+    const totalGapUnits = gapUnits * (this.columnCount - 1);
+    const availableWidthUnits = boardWidthUnits - totalGapUnits;
+    if (!(availableWidthUnits > 0)) {
+      return null;
+    }
+
+    const columnWidthUnits = availableWidthUnits / this.columnCount;
+    if (!(columnWidthUnits > 0)) {
+      return null;
+    }
+
+    const metrics = [];
+    let cursor = 0;
+    for (let index = 0; index < this.columnCount; index += 1) {
+      const start = cursor;
+      const end = start + columnWidthUnits;
+      const center = start + columnWidthUnits / 2;
+      metrics.push({ index, start, end, center, width: columnWidthUnits });
+      cursor = end + gapUnits;
+    }
+
+    return { columnWidthUnits, gapUnits, metrics };
+  }
+
+  getColumnSnapTarget({ boardWidthPx, noteWidthUnits, targetX }) {
+    if (!this.workspace) return null;
+    if (!Number.isFinite(targetX)) return null;
+    if (!Number.isFinite(noteWidthUnits) || noteWidthUnits <= 0) return null;
+
+    const metrics = this.getColumnMetrics(boardWidthPx);
+    if (!metrics) return null;
+
+    const { metrics: columns } = metrics;
+    if (!columns.length) return null;
+
+    const boardWidthUnits = boardWidthPx / this.scale;
+    const maxX = Math.max(0, boardWidthUnits - noteWidthUnits);
+    const thresholdUnits = Math.max(0, this.columnSnapThreshold) / this.scale;
+    const noteCenter = targetX + noteWidthUnits / 2;
+
+    let closest = null;
+    columns.forEach((column) => {
+      const distance = Math.abs(noteCenter - column.center);
+      if (distance <= thresholdUnits) {
+        if (!closest || distance < closest.distance) {
+          closest = { column, distance };
+        }
+      }
+    });
+
+    if (!closest) return null;
+
+    const snapX = clamp(closest.column.center - noteWidthUnits / 2, 0, maxX);
+    return { columnIndex: closest.column.index, x: snapX };
+  }
+
+  showSnapIndicator(note) {
+    if (!note) return;
+    const existing = this.snapIndicatorTimeouts.get(note);
+    if (existing) {
+      window.clearTimeout(existing);
+    }
+    note.dataset.snapIndicator = "true";
+    const timeoutId = window.setTimeout(() => {
+      note.removeAttribute("data-snap-indicator");
+      this.snapIndicatorTimeouts.delete(note);
+    }, BRAIN_BOARD_SNAP_INDICATOR_DURATION);
+    this.snapIndicatorTimeouts.set(note, timeoutId);
+  }
+
+  clearSnapIndicator(note) {
+    if (!note) return;
+    const existing = this.snapIndicatorTimeouts.get(note);
+    if (existing) {
+      window.clearTimeout(existing);
+      this.snapIndicatorTimeouts.delete(note);
+    }
+    note.removeAttribute("data-snap-indicator");
+  }
+
   setupNote(note) {
     if (!note) return;
 
@@ -955,7 +1106,8 @@ class StickyBoard {
         const pointerId = event.pointerId;
         const boardWidth = this.workspace.clientWidth;
         const boardHeight = this.workspace.clientHeight;
-        const noteWidth = note.offsetWidth * this.scale;
+        const noteWidthUnits = note.offsetWidth;
+        const noteWidth = noteWidthUnits * this.scale;
         const noteHeight = note.offsetHeight * this.scale;
         const maxX = Math.max(0, (boardWidth - noteWidth) / this.scale);
         const maxY = Math.max(0, (boardHeight - noteHeight) / this.scale);
@@ -968,6 +1120,7 @@ class StickyBoard {
         const nearbyNotes = groupEnabled ? this.getNearbyColorNotes(note) : [];
 
         note.dataset.dragging = "true";
+        let activeSnap = null;
         handle.setPointerCapture(pointerId);
 
         const onPointerMove = (moveEvent) => {
@@ -976,13 +1129,31 @@ class StickyBoard {
 
           const targetX = clamp(startX + deltaX, 0, maxX);
           const targetY = clamp(startY + deltaY, 0, maxY);
-          this.setNotePosition(note, targetX, targetY);
+          const snapTarget = this.getColumnSnapTarget({
+            boardWidthPx: boardWidth,
+            noteWidthUnits,
+            targetX
+          });
+
+          let appliedX = targetX;
+          if (snapTarget) {
+            activeSnap = snapTarget;
+            appliedX = snapTarget.x;
+            note.dataset.column = `${snapTarget.columnIndex + 1}`;
+          } else {
+            activeSnap = null;
+            note.removeAttribute("data-column");
+            this.clearSnapIndicator(note);
+          }
+
+          this.setNotePosition(note, appliedX, targetY);
 
           if (groupEnabled && nearbyNotes.length) {
+            const offsetAdjustmentX = appliedX - targetX;
             nearbyNotes.forEach((entry) => {
               const neighborMaxX = Math.max(0, (boardWidth - entry.width) / this.scale);
               const neighborMaxY = Math.max(0, (boardHeight - entry.height) / this.scale);
-              const neighborX = clamp(entry.startX + deltaX, 0, neighborMaxX);
+              const neighborX = clamp(entry.startX + deltaX + offsetAdjustmentX, 0, neighborMaxX);
               const neighborY = clamp(entry.startY + deltaY, 0, neighborMaxY);
               this.setNotePosition(entry.note, neighborX, neighborY);
             });
@@ -997,6 +1168,14 @@ class StickyBoard {
           handle.removeEventListener("pointermove", onPointerMove);
           handle.removeEventListener("pointerup", onPointerEnd);
           handle.removeEventListener("pointercancel", onPointerEnd);
+
+          if (activeSnap) {
+            note.dataset.column = `${activeSnap.columnIndex + 1}`;
+            this.showSnapIndicator(note);
+          } else {
+            note.removeAttribute("data-column");
+            this.clearSnapIndicator(note);
+          }
 
           if (groupEnabled) {
             this.disableGroupMove(note);
