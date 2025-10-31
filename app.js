@@ -690,6 +690,8 @@ App.NAV_AREA_EXTRAS = {
 App.qs = sel => document.querySelector(sel);
 App.qsa = sel => Array.from(document.querySelectorAll(sel));
 
+App.CONSTRUCTION_STORAGE_KEY = "harmonySheets:constructionDismissed";
+
 App.hexToRgba = function(hex, alpha = 1) {
   if (!hex) return "";
   let value = hex.replace("#", "");
@@ -1996,9 +1998,100 @@ App.initCart = function() {
 };
 
 /*****************************************************
+ * Under construction gate
+ *****************************************************/
+App.initConstructionGate = function() {
+  const gate = App.qs("[data-construction-gate]");
+  if (!gate) return;
+
+  const dialog = gate.querySelector("[data-construction-dialog]");
+  const continueLink = gate.querySelector("[data-construction-continue]");
+  const backdrop = gate.querySelector("[data-construction-dismiss]");
+  const storageKey = App.CONSTRUCTION_STORAGE_KEY;
+
+  const hasDismissed = (() => {
+    try {
+      return window.localStorage.getItem(storageKey) === "1";
+    } catch (err) {
+      console.warn("Construction gate storage unavailable", err);
+      return false;
+    }
+  })();
+
+  if (hasDismissed) return;
+
+  let dismissed = false;
+
+  const hideGate = () => {
+    if (dismissed) return;
+    dismissed = true;
+
+    gate.setAttribute("aria-hidden", "true");
+    gate.classList.add("is-hiding");
+    gate.classList.remove("is-active");
+    document.body.classList.remove("is-construction-locked");
+
+    try {
+      window.localStorage.setItem(storageKey, "1");
+    } catch (err) {
+      console.warn("Construction gate storage unavailable", err);
+    }
+
+    gate.addEventListener(
+      "transitionend",
+      () => {
+        gate.hidden = true;
+        gate.classList.remove("is-hiding");
+      },
+      { once: true }
+    );
+
+    document.removeEventListener("keydown", onKeydown);
+  };
+
+  const onKeydown = event => {
+    if (event.key === "Escape" || event.key === "Esc") {
+      event.preventDefault();
+      hideGate();
+    }
+  };
+
+  gate.hidden = false;
+  gate.setAttribute("aria-hidden", "false");
+  document.body.classList.add("is-construction-locked");
+
+  requestAnimationFrame(() => {
+    gate.classList.add("is-active");
+    if (dialog) {
+      dialog.focus();
+    }
+  });
+
+  if (continueLink) {
+    continueLink.addEventListener("click", event => {
+      event.preventDefault();
+      hideGate();
+    });
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", hideGate);
+  }
+
+  gate.addEventListener("click", event => {
+    if (event.target === gate) {
+      hideGate();
+    }
+  });
+
+  document.addEventListener("keydown", onKeydown);
+};
+
+/*****************************************************
  * Init
  *****************************************************/
 App.init = function() {
+  App.initConstructionGate();
   App.initNav();
   App.initAuthLink();
   App.initCart();

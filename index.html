@@ -9,6 +9,39 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-neutral">
+<div class="construction-gate" data-construction-gate hidden aria-hidden="true">
+  <div class="construction-gate__backdrop" data-construction-dismiss></div>
+  <div class="construction-gate__dialog" role="dialog" aria-modal="true" aria-labelledby="construction-title" aria-describedby="construction-description" data-construction-dialog tabindex="-1">
+    <svg
+      class="construction-gate__icon"
+      viewBox="0 0 128 128"
+      role="img"
+      aria-labelledby="construction-icon-title"
+      focusable="false"
+    >
+      <title id="construction-icon-title">Under construction</title>
+      <defs>
+        <linearGradient id="construction-icon-gradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#38bdf8" />
+          <stop offset="100%" stop-color="#2563eb" />
+        </linearGradient>
+      </defs>
+      <g fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+        <path
+          d="M64 14 10 114a6 6 0 0 0 5.2 9h97.6a6 6 0 0 0 5.2-9L64 14Z"
+          fill="url(#construction-icon-gradient)"
+          stroke="rgba(15,23,42,.6)"
+        />
+        <path d="M64 42v36" stroke="#0f172a" />
+        <circle cx="64" cy="92" r="6" fill="#0f172a" stroke="#0f172a" />
+      </g>
+    </svg>
+    <p class="construction-gate__eyebrow">First look</p>
+    <h2 class="construction-gate__title" id="construction-title">We&rsquo;re still under construction</h2>
+    <p class="construction-gate__message" id="construction-description">Thanks for visiting Harmony Sheets early! We&rsquo;re polishing the experience behind the scenes, so expect a few unfinished edges.</p>
+    <a class="construction-gate__continue" href="#" data-construction-continue>Continue to the site</a>
+  </div>
+</div>
 <header class="site-header">
   <a class="brand" href="/">
     <img class="brand__logo" src="assets/logoHarmonySheets.webp" alt="">
