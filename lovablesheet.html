@@ -348,91 +348,118 @@
                           <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Collect user stories that need deeper grooming.</div>
                         </div>
                       </div>
-                      <div class="brain-board-menu" role="group" aria-label="Brain board quick tools">
-                        <div class="brain-board-menu__layout">
-                          <div class="brain-board-menu__stack">
-                            <div class="brain-board-menu__surface">
-                              <div class="brain-board-menu__cluster" role="group" aria-label="Workspace quick controls">
-                                <div class="brain-board-menu__primary" role="group" aria-label="Workspace layout options">
-                                  <button class="brain-board-menu__placeholder" type="button" aria-label="Placeholder option 1"></button>
-                                  <button class="brain-board-menu__placeholder" type="button" aria-label="Placeholder option 2"></button>
-                                  <button class="brain-board-menu__placeholder" type="button" aria-label="Placeholder option 3"></button>
-                                  <span class="brain-board-menu__divider" aria-hidden="true"></span>
-                                  <button class="brain-board-menu__screen" type="button" aria-label="Small screen layout">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="7" y="6" width="10" height="9" rx="1.8"></rect>
-                                        <rect x="10" y="17" width="4" height="1.5" rx="0.75"></rect>
-                                      </g>
-                                    </svg>
-                                  </button>
-                                  <button class="brain-board-menu__screen" type="button" aria-label="Medium screen layout">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="5.5" y="5.5" width="13" height="10.5" rx="2"></rect>
-                                        <rect x="9" y="17.5" width="6" height="1.5" rx="0.75"></rect>
-                                      </g>
-                                    </svg>
-                                  </button>
-                                  <button class="brain-board-menu__screen" type="button" aria-label="Large screen layout">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="4" y="5" width="16" height="11" rx="2"></rect>
-                                        <rect x="8.5" y="18" width="7" height="1.5" rx="0.75"></rect>
-                                      </g>
-                                    </svg>
-                                  </button>
+                      <div class="brain-board-menu brain-board-menu--fab" role="group" aria-label="Brain board quick tools" data-board-menu>
+                        <button class="brain-board-menu__toggle" type="button" data-board-menu-toggle aria-expanded="false" aria-controls="brain-board-menu-actions">
+                          <span class="sr-only">Toggle brain board controls</span>
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M12 5v14"></path>
+                              <path d="M5 12h14"></path>
+                            </g>
+                          </svg>
+                        </button>
+                        <div class="brain-board-menu__actions" id="brain-board-menu-actions">
+                          <button class="brain-board-menu__action brain-board-menu__action--add" type="button" data-board-add>
+                            <span class="brain-board-menu__action-icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" focusable="false">
+                                <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M7 4.8h7.2L19.2 9v8.2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6.8a2 2 0 0 1 2-2Z"></path>
+                                  <path d="M14.2 4.8v3.4a1 1 0 0 0 1 1H18"></path>
+                                  <path d="M12 11.2v6"></path>
+                                  <path d="M9 14.2h6"></path>
+                                </g>
+                              </svg>
+                            </span>
+                            <span class="brain-board-menu__action-label">New sticky</span>
+                          </button>
+                          <div class="brain-board-menu__panel brain-board-menu__panel--zoom" role="group" aria-label="Zoom controls">
+                            <div class="brain-board-menu__panel-content">
+                              <div class="brain-board-menu__panel-header">
+                                <span>Zoom</span>
+                              </div>
+                              <div class="brain-board-menu__panel-controls">
+                                <button class="brain-board-menu__panel-button" type="button" data-board-zoom-out aria-label="Zoom out">
+                                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                      <circle cx="11" cy="11" r="6"></circle>
+                                      <path d="M20 20l-4.2-4.2"></path>
+                                      <path d="M8 11h6"></path>
+                                    </g>
+                                  </svg>
+                                </button>
+                                <div class="brain-board-menu__panel-track">
+                                  <input class="brain-board-menu__panel-slider" type="range" min="60" max="140" value="100" step="1" data-board-zoom-slider aria-label="Zoom level">
+                                  <span class="brain-board-menu__panel-display" data-board-zoom-display>100%</span>
                                 </div>
+                                <button class="brain-board-menu__panel-button" type="button" data-board-zoom-in aria-label="Zoom in">
+                                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                      <circle cx="11" cy="11" r="6"></circle>
+                                      <path d="M20 20l-4.2-4.2"></path>
+                                      <path d="M11 8v6"></path>
+                                      <path d="M8 11h6"></path>
+                                    </g>
+                                  </svg>
+                                </button>
+                                <button class="brain-board-menu__panel-button" type="button" data-board-zoom-fit aria-label="Fit notes to board">
+                                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                      <rect x="4.5" y="4.5" width="15" height="15" rx="2"></rect>
+                                      <path d="M9.5 8.5h-2v2"></path>
+                                      <path d="M14.5 8.5h2v2"></path>
+                                      <path d="M9.5 15.5h-2v-2"></path>
+                                      <path d="M14.5 15.5h2v-2"></path>
+                                    </g>
+                                  </svg>
+                                </button>
                               </div>
-                            </div>
-                            <div class="brain-board-menu__zoom" role="group" aria-label="Zoom controls">
-                              <button class="brain-board-menu__zoom-button" type="button" data-board-zoom-out aria-label="Zoom out">
-                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                  <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="11" cy="11" r="6"></circle>
-                                    <path d="M20 20l-4.2-4.2"></path>
-                                    <path d="M8 11h6"></path>
-                                  </g>
-                                </svg>
-                              </button>
-                              <div class="brain-board-menu__zoom-track">
-                                <input class="brain-board-menu__zoom-slider" type="range" min="60" max="140" value="100" step="1" data-board-zoom-slider aria-label="Zoom level">
-                                <span class="brain-board-menu__zoom-display" data-board-zoom-display>100%</span>
-                              </div>
-                              <button class="brain-board-menu__zoom-button" type="button" data-board-zoom-in aria-label="Zoom in">
-                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                  <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="11" cy="11" r="6"></circle>
-                                    <path d="M20 20l-4.2-4.2"></path>
-                                    <path d="M11 8v6"></path>
-                                    <path d="M8 11h6"></path>
-                                  </g>
-                                </svg>
-                              </button>
-                              <button class="brain-board-menu__zoom-button" type="button" data-board-zoom-fit aria-label="Fit notes to board">
-                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                  <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="4.5" y="4.5" width="15" height="15" rx="2"></rect>
-                                    <path d="M9.5 8.5h-2v2"></path>
-                                    <path d="M14.5 8.5h2v2"></path>
-                                    <path d="M9.5 15.5h-2v-2"></path>
-                                    <path d="M14.5 15.5h2v-2"></path>
-                                  </g>
-                                </svg>
-                              </button>
                             </div>
                           </div>
-                          <button class="brain-board-menu__add" type="button" data-board-add>
-                            <span class="sr-only">Add new sticky note</span>
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                              <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M7 4.8h7.2L19.2 9v8.2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6.8a2 2 0 0 1 2-2Z"></path>
-                                <path d="M14.2 4.8v3.4a1 1 0 0 0 1 1H18"></path>
-                                <path d="M12 11.2v6"></path>
-                                <path d="M9 14.2h6"></path>
-                              </g>
-                            </svg>
+                          <button class="brain-board-menu__action brain-board-menu__action--save" type="button" data-board-save-inline>
+                            <span class="brain-board-menu__action-icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" focusable="false">
+                                <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M6.5 4.5h11a1 1 0 0 1 .7.3l1.5 1.5a1 1 0 0 1 .3.7v11a1 1 0 0 1-1 1h-12a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Z"></path>
+                                  <path d="M9 4.5v5.5h6V4.5"></path>
+                                  <path d="M9 17.5h6"></path>
+                                </g>
+                              </svg>
+                            </span>
+                            <span class="brain-board-menu__action-label">Save</span>
                           </button>
+                          <button class="brain-board-menu__action brain-board-menu__action--switch" type="button" data-board-switcher-open>
+                            <span class="brain-board-menu__action-icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" focusable="false">
+                                <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                  <rect x="4.5" y="6" width="15" height="4.5" rx="1"></rect>
+                                  <rect x="4.5" y="13.5" width="15" height="4.5" rx="1"></rect>
+                                  <path d="M8 8h0.01"></path>
+                                  <path d="M8 15.5h0.01"></path>
+                                </g>
+                              </svg>
+                            </span>
+                            <span class="brain-board-menu__action-label">Switch board</span>
+                          </button>
+                        </div>
+                        <div class="brain-board-switcher" data-board-switcher hidden aria-hidden="true">
+                          <div class="brain-board-switcher__backdrop" data-board-switcher-dismiss></div>
+                          <div class="brain-board-switcher__dialog" role="dialog" aria-modal="true" aria-labelledby="brain-board-switcher-title" tabindex="-1">
+                            <div class="brain-board-switcher__header">
+                              <h3 class="brain-board-switcher__title" id="brain-board-switcher-title">Board controls</h3>
+                              <button class="brain-board-switcher__close" type="button" data-board-switcher-close aria-label="Close board controls">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <p class="brain-board-switcher__description">Save your current layout or switch to another board without leaving the workspace.</p>
+                            <label class="brain-board-switcher__field">
+                              <span class="brain-board-switcher__label">Boards</span>
+                              <select class="brain-board-switcher__select" data-board-switcher-select></select>
+                            </label>
+                            <div class="brain-board-switcher__actions">
+                              <button class="brain-board-switcher__button brain-board-switcher__button--save" type="button" data-board-switcher-save>Save layout</button>
+                              <button class="brain-board-switcher__button brain-board-switcher__button--load" type="button" data-board-switcher-load>Load board</button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

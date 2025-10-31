@@ -55,6 +55,14 @@ let boardsLoading = false;
 let boardsLoaded = false;
 let isSavingBoard = false;
 let boardStatusTimeoutId = null;
+const boardSaveTriggers = new Set();
+let boardSwitcherEl = null;
+let boardSwitcherDialog = null;
+let boardSwitcherSelect = null;
+let boardSwitcherSaveButton = null;
+let boardSwitcherLoadButton = null;
+let boardSwitcherCloseButton = null;
+let boardSwitcherActiveTrigger = null;
 const flowchartPromptElements = {
   container: document.querySelector("[data-flowchart-prompt]"),
   output: document.querySelector("[data-flowchart-prompt-output]"),
@@ -138,6 +146,53 @@ function distanceBetween(a, b) {
   const dx = a.x - b.x;
   const dy = a.y - b.y;
   return Math.hypot(dx, dy);
+}
+
+function registerBoardSaveTrigger(button) {
+  if (!button || boardSaveTriggers.has(button)) return;
+  boardSaveTriggers.add(button);
+  button.addEventListener("click", () => {
+    handleSaveBoard();
+  });
+}
+
+function setBoardSaveButtonsDisabled(disabled) {
+  const isDisabled = Boolean(disabled);
+  boardSaveTriggers.forEach((button) => {
+    if (!button) return;
+    button.disabled = isDisabled;
+    if (isDisabled) {
+      button.setAttribute("aria-busy", "true");
+    } else {
+      button.removeAttribute("aria-busy");
+    }
+  });
+}
+
+function openBoardSwitcherDialog(trigger) {
+  if (!boardSwitcherEl || !boardSwitcherDialog) return;
+  boardSwitcherEl.hidden = false;
+  boardSwitcherEl.setAttribute("aria-hidden", "false");
+  boardSwitcherActiveTrigger = trigger && typeof trigger.focus === "function" ? trigger : null;
+  if (!boardsLoaded) {
+    fetchBoards();
+  }
+  updateBoardOptions(currentBoardId);
+  window.requestAnimationFrame(() => {
+    boardSwitcherDialog.focus({ preventScroll: true });
+  });
+}
+
+function closeBoardSwitcherDialog({ returnFocus = true } = {}) {
+  if (!boardSwitcherEl) return;
+  boardSwitcherEl.hidden = true;
+  boardSwitcherEl.setAttribute("aria-hidden", "true");
+  if (returnFocus && boardSwitcherActiveTrigger) {
+    window.requestAnimationFrame(() => {
+      boardSwitcherActiveTrigger?.focus?.();
+    });
+  }
+  boardSwitcherActiveTrigger = null;
 }
 
 function normalizeHexColor(value) {
@@ -407,6 +462,11 @@ class StickyBoard {
     this.zoomDisplayEl = this.menu?.querySelector("[data-board-zoom-display]") ?? null;
     this.zoomSliderEl = this.menu?.querySelector("[data-board-zoom-slider]") ?? null;
     this.zoomFitButton = this.menu?.querySelector("[data-board-zoom-fit]") ?? null;
+    this.menuToggleButton = this.menu?.querySelector("[data-board-menu-toggle]") ?? null;
+    this.inlineSaveButton = this.menu?.querySelector("[data-board-save-inline]") ?? null;
+    this.switcherButton = this.menu?.querySelector("[data-board-switcher-open]") ?? null;
+    this.menuOpen = false;
+    this.menuOutsideListenerBound = false;
 
     this.controlsBound = false;
     this.activeColorMenu = null;
@@ -426,6 +486,20 @@ class StickyBoard {
         this.closeColorMenu();
         toggle?.focus?.();
       }
+    };
+    this.handleMenuKeydown = (event) => {
+      if (event.key === "Escape" && this.menuOpen) {
+        event.preventDefault();
+        this.closeMenu();
+        this.menuToggleButton?.focus?.();
+      }
+    };
+    this.handleDocumentPointerDownMenu = (event) => {
+      if (!this.menu || !this.menuOpen) return;
+      if (this.menu.contains(event.target)) {
+        return;
+      }
+      this.closeMenu();
     };
   }
 
@@ -453,24 +527,28 @@ class StickyBoard {
         if (newNote && this.onNoteCreated) {
           this.onNoteCreated(newNote);
         }
+        this.closeMenu();
       });
     }
 
     if (this.zoomOutButton) {
       this.zoomOutButton.addEventListener("click", () => {
         this.adjustScale(-this.scaleStep);
+        this.closeMenu();
       });
     }
 
     if (this.zoomInButton) {
       this.zoomInButton.addEventListener("click", () => {
         this.adjustScale(this.scaleStep);
+        this.closeMenu();
       });
     }
 
     if (this.zoomFitButton) {
       this.zoomFitButton.addEventListener("click", () => {
         this.setScale(this.getFitScale());
+        this.closeMenu();
       });
     }
 
@@ -486,7 +564,64 @@ class StickyBoard {
       });
     }
 
+    if (this.menuToggleButton) {
+      this.menuToggleButton.addEventListener("click", () => {
+        this.toggleMenu();
+      });
+      this.menuToggleButton.setAttribute("aria-expanded", "false");
+    }
+
+    if (this.menu) {
+      this.menu.addEventListener("keydown", this.handleMenuKeydown);
+    }
+
+    if (this.inlineSaveButton) {
+      registerBoardSaveTrigger(this.inlineSaveButton);
+      this.inlineSaveButton.addEventListener("click", () => {
+        this.closeMenu();
+      });
+    }
+
+    if (this.switcherButton) {
+      this.switcherButton.addEventListener("click", () => {
+        const focusTarget = this.menuToggleButton ?? this.switcherButton;
+        openBoardSwitcherDialog(focusTarget);
+        this.closeMenu();
+      });
+    }
+
+    if (!this.menuOutsideListenerBound) {
+      document.addEventListener("pointerdown", this.handleDocumentPointerDownMenu);
+      this.menuOutsideListenerBound = true;
+    }
+
     this.updateZoomControls();
+  }
+
+  openMenu() {
+    if (!this.menu || this.menuOpen) return;
+    this.menuOpen = true;
+    this.menu.classList.add("is-open");
+    if (this.menuToggleButton) {
+      this.menuToggleButton.setAttribute("aria-expanded", "true");
+    }
+  }
+
+  closeMenu() {
+    if (!this.menu || !this.menuOpen) return;
+    this.menuOpen = false;
+    this.menu.classList.remove("is-open");
+    if (this.menuToggleButton) {
+      this.menuToggleButton.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  toggleMenu() {
+    if (this.menuOpen) {
+      this.closeMenu();
+    } else {
+      this.openMenu();
+    }
   }
 
   getScale() {
@@ -1071,6 +1206,7 @@ function closeActiveBoardModal({ restoreFocus = true } = {}) {
     modal.hidden = true;
     modal.setAttribute("aria-hidden", "true");
   }
+  closeBoardSwitcherDialog({ returnFocus: false });
   activeBoardModalId = null;
   if (boardLayerEl) {
     boardLayerEl.hidden = true;
@@ -1201,6 +1337,55 @@ function setupBrainBoard() {
   boardSelectEl = document.querySelector("[data-board-select]");
   boardSaveButton = document.querySelector("[data-board-save]");
   boardStatusEl = document.querySelector("[data-board-status]");
+  boardSwitcherEl = board.querySelector("[data-board-switcher]") ?? null;
+  boardSwitcherDialog = boardSwitcherEl?.querySelector(".brain-board-switcher__dialog") ?? null;
+  boardSwitcherSelect = boardSwitcherEl?.querySelector("[data-board-switcher-select]") ?? null;
+  boardSwitcherSaveButton = boardSwitcherEl?.querySelector("[data-board-switcher-save]") ?? null;
+  boardSwitcherLoadButton = boardSwitcherEl?.querySelector("[data-board-switcher-load]") ?? null;
+  boardSwitcherCloseButton = boardSwitcherEl?.querySelector("[data-board-switcher-close]") ?? null;
+
+  if (boardSwitcherEl) {
+    boardSwitcherEl.setAttribute("aria-hidden", boardSwitcherEl.hidden ? "true" : "false");
+    boardSwitcherEl.querySelectorAll("[data-board-switcher-dismiss]").forEach((element) => {
+      element.addEventListener("click", () => {
+        closeBoardSwitcherDialog();
+      });
+    });
+    boardSwitcherEl.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeBoardSwitcherDialog();
+      }
+    });
+  }
+
+  if (boardSwitcherCloseButton) {
+    boardSwitcherCloseButton.addEventListener("click", () => {
+      closeBoardSwitcherDialog();
+    });
+  }
+
+  if (boardSwitcherDialog) {
+    boardSwitcherDialog.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeBoardSwitcherDialog();
+      }
+    });
+  }
+
+  if (boardSwitcherSaveButton) {
+    registerBoardSaveTrigger(boardSwitcherSaveButton);
+  }
+
+  if (boardSwitcherLoadButton) {
+    boardSwitcherLoadButton.addEventListener("click", () => {
+      const targetId = boardSwitcherSelect?.value;
+      if (!targetId) return;
+      selectBoard(targetId);
+      closeBoardSwitcherDialog();
+    });
+  }
 
   defaultBoardSnapshot = brainBoard.captureSnapshot();
   boardsCache.set(DEFAULT_BOARD_ID, {
@@ -1216,11 +1401,11 @@ function setupBrainBoard() {
     });
     updateBoardOptions(DEFAULT_BOARD_ID);
     boardSelectEl.value = DEFAULT_BOARD_ID;
+  } else if (boardSwitcherSelect) {
+    updateBoardOptions(DEFAULT_BOARD_ID);
   }
 
-  if (boardSaveButton) {
-    boardSaveButton.addEventListener("click", handleSaveBoard);
-  }
+  registerBoardSaveTrigger(boardSaveButton);
 
   brainBoardInitialized = true;
 }
@@ -1273,7 +1458,10 @@ function setBoardStatus(message, tone = "neutral") {
 }
 
 function updateBoardOptions(targetSelection = currentBoardId) {
-  if (!boardSelectEl) return;
+  const selects = [];
+  if (boardSelectEl) selects.push(boardSelectEl);
+  if (boardSwitcherSelect) selects.push(boardSwitcherSelect);
+  if (!selects.length) return;
 
   const sortedBoards = [...supabaseBoards].sort((a, b) => {
     const nameA = a.name.toLocaleLowerCase();
@@ -1282,27 +1470,28 @@ function updateBoardOptions(targetSelection = currentBoardId) {
     return nameA < nameB ? -1 : 1;
   });
 
-  boardSelectEl.innerHTML = "";
+  const options = [
+    { value: DEFAULT_BOARD_ID, label: "Default Board (Demo)" },
+    ...sortedBoards.map((board) => ({ value: board.id, label: board.name }))
+  ];
 
-  const defaultOption = document.createElement("option");
-  defaultOption.value = DEFAULT_BOARD_ID;
-  defaultOption.textContent = "Default Board (Demo)";
-  boardSelectEl.appendChild(defaultOption);
-
-  sortedBoards.forEach((board) => {
-    const option = document.createElement("option");
-    option.value = board.id;
-    option.textContent = board.name;
-    boardSelectEl.appendChild(option);
-  });
-
-  const fallback = boardsCache.has(targetSelection)
+  const fallback = options.some((option) => option.value === targetSelection)
     ? targetSelection
-    : boardsCache.has(currentBoardId)
+    : options.some((option) => option.value === currentBoardId)
       ? currentBoardId
       : DEFAULT_BOARD_ID;
 
-  boardSelectEl.value = fallback;
+  selects.forEach((select) => {
+    select.innerHTML = "";
+    options.forEach((option) => {
+      const element = document.createElement("option");
+      element.value = option.value;
+      element.textContent = option.label;
+      select.appendChild(element);
+    });
+    const targetValue = options.some((option) => option.value === fallback) ? fallback : DEFAULT_BOARD_ID;
+    select.value = targetValue;
+  });
 }
 
 function selectBoard(boardId, { announce = true } = {}) {
@@ -1313,6 +1502,9 @@ function selectBoard(boardId, { announce = true } = {}) {
   currentBoardId = targetId;
   if (boardSelectEl && boardSelectEl.value !== targetId) {
     boardSelectEl.value = targetId;
+  }
+  if (boardSwitcherSelect && boardSwitcherSelect.value !== targetId) {
+    boardSwitcherSelect.value = targetId;
   }
 
   if (brainBoard) {
@@ -1424,9 +1616,7 @@ async function handleSaveBoard() {
   }
 
   isSavingBoard = true;
-  if (boardSaveButton) {
-    boardSaveButton.disabled = true;
-  }
+  setBoardSaveButtonsDisabled(true);
   setBoardStatus("Saving board…");
 
   try {
@@ -1453,9 +1643,6 @@ async function handleSaveBoard() {
       });
       currentBoardId = normalized.id;
       updateBoardOptions(currentBoardId);
-      if (boardSelectEl) {
-        boardSelectEl.value = currentBoardId;
-      }
       setBoardStatus(`Saved “${normalized.name}” to Supabase.`, "success");
     } else {
       const { data, error } = await supabaseClient
@@ -1493,9 +1680,7 @@ async function handleSaveBoard() {
     setBoardStatus("We couldn't save your board. Please try again.", "error");
   } finally {
     isSavingBoard = false;
-    if (boardSaveButton) {
-      boardSaveButton.disabled = false;
-    }
+    setBoardSaveButtonsDisabled(false);
   }
 }
 
