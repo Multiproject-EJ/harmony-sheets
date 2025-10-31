@@ -295,6 +295,7 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .lovablesheet-modal__body .brain-board__workspace{background:linear-gradient(160deg,rgba(226,232,240,.88),rgba(248,250,252,.92))}
 .lovablesheet-modal__body .brain-board__workspace--flowchart{background:radial-gradient(circle at 16% 18%,rgba(59,130,246,.24),rgba(59,130,246,0) 58%),radial-gradient(circle at 84% 14%,rgba(236,72,153,.26),rgba(236,72,153,0) 60%),radial-gradient(circle at 26% 78%,rgba(45,212,191,.24),rgba(45,212,191,0) 62%),linear-gradient(155deg,#020617 8%,#0f172a 52%,#111827 100%)}
 .lovablesheet-modal__body .brain-board-menu{top:24px;right:24px}
+.lovablesheet-modal__body .brain-board-menu--fab{top:auto;bottom:24px;right:24px}
 .lovablesheet-modal__body .flowchart-prompt{background:linear-gradient(140deg,rgba(15,23,42,.72),rgba(15,23,42,.9));border:1px solid rgba(148,163,184,.24);box-shadow:0 20px 48px rgba(2,6,23,.4)}
 @media (max-width:960px){
   .lovablesheet-library__card{padding:28px;gap:22px}
@@ -419,6 +420,7 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .brain-board-menu--fab .brain-board-switcher__backdrop,.brain-board-menu--fab .brain-board-switcher__dialog{pointer-events:auto}
 @media (max-width: 768px){
   .brain-board-menu--fab{bottom:22px;right:22px}
+  .lovablesheet-modal__body .brain-board-menu--fab{bottom:22px;right:22px}
   .brain-board-menu--fab .brain-board-menu__toggle{width:58px;height:58px}
   .brain-board-menu--fab .brain-board-menu__action-icon{width:30px;height:30px}
   .brain-board-menu--fab .brain-board-menu__panel-content{min-width:240px;padding:16px 18px}
