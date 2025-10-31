@@ -1573,11 +1573,24 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin__performance-head{display:flex;flex-direction:column;gap:6px}
 .admin__performance-head h3{margin:0;font-size:1.1rem;color:#0f172a}
 .admin__performance-sub{margin:0;color:#475569;font-size:.92rem}
-.admin__performance-body{overflow:hidden;border-radius:14px;border:1px solid rgba(148,163,184,.26);background:#fff}
+.admin__performance-body{border-radius:26px;border:none;background:transparent;padding:4px}
 .admin-kpi__ask-cell{width:150px;text-align:right;white-space:nowrap}
 .admin-kpi__ask-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#f97316;color:#fff;border:none;border-radius:999px;padding:10px 20px;font-weight:700;font-size:.9rem;cursor:pointer;box-shadow:0 14px 28px rgba(249,115,22,.22);transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
 .admin-kpi__ask-btn:hover,.admin-kpi__ask-btn:focus-visible{background:#ea580c;transform:translateY(-1px);box-shadow:0 18px 34px rgba(234,88,12,.26);outline:none}
 .admin-kpi__ask-btn:focus-visible{box-shadow:0 0 0 3px rgba(249,115,22,.35),0 18px 34px rgba(234,88,12,.26)}
+.admin-kpi-grid{display:grid;gap:22px;padding:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.admin-kpi-card{position:relative;display:flex;flex-direction:column;gap:18px;padding:26px;border-radius:28px;background:linear-gradient(160deg,rgba(15,23,42,.92),rgba(30,41,59,.88));box-shadow:0 28px 48px rgba(15,23,42,.25);color:#e2e8f0;overflow:hidden;min-height:100%}
+.admin-kpi-card::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 120% at 20% 0%,rgba(96,165,250,.32),transparent 55%),radial-gradient(90% 90% at 90% 20%,rgba(168,85,247,.24),transparent 60%);opacity:.9;mix-blend-mode:screen;pointer-events:none}
+.admin-kpi-card__illustration{position:relative;border-radius:22px;overflow:hidden;box-shadow:0 20px 40px rgba(15,23,42,.35)}
+.admin-kpi-card__illustration svg{display:block;width:100%;height:auto}
+.admin-kpi-card__content{display:flex;flex-direction:column;gap:10px;position:relative;z-index:1}
+.admin-kpi-card__kpi{margin:0;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:rgba(226,232,240,.8)}
+.admin-kpi-card__product{margin:0;font-size:1.3rem;font-weight:700;color:#f8fafc}
+.admin-kpi-card__description{margin:0;color:rgba(226,232,240,.85);line-height:1.5;font-size:.95rem}
+.admin-kpi-card__actions{margin-top:auto;position:relative;z-index:1}
+.admin-kpi-card .admin-kpi__ask-btn{width:100%;justify-content:center;font-size:.95rem;padding:14px 20px;box-shadow:0 18px 34px rgba(249,115,22,.28)}
+.admin-kpi-card .admin-kpi__ask-btn:hover,.admin-kpi-card .admin-kpi__ask-btn:focus-visible{transform:translateY(-2px)}
+@media (max-width:960px){.admin-kpi-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));padding:8px}}
 .admin-table--compact thead th{font-size:.7rem}
 .admin-table--compact td{font-size:.88rem;line-height:1.5}
 .admin-table--compact tbody tr:nth-child(even){background:rgba(148,163,184,.08)}
