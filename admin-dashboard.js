@@ -1,6 +1,7 @@
 import { isSupabaseConfigured } from "./supabase-config.js";
 import { ACCOUNT_PAGE_PATH, ADMIN_DASHBOARD_PATH, isAdminUser } from "./auth-helpers.js";
 import { getSupabaseClient } from "./supabase-client.js";
+import { initCollapsiblePipelineTables } from "./pipeline-table.js";
 
 const ADMIN_PAGE_REGEX = /\/admin_dashboard\.html$/i;
 const isAdminPage = ADMIN_PAGE_REGEX.test(location.pathname);
@@ -95,105 +96,8 @@ if (!rootHook) {
     }
   }
 
-  const pipelineTable = document.querySelector("[data-pipeline-table]");
 
-  if (pipelineTable) {
-    const fallbackPreviewCount = 3;
-    const parsedPreviewCount = Number.parseInt(
-      pipelineTable.dataset.previewCount || "",
-      10
-    );
-    const previewCount =
-      Number.isFinite(parsedPreviewCount) && parsedPreviewCount > 0
-        ? parsedPreviewCount
-        : fallbackPreviewCount;
-    const tableBody =
-      pipelineTable.tBodies?.[0] || pipelineTable.querySelector("tbody");
-    const rows = tableBody ? Array.from(tableBody.rows) : [];
-    const expandableRows = rows.slice(previewCount);
-
-    if (expandableRows.length > 0) {
-      const pipelineToggleButton = document.querySelector(
-        "[data-pipeline-toggle]"
-      );
-      const pipelineToggleLabel = pipelineToggleButton?.querySelector(
-        "[data-pipeline-toggle-label]"
-      );
-
-      const setPipelineCollapsed = (shouldCollapse) => {
-        expandableRows.forEach((row) => {
-          row.hidden = shouldCollapse;
-        });
-        const collapsedValue = shouldCollapse ? "true" : "false";
-        pipelineTable.dataset.pipelineCollapsed = collapsedValue;
-        pipelineTable.setAttribute(
-          "aria-expanded",
-          shouldCollapse ? "false" : "true"
-        );
-        if (pipelineToggleButton) {
-          pipelineToggleButton.setAttribute(
-            "aria-expanded",
-            shouldCollapse ? "false" : "true"
-          );
-          if (pipelineToggleLabel) {
-            pipelineToggleLabel.textContent = shouldCollapse
-              ? "Expand full pipeline"
-              : "Collapse pipeline";
-          }
-        }
-      };
-
-      pipelineTable.classList.add("admin-table--collapsible");
-      pipelineTable.dataset.previewCount = String(previewCount);
-      pipelineTable.setAttribute("tabindex", "0");
-
-      setPipelineCollapsed(true);
-
-      if (pipelineToggleButton && expandableRows.length > 0) {
-        pipelineToggleButton.hidden = false;
-      }
-
-      if (pipelineToggleButton) {
-        pipelineToggleButton.addEventListener("click", () => {
-          const isCollapsed = pipelineTable.dataset.pipelineCollapsed === "true";
-          setPipelineCollapsed(!isCollapsed);
-        });
-      } else {
-        const revealRows = () => {
-          setPipelineCollapsed(false);
-          pipelineTable.removeEventListener("click", handleClick);
-          pipelineTable.removeEventListener("keydown", handleKeydown);
-        };
-
-        const handleClick = () => {
-          if (pipelineTable.dataset.pipelineCollapsed !== "true") {
-            return;
-          }
-          revealRows();
-        };
-
-        const handleKeydown = (event) => {
-          if (pipelineTable.dataset.pipelineCollapsed !== "true") {
-            return;
-          }
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            revealRows();
-          }
-        };
-
-        pipelineTable.addEventListener("click", handleClick);
-        pipelineTable.addEventListener("keydown", handleKeydown);
-      }
-    } else {
-      const pipelineToggleButton = document.querySelector(
-        "[data-pipeline-toggle]"
-      );
-      if (pipelineToggleButton) {
-        pipelineToggleButton.hidden = true;
-      }
-    }
-  }
+  initCollapsiblePipelineTables();
 
   const salesEls = {
     source: document.querySelector("[data-sales-source]"),

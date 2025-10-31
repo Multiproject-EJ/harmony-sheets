@@ -1,6 +1,7 @@
 import { isSupabaseConfigured } from "./supabase-config.js";
 import { ACCOUNT_PAGE_PATH, isAdminUser } from "./auth-helpers.js";
 import { getSupabaseClient } from "./supabase-client.js";
+import { initCollapsiblePipelineTables } from "./pipeline-table.js";
 
 const DEFAULT_PAGE_PATH = "lovablesheet.html";
 const SUPPORTED_PAGE_PATHS = new Set([DEFAULT_PAGE_PATH, "lovables_sheet.html"]);
@@ -124,6 +125,7 @@ function requireAdmin(user) {
 
   showSection("content");
   setupBoardLibrary();
+  initCollapsiblePipelineTables();
   return true;
 }
 
