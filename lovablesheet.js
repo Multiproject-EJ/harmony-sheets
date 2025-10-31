@@ -1196,9 +1196,9 @@ function setupBrainBoard() {
     return;
   }
 
-  boardSelectEl = board.querySelector("[data-board-select]");
-  boardSaveButton = board.querySelector("[data-board-save]");
-  boardStatusEl = board.querySelector("[data-board-status]");
+  boardSelectEl = document.querySelector("[data-board-select]");
+  boardSaveButton = document.querySelector("[data-board-save]");
+  boardStatusEl = document.querySelector("[data-board-status]");
 
   defaultBoardSnapshot = brainBoard.captureSnapshot();
   boardsCache.set(DEFAULT_BOARD_ID, {
