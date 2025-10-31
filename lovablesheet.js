@@ -736,6 +736,22 @@ class StickyBoard {
     this.applyNoteTransform(note, x, y);
   }
 
+  deleteNote(note) {
+    if (!note || !this.workspace || !this.workspace.contains(note)) return;
+
+    if (this.activeColorMenu?.note === note) {
+      this.closeColorMenu();
+    }
+
+    const wasFocused = note.contains(document.activeElement);
+    note.remove();
+    this.updateZoomControls();
+
+    if (wasFocused) {
+      this.addButton?.focus?.({ preventScroll: true });
+    }
+  }
+
   getNoteCenter(note) {
     const x = Number.parseFloat(note.dataset.x || "0");
     const y = Number.parseFloat(note.dataset.y || "0");
@@ -929,7 +945,8 @@ class StickyBoard {
           event.target.closest("[data-note-color]") ||
           event.target.closest("[data-note-group]") ||
           event.target.closest("[data-note-color-toggle]") ||
-          event.target.closest("[data-note-color-picker]")
+          event.target.closest("[data-note-color-picker]") ||
+          event.target.closest("[data-note-menu-button]")
         ) {
           return;
         }
@@ -1041,6 +1058,13 @@ class StickyBoard {
       });
       colorPicker.addEventListener("change", () => {
         this.closeColorMenu(colorMenu);
+      });
+    }
+
+    const deleteButton = note.querySelector("[data-note-delete]");
+    if (deleteButton) {
+      deleteButton.addEventListener("click", () => {
+        this.deleteNote(note);
       });
     }
   }
