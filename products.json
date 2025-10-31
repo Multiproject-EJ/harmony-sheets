@@ -403,5 +403,54 @@
       { "title": "Stay motivated", "desc": "Milestone celebrations and note prompts keep you inspired." },
       { "title": "Plan together", "desc": "Great for households aligning on shared savings goals." }
     ]
+  },
+  {
+    "id": "life-goals-habit-tracker-pro",
+    "name": "Life Goals and Habit Tracker Pro",
+    "tagline": "Stay aligned with monthly focus, rituals, and long-term vision.",
+    "draft": true,
+    "price": "$34",
+    "lifeAreas": ["career", "health", "family", "spirituality"],
+    "badges": [
+      "Goal + habit pairing",
+      "Rolling 12-month view",
+      "Google Sheets + Web demo"
+    ],
+    "heroImage": "assets/lifewheel-hero.svg",
+    "features": [
+      "Monthly pulse dashboard for wins, energy, and focus",
+      "Guided goal setup with quarterly sprint planning",
+      "Habit routine designer with cue → routine → reward prompts",
+      "Vision board canvas with mood tags and reflection prompts"
+    ],
+    "description": "<p><strong>Life Goals and Habit Tracker Pro</strong> keeps your priorities visible and actionable. Build rituals that reinforce your why, track mood and momentum, and stay inspired by a curated vision board. Everything runs inside Google Sheets with a companion sidebar experience.</p>",
+    "gallery": [
+      { "src": "assets/lifewheel-hero.svg", "alt": "Life Goals tracker dashboard concept art" }
+    ],
+    "colorImage": "assets/lifewheel-hero.svg",
+    "colorCaption": "Concept art inspired by the Life Goals ritual dashboard.",
+    "virtualDemo": "Google sheets products/demo/Life Goals and habit tracker Pro/Life Goals and habit tracker Pro.html",
+    "included": [
+      "Life Goals + Habits Google Sheet (draft)",
+      "Monthly review ritual prompts",
+      "Habit loop worksheet",
+      "Vision board inspiration pack"
+    ],
+    "faqs": [
+      { "q": "Is this product ready for customers?", "a": "Not yet — this is an internal draft concept for feedback." },
+      { "q": "What does the dashboard cover?", "a": "Monthly pulse metrics, routine tracking, and a rolling 12-month timeline." },
+      { "q": "How does it pair with Google Sheets?", "a": "The tracker is built as a Sheet template with an optional sidebar demo." }
+    ],
+    "pricingTitle": "Preview Life Goals and Habit Tracker Pro",
+    "pricingSub": "Draft concept for internal review.",
+    "socialProof": {
+      "stars": "",
+      "quote": ""
+    },
+    "benefits": [
+      { "title": "Plan with clarity", "desc": "Prioritize the goals that matter with guided monthly focus." },
+      { "title": "Build supportive habits", "desc": "Design routines that reinforce your goals and energy rhythms." },
+      { "title": "Keep your vision close", "desc": "A dedicated board keeps inspiration alive during weekly reviews." }
+    ]
   }
 ]
