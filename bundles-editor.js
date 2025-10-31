@@ -11,6 +11,25 @@ const state = {
   filter: "all"
 };
 
+const REVIEW_CATEGORIES = [
+  { key: "marketing", label: "Marketing" },
+  { key: "optimization", label: "Optimization" },
+  { key: "safeLegal", label: "SAFE & Legal" },
+  { key: "identity", label: "Identity" }
+];
+
+const STATUS_LABELS = {
+  1: "Ready",
+  2: "In progress",
+  3: "Needs attention"
+};
+
+const STATUS_TONES = {
+  1: "success",
+  2: "warning",
+  3: "danger"
+};
+
 let baselineSourceLabel = "Supabase dataset";
 
 const subscribers = new Set();
@@ -78,6 +97,19 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function escapeAttribute(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeHtml(value) {
+  return escapeAttribute(value);
+}
+
 function formatError(error) {
   if (!error) return "Unknown error.";
   if (error instanceof Error) {
@@ -125,6 +157,126 @@ function sortByPosition(list) {
   return toArray(list)
     .slice()
     .sort((a, b) => getPosition(a) - getPosition(b));
+}
+
+function parseStatusScore(value) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && [1, 2, 3].includes(parsed) ? parsed : null;
+}
+
+function normalizeStatusTask(task) {
+  if (!task) return null;
+  if (typeof task === "string") {
+    const text = task.trim();
+    return text ? { title: text, status: null, detail: "" } : null;
+  }
+  if (typeof task !== "object") return null;
+  const titleSource =
+    typeof task.title === "string"
+      ? task.title
+      : typeof task.name === "string"
+      ? task.name
+      : "";
+  const title = titleSource.trim();
+  if (!title) return null;
+  const status = parseStatusScore(task.status ?? task.score ?? task.level ?? task.state);
+  const detailSource =
+    typeof task.detail === "string"
+      ? task.detail
+      : typeof task.note === "string"
+      ? task.note
+      : typeof task.description === "string"
+      ? task.description
+      : "";
+  const detail = detailSource.trim();
+  return { title, status, detail };
+}
+
+function pickStatusEntry(source, key) {
+  if (!source || typeof source !== "object") return null;
+  const variants = new Set([key]);
+  const snake = key.replace(/([A-Z])/g, "_$1").toLowerCase();
+  const kebab = key.replace(/([A-Z])/g, "-$1").toLowerCase();
+  variants.add(snake);
+  variants.add(kebab);
+  if (key === "safeLegal") {
+    variants.add("safeandlegal");
+    variants.add("safe_legal");
+    variants.add("safe-legal");
+  }
+  for (const variant of variants) {
+    if (Object.prototype.hasOwnProperty.call(source, variant)) {
+      return source[variant];
+    }
+  }
+  return null;
+}
+
+function normalizeStatusEntry(entry) {
+  if (!entry || typeof entry !== "object") {
+    return {
+      score: parseStatusScore(entry),
+      tasks: [],
+      note: ""
+    };
+  }
+
+  const score = parseStatusScore(entry.score ?? entry.status ?? entry.level ?? entry.value);
+  const tasks = Array.isArray(entry.tasks)
+    ? entry.tasks.map((task) => normalizeStatusTask(task)).filter(Boolean)
+    : [];
+  const noteSource =
+    typeof entry.note === "string"
+      ? entry.note
+      : typeof entry.summary === "string"
+      ? entry.summary
+      : typeof entry.description === "string"
+      ? entry.description
+      : "";
+  const note = noteSource.trim();
+  return { score, tasks, note };
+}
+
+function normalizeReviewStatus(rawStatus) {
+  const source = rawStatus && typeof rawStatus === "object" ? rawStatus : {};
+  const normalized = {};
+  REVIEW_CATEGORIES.forEach(({ key }) => {
+    const entry = pickStatusEntry(source, key);
+    normalized[key] = normalizeStatusEntry(entry);
+  });
+  return normalized;
+}
+
+function getReviewEntry(bundle, key) {
+  if (!bundle || typeof bundle !== "object") {
+    return { score: null, tasks: [], note: "" };
+  }
+  const review = bundle.reviewStatus;
+  const entry = review && typeof review === "object" ? review[key] : null;
+  if (!entry || typeof entry !== "object") {
+    return { score: null, tasks: [], note: "" };
+  }
+  const score = parseStatusScore(entry.score);
+  const tasks = Array.isArray(entry.tasks) ? entry.tasks.slice() : [];
+  const note = typeof entry.note === "string" ? entry.note : "";
+  return { score, tasks, note };
+}
+
+function getStatusLabel(score) {
+  return STATUS_LABELS[score] || "Not set";
+}
+
+function getStatusTone(score) {
+  return STATUS_TONES[score] || "neutral";
+}
+
+function encodeStatusPayload(payload) {
+  try {
+    return encodeURIComponent(JSON.stringify(payload));
+  } catch (error) {
+    console.warn("[bundles] Failed to encode status payload", error);
+    return "";
+  }
 }
 
 function getSupabaseRestUrl(path) {
@@ -317,6 +469,13 @@ function normalizeBundle(bundle) {
   if (!Array.isArray(normalized.includes)) {
     normalized.includes = [];
   }
+  const reviewSource =
+    (normalized.reviewStatus && typeof normalized.reviewStatus === "object"
+      ? normalized.reviewStatus
+      : null) ||
+    (normalized.review && typeof normalized.review === "object" ? normalized.review : null) ||
+    {};
+  normalized.reviewStatus = normalizeReviewStatus(reviewSource);
   return normalized;
 }
 
@@ -495,8 +654,48 @@ function updateTableMeta(count) {
 
 function renderEmptyTable(message) {
   if (!els.tableBody) return;
-  els.tableBody.innerHTML = `<tr><td colspan="5" class="admin-table__empty">${message}</td></tr>`;
+  els.tableBody.innerHTML = `<tr><td colspan="9" class="admin-table__empty">${message}</td></tr>`;
   updateTableMeta(0);
+}
+
+function renderReviewStatusCell(bundle, category) {
+  const entry = getReviewEntry(bundle, category.key);
+  const bundleName = bundle.name || bundle.slug || "Untitled bundle";
+  const score = entry.score;
+  const tone = getStatusTone(score);
+  const classes = ["admin-status-pill", `admin-status-pill--${tone}`];
+  if (score == null) {
+    classes.push("admin-status-pill--empty");
+  } else {
+    classes.push(`admin-status-pill--score-${score}`);
+  }
+  const label = getStatusLabel(score);
+  const displayValue = score == null ? "Set" : String(score);
+  const payload = {
+    entityType: "bundle",
+    entityId: bundle.slug || null,
+    entityName: bundleName,
+    categoryKey: category.key,
+    categoryLabel: category.label,
+    score,
+    statusLabel: label,
+    tone,
+    note: entry.note || "",
+    tasks: Array.isArray(entry.tasks) ? entry.tasks : []
+  };
+  const encoded = encodeStatusPayload(payload);
+  const ariaLabel =
+    score == null
+      ? `${category.label} status for ${bundleName} not set`
+      : `${category.label} status for ${bundleName}: level ${score} — ${label}`;
+  return `
+        <td data-label="${category.label}">
+          <button type="button" class="${classes.join(" ")}" data-status-trigger data-status-entity="bundle" data-status-payload="${escapeAttribute(encoded)}" aria-label="${escapeAttribute(ariaLabel)}">
+            <span class="admin-status-pill__value">${escapeHtml(displayValue)}</span>
+            <span class="admin-status-pill__label">${escapeHtml(label)}</span>
+          </button>
+        </td>
+  `;
 }
 
 function renderTable() {
@@ -517,6 +716,9 @@ function renderTable() {
       const bundleLabel = includesCount ? `${productLabel} (${includesCount} items)` : productLabel;
       const featured = bundle.navFeatured ? "Featured" : "—";
       const draftToggleId = `bundle-draft-${slug || Math.random().toString(36).slice(2)}`;
+      const statusCells = REVIEW_CATEGORIES.map((category) =>
+        renderReviewStatusCell(bundle, category)
+      ).join("");
 
       return `
         <tr data-row data-id="${slug}">
@@ -536,6 +738,7 @@ function renderTable() {
             </label>
           </td>
           <td data-label="Menu">${featured}</td>
+          ${statusCells}
         </tr>
       `;
     })

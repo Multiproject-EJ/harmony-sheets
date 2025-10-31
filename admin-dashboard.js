@@ -31,6 +31,367 @@ if (!rootHook) {
   const messageEl = document.querySelector("[data-admin-dashboard-message]");
   const contentSection = sections.content;
 
+  const STATUS_TONE_MAP = {
+    1: "success",
+    2: "warning",
+    3: "danger"
+  };
+
+  const tabNav = document.querySelector("[data-admin-tabs]");
+
+  const statusPopoverEls = {
+    overlay: document.querySelector("[data-status-overlay]"),
+    popover: document.querySelector("[data-status-popover]"),
+    title: document.getElementById("status-popover-title"),
+    summary: document.querySelector("[data-status-summary]"),
+    tasks: document.querySelector("[data-status-tasks]"),
+    empty: document.querySelector("[data-status-empty]"),
+    noteWrap: document.querySelector("[data-status-note-wrap]"),
+    note: document.querySelector("[data-status-note]"),
+    close: document.querySelector("[data-status-popover-close]")
+  };
+
+  const statusPopoverState = {
+    open: false,
+    trigger: null,
+    payload: null,
+    raf: null
+  };
+
+  function getTabPanels() {
+    if (!contentSection) return new Map();
+    const panels = Array.from(
+      contentSection.querySelectorAll("[data-admin-tab-panel]")
+    );
+    const panelMap = new Map();
+    panels.forEach((panel) => {
+      const key = panel.dataset.adminTabPanel;
+      if (key && !panelMap.has(key)) {
+        panelMap.set(key, panel);
+      }
+    });
+    return panelMap;
+  }
+
+  function activateAdminTab(tabKey, options = {}) {
+    const { focus = false } = options;
+    if (!tabNav) return;
+    const panels = getTabPanels();
+    if (!panels.has(tabKey)) return;
+    const buttons = Array.from(tabNav.querySelectorAll("[data-admin-tab]"));
+    buttons.forEach((button) => {
+      const key = button.dataset.adminTab;
+      const isActive = key === tabKey;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-selected", isActive ? "true" : "false");
+      button.setAttribute("tabindex", isActive ? "0" : "-1");
+      if (isActive && focus && typeof button.focus === "function") {
+        button.focus();
+      }
+    });
+    panels.forEach((panel, key) => {
+      const isVisible = key === tabKey;
+      panel.hidden = !isVisible;
+      panel.setAttribute("aria-hidden", isVisible ? "false" : "true");
+    });
+  }
+
+  function initAdminTabs() {
+    if (!tabNav) return;
+    const buttons = Array.from(tabNav.querySelectorAll("[data-admin-tab]"));
+    if (!buttons.length) return;
+    const panels = getTabPanels();
+    if (!panels.size) return;
+    const defaultTab =
+      buttons.find((button) => button.classList.contains("is-active"))?.dataset
+        .adminTab || buttons[0].dataset.adminTab;
+    const focusTabByOffset = (currentIndex, offset) => {
+      if (!buttons.length) return;
+      const nextIndex = (currentIndex + offset + buttons.length) % buttons.length;
+      const nextButton = buttons[nextIndex];
+      if (!nextButton) return;
+      const nextKey = nextButton.dataset.adminTab;
+      if (nextKey) {
+        activateAdminTab(nextKey, { focus: true });
+      }
+    };
+
+    buttons.forEach((button, index) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        const key = button.dataset.adminTab;
+        if (key) {
+          activateAdminTab(key);
+        }
+      });
+      button.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          focusTabByOffset(index, 1);
+        } else if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          focusTabByOffset(index, -1);
+        }
+      });
+    });
+
+    activateAdminTab(defaultTab);
+  }
+
+  function decodeStatusPayload(trigger) {
+    if (!trigger) return null;
+    const encoded = trigger.dataset.statusPayload;
+    if (!encoded) return null;
+    try {
+      const decoded = decodeURIComponent(encoded);
+      const payload = JSON.parse(decoded);
+      if (payload && typeof payload === "object") {
+        return payload;
+      }
+    } catch (error) {
+      console.warn("[admin] Failed to decode status payload", error);
+    }
+    return null;
+  }
+
+  function clearStatusTasks() {
+    if (!statusPopoverEls.tasks) return;
+    while (statusPopoverEls.tasks.firstChild) {
+      statusPopoverEls.tasks.removeChild(statusPopoverEls.tasks.firstChild);
+    }
+  }
+
+  function createStatusTaskItem(task) {
+    if (!task || typeof task !== "object") return null;
+    const title = typeof task.title === "string" ? task.title : "";
+    const detail = typeof task.detail === "string" ? task.detail : "";
+    if (!title) return null;
+    const item = document.createElement("li");
+    item.className = "admin-status-task";
+    const tone = STATUS_TONE_MAP[task.status] || "neutral";
+    if (tone !== "neutral") {
+      item.dataset.tone = tone;
+    }
+    const badge = document.createElement("span");
+    badge.className = "admin-status-task__badge";
+    badge.textContent = task.status == null ? "—" : String(task.status);
+    const body = document.createElement("div");
+    body.className = "admin-status-task__body";
+    const titleEl = document.createElement("p");
+    titleEl.className = "admin-status-task__title";
+    titleEl.textContent = title;
+    body.appendChild(titleEl);
+    if (detail) {
+      const noteEl = document.createElement("p");
+      noteEl.className = "admin-status-task__note";
+      noteEl.textContent = detail;
+      body.appendChild(noteEl);
+    }
+    item.appendChild(badge);
+    item.appendChild(body);
+    return item;
+  }
+
+  function populateStatusPopover(payload) {
+    if (!statusPopoverEls.popover) return;
+    const tone = STATUS_TONE_MAP[payload?.score] || "neutral";
+    statusPopoverEls.popover.dataset.tone = tone;
+    if (statusPopoverEls.title) {
+      const entityName = payload?.entityName || "Selected item";
+      const categoryLabel = payload?.categoryLabel || "Status";
+      statusPopoverEls.title.textContent = `${categoryLabel} — ${entityName}`;
+    }
+    if (statusPopoverEls.summary) {
+      const summaryParts = [];
+      const entityLabel =
+        payload?.entityType === "bundle"
+          ? "Bundle"
+          : payload?.entityType === "product"
+          ? "Product"
+          : "Record";
+      summaryParts.push(entityLabel);
+      if (payload?.score == null) {
+        summaryParts.push("status not set");
+      } else {
+        summaryParts.push(`level ${payload.score}`);
+        if (payload.statusLabel) {
+          summaryParts.push(payload.statusLabel);
+        }
+      }
+      statusPopoverEls.summary.textContent = summaryParts.join(" · ");
+    }
+    clearStatusTasks();
+    const tasks = Array.isArray(payload?.tasks) ? payload.tasks : [];
+    if (tasks.length && statusPopoverEls.tasks) {
+      tasks
+        .map((task) => createStatusTaskItem(task))
+        .filter(Boolean)
+        .forEach((item) => {
+          statusPopoverEls.tasks.appendChild(item);
+        });
+      if (statusPopoverEls.empty) {
+        statusPopoverEls.empty.hidden = true;
+      }
+    } else if (statusPopoverEls.empty) {
+      statusPopoverEls.empty.hidden = false;
+    }
+    if (statusPopoverEls.note) {
+      const noteText = typeof payload?.note === "string" ? payload.note.trim() : "";
+      if (noteText) {
+        statusPopoverEls.note.textContent = noteText;
+        if (statusPopoverEls.noteWrap) {
+          statusPopoverEls.noteWrap.hidden = false;
+        }
+      } else {
+        statusPopoverEls.note.textContent = "";
+        if (statusPopoverEls.noteWrap) {
+          statusPopoverEls.noteWrap.hidden = true;
+        }
+      }
+    }
+  }
+
+  function positionStatusPopover() {
+    if (!statusPopoverEls.popover || !statusPopoverState.trigger) return;
+    const triggerRect = statusPopoverState.trigger.getBoundingClientRect();
+    const popoverRect = statusPopoverEls.popover.getBoundingClientRect();
+    const margin = 16;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    let top = triggerRect.bottom + 12;
+    if (top + popoverRect.height > viewportHeight - margin) {
+      top = triggerRect.top - 12 - popoverRect.height;
+    }
+    if (top < margin) {
+      top = margin;
+    }
+    let left = triggerRect.left + triggerRect.width / 2 - popoverRect.width / 2;
+    if (left < margin) {
+      left = margin;
+    }
+    if (left + popoverRect.width > viewportWidth - margin) {
+      left = viewportWidth - margin - popoverRect.width;
+    }
+    statusPopoverEls.popover.style.top = `${Math.round(top)}px`;
+    statusPopoverEls.popover.style.left = `${Math.round(left)}px`;
+  }
+
+  function scheduleStatusReposition() {
+    if (statusPopoverState.raf != null) return;
+    statusPopoverState.raf = requestAnimationFrame(() => {
+      statusPopoverState.raf = null;
+      positionStatusPopover();
+    });
+  }
+
+  function getStatusFocusableElements() {
+    if (!statusPopoverEls.popover) return [];
+    const selectors =
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+    return Array.from(statusPopoverEls.popover.querySelectorAll(selectors)).filter(
+      (element) => element instanceof HTMLElement && element.offsetParent !== null
+    );
+  }
+
+  function closeStatusPopover(options = {}) {
+    const { restoreFocus = true } = options;
+    if (!statusPopoverState.open) return;
+    statusPopoverState.open = false;
+    if (statusPopoverEls.overlay) {
+      statusPopoverEls.overlay.hidden = true;
+    }
+    if (statusPopoverEls.popover) {
+      statusPopoverEls.popover.hidden = true;
+      statusPopoverEls.popover.style.top = "";
+      statusPopoverEls.popover.style.left = "";
+      delete statusPopoverEls.popover.dataset.tone;
+    }
+    document.removeEventListener("keydown", handleStatusKeydown);
+    window.removeEventListener("resize", scheduleStatusReposition);
+    window.removeEventListener("scroll", scheduleStatusReposition, true);
+    if (statusPopoverState.raf != null) {
+      cancelAnimationFrame(statusPopoverState.raf);
+      statusPopoverState.raf = null;
+    }
+    const trigger = statusPopoverState.trigger;
+    statusPopoverState.trigger = null;
+    statusPopoverState.payload = null;
+    if (restoreFocus && trigger && typeof trigger.focus === "function") {
+      trigger.focus();
+    }
+  }
+
+  function handleStatusKeydown(event) {
+    if (!statusPopoverState.open) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeStatusPopover();
+      return;
+    }
+    if (event.key === "Tab") {
+      const focusable = getStatusFocusableElements();
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey) {
+        if (document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else if (document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
+  function openStatusPopover(trigger) {
+    if (!statusPopoverEls.popover || !statusPopoverEls.overlay) return;
+    const payload = decodeStatusPayload(trigger);
+    if (!payload) return;
+    statusPopoverState.trigger = trigger;
+    statusPopoverState.payload = payload;
+    populateStatusPopover(payload);
+    statusPopoverEls.overlay.hidden = false;
+    statusPopoverEls.popover.hidden = false;
+    statusPopoverEls.popover.style.top = "0px";
+    statusPopoverEls.popover.style.left = "0px";
+    statusPopoverState.open = true;
+    requestAnimationFrame(() => {
+      positionStatusPopover();
+    });
+    const focusTarget =
+      statusPopoverEls.close && typeof statusPopoverEls.close.focus === "function"
+        ? statusPopoverEls.close
+        : statusPopoverEls.popover;
+    focusTarget?.focus({ preventScroll: true });
+    document.addEventListener("keydown", handleStatusKeydown);
+    window.addEventListener("resize", scheduleStatusReposition);
+    window.addEventListener("scroll", scheduleStatusReposition, true);
+  }
+
+  function handleStatusTriggerClick(event) {
+    const trigger = event.target.closest("[data-status-trigger]");
+    if (!trigger) return;
+    event.preventDefault();
+    if (statusPopoverState.open && statusPopoverState.trigger === trigger) {
+      closeStatusPopover();
+    } else {
+      openStatusPopover(trigger);
+    }
+  }
+
+  function initStatusPopovers() {
+    if (!statusPopoverEls.popover || !statusPopoverEls.overlay) return;
+    document.addEventListener("click", handleStatusTriggerClick);
+    statusPopoverEls.overlay.addEventListener("click", () => {
+      closeStatusPopover();
+    });
+    statusPopoverEls.close?.addEventListener("click", () => {
+      closeStatusPopover();
+    });
+  }
+
   const supabaseTestEls = {
     card: document.querySelector("[data-supabase-card]"),
     indicator: document.querySelector("[data-supabase-indicator]"),
@@ -98,6 +459,8 @@ if (!rootHook) {
 
 
   initCollapsiblePipelineTables();
+  initAdminTabs();
+  initStatusPopovers();
 
   const salesEls = {
     source: document.querySelector("[data-sales-source]"),

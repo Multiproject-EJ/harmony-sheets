@@ -10,6 +10,25 @@ const state = {
   sortDir: 'asc'
 };
 
+const REVIEW_CATEGORIES = [
+  { key: 'marketing', label: 'Marketing' },
+  { key: 'optimization', label: 'Optimization' },
+  { key: 'safeLegal', label: 'SAFE & Legal' },
+  { key: 'identity', label: 'Identity' }
+];
+
+const STATUS_LABELS = {
+  1: 'Ready',
+  2: 'In progress',
+  3: 'Needs attention'
+};
+
+const STATUS_TONES = {
+  1: 'success',
+  2: 'warning',
+  3: 'danger'
+};
+
 const subscribers = new Set();
 
 const els = {
@@ -408,6 +427,10 @@ function escapeAttribute(value) {
     .replace(/>/g, '&gt;');
 }
 
+function escapeHtml(value) {
+  return escapeAttribute(value);
+}
+
 function normalizeDraftFlag(value) {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'string') {
@@ -417,6 +440,130 @@ function normalizeDraftFlag(value) {
   }
   if (value == null) return false;
   return Boolean(value);
+}
+
+function parseStatusScore(value) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && [1, 2, 3].includes(parsed) ? parsed : null;
+}
+
+function normalizeStatusTask(task) {
+  if (!task) return null;
+  if (typeof task === 'string') {
+    const text = task.trim();
+    return text ? { title: text, status: null, detail: '' } : null;
+  }
+  if (typeof task !== 'object') return null;
+  const titleSource =
+    typeof task.title === 'string'
+      ? task.title
+      : typeof task.name === 'string'
+      ? task.name
+      : '';
+  const title = titleSource.trim();
+  if (!title) return null;
+  const status = parseStatusScore(task.status ?? task.score ?? task.level ?? task.state);
+  const detailSource =
+    typeof task.detail === 'string'
+      ? task.detail
+      : typeof task.note === 'string'
+      ? task.note
+      : typeof task.description === 'string'
+      ? task.description
+      : '';
+  const detail = detailSource.trim();
+  return { title, status, detail };
+}
+
+function pickStatusEntry(source, key) {
+  if (!source || typeof source !== 'object') return null;
+  const variants = new Set([key]);
+  const snake = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+  const kebab = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+  variants.add(snake);
+  variants.add(kebab);
+  if (key === 'safeLegal') {
+    variants.add('safeandlegal');
+    variants.add('safe_legal');
+    variants.add('safe-legal');
+  }
+  for (const variant of variants) {
+    if (Object.prototype.hasOwnProperty.call(source, variant)) {
+      return source[variant];
+    }
+  }
+  return null;
+}
+
+function normalizeStatusEntry(entry) {
+  if (!entry || typeof entry !== 'object') {
+    return {
+      score: parseStatusScore(entry),
+      tasks: [],
+      note: ''
+    };
+  }
+
+  const score = parseStatusScore(entry.score ?? entry.status ?? entry.level ?? entry.value);
+  const tasks = Array.isArray(entry.tasks)
+    ? entry.tasks.map((task) => normalizeStatusTask(task)).filter(Boolean)
+    : [];
+  const noteSource =
+    typeof entry.note === 'string'
+      ? entry.note
+      : typeof entry.summary === 'string'
+      ? entry.summary
+      : typeof entry.description === 'string'
+      ? entry.description
+      : '';
+  const note = noteSource.trim();
+  return { score, tasks, note };
+}
+
+function normalizeReviewStatus(rawStatus) {
+  const source = rawStatus && typeof rawStatus === 'object' ? rawStatus : {};
+  const normalized = {};
+  REVIEW_CATEGORIES.forEach(({ key }) => {
+    const entry = pickStatusEntry(source, key);
+    normalized[key] = normalizeStatusEntry(entry);
+  });
+  return normalized;
+}
+
+function getReviewEntry(product, key) {
+  if (!product || typeof product !== 'object') {
+    return { score: null, tasks: [], note: '' };
+  }
+  const review = product.reviewStatus;
+  const entry = review && typeof review === 'object' ? review[key] : null;
+  if (!entry || typeof entry !== 'object') {
+    return { score: null, tasks: [], note: '' };
+  }
+  const score = parseStatusScore(entry.score);
+  const tasks = Array.isArray(entry.tasks) ? entry.tasks.slice() : [];
+  const note = typeof entry.note === 'string' ? entry.note : '';
+  return {
+    score,
+    tasks,
+    note
+  };
+}
+
+function getStatusLabel(score) {
+  return STATUS_LABELS[score] || 'Not set';
+}
+
+function getStatusTone(score) {
+  return STATUS_TONES[score] || 'neutral';
+}
+
+function encodeStatusPayload(payload) {
+  try {
+    return encodeURIComponent(JSON.stringify(payload));
+  } catch (error) {
+    console.warn('[editor] Failed to encode status payload', error);
+    return '';
+  }
 }
 
 function normalizeProduct(product) {
@@ -430,6 +577,16 @@ function normalizeProduct(product) {
   } else {
     normalized.draft = false;
   }
+  const reviewSource =
+    (normalized.reviewStatus && typeof normalized.reviewStatus === 'object'
+      ? normalized.reviewStatus
+      : null) ||
+    (normalized.review && typeof normalized.review === 'object' ? normalized.review : null) ||
+    (normalized.statusReview && typeof normalized.statusReview === 'object'
+      ? normalized.statusReview
+      : null) ||
+    {};
+  normalized.reviewStatus = normalizeReviewStatus(reviewSource);
   return normalized;
 }
 
@@ -612,6 +769,46 @@ function getFilteredProducts() {
   return filtered;
 }
 
+function renderReviewStatusCell(product, category) {
+  const entry = getReviewEntry(product, category.key);
+  const productName = product.name || product.id || 'Untitled product';
+  const score = entry.score;
+  const tone = getStatusTone(score);
+  const classes = ['admin-status-pill', `admin-status-pill--${tone}`];
+  if (score == null) {
+    classes.push('admin-status-pill--empty');
+  } else {
+    classes.push(`admin-status-pill--score-${score}`);
+  }
+  const label = getStatusLabel(score);
+  const displayValue = score == null ? 'Set' : String(score);
+  const payload = {
+    entityType: 'product',
+    entityId: product.id || null,
+    entityName: productName,
+    categoryKey: category.key,
+    categoryLabel: category.label,
+    score,
+    statusLabel: label,
+    tone,
+    note: entry.note || '',
+    tasks: Array.isArray(entry.tasks) ? entry.tasks : []
+  };
+  const encodedPayload = encodeStatusPayload(payload);
+  const ariaLabel =
+    score == null
+      ? `${category.label} status for ${productName} not set`
+      : `${category.label} status for ${productName}: level ${score} — ${label}`;
+  return `
+      <td data-label="${category.label}">
+        <button type="button" class="${classes.join(' ')}" data-status-trigger data-status-entity="product" data-status-payload="${escapeAttribute(encodedPayload)}" aria-label="${escapeAttribute(ariaLabel)}">
+          <span class="admin-status-pill__value">${escapeHtml(displayValue)}</span>
+          <span class="admin-status-pill__label">${escapeHtml(label)}</span>
+        </button>
+      </td>
+  `;
+}
+
 function renderProductRow(product) {
   const isSelected = state.selectedId === product.id;
   const attributes = [
@@ -632,6 +829,9 @@ function renderProductRow(product) {
   const badges = formatBadges(product.badges);
   const price = product.price || '—';
   const labelName = escapeAttribute(product.name || product.id || 'product');
+  const statusCells = REVIEW_CATEGORIES.map((category) =>
+    renderReviewStatusCell(product, category)
+  ).join('');
 
   return `
     <tr ${attributes}>
@@ -652,6 +852,7 @@ function renderProductRow(product) {
           <span class="sr-only">${statusLabel} status for ${product.name || 'Untitled product'}</span>
         </label>
       </td>
+      ${statusCells}
     </tr>
   `;
 }
@@ -661,7 +862,7 @@ function renderTable() {
   const products = getFilteredProducts();
 
   if (!products.length) {
-    els.tableBody.innerHTML = '<tr><td colspan="5" class="admin-table__empty">No products found. Adjust your filters or add a new product.</td></tr>';
+    els.tableBody.innerHTML = '<tr><td colspan="9" class="admin-table__empty">No products found. Adjust your filters or add a new product.</td></tr>';
   } else {
     const rows = products.map((product) => renderProductRow(product)).join('');
     els.tableBody.innerHTML = rows;
