@@ -578,14 +578,22 @@
             <fieldset class="nextgen-form__field nextgen-form__field--products">
               <legend class="nextgen-form__label">Inspiration products</legend>
               <p class="nextgen-form__hint">Check any existing Harmony Sheets products&mdash;including drafts&mdash;that informed this idea.</p>
-              <div class="nextgen-form__products" data-nextgen-products>
-                <p class="nextgen-form__loading" data-nextgen-products-loading>Loading product catalog…</p>
-                <p class="nextgen-form__error" data-nextgen-products-error hidden>We couldn't load the product catalog. Refresh the page to try again.</p>
+              <button class="btn ghost nextgen-form__inspiration-open" type="button" data-nextgen-inspiration-open>Find inspiration</button>
+              <div class="nextgen-form__inspiration-selected" data-nextgen-inspiration-selected hidden>
+                <p class="nextgen-form__empty" data-nextgen-inspiration-empty>No inspiration selected yet. Use “Find inspiration”.</p>
+                <div class="nextgen-form__inspiration-list" data-nextgen-inspiration-list></div>
               </div>
             </fieldset>
 
-            <div class="nextgen-form__field">
-              <label class="nextgen-form__label" for="nextgen-standard">Fixed standard text</label>
+            <div class="nextgen-form__field nextgen-form__field--standard">
+              <div class="nextgen-form__field-header">
+                <label class="nextgen-form__label" for="nextgen-standard">Fixed standard text</label>
+                <div class="nextgen-form__standard-actions">
+                  <button class="nextgen-form__standard-button" type="button" data-nextgen-standard-edit>Edit text</button>
+                  <button class="nextgen-form__standard-button" type="button" data-nextgen-standard-cancel hidden>Cancel</button>
+                  <button class="nextgen-form__standard-button nextgen-form__standard-button--primary" type="button" data-nextgen-standard-save hidden>Save text</button>
+                </div>
+              </div>
               <textarea
                 class="nextgen-form__textarea nextgen-form__textarea--readonly"
                 id="nextgen-standard"
@@ -593,6 +601,7 @@
                 readonly
                 data-nextgen-standard
               ></textarea>
+              <p class="nextgen-form__standard-status" data-nextgen-standard-status></p>
             </div>
 
             <div class="nextgen-form__field">
@@ -605,6 +614,27 @@
                 placeholder="Capture extra context, launch partners, or follow-up questions."
                 data-nextgen-notes
               ></textarea>
+            </div>
+          </div>
+
+          <div class="nextgen-form__product-dialog" data-nextgen-products-dialog hidden aria-hidden="true">
+            <div class="nextgen-form__product-dialog-overlay" data-nextgen-products-overlay></div>
+            <div class="nextgen-form__product-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="nextgen-product-dialog-title">
+              <header class="nextgen-form__product-dialog-header">
+                <h3 class="nextgen-form__product-dialog-title" id="nextgen-product-dialog-title">Select inspiration</h3>
+                <button class="nextgen-form__product-dialog-close" type="button" data-nextgen-products-close aria-label="Close inspiration picker">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </header>
+              <div class="nextgen-form__product-dialog-body">
+                <p class="nextgen-form__loading" data-nextgen-products-loading>Loading product catalog…</p>
+                <p class="nextgen-form__error" data-nextgen-products-error hidden>We couldn't load the product catalog. Refresh the page to try again.</p>
+                <div class="nextgen-form__products" data-nextgen-products></div>
+              </div>
+              <footer class="nextgen-form__product-dialog-footer">
+                <button class="btn ghost" type="button" data-nextgen-products-cancel>Cancel</button>
+                <button class="btn primary" type="button" data-nextgen-products-apply>Use selection</button>
+              </footer>
             </div>
           </div>
 
