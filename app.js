@@ -2455,7 +2455,7 @@ App.initNavDropdown = function() {
     mega.style.right = "";
     mega.style.removeProperty("--mega-adjust");
 
-    const margin = 20;
+    const margin = 0;
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
     const viewportCenter = viewportWidth / 2;
     const linkRect = browseLink.getBoundingClientRect();
