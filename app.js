@@ -840,6 +840,42 @@ App.normalizeDraftFlag = function(value) {
   return Boolean(value);
 };
 
+App.normalizeVirtualDemoUrl = function(value) {
+  if (value == null) return "";
+
+  const stringValue = typeof value === "string" ? value : String(value);
+  const trimmed = stringValue.trim();
+  if (!trimmed) return "";
+
+  const sanitized = trimmed.replace(/\\+/g, "/");
+  const hasProtocol = /^[a-z][a-z0-9+.-]*:/i.test(sanitized) || sanitized.startsWith("//");
+
+  if (hasProtocol) {
+    try {
+      return encodeURI(sanitized);
+    } catch (error) {
+      console.warn("[App] Unable to encode virtual demo URL", error);
+      return sanitized;
+    }
+  }
+
+  let normalizedPath = sanitized;
+  if (sanitized.startsWith("./")) {
+    normalizedPath = sanitized.slice(1);
+  }
+
+  if (!normalizedPath.startsWith("/")) {
+    normalizedPath = `/${normalizedPath}`;
+  }
+
+  try {
+    return encodeURI(normalizedPath);
+  } catch (error) {
+    console.warn("[App] Unable to encode virtual demo path", error);
+    return normalizedPath.replace(/\s+/g, "%20");
+  }
+};
+
 App.normalizeProduct = function(product) {
   if (!product || typeof product !== "object") return product;
 
@@ -859,6 +895,40 @@ App.normalizeProduct = function(product) {
   }
 
   normalized.draft = Boolean(draft);
+
+  let virtualDemoValue = null;
+  if (Object.prototype.hasOwnProperty.call(normalized, "virtualDemo")) {
+    virtualDemoValue = normalized.virtualDemo;
+  } else if (Object.prototype.hasOwnProperty.call(normalized, "virtual_demo")) {
+    virtualDemoValue = normalized.virtual_demo;
+  }
+
+  if (virtualDemoValue != null && virtualDemoValue !== "") {
+    const trimmed = typeof virtualDemoValue === "string"
+      ? virtualDemoValue.trim()
+      : String(virtualDemoValue).trim();
+
+    if (trimmed) {
+      normalized.virtualDemo = trimmed;
+      const resolvedUrl = App.normalizeVirtualDemoUrl(trimmed);
+      if (resolvedUrl) {
+        normalized.virtualDemoUrl = resolvedUrl;
+      } else {
+        delete normalized.virtualDemoUrl;
+      }
+    } else {
+      delete normalized.virtualDemo;
+      delete normalized.virtualDemoUrl;
+    }
+  } else {
+    delete normalized.virtualDemo;
+    delete normalized.virtualDemoUrl;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(normalized, "virtual_demo")) {
+    delete normalized.virtual_demo;
+  }
+
   return normalized;
 };
 
@@ -4220,6 +4290,7 @@ App.initProduct = async function() {
     if (!product) return;
 
     App.currentProduct = product;
+    const normalizedVirtualDemoUrl = App.normalizeVirtualDemoUrl(product.virtualDemoUrl || product.virtualDemo);
 
     if (product.draft) {
       document.body.classList.add("product-draft");
@@ -4232,8 +4303,8 @@ App.initProduct = async function() {
       if (draftActions) draftActions.removeAttribute("hidden");
       const draftDemoLink = App.qs("#p-draft-demo");
       if (draftDemoLink) {
-        if (product.virtualDemo) {
-          draftDemoLink.href = product.virtualDemo;
+        if (normalizedVirtualDemoUrl) {
+          draftDemoLink.href = normalizedVirtualDemoUrl;
           draftDemoLink.removeAttribute("hidden");
         } else {
           draftDemoLink.setAttribute("hidden", "");
@@ -4337,10 +4408,10 @@ App.initProduct = async function() {
 
     // Virtual demo
     const virtualDemoFrame = App.qs('[data-virtual-demo]');
-    const DEFAULT_VIRTUAL_DEMO = 'Google sheets products/demo/pomodoro.html';
+    const DEFAULT_VIRTUAL_DEMO = App.normalizeVirtualDemoUrl('Google sheets products/demo/pomodoro.html');
     if (virtualDemoFrame) {
       const screen = virtualDemoFrame.querySelector('.device-frame__screen');
-      const virtualDemoUrl = product.virtualDemo || DEFAULT_VIRTUAL_DEMO;
+      const virtualDemoUrl = normalizedVirtualDemoUrl || DEFAULT_VIRTUAL_DEMO;
       if (virtualDemoUrl && screen) {
         virtualDemoFrame.setAttribute('data-loading', 'true');
         screen.innerHTML = `
