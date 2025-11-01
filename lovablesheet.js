@@ -481,6 +481,7 @@ class StickyBoard {
     this.columnGap = BRAIN_BOARD_DEFAULT_COLUMN_GAP;
     this.columnSnapThreshold = BRAIN_BOARD_DEFAULT_SNAP_THRESHOLD;
     this.snapIndicatorTimeouts = new WeakMap();
+    this.workspaceSizeUpdateScheduled = false;
 
     this.labelEditor = {
       container: null,
@@ -583,6 +584,7 @@ class StickyBoard {
     this.bindControls();
     this.fitToNotes();
     this.scheduleColumnVisualUpdate();
+    this.scheduleWorkspaceSizeUpdate();
     return true;
   }
 
@@ -811,12 +813,101 @@ class StickyBoard {
     note.style.setProperty("--note-translate-y", `${y * this.scale}px`);
   }
 
+  scheduleWorkspaceSizeUpdate() {
+    if (this.workspaceSizeUpdateScheduled) return;
+    this.workspaceSizeUpdateScheduled = true;
+    window.requestAnimationFrame(() => {
+      this.workspaceSizeUpdateScheduled = false;
+      this.updateWorkspaceSize();
+    });
+  }
+
+  getWorkspacePadding() {
+    if (!this.workspace) {
+      return { top: 0, right: 0, bottom: 0, left: 0 };
+    }
+
+    const styles = window.getComputedStyle(this.workspace);
+    const parse = (value) => {
+      const parsed = Number.parseFloat(value || "");
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    return {
+      top: parse(styles.paddingTop),
+      right: parse(styles.paddingRight),
+      bottom: parse(styles.paddingBottom),
+      left: parse(styles.paddingLeft)
+    };
+  }
+
+  getWorkspaceDimensions() {
+    if (!this.workspace) {
+      return { width: 0, height: 0 };
+    }
+
+    const width = Math.max(this.workspace.scrollWidth, this.workspace.clientWidth);
+    const height = Math.max(this.workspace.scrollHeight, this.workspace.clientHeight);
+    return { width, height };
+  }
+
+  updateWorkspaceSize() {
+    if (!this.workspace) return;
+
+    const notes = Array.from(this.workspace.querySelectorAll("[data-note]"));
+    if (!notes.length) {
+      this.workspace.style.removeProperty("--brain-board-canvas-width");
+      this.workspace.style.removeProperty("--brain-board-canvas-height");
+      return;
+    }
+
+    let maxRight = 0;
+    let maxBottom = 0;
+
+    notes.forEach((note) => {
+      const x = Number.parseFloat(note.dataset.x || "0");
+      const y = Number.parseFloat(note.dataset.y || "0");
+      const width = note.offsetWidth;
+      const height = note.offsetHeight;
+
+      if (!Number.isFinite(x) || !Number.isFinite(y)) {
+        return;
+      }
+
+      const right = x + (Number.isFinite(width) ? width : 0);
+      const bottom = y + (Number.isFinite(height) ? height : 0);
+      if (Number.isFinite(right)) {
+        maxRight = Math.max(maxRight, right);
+      }
+      if (Number.isFinite(bottom)) {
+        maxBottom = Math.max(maxBottom, bottom);
+      }
+    });
+
+    const padding = this.getWorkspacePadding();
+    const totalWidth = Math.max(0, maxRight + padding.left + padding.right);
+    const totalHeight = Math.max(0, maxBottom + padding.top + padding.bottom);
+
+    if (totalWidth > 0) {
+      this.workspace.style.setProperty("--brain-board-canvas-width", `${totalWidth}px`);
+    } else {
+      this.workspace.style.removeProperty("--brain-board-canvas-width");
+    }
+
+    if (totalHeight > 0) {
+      this.workspace.style.setProperty("--brain-board-canvas-height", `${totalHeight}px`);
+    } else {
+      this.workspace.style.removeProperty("--brain-board-canvas-height");
+    }
+  }
+
   setNotePosition(note, x, y) {
     note.dataset.x = String(x);
     note.dataset.y = String(y);
     note.style.setProperty("--note-x", `${x}px`);
     note.style.setProperty("--note-y", `${y}px`);
     this.applyNoteTransform(note, x, y);
+    this.scheduleWorkspaceSizeUpdate();
   }
 
   deleteNote(note) {
@@ -834,6 +925,7 @@ class StickyBoard {
     note.remove();
     this.updateZoomControls();
     this.scheduleColumnVisualUpdate();
+    this.scheduleWorkspaceSizeUpdate();
 
     if (wasFocused) {
       this.addButton?.focus?.({ preventScroll: true });
@@ -945,8 +1037,8 @@ class StickyBoard {
 
     if (Number.isFinite(width) && width > 0) {
       const minWidth = this.noteMinWidth || NOTE_MIN_WIDTH;
-      const maxWidth = Number.isFinite(this.noteMaxWidth) ? this.noteMaxWidth : width;
-      const resolvedMax = Number.isFinite(maxWidth) ? Math.max(minWidth, maxWidth) : minWidth;
+      const maxWidth = Number.isFinite(this.noteMaxWidth) ? this.noteMaxWidth : Number.POSITIVE_INFINITY;
+      const resolvedMax = Number.isFinite(maxWidth) ? Math.max(minWidth, maxWidth) : Number.POSITIVE_INFINITY;
       const clampedWidth = clamp(width, minWidth, resolvedMax);
       note.dataset.width = `${clampedWidth}`;
       note.style.setProperty("--note-width", `${clampedWidth}px`);
@@ -957,8 +1049,8 @@ class StickyBoard {
 
     if (Number.isFinite(height) && height > 0) {
       const minHeight = this.noteMinHeight || NOTE_MIN_HEIGHT;
-      const maxHeight = Number.isFinite(this.noteMaxHeight) ? this.noteMaxHeight : height;
-      const resolvedMaxHeight = Number.isFinite(maxHeight) ? Math.max(minHeight, maxHeight) : minHeight;
+      const maxHeight = Number.isFinite(this.noteMaxHeight) ? this.noteMaxHeight : Number.POSITIVE_INFINITY;
+      const resolvedMaxHeight = Number.isFinite(maxHeight) ? Math.max(minHeight, maxHeight) : Number.POSITIVE_INFINITY;
       const clampedHeight = clamp(height, minHeight, resolvedMaxHeight);
       note.dataset.height = `${clampedHeight}`;
       note.style.setProperty("--note-height", `${clampedHeight}px`);
@@ -966,6 +1058,8 @@ class StickyBoard {
       delete note.dataset.height;
       note.style.removeProperty("--note-height");
     }
+
+    this.scheduleWorkspaceSizeUpdate();
   }
 
   ensureResizeHandle(note) {
@@ -1275,7 +1369,7 @@ class StickyBoard {
       return;
     }
 
-    const boardWidth = this.workspace.clientWidth;
+    const { width: boardWidth } = this.getWorkspaceDimensions();
     if (!(boardWidth > 0)) {
       return;
     }
@@ -1629,13 +1723,8 @@ class StickyBoard {
         this.closeLabelEditor();
 
         const pointerId = event.pointerId;
-        const boardWidth = this.workspace.clientWidth;
-        const boardHeight = this.workspace.clientHeight;
+        const { width: boardWidth } = this.getWorkspaceDimensions();
         const noteWidthUnits = note.offsetWidth;
-        const noteWidth = noteWidthUnits * this.scale;
-        const noteHeight = note.offsetHeight * this.scale;
-        const maxX = Math.max(0, (boardWidth - noteWidth) / this.scale);
-        const maxY = Math.max(0, (boardHeight - noteHeight) / this.scale);
 
         const startX = Number.parseFloat(note.dataset.x || "0");
         const startY = Number.parseFloat(note.dataset.y || "0");
@@ -1652,8 +1741,8 @@ class StickyBoard {
           const deltaX = (moveEvent.clientX - originPointer.x) / this.scale;
           const deltaY = (moveEvent.clientY - originPointer.y) / this.scale;
 
-          const targetX = clamp(startX + deltaX, 0, maxX);
-          const targetY = clamp(startY + deltaY, 0, maxY);
+          const targetX = Math.max(0, startX + deltaX);
+          const targetY = Math.max(0, startY + deltaY);
           const snapTarget = this.getColumnSnapTarget({
             boardWidthPx: boardWidth,
             noteWidthUnits,
@@ -1677,10 +1766,8 @@ class StickyBoard {
           if (groupEnabled && nearbyNotes.length) {
             const offsetAdjustmentX = appliedX - targetX;
             nearbyNotes.forEach((entry) => {
-              const neighborMaxX = Math.max(0, (boardWidth - entry.width) / this.scale);
-              const neighborMaxY = Math.max(0, (boardHeight - entry.height) / this.scale);
-              const neighborX = clamp(entry.startX + deltaX + offsetAdjustmentX, 0, neighborMaxX);
-              const neighborY = clamp(entry.startY + deltaY, 0, neighborMaxY);
+              const neighborX = Math.max(0, entry.startX + deltaX + offsetAdjustmentX);
+              const neighborY = Math.max(0, entry.startY + deltaY);
               this.setNotePosition(entry.note, neighborX, neighborY);
             });
           }
@@ -1728,11 +1815,6 @@ class StickyBoard {
         const origin = { x: event.clientX, y: event.clientY };
         const startWidth = note.offsetWidth;
         const startHeight = note.offsetHeight;
-        const startX = Number.parseFloat(note.dataset.x || "0");
-        const startY = Number.parseFloat(note.dataset.y || "0");
-        const boardWidthUnits = this.workspace.clientWidth / this.scale;
-        const boardHeightUnits = this.workspace.clientHeight / this.scale;
-
         note.dataset.resizing = "true";
         resizeHandle.setPointerCapture(pointerId);
 
@@ -1740,60 +1822,28 @@ class StickyBoard {
           const deltaX = (moveEvent.clientX - origin.x) / this.scale;
           const deltaY = (moveEvent.clientY - origin.y) / this.scale;
 
-          const availableWidth = Number.isFinite(boardWidthUnits)
-            ? Math.max(this.noteMinWidth, boardWidthUnits - startX)
-            : Math.max(this.noteMinWidth, this.noteMaxWidth || this.noteMinWidth);
-          const availableHeight = Number.isFinite(boardHeightUnits)
-            ? Math.max(this.noteMinHeight, boardHeightUnits - startY)
-            : Math.max(this.noteMinHeight, this.noteMaxHeight || this.noteMinHeight);
+          const maxWidth = Number.isFinite(this.noteMaxWidth) ? this.noteMaxWidth : Number.POSITIVE_INFINITY;
+          const maxHeight = Number.isFinite(this.noteMaxHeight) ? this.noteMaxHeight : Number.POSITIVE_INFINITY;
 
-          const maxWidth = Number.isFinite(this.noteMaxWidth)
-            ? Math.min(this.noteMaxWidth, availableWidth)
-            : availableWidth;
-          const maxHeight = Number.isFinite(this.noteMaxHeight)
-            ? Math.min(this.noteMaxHeight, availableHeight)
-            : availableHeight;
-
-          const resolvedMaxWidth = Number.isFinite(maxWidth) ? Math.max(this.noteMinWidth, maxWidth) : this.noteMinWidth;
-          const resolvedMaxHeight = Number.isFinite(maxHeight) ? Math.max(this.noteMinHeight, maxHeight) : this.noteMinHeight;
-
-          const nextWidth = clamp(startWidth + deltaX, this.noteMinWidth, resolvedMaxWidth);
-          const nextHeight = clamp(startHeight + deltaY, this.noteMinHeight, resolvedMaxHeight);
+          const nextWidth = clamp(startWidth + deltaX, this.noteMinWidth, maxWidth);
+          const nextHeight = clamp(startHeight + deltaY, this.noteMinHeight, maxHeight);
 
           this.setNoteSize(note, nextWidth, nextHeight);
           this.scheduleColumnVisualUpdate();
         };
 
-        const finalizeResize = () => {
-          delete note.dataset.resizing;
-          if (resizeHandle.hasPointerCapture(pointerId)) {
-            resizeHandle.releasePointerCapture(pointerId);
-          }
-          resizeHandle.removeEventListener("pointermove", onPointerMove);
-          resizeHandle.removeEventListener("pointerup", finalizeResize);
-          resizeHandle.removeEventListener("pointercancel", finalizeResize);
-
-          const boardWidth = this.workspace.clientWidth;
-          const boardHeight = this.workspace.clientHeight;
-          const currentX = Number.parseFloat(note.dataset.x || "0");
-          const currentY = Number.parseFloat(note.dataset.y || "0");
-
-          if (boardWidth > 0) {
-            const maxX = Math.max(0, (boardWidth - note.offsetWidth * this.scale) / this.scale);
-            if (currentX > maxX) {
-              this.setNotePosition(note, maxX, currentY);
+          const finalizeResize = () => {
+            delete note.dataset.resizing;
+            if (resizeHandle.hasPointerCapture(pointerId)) {
+              resizeHandle.releasePointerCapture(pointerId);
             }
-          }
+            resizeHandle.removeEventListener("pointermove", onPointerMove);
+            resizeHandle.removeEventListener("pointerup", finalizeResize);
+            resizeHandle.removeEventListener("pointercancel", finalizeResize);
 
-          if (boardHeight > 0) {
-            const maxY = Math.max(0, (boardHeight - note.offsetHeight * this.scale) / this.scale);
-            if (currentY > maxY) {
-              this.setNotePosition(note, Number.parseFloat(note.dataset.x || "0"), maxY);
-            }
-          }
-
-          this.scheduleColumnVisualUpdate();
-        };
+            this.scheduleColumnVisualUpdate();
+            this.scheduleWorkspaceSizeUpdate();
+          };
 
         resizeHandle.addEventListener("pointermove", onPointerMove);
         resizeHandle.addEventListener("pointerup", finalizeResize);
@@ -1942,13 +1992,9 @@ class StickyBoard {
 
     window.requestAnimationFrame(() => {
       const noteWidth = noteElement.offsetWidth * this.scale;
-      const noteHeight = noteElement.offsetHeight * this.scale;
-      const boardWidth = this.workspace.clientWidth;
-      const boardHeight = this.workspace.clientHeight;
-      const maxX = Math.max(0, (boardWidth - noteWidth) / this.scale);
-      const maxY = Math.max(0, (boardHeight - noteHeight) / this.scale);
+      const { width: boardWidth } = this.getWorkspaceDimensions();
 
-      let targetX = maxX;
+      let targetX = Math.max(0, (boardWidth - noteWidth) / this.scale);
       let targetY = 0;
 
       if (this.menu) {
@@ -1959,8 +2005,8 @@ class StickyBoard {
         const relativeMenuTop = (menuRect.top - workspaceRect.top) / this.scale;
         const adjustedGap = gap / this.scale;
 
-        targetX = clamp(relativeMenuLeft - noteElement.offsetWidth - adjustedGap, 0, maxX);
-        targetY = clamp(relativeMenuTop, 0, maxY);
+        targetX = Math.max(0, relativeMenuLeft - noteElement.offsetWidth - adjustedGap);
+        targetY = Math.max(0, relativeMenuTop);
       }
 
       this.setNotePosition(noteElement, targetX, targetY);
@@ -2007,6 +2053,7 @@ class StickyBoard {
     });
     this.fitToNotes();
     this.scheduleColumnVisualUpdate();
+    this.scheduleWorkspaceSizeUpdate();
   }
 }
 
