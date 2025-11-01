@@ -399,7 +399,6 @@
       <header class="lovablesheet-workflow__intro">
         <p class="lovablesheet-eyebrow">Simple Workflow</p>
         <h1 id="lovablesheet-workflow-title">Bring clarity to every planning sprint</h1>
-        <p class="lovablesheet-workflow__description">Use the brain board to rough out initiatives, quick wins, and backlog ideas. Drag notes anywhere, recolor them, and rally similar ideas with a single move.</p>
       </header>
 
       <section id="code-library" class="lovablesheet-code-library" aria-labelledby="code-library-title">
@@ -427,11 +426,29 @@
                 <p class="lovablesheet-library__eyebrow">Sticky board</p>
                 <h2 class="lovablesheet-library__title">Brain board</h2>
                 <p class="lovablesheet-library__description">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
+                <p class="lovablesheet-library__description lovablesheet-library__description--secondary">
+                  Use the brain board to rough out initiatives, quick wins, and backlog ideas. Drag notes anywhere, recolor them, and rally similar ideas with a single move.
+                </p>
                 <ul class="lovablesheet-library__list">
                   <li>Drag, recolor, and cluster quick ideas in real time.</li>
                   <li>Switch between saved Supabase boards in a click.</li>
                   <li>Rally similar notes with grouped color moves.</li>
                 </ul>
+                <div class="brain-board-library">
+                  <p class="brain-board-library__eyebrow">Brain board setup</p>
+                  <h3 class="brain-board-library__title">Board library</h3>
+                  <p class="brain-board-library__description">
+                    Choose which Supabase board to load before launching the brain board, then save new sticky note sessions without leaving this page.
+                  </p>
+                  <div class="brain-board-library__form">
+                    <label class="brain-board-library__label" for="brain-board-select">Boards</label>
+                    <select class="brain-board__select" id="brain-board-select" data-board-select>
+                      <option value="default">Default Board (Demo)</option>
+                    </select>
+                    <button class="btn primary brain-board__save" type="button" data-board-save>Save to Supabase</button>
+                  </div>
+                  <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
+                </div>
               </div>
               <div class="lovablesheet-library__actions">
                 <button class="btn primary lovablesheet-library__button" type="button" data-board-launch="brain">
@@ -461,20 +478,6 @@
           </div>
 
           <div class="lovablesheet-library__column lovablesheet-library__column--controls">
-            <section class="lovablesheet-controls lovablesheet-controls--brain" aria-labelledby="lovablesheet-brain-controls-title">
-              <p class="lovablesheet-controls__eyebrow">Brain board setup</p>
-              <h2 class="lovablesheet-controls__title" id="lovablesheet-brain-controls-title">Board library</h2>
-              <p class="lovablesheet-controls__description">Choose which Supabase board to load before launching the brain board, then save new sticky note sessions without leaving this page.</p>
-              <div class="brain-board__toolbar lovablesheet-controls__form">
-                <label class="brain-board__toolbar-label" for="brain-board-select">Boards</label>
-                <select class="brain-board__select" id="brain-board-select" data-board-select>
-                  <option value="default">Default Board (Demo)</option>
-                </select>
-                <button class="btn primary brain-board__save" type="button" data-board-save>Save to Supabase</button>
-              </div>
-              <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
-            </section>
-
             <section class="lovablesheet-controls lovablesheet-controls--flowchart" aria-labelledby="lovablesheet-flowchart-controls-title">
               <p class="lovablesheet-controls__eyebrow">Flowchart board</p>
               <h2 class="lovablesheet-controls__title" id="lovablesheet-flowchart-controls-title">Prompt compiler</h2>

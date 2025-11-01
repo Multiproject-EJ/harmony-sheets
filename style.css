@@ -303,12 +303,21 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .lovablesheet-library__title{margin:6px 0;font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.1;color:#0f172a}
 .lovablesheet-library__card--flowchart .lovablesheet-library__title{color:#f8fafc}
 .lovablesheet-library__description{margin:0;color:#475569;font-size:1rem;max-width:520px}
+.lovablesheet-library__description--secondary{color:#334155;margin-top:10px}
 .lovablesheet-library__list{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:10px}
 .lovablesheet-library__list li{position:relative;padding-left:26px;color:#1f2937;font-weight:500}
 .lovablesheet-library__list li::before{content:"";position:absolute;left:0;top:0.6em;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:rgba(251,191,36,.95);box-shadow:0 0 0 4px rgba(251,191,36,.16)}
 .lovablesheet-library__card--brain .lovablesheet-library__list li::before{background:rgba(249,115,22,.9);box-shadow:0 0 0 4px rgba(249,115,22,.18)}
 .lovablesheet-library__actions{margin-top:auto}
 .lovablesheet-library__button{width:100%;justify-content:center;font-weight:700}
+.brain-board-library{margin-top:clamp(18px,3vw,28px);padding:clamp(18px,3vw,24px);border-radius:24px;border:1px solid rgba(251,191,36,.28);background:rgba(255,255,255,.82);box-shadow:0 18px 42px rgba(251,191,36,.18);display:grid;gap:clamp(12px,2.4vw,18px)}
+.brain-board-library__eyebrow{margin:0;font-size:.72rem;letter-spacing:.26em;text-transform:uppercase;font-weight:700;color:rgba(180,83,9,.9)}
+.brain-board-library__title{margin:0;font-size:1.25rem;line-height:1.2;color:#0f172a}
+.brain-board-library__description{margin:0;font-size:.95rem;line-height:1.55;color:#475569}
+.brain-board-library__form{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.brain-board-library__label{font-weight:600;color:#1e293b}
+.brain-board-library__form .btn{flex-shrink:0}
+.brain-board-library__form .brain-board__select{flex:1;min-width:200px}
 .lovablesheet-pipeline{margin:clamp(48px,9vw,96px) auto 0;width:min(1040px,100%);display:grid;gap:28px}
 .lovablesheet-pipeline .admin__panel{border-radius:32px;border:1px solid rgba(148,163,184,.22);box-shadow:0 28px 60px rgba(15,23,42,.16);background:linear-gradient(140deg,rgba(255,255,255,.94),rgba(241,245,249,.88))}
 .lovablesheet-pipeline .admin__panel-head{align-items:center}
