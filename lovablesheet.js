@@ -70,7 +70,7 @@ const NEXTGEN_FEATURE_OPTIONS = [
   { id: "images-storing", label: "Images storing" }
 ];
 const NEXTGEN_FEATURE_MAP = new Map(NEXTGEN_FEATURE_OPTIONS.map((feature) => [feature.id, feature]));
-const NEXTGEN_STANDARD_TEXT = [
+const NEXTGEN_DEFAULT_STANDARD_TEXT = [
   "Produce a google sheets product by completing the following:",
   "1) Make the product page JSON with the stats.",
   "2) Push it to Supabase.",
@@ -79,15 +79,24 @@ const NEXTGEN_STANDARD_TEXT = [
   "   Link the finished product (the HTML) to the interactive demo section on the product page."
 ].join("\n");
 const NEXTGEN_STORAGE_KEY = "lovablesheet.nextGenEngineBriefs";
+const NEXTGEN_STANDARD_TABLE = "lovablesheet_nextgen_standard";
+const NEXTGEN_STANDARD_ID = "default";
 
 const nextGenState = {
   initialized: false,
   selectedFeatures: [],
+  selectedInspiration: [],
+  standardText: NEXTGEN_DEFAULT_STANDARD_TEXT,
+  standardEditing: false,
+  standardSaving: false,
+  standardLoaded: false,
   savedBriefs: [],
   products: [],
   productMap: new Map(),
   activeTrigger: null,
   keydownHandler: null,
+  inspirationDialogOpen: false,
+  inspirationKeydownHandler: null,
   elements: {
     section: null,
     openButton: null,
@@ -105,9 +114,22 @@ const nextGenState = {
     descriptionInput: null,
     notesInput: null,
     standardTextarea: null,
+    standardEditButton: null,
+    standardSaveButton: null,
+    standardCancelButton: null,
+    standardStatus: null,
+    inspirationButton: null,
+    inspirationContainer: null,
+    inspirationEmpty: null,
+    inspirationList: null,
     productsContainer: null,
     productsLoading: null,
     productsError: null,
+    inspirationDialog: null,
+    inspirationDialogOverlay: null,
+    inspirationDialogClose: null,
+    inspirationDialogApply: null,
+    inspirationDialogCancel: null,
     formStatus: null,
     cancelButton: null,
     closeButton: null
@@ -270,6 +292,184 @@ function setNextGenFormStatus(message, tone) {
   }
 }
 
+function setNextGenStandardStatus(message, tone) {
+  const statusEl = nextGenState.elements.standardStatus;
+  if (!statusEl) return;
+  statusEl.textContent = message || "";
+  if (tone) {
+    statusEl.dataset.tone = tone;
+  } else {
+    statusEl.removeAttribute("data-tone");
+  }
+}
+
+function applyNextGenStandardText(value) {
+  const normalized = typeof value === "string" && value ? value : NEXTGEN_DEFAULT_STANDARD_TEXT;
+  nextGenState.standardText = normalized;
+  const textarea = nextGenState.elements.standardTextarea;
+  if (textarea) {
+    textarea.value = normalized;
+    textarea.setAttribute("readonly", "true");
+    if (!textarea.classList.contains("nextgen-form__textarea--readonly")) {
+      textarea.classList.add("nextgen-form__textarea--readonly");
+    }
+  }
+}
+
+function setNextGenStandardEditing(enabled) {
+  const {
+    standardTextarea,
+    standardEditButton,
+    standardSaveButton,
+    standardCancelButton
+  } = nextGenState.elements;
+
+  nextGenState.standardEditing = Boolean(enabled);
+
+  if (standardTextarea) {
+    if (enabled) {
+      standardTextarea.removeAttribute("readonly");
+      standardTextarea.classList.remove("nextgen-form__textarea--readonly");
+      window.setTimeout(() => {
+        try {
+          standardTextarea.focus();
+          const length = standardTextarea.value.length;
+          standardTextarea.setSelectionRange(length, length);
+        } catch (error) {
+          // Ignore focus errors.
+        }
+      }, 0);
+    } else {
+      standardTextarea.value = nextGenState.standardText;
+      standardTextarea.setAttribute("readonly", "true");
+      if (!standardTextarea.classList.contains("nextgen-form__textarea--readonly")) {
+        standardTextarea.classList.add("nextgen-form__textarea--readonly");
+      }
+    }
+  }
+
+  if (standardEditButton) {
+    standardEditButton.hidden = Boolean(enabled);
+    standardEditButton.disabled = nextGenState.standardSaving;
+  }
+  if (standardSaveButton) {
+    standardSaveButton.hidden = !enabled;
+    standardSaveButton.disabled = nextGenState.standardSaving;
+  }
+  if (standardCancelButton) {
+    standardCancelButton.hidden = !enabled;
+    standardCancelButton.disabled = nextGenState.standardSaving;
+  }
+}
+
+function handleNextGenStandardEdit() {
+  if (!supabaseClient) {
+    setNextGenStandardStatus("Supabase connection required to edit the standard text.", "error");
+    return;
+  }
+
+  setNextGenStandardEditing(true);
+  setNextGenStandardStatus("Editing standard text.");
+}
+
+function handleNextGenStandardCancel() {
+  if (nextGenState.standardSaving) return;
+  const textarea = nextGenState.elements.standardTextarea;
+  if (textarea) {
+    textarea.value = nextGenState.standardText;
+  }
+  setNextGenStandardEditing(false);
+  setNextGenStandardStatus("");
+}
+
+async function saveNextGenStandardToSupabase(content) {
+  if (!supabaseClient) {
+    throw new Error("Supabase client is not available.");
+  }
+
+  const payload = { id: NEXTGEN_STANDARD_ID, content };
+  const { data, error } = await supabaseClient
+    .from(NEXTGEN_STANDARD_TABLE)
+    .upsert(payload, { onConflict: "id" })
+    .select("content")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  if (data && typeof data.content === "string") {
+    return data.content;
+  }
+
+  return content;
+}
+
+async function handleNextGenStandardSave() {
+  const textarea = nextGenState.elements.standardTextarea;
+  if (!textarea) return;
+
+  if (!supabaseClient) {
+    setNextGenStandardStatus("Supabase connection required to save the standard text.", "error");
+    return;
+  }
+
+  const value = textarea.value;
+  if (!value || !value.trim()) {
+    setNextGenStandardStatus("Standard text cannot be empty.", "error");
+    textarea.focus();
+    return;
+  }
+
+  nextGenState.standardSaving = true;
+  setNextGenStandardEditing(true);
+  setNextGenStandardStatus("Saving standard text…");
+
+  try {
+    const saved = await saveNextGenStandardToSupabase(value);
+    applyNextGenStandardText(saved);
+    setNextGenStandardEditing(false);
+    setNextGenStandardStatus("Updated standard text.", "success");
+  } catch (error) {
+    console.error("[lovablesheet] Unable to save Next Gen standard text", error);
+    setNextGenStandardStatus("We couldn't save the standard text. Please try again.", "error");
+  } finally {
+    nextGenState.standardSaving = false;
+    setNextGenStandardEditing(nextGenState.standardEditing);
+  }
+}
+
+async function loadNextGenStandardFromSupabase() {
+  if (nextGenState.standardLoaded) return;
+  if (!supabaseClient) return;
+
+  nextGenState.standardLoaded = true;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(NEXTGEN_STANDARD_TABLE)
+      .select("content")
+      .eq("id", NEXTGEN_STANDARD_ID)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data && typeof data.content === "string" && data.content.trim()) {
+      applyNextGenStandardText(data.content);
+      setNextGenStandardStatus("");
+      return;
+    }
+
+    setNextGenStandardStatus("");
+  } catch (error) {
+    console.error("[lovablesheet] Unable to load Next Gen standard text", error);
+    setNextGenStandardStatus("We couldn't load the saved standard text. Using the default copy.", "error");
+    applyNextGenStandardText(NEXTGEN_DEFAULT_STANDARD_TEXT);
+  }
+}
+
 function populateNextGenFeatureOptions() {
   const select = nextGenState.elements.featureSelect;
   if (!select) return;
@@ -349,6 +549,285 @@ function removeNextGenFeature(featureId) {
   renderNextGenSelectedFeatures();
 }
 
+function syncNextGenProductSelections() {
+  const { productsContainer } = nextGenState.elements;
+  if (!productsContainer) return;
+  const selectedIds = new Set(nextGenState.selectedInspiration.map((item) => item.id));
+  productsContainer.querySelectorAll("input[type='checkbox']").forEach((input) => {
+    input.checked = selectedIds.has(input.value);
+  });
+}
+
+function renderNextGenSelectedInspiration() {
+  const { inspirationContainer, inspirationEmpty, inspirationList } = nextGenState.elements;
+  if (!inspirationList) return;
+
+  inspirationList.innerHTML = "";
+  const selections = Array.isArray(nextGenState.selectedInspiration) ? nextGenState.selectedInspiration : [];
+
+  if (!selections.length) {
+    if (inspirationContainer) {
+      inspirationContainer.hidden = true;
+    }
+    if (inspirationEmpty) {
+      inspirationEmpty.hidden = false;
+    }
+    return;
+  }
+
+  if (inspirationContainer) {
+    inspirationContainer.hidden = false;
+  }
+  if (inspirationEmpty) {
+    inspirationEmpty.hidden = true;
+  }
+
+  const fragment = document.createDocumentFragment();
+  selections.forEach((item, index) => {
+    if (!item) return;
+    const rawId = typeof item.id === "string" && item.id ? item.id : `inspiration-${index}`;
+    const sanitizedId = sanitizeNextGenId(rawId, `inspiration-${index}`);
+    const name = typeof item.name === "string" && item.name ? item.name : rawId;
+    const scope = item.scope === "features" ? "features" : "full";
+    const details = typeof item.details === "string" ? item.details : "";
+
+    const entry = document.createElement("article");
+    entry.className = "nextgen-form__inspiration-item";
+    entry.dataset.nextgenInspirationItem = rawId;
+
+    const header = document.createElement("div");
+    header.className = "nextgen-form__inspiration-header";
+
+    const copy = document.createElement("div");
+    copy.className = "nextgen-form__inspiration-copy";
+
+    const nameEl = document.createElement("p");
+    nameEl.className = "nextgen-form__inspiration-name";
+    nameEl.textContent = name;
+    copy.appendChild(nameEl);
+
+    const metaEl = document.createElement("p");
+    metaEl.className = "nextgen-form__inspiration-meta";
+    metaEl.textContent = item.draft ? "Draft • Internal preview" : "Live in storefront";
+    copy.appendChild(metaEl);
+
+    header.appendChild(copy);
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "nextgen-form__inspiration-remove";
+    removeButton.dataset.nextgenInspirationRemove = rawId;
+    removeButton.textContent = "Remove";
+    header.appendChild(removeButton);
+
+    entry.appendChild(header);
+
+    const options = document.createElement("div");
+    options.className = "nextgen-form__inspiration-options";
+
+    const fullLabel = document.createElement("label");
+    fullLabel.className = "nextgen-form__inspiration-option";
+    const fullInput = document.createElement("input");
+    fullInput.type = "radio";
+    fullInput.name = `inspiration-scope-${sanitizedId}`;
+    fullInput.value = "full";
+    fullInput.dataset.nextgenInspirationScope = rawId;
+    fullInput.checked = scope !== "features";
+    fullLabel.appendChild(fullInput);
+    fullLabel.appendChild(document.createTextNode("Full model"));
+    options.appendChild(fullLabel);
+
+    const featureLabel = document.createElement("label");
+    featureLabel.className = "nextgen-form__inspiration-option";
+    const featureInput = document.createElement("input");
+    featureInput.type = "radio";
+    featureInput.name = `inspiration-scope-${sanitizedId}`;
+    featureInput.value = "features";
+    featureInput.dataset.nextgenInspirationScope = rawId;
+    featureInput.checked = scope === "features";
+    featureLabel.appendChild(featureInput);
+    featureLabel.appendChild(document.createTextNode("Features"));
+    options.appendChild(featureLabel);
+
+    entry.appendChild(options);
+
+    const notes = document.createElement("div");
+    notes.className = "nextgen-form__inspiration-notes";
+    notes.dataset.nextgenInspirationNotes = rawId;
+    notes.hidden = scope !== "features";
+
+    const notesLabel = document.createElement("label");
+    notesLabel.className = "nextgen-form__picker-label";
+    const notesId = `inspiration-notes-${sanitizedId}`;
+    notesLabel.setAttribute("for", notesId);
+    notesLabel.textContent = "Feature details";
+    notes.appendChild(notesLabel);
+
+    const notesInput = document.createElement("textarea");
+    notesInput.className = "nextgen-form__textarea nextgen-form__textarea--condensed";
+    notesInput.id = notesId;
+    notesInput.rows = 3;
+    notesInput.placeholder = "Describe the feature(s) that inspired you.";
+    notesInput.dataset.nextgenInspirationDetail = rawId;
+    notesInput.value = details;
+    notes.appendChild(notesInput);
+
+    entry.appendChild(notes);
+
+    fragment.appendChild(entry);
+  });
+
+  inspirationList.appendChild(fragment);
+}
+
+function removeNextGenInspiration(productId) {
+  const index = nextGenState.selectedInspiration.findIndex((item) => item.id === productId);
+  if (index === -1) return;
+  nextGenState.selectedInspiration.splice(index, 1);
+  renderNextGenSelectedInspiration();
+  syncNextGenProductSelections();
+}
+
+function updateNextGenInspirationScope(productId, scope) {
+  const target = nextGenState.selectedInspiration.find((item) => item.id === productId);
+  if (!target) return;
+
+  const normalized = scope === "features" ? "features" : "full";
+  target.scope = normalized;
+
+  const { inspirationList } = nextGenState.elements;
+  if (!inspirationList) return;
+
+  inspirationList.querySelectorAll("[data-nextgen-inspiration-notes]").forEach((wrapper) => {
+    if (wrapper.dataset.nextgenInspirationNotes === productId) {
+      wrapper.hidden = normalized !== "features";
+      if (!wrapper.hidden) {
+        const textarea = wrapper.querySelector(`[data-nextgen-inspiration-detail="${productId}"]`);
+        textarea?.focus?.();
+      }
+    }
+  });
+}
+
+function updateNextGenInspirationDetails(productId, value) {
+  const target = nextGenState.selectedInspiration.find((item) => item.id === productId);
+  if (!target) return;
+  target.details = value;
+}
+
+function handleNextGenInspirationListClick(event) {
+  const removeButton = event.target.closest("[data-nextgen-inspiration-remove]");
+  if (!removeButton) return;
+  const productId = removeButton.dataset.nextgenInspirationRemove;
+  if (!productId) return;
+  removeNextGenInspiration(productId);
+}
+
+function handleNextGenInspirationListChange(event) {
+  const control = event.target.closest("[data-nextgen-inspiration-scope]");
+  if (!control) return;
+  const productId = control.dataset.nextgenInspirationScope;
+  if (!productId) return;
+  updateNextGenInspirationScope(productId, control.value);
+}
+
+function handleNextGenInspirationListInput(event) {
+  const field = event.target.closest("[data-nextgen-inspiration-detail]");
+  if (!field) return;
+  const productId = field.dataset.nextgenInspirationDetail;
+  if (!productId) return;
+  updateNextGenInspirationDetails(productId, field.value);
+}
+
+function handleNextGenInspirationDialogKeydown(event) {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeNextGenInspirationDialog({ focusButton: true });
+  }
+}
+
+function openNextGenInspirationDialog() {
+  const { inspirationDialog, productsContainer } = nextGenState.elements;
+  if (!inspirationDialog) return;
+
+  inspirationDialog.hidden = false;
+  inspirationDialog.setAttribute("aria-hidden", "false");
+  nextGenState.inspirationDialogOpen = true;
+
+  if (productsContainer) {
+    if (!productsContainer.childElementCount && nextGenState.products.length) {
+      renderNextGenProductOptions(nextGenState.products);
+    } else {
+      syncNextGenProductSelections();
+    }
+  }
+
+  if (!nextGenState.inspirationKeydownHandler) {
+    nextGenState.inspirationKeydownHandler = handleNextGenInspirationDialogKeydown;
+  }
+  document.addEventListener("keydown", nextGenState.inspirationKeydownHandler);
+
+  window.setTimeout(() => {
+    const focusTarget = inspirationDialog.querySelector("input[type='checkbox']")
+      || inspirationDialog.querySelector("button, input, [href], select, textarea");
+    focusTarget?.focus?.();
+  }, 0);
+}
+
+function closeNextGenInspirationDialog(options = {}) {
+  const { focusButton = false } = options;
+  const { inspirationDialog, inspirationButton } = nextGenState.elements;
+  if (!inspirationDialog) return;
+
+  inspirationDialog.hidden = true;
+  inspirationDialog.setAttribute("aria-hidden", "true");
+  nextGenState.inspirationDialogOpen = false;
+
+  if (nextGenState.inspirationKeydownHandler) {
+    document.removeEventListener("keydown", nextGenState.inspirationKeydownHandler);
+    nextGenState.inspirationKeydownHandler = null;
+  }
+
+  if (focusButton && inspirationButton) {
+    window.setTimeout(() => {
+      try {
+        inspirationButton.focus();
+      } catch (error) {
+        // Ignore focus issues.
+      }
+    }, 0);
+  }
+}
+
+function applyNextGenInspirationSelection() {
+  const { productsContainer } = nextGenState.elements;
+  if (!productsContainer) return;
+
+  const previous = new Map(nextGenState.selectedInspiration.map((item) => [item.id, item]));
+  const selections = [];
+
+  productsContainer.querySelectorAll("input[type='checkbox']").forEach((input) => {
+    if (!input.checked) return;
+    const id = input.value;
+    if (!id) return;
+    const name = input.dataset.label || nextGenState.productMap.get(id) || id;
+    const draft = input.dataset.draft === "true";
+    const existing = previous.get(id);
+    selections.push({
+      id,
+      name,
+      draft,
+      scope: existing?.scope === "features" ? "features" : "full",
+      details: existing?.details || ""
+    });
+  });
+
+  nextGenState.selectedInspiration = selections;
+  renderNextGenSelectedInspiration();
+  syncNextGenProductSelections();
+  closeNextGenInspirationDialog({ focusButton: true });
+}
+
 function resetNextGenForm() {
   const {
     form,
@@ -369,18 +848,26 @@ function resetNextGenForm() {
   if (notesInput) {
     notesInput.value = "";
   }
-  if (standardTextarea) {
-    standardTextarea.value = NEXTGEN_STANDARD_TEXT;
-  }
 
   nextGenState.selectedFeatures = [];
   renderNextGenSelectedFeatures();
+
+  nextGenState.selectedInspiration = [];
+  renderNextGenSelectedInspiration();
 
   if (productsContainer) {
     productsContainer.querySelectorAll("input[type='checkbox']").forEach((input) => {
       input.checked = false;
     });
   }
+
+  if (standardTextarea) {
+    standardTextarea.value = nextGenState.standardText;
+  }
+
+  nextGenState.standardEditing = false;
+  setNextGenStandardEditing(false);
+  setNextGenStandardStatus("");
 
   setNextGenFormStatus("");
 }
@@ -417,6 +904,8 @@ function closeNextGenModal(options = {}) {
   const { reset = false, focusTrigger = true } = options;
   const { layer, modal } = nextGenState.elements;
   if (!layer || !modal) return;
+
+  closeNextGenInspirationDialog({ focusButton: false });
 
   modal.hidden = true;
   layer.hidden = true;
@@ -517,6 +1006,7 @@ function renderNextGenProductOptions(products) {
     return;
   }
 
+  const selectedIds = new Set(nextGenState.selectedInspiration.map((item) => item.id));
   const fragment = document.createDocumentFragment();
   products.forEach((product, index) => {
     const optionId = `nextgen-product-${sanitizeNextGenId(product.id, String(index))}`;
@@ -532,6 +1022,7 @@ function renderNextGenProductOptions(products) {
     if (product.draft) {
       input.dataset.draft = "true";
     }
+    input.checked = selectedIds.has(product.id);
 
     const copyWrap = document.createElement("span");
     copyWrap.className = "nextgen-form__product-copy";
@@ -618,6 +1109,16 @@ function appendNextGenInspirationSection(parent, inspiration) {
       badge.textContent = "Draft";
       row.appendChild(badge);
     }
+    const detail = document.createElement("span");
+    detail.className = "lovablesheet-nextgen__inspiration-detail";
+    const scope = item.scope === "features" ? "features" : "full";
+    if (scope === "features") {
+      const detailsText = typeof item.details === "string" && item.details.trim() ? item.details.trim() : "Features";
+      detail.textContent = detailsText === "Features" ? "Features" : `Features — ${detailsText}`;
+    } else {
+      detail.textContent = "Full model";
+    }
+    row.appendChild(detail);
     list.appendChild(row);
   });
   section.appendChild(list);
@@ -729,7 +1230,7 @@ function normalizeNextGenBrief(brief) {
   const notes = typeof brief.notes === "string" ? brief.notes.trim() : "";
   const standardText = typeof brief.standardText === "string" && brief.standardText.trim()
     ? brief.standardText
-    : NEXTGEN_STANDARD_TEXT;
+    : NEXTGEN_DEFAULT_STANDARD_TEXT;
   const createdAt = typeof brief.createdAt === "string" && brief.createdAt.trim()
     ? brief.createdAt.trim()
     : new Date().toISOString();
@@ -781,10 +1282,31 @@ function normalizeNextGenBrief(brief) {
           if (!rawId && !name) {
             return null;
           }
+          const normalizedScope = (() => {
+            const scopeValue = typeof item.scope === "string" ? item.scope.trim().toLowerCase() : "";
+            if (scopeValue === "features") {
+              return "features";
+            }
+            const typeValue = typeof item.type === "string" ? item.type.trim().toLowerCase() : "";
+            if (typeValue === "features") {
+              return "features";
+            }
+            return "full";
+          })();
+          const rawDetails = typeof item.details === "string"
+            ? item.details
+            : typeof item.featureDetails === "string"
+              ? item.featureDetails
+              : typeof item.focus === "string"
+                ? item.focus
+                : "";
+          const details = normalizedScope === "features" ? rawDetails.trim() : "";
           return {
             id: rawId || name,
             name: name || rawId,
-            draft: Boolean(item.draft)
+            draft: Boolean(item.draft),
+            scope: normalizedScope,
+            details
           };
         })
         .filter(Boolean)
@@ -805,7 +1327,7 @@ function normalizeNextGenBrief(brief) {
 function handleNextGenFormSubmit(event) {
   event.preventDefault();
 
-  const { nameInput, descriptionInput, notesInput, productsContainer, standardTextarea } = nextGenState.elements;
+  const { nameInput, descriptionInput, notesInput, standardTextarea } = nextGenState.elements;
   const productName = nameInput?.value?.trim() ?? "";
   if (!productName) {
     setNextGenFormStatus("Name of product is required.", "error");
@@ -821,23 +1343,34 @@ function handleNextGenFormSubmit(event) {
   const description = descriptionInput?.value?.trim() ?? "";
   const notes = notesInput?.value?.trim() ?? "";
 
-  const inspiration = [];
-  if (productsContainer) {
-    productsContainer.querySelectorAll("input[type='checkbox']").forEach((input) => {
-      if (!input.checked) return;
-      const id = input.value;
-      const name = input.dataset.label || nextGenState.productMap.get(id) || id;
-      const draft = input.dataset.draft === "true";
-      inspiration.push({ id, name, draft });
-    });
-  }
+  const inspiration = Array.isArray(nextGenState.selectedInspiration)
+    ? nextGenState.selectedInspiration.map((item) => {
+        if (!item) return null;
+        const id = typeof item.id === "string" ? item.id : "";
+        const name = typeof item.name === "string" && item.name ? item.name : nextGenState.productMap.get(id) || id;
+        if (!id && !name) return null;
+        const scope = item.scope === "features" ? "features" : "full";
+        const details = scope === "features" && typeof item.details === "string" ? item.details.trim() : "";
+        return {
+          id: id || name,
+          name,
+          draft: Boolean(item.draft),
+          scope,
+          details
+        };
+      }).filter(Boolean)
+    : [];
 
+  const standardValue = standardTextarea?.value;
   const brief = normalizeNextGenBrief({
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     productName,
     description,
     notes,
-    standardText: standardTextarea?.value || NEXTGEN_STANDARD_TEXT,
+    standardText:
+      typeof standardValue === "string" && standardValue.trim()
+        ? standardValue
+        : nextGenState.standardText || NEXTGEN_DEFAULT_STANDARD_TEXT,
     features,
     inspiration,
     createdAt: new Date().toISOString()
@@ -888,19 +1421,33 @@ function initNextGenEngineBriefs() {
   elements.descriptionInput = elements.form?.querySelector("[data-nextgen-description]") ?? null;
   elements.notesInput = elements.form?.querySelector("[data-nextgen-notes]") ?? null;
   elements.standardTextarea = elements.form?.querySelector("[data-nextgen-standard]") ?? null;
-  elements.productsContainer = elements.form?.querySelector("[data-nextgen-products]") ?? null;
-  elements.productsLoading = elements.form?.querySelector("[data-nextgen-products-loading]") ?? null;
-  elements.productsError = elements.form?.querySelector("[data-nextgen-products-error]") ?? null;
+  elements.standardEditButton = elements.form?.querySelector("[data-nextgen-standard-edit]") ?? null;
+  elements.standardSaveButton = elements.form?.querySelector("[data-nextgen-standard-save]") ?? null;
+  elements.standardCancelButton = elements.form?.querySelector("[data-nextgen-standard-cancel]") ?? null;
+  elements.standardStatus = elements.form?.querySelector("[data-nextgen-standard-status]") ?? null;
+  elements.inspirationButton = elements.form?.querySelector("[data-nextgen-inspiration-open]") ?? null;
+  elements.inspirationContainer = elements.form?.querySelector("[data-nextgen-inspiration-selected]") ?? null;
+  elements.inspirationEmpty = elements.form?.querySelector("[data-nextgen-inspiration-empty]") ?? null;
+  elements.inspirationList = elements.form?.querySelector("[data-nextgen-inspiration-list]") ?? null;
+  elements.inspirationDialog = elements.form?.querySelector("[data-nextgen-products-dialog]") ?? null;
+  elements.inspirationDialogOverlay = elements.inspirationDialog?.querySelector("[data-nextgen-products-overlay]") ?? null;
+  elements.inspirationDialogClose = elements.inspirationDialog?.querySelector("[data-nextgen-products-close]") ?? null;
+  elements.inspirationDialogApply = elements.inspirationDialog?.querySelector("[data-nextgen-products-apply]") ?? null;
+  elements.inspirationDialogCancel = elements.inspirationDialog?.querySelector("[data-nextgen-products-cancel]") ?? null;
+  elements.productsContainer = elements.inspirationDialog?.querySelector("[data-nextgen-products]") ?? null;
+  elements.productsLoading = elements.inspirationDialog?.querySelector("[data-nextgen-products-loading]") ?? null;
+  elements.productsError = elements.inspirationDialog?.querySelector("[data-nextgen-products-error]") ?? null;
   elements.formStatus = elements.form?.querySelector("[data-nextgen-form-status]") ?? null;
   elements.cancelButton = elements.form?.querySelector("[data-nextgen-cancel]") ?? null;
   elements.closeButton = elements.form?.querySelector("[data-nextgen-close]") ?? null;
 
-  if (elements.standardTextarea) {
-    elements.standardTextarea.value = NEXTGEN_STANDARD_TEXT;
-  }
+  applyNextGenStandardText(nextGenState.standardText);
+  setNextGenStandardEditing(false);
+  setNextGenStandardStatus("");
 
   populateNextGenFeatureOptions();
   renderNextGenSelectedFeatures();
+  renderNextGenSelectedInspiration();
 
   nextGenState.savedBriefs = getNextGenStoredBriefs();
   renderNextGenSavedBriefs();
@@ -959,6 +1506,53 @@ function initNextGenEngineBriefs() {
     elements.form.addEventListener("submit", handleNextGenFormSubmit);
   }
 
+  if (elements.standardEditButton) {
+    elements.standardEditButton.addEventListener("click", handleNextGenStandardEdit);
+  }
+  if (elements.standardSaveButton) {
+    elements.standardSaveButton.addEventListener("click", handleNextGenStandardSave);
+  }
+  if (elements.standardCancelButton) {
+    elements.standardCancelButton.addEventListener("click", handleNextGenStandardCancel);
+  }
+
+  if (elements.inspirationButton) {
+    elements.inspirationButton.addEventListener("click", () => {
+      setNextGenFormStatus("");
+      openNextGenInspirationDialog();
+    });
+  }
+
+  if (elements.inspirationDialogOverlay) {
+    elements.inspirationDialogOverlay.addEventListener("click", () => {
+      closeNextGenInspirationDialog({ focusButton: true });
+    });
+  }
+
+  if (elements.inspirationDialogClose) {
+    elements.inspirationDialogClose.addEventListener("click", () => {
+      closeNextGenInspirationDialog({ focusButton: true });
+    });
+  }
+
+  if (elements.inspirationDialogCancel) {
+    elements.inspirationDialogCancel.addEventListener("click", () => {
+      closeNextGenInspirationDialog({ focusButton: true });
+    });
+  }
+
+  if (elements.inspirationDialogApply) {
+    elements.inspirationDialogApply.addEventListener("click", () => {
+      applyNextGenInspirationSelection();
+    });
+  }
+
+  if (elements.inspirationList) {
+    elements.inspirationList.addEventListener("click", handleNextGenInspirationListClick);
+    elements.inspirationList.addEventListener("change", handleNextGenInspirationListChange);
+    elements.inspirationList.addEventListener("input", handleNextGenInspirationListInput);
+  }
+
   if (elements.list) {
     elements.list.addEventListener("click", (event) => {
       const button = event.target.closest("[data-nextgen-delete]");
@@ -970,6 +1564,7 @@ function initNextGenEngineBriefs() {
   }
 
   fetchNextGenProducts();
+  loadNextGenStandardFromSupabase();
 
   nextGenState.initialized = true;
 }
