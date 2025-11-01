@@ -102,6 +102,276 @@
     </div>
   </section>
   <section class="lovablesheet-content" data-lovablesheet-content hidden>
+    <section class="lovablesheet-pipeline" aria-labelledby="todo-pipeline-title">
+      <div class="admin__panel admin__panel--pipeline" aria-labelledby="todo-pipeline-title">
+        <div class="admin__panel-head">
+          <div>
+            <h2 id="todo-pipeline-title">«Todo do» product pipeline</h2>
+            <p class="admin__panel-sub">
+              Track upcoming spreadsheet experiences and align launch priorities for the Todo do mini product line.
+            </p>
+          </div>
+          <div class="admin__panel-actions admin__panel-actions--pipeline">
+            <button
+              type="button"
+              class="admin__pipeline-toggle"
+              data-pipeline-toggle
+              aria-controls="todo-pipeline-table"
+              aria-expanded="false"
+              hidden
+            >
+              <span class="admin__pipeline-toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span data-pipeline-toggle-label>Expand full pipeline</span>
+            </button>
+          </div>
+        </div>
+        <div class="admin__pipeline-body">
+          <p id="todo-pipeline-hint" class="sr-only">This table shows the first three Todo do products. Use the pipeline toggle button to reveal or collapse the remaining items.</p>
+          <table
+            class="admin-table admin-table--compact admin-table--pipeline"
+            aria-describedby="todo-pipeline-title todo-pipeline-hint"
+            data-pipeline-table
+            data-preview-count="3"
+            id="todo-pipeline-table"
+          >
+            <thead>
+              <tr>
+                <th scope="col">Product</th>
+                <th scope="col">Type</th>
+                <th scope="col">Badge</th>
+                <th scope="col" class="admin-table__price">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Finances</span>
+                  <span class="admin-pipeline__product">Budget Blueprint</span>
+                </td>
+                <td data-label="Type">Budget</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$29</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Love</span>
+                  <span class="admin-pipeline__product">Shared Memory Keeper</span>
+                </td>
+                <td data-label="Type">Template</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$24</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Love</span>
+                  <span class="admin-pipeline__product">Couples Connection Journal</span>
+                </td>
+                <td data-label="Type">Journal</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$19</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Health</span>
+                  <span class="admin-pipeline__product">Meal &amp; Movement Planner</span>
+                </td>
+                <td data-label="Type">Planner</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$19</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Love</span>
+                  <span class="admin-pipeline__product">Date Night Generator</span>
+                </td>
+                <td data-label="Type">Tool</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge" data-badge="new">New</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$9</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Career</span>
+                  <span class="admin-pipeline__product">Weekly Reflection Guide</span>
+                </td>
+                <td data-label="Type">Guide</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge" data-badge="new">New</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$11</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Fun</span>
+                  <span class="admin-pipeline__product">Bucket List Builder</span>
+                </td>
+                <td data-label="Type">Template</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$8</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Finances</span>
+                  <span class="admin-pipeline__product">Cash-Flow Dashboard</span>
+                </td>
+                <td data-label="Type">Dashboard</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$24</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Family</span>
+                  <span class="admin-pipeline__product">Celebration Planner</span>
+                </td>
+                <td data-label="Type">Planner</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$8</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Spirituality</span>
+                  <span class="admin-pipeline__product">Community Service Tracker</span>
+                </td>
+                <td data-label="Type">Tracker</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$7</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Family</span>
+                  <span class="admin-pipeline__product">Connection Rituals</span>
+                </td>
+                <td data-label="Type">Ideas</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$6</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Fun</span>
+                  <span class="admin-pipeline__product">Creative Hobby Dashboard</span>
+                </td>
+                <td data-label="Type">Dashboard</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$12</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Love</span>
+                  <span class="admin-pipeline__product">Daily Ritual Prompts</span>
+                </td>
+                <td data-label="Type">Cards</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$12</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Finances</span>
+                  <span class="admin-pipeline__product">Debt Snowball Coach</span>
+                </td>
+                <td data-label="Type">Template</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$15</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Spirituality</span>
+                  <span class="admin-pipeline__product">Gratitude &amp; Intention Log</span>
+                </td>
+                <td data-label="Type">Journal</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$6</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Health</span>
+                  <span class="admin-pipeline__product">Habit Loop Tracker</span>
+                </td>
+                <td data-label="Type">Tracker</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$7</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Family</span>
+                  <span class="admin-pipeline__product">Shared Family Agenda</span>
+                </td>
+                <td data-label="Type">Planner</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$12</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Career</span>
+                  <span class="admin-pipeline__product">Skill Tracker Pro</span>
+                </td>
+                <td data-label="Type">Tracker</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$18</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Health</span>
+                  <span class="admin-pipeline__product">Sleep Routine Builder</span>
+                </td>
+                <td data-label="Type">Template</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$12</td>
+              </tr>
+              <tr>
+                <td data-label="Product">
+                  <span class="admin-pipeline__life-area">Life area: Fun</span>
+                  <span class="admin-pipeline__product">Weekend Adventure Planner</span>
+                </td>
+                <td data-label="Type">Planner</td>
+                <td data-label="Badge">
+                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                </td>
+                <td data-label="Price" class="admin-table__price">$9</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
     <article class="lovablesheet-workflow" aria-labelledby="lovablesheet-workflow-title">
       <header class="lovablesheet-workflow__intro">
         <p class="lovablesheet-eyebrow">Simple Workflow</p>
@@ -121,167 +391,6 @@
               <li><a href="docs/module-publishing-playbook.md#new-module-implementation" target="_blank" rel="noopener">Module Publishing Playbook</a> &mdash; outlines required content fields, asset specs, CSS hooks, and QA steps for every launch.</li>
               <li><a href="products.json" target="_blank" rel="noopener">products.json</a> &mdash; edit copy, pricing, sheet IDs, and metadata that surface in the public storefront.</li>
             </ul>
-          </section>
-
-          <nav class="code-library__nav" aria-label="LovableSheet modules">
-            <ul>
-              <li><a href="#module-board-library">Board library controls</a></li>
-              <li><a href="#module-brain-board">Brain board workspace</a></li>
-              <li><a href="#module-flowchart-board">Flowchart board workspace</a></li>
-              <li><a href="#module-flowchart-prompt">Flowchart prompt compiler</a></li>
-            </ul>
-          </nav>
-
-          <section id="module-board-library" class="code-library__module" aria-labelledby="module-board-library-title">
-            <h3 id="module-board-library-title">Board library controls</h3>
-            <p>Initializes the modal layer that launches each sticky board experience and wires up dismissal logic for overlays, close buttons, and keyboard shortcuts.</p>
-            <table class="code-library__table">
-              <thead>
-                <tr>
-                  <th scope="col">Hook</th>
-                  <th scope="col">Purpose</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>data-board-layer</code></td>
-                  <td>Root element containing the sticky board modals and overlay.</td>
-                </tr>
-                <tr>
-                  <td><code>data-board-modal</code></td>
-                  <td>Identifies each modal instance (for example, <code>brain</code> or <code>flowchart</code>).</td>
-                </tr>
-                <tr>
-                  <td><code>data-board-launch</code></td>
-                  <td>Buttons that open the corresponding modal and store the triggering control.</td>
-                </tr>
-                <tr>
-                  <td><code>data-board-close</code> &amp; overlay</td>
-                  <td>Close affordances that collapse the active modal and restore focus.</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="code-library__notes">
-              <h4>Implementation notes</h4>
-              <ul>
-                <li><em>Document keyboard focus management and animation hooks.</em></li>
-                <li><em>Add overlay styling guidelines if custom themes are introduced.</em></li>
-              </ul>
-            </div>
-          </section>
-
-          <section id="module-brain-board" class="code-library__module" aria-labelledby="module-brain-board-title">
-            <h3 id="module-brain-board-title">Brain board workspace</h3>
-            <p>Creates the draggable sticky note canvas for the brain board, registers Supabase save actions, and exposes board switching utilities.</p>
-            <table class="code-library__table">
-              <thead>
-                <tr>
-                  <th scope="col">Hook</th>
-                  <th scope="col">Purpose</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>data-brain-board</code></td>
-                  <td>Root node passed to the <code>StickyBoard</code> class.</td>
-                </tr>
-                <tr>
-                  <td><code>#brain-board-note-template</code></td>
-                  <td>Template element used to clone new sticky notes.</td>
-                </tr>
-                <tr>
-                  <td><code>data-board-select</code> / <code>data-board-switcher</code></td>
-                  <td>Dropdown and dialog that load and save Supabase board layouts.</td>
-                </tr>
-                <tr>
-                  <td><code>data-board-save</code> &amp; <code>data-board-status</code></td>
-                  <td>Primary save trigger and status region for progress or errors.</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="code-library__notes">
-              <h4>Implementation notes</h4>
-              <ul>
-                <li><em>Clarify default snapshot expectations before overwriting custom boards.</em></li>
-                <li><em>Track additional accessibility announcements for save operations.</em></li>
-              </ul>
-            </div>
-          </section>
-
-          <section id="module-flowchart-board" class="code-library__module" aria-labelledby="module-flowchart-board-title">
-            <h3 id="module-flowchart-board-title">Flowchart board workspace</h3>
-            <p>Spins up the flowchart variant of the sticky board with optional initial zoom and delegates updates to the shared prompt compiler.</p>
-            <table class="code-library__table">
-              <thead>
-                <tr>
-                  <th scope="col">Hook</th>
-                  <th scope="col">Purpose</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>data-flowchart-board</code></td>
-                  <td>Root element instantiated as a <code>StickyBoard</code> instance.</td>
-                </tr>
-                <tr>
-                  <td><code>data-board-initial-scale</code></td>
-                  <td>Optional attribute that seeds the default zoom level.</td>
-                </tr>
-                <tr>
-                  <td><code>data-board-workspace</code></td>
-                  <td>Scrollable canvas that emits updates consumed by the prompt module.</td>
-                </tr>
-                <tr>
-                  <td><code>data-board-add</code> controls</td>
-                  <td>Buttons that insert new flowchart sticky notes into the workspace.</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="code-library__notes">
-              <h4>Implementation notes</h4>
-              <ul>
-                <li><em>Outline swimlane presets once the placeholder controls are implemented.</em></li>
-                <li><em>Document syncing behaviour when multiple flowchart boards are opened.</em></li>
-              </ul>
-            </div>
-          </section>
-
-          <section id="module-flowchart-prompt" class="code-library__module" aria-labelledby="module-flowchart-prompt-title">
-            <h3 id="module-flowchart-prompt-title">Flowchart prompt compiler</h3>
-            <p>Compiles the live flowchart workspace into a sharable prompt, exposes a manual regenerate action, and provides clipboard helpers.</p>
-            <table class="code-library__table">
-              <thead>
-                <tr>
-                  <th scope="col">Hook</th>
-                  <th scope="col">Purpose</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><code>data-flowchart-prompt</code></td>
-                  <td>Container that scopes prompt controls and output fields.</td>
-                </tr>
-                <tr>
-                  <td><code>data-flowchart-prompt-generate</code></td>
-                  <td>Button that triggers a manual prompt compilation.</td>
-                </tr>
-                <tr>
-                  <td><code>data-flowchart-prompt-copy</code></td>
-                  <td>Invokes clipboard logic or falls back to manual text selection.</td>
-                </tr>
-                <tr>
-                  <td><code>data-flowchart-prompt-output</code></td>
-                  <td>Read-only textarea populated with compiled prompt text.</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="code-library__notes">
-              <h4>Implementation notes</h4>
-              <ul>
-                <li><em>Add localization guidance for success and error status messages.</em></li>
-                <li><em>Capture performance metrics for large flowchart boards.</em></li>
-              </ul>
-            </div>
           </section>
         </div>
       </section>
@@ -1094,277 +1203,6 @@
         </div>
       </div>
     </div>
-
-    <section class="lovablesheet-pipeline" aria-labelledby="todo-pipeline-title">
-      <div class="admin__panel admin__panel--pipeline" aria-labelledby="todo-pipeline-title">
-        <div class="admin__panel-head">
-          <div>
-            <h2 id="todo-pipeline-title">«Todo do» product pipeline</h2>
-            <p class="admin__panel-sub">
-              Track upcoming spreadsheet experiences and align launch priorities for the Todo do mini product line.
-            </p>
-          </div>
-          <div class="admin__panel-actions admin__panel-actions--pipeline">
-            <button
-              type="button"
-              class="admin__pipeline-toggle"
-              data-pipeline-toggle
-              aria-controls="todo-pipeline-table"
-              aria-expanded="false"
-              hidden
-            >
-              <span class="admin__pipeline-toggle-icon" aria-hidden="true">
-                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-              <span data-pipeline-toggle-label>Expand full pipeline</span>
-            </button>
-          </div>
-        </div>
-        <div class="admin__pipeline-body">
-          <p id="todo-pipeline-hint" class="sr-only">This table shows the first three Todo do products. Use the pipeline toggle button to reveal or collapse the remaining items.</p>
-          <table
-            class="admin-table admin-table--compact admin-table--pipeline"
-            aria-describedby="todo-pipeline-title todo-pipeline-hint"
-            data-pipeline-table
-            data-preview-count="3"
-            id="todo-pipeline-table"
-          >
-            <thead>
-              <tr>
-                <th scope="col">Product</th>
-                <th scope="col">Type</th>
-                <th scope="col">Badge</th>
-                <th scope="col" class="admin-table__price">Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Finances</span>
-                  <span class="admin-pipeline__product">Budget Blueprint</span>
-                </td>
-                <td data-label="Type">Budget</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$29</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Love</span>
-                  <span class="admin-pipeline__product">Shared Memory Keeper</span>
-                </td>
-                <td data-label="Type">Template</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$24</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Love</span>
-                  <span class="admin-pipeline__product">Couples Connection Journal</span>
-                </td>
-                <td data-label="Type">Journal</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$19</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Health</span>
-                  <span class="admin-pipeline__product">Meal &amp; Movement Planner</span>
-                </td>
-                <td data-label="Type">Planner</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$19</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Love</span>
-                  <span class="admin-pipeline__product">Date Night Generator</span>
-                </td>
-                <td data-label="Type">Tool</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge" data-badge="new">New</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$9</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Career</span>
-                  <span class="admin-pipeline__product">Weekly Reflection Guide</span>
-                </td>
-                <td data-label="Type">Guide</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge" data-badge="new">New</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$11</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Fun</span>
-                  <span class="admin-pipeline__product">Bucket List Builder</span>
-                </td>
-                <td data-label="Type">Template</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$8</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Finances</span>
-                  <span class="admin-pipeline__product">Cash-Flow Dashboard</span>
-                </td>
-                <td data-label="Type">Dashboard</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$24</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Family</span>
-                  <span class="admin-pipeline__product">Celebration Planner</span>
-                </td>
-                <td data-label="Type">Planner</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$8</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Spirituality</span>
-                  <span class="admin-pipeline__product">Community Service Tracker</span>
-                </td>
-                <td data-label="Type">Tracker</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$7</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Family</span>
-                  <span class="admin-pipeline__product">Connection Rituals</span>
-                </td>
-                <td data-label="Type">Ideas</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$6</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Fun</span>
-                  <span class="admin-pipeline__product">Creative Hobby Dashboard</span>
-                </td>
-                <td data-label="Type">Dashboard</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$12</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Love</span>
-                  <span class="admin-pipeline__product">Daily Ritual Prompts</span>
-                </td>
-                <td data-label="Type">Cards</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$12</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Finances</span>
-                  <span class="admin-pipeline__product">Debt Snowball Coach</span>
-                </td>
-                <td data-label="Type">Template</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$15</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Spirituality</span>
-                  <span class="admin-pipeline__product">Gratitude &amp; Intention Log</span>
-                </td>
-                <td data-label="Type">Journal</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$6</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Health</span>
-                  <span class="admin-pipeline__product">Habit Loop Tracker</span>
-                </td>
-                <td data-label="Type">Tracker</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$7</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Family</span>
-                  <span class="admin-pipeline__product">Shared Family Agenda</span>
-                </td>
-                <td data-label="Type">Planner</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$12</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Career</span>
-                  <span class="admin-pipeline__product">Skill Tracker Pro</span>
-                </td>
-                <td data-label="Type">Tracker</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$18</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Health</span>
-                  <span class="admin-pipeline__product">Sleep Routine Builder</span>
-                </td>
-                <td data-label="Type">Template</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$12</td>
-              </tr>
-              <tr>
-                <td data-label="Product">
-                  <span class="admin-pipeline__life-area">Life area: Fun</span>
-                  <span class="admin-pipeline__product">Weekend Adventure Planner</span>
-                </td>
-                <td data-label="Type">Planner</td>
-                <td data-label="Badge">
-                  <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                </td>
-                <td data-label="Price" class="admin-table__price">$9</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
 
   </section>
 </main>
