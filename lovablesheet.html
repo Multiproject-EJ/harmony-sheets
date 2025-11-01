@@ -102,6 +102,29 @@
     </div>
   </section>
   <section class="lovablesheet-content" data-lovablesheet-content hidden>
+    <section class="lovablesheet-nextgen" aria-labelledby="nextgen-engine-title" data-nextgen-section>
+      <div class="admin__panel admin__panel--nextgen">
+        <div class="admin__panel-head">
+          <div>
+            <p class="lovablesheet-nextgen__eyebrow">Next Gen brief</p>
+            <h2 id="nextgen-engine-title">Google Sheet next Gen Engine</h2>
+            <p class="admin__panel-sub">
+              Capture exploratory product briefs, link them to live inspiration modules, and keep the launch playbook close at hand.
+            </p>
+          </div>
+          <div class="admin__panel-actions">
+            <button class="btn primary" type="button" data-nextgen-open>New brief</button>
+          </div>
+        </div>
+        <div class="admin__panel-body lovablesheet-nextgen__body">
+          <div class="lovablesheet-nextgen__status" data-nextgen-status role="status" aria-live="polite"></div>
+          <div class="lovablesheet-nextgen__empty" data-nextgen-empty>
+            <p>No Next Gen Engine briefs saved yet. Use “New brief” to capture the first concept.</p>
+          </div>
+          <div class="lovablesheet-nextgen__list" data-nextgen-list hidden></div>
+        </div>
+      </div>
+    </section>
     <section class="lovablesheet-pipeline" aria-labelledby="todo-pipeline-title">
       <div class="admin__panel admin__panel--pipeline" aria-labelledby="todo-pipeline-title">
         <div class="admin__panel-head">
@@ -482,6 +505,113 @@
         </div>
       </section>
     </article>
+
+    <div class="nextgen-modal-layer" data-nextgen-layer hidden>
+      <div class="nextgen-modal-overlay" data-nextgen-overlay></div>
+      <div
+        class="nextgen-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="nextgen-form-title"
+        data-nextgen-modal
+        hidden
+      >
+        <form class="nextgen-form" data-nextgen-form novalidate>
+          <header class="nextgen-form__header">
+            <div>
+              <p class="nextgen-form__eyebrow">Next Gen brief</p>
+              <h2 class="nextgen-form__title" id="nextgen-form-title">Google Sheet next Gen Engine</h2>
+              <p class="nextgen-form__subtitle">
+                Document a concept, tag the Harmony Sheets products that inspired it, and keep the delivery checklist within reach.
+              </p>
+            </div>
+            <button class="nextgen-form__close" type="button" data-nextgen-close aria-label="Close Next Gen brief form">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </header>
+
+          <div class="nextgen-form__body">
+            <div class="nextgen-form__status" data-nextgen-form-status role="status" aria-live="polite"></div>
+
+            <div class="nextgen-form__field">
+              <label class="nextgen-form__label" for="nextgen-name">Name of product</label>
+              <input
+                class="nextgen-form__input"
+                id="nextgen-name"
+                name="name"
+                type="text"
+                placeholder="e.g. Harmony Sheets Flow Studio"
+                autocomplete="off"
+                required
+                data-nextgen-name
+              >
+            </div>
+
+            <fieldset class="nextgen-form__field nextgen-form__field--features">
+              <legend class="nextgen-form__label">Product description</legend>
+              <p class="nextgen-form__hint">
+                Add feature highlights from the dropdown, then expand on the concept with freeform copy.
+              </p>
+              <div class="nextgen-form__feature-picker">
+                <label class="nextgen-form__picker-label" for="nextgen-feature-select">Feature highlights</label>
+                <select class="nextgen-form__select" id="nextgen-feature-select" data-nextgen-feature-select>
+                  <option value="">Choose a feature…</option>
+                </select>
+                <p class="nextgen-form__hint">Select a feature to add it to the list below. Repeat as needed.</p>
+                <p class="nextgen-form__empty" data-nextgen-feature-empty>No feature highlights selected yet.</p>
+                <ul class="nextgen-form__chips" data-nextgen-feature-list aria-live="polite" aria-label="Selected feature highlights"></ul>
+              </div>
+              <label class="nextgen-form__picker-label" for="nextgen-description">Free text field</label>
+              <textarea
+                class="nextgen-form__textarea"
+                id="nextgen-description"
+                name="description"
+                rows="4"
+                placeholder="Summarize the problem it solves, the experience, and the wow moments."
+                data-nextgen-description
+              ></textarea>
+            </fieldset>
+
+            <fieldset class="nextgen-form__field nextgen-form__field--products">
+              <legend class="nextgen-form__label">Inspiration products</legend>
+              <p class="nextgen-form__hint">Check any existing Harmony Sheets products&mdash;including drafts&mdash;that informed this idea.</p>
+              <div class="nextgen-form__products" data-nextgen-products>
+                <p class="nextgen-form__loading" data-nextgen-products-loading>Loading product catalog…</p>
+                <p class="nextgen-form__error" data-nextgen-products-error hidden>We couldn't load the product catalog. Refresh the page to try again.</p>
+              </div>
+            </fieldset>
+
+            <div class="nextgen-form__field">
+              <label class="nextgen-form__label" for="nextgen-standard">Fixed standard text</label>
+              <textarea
+                class="nextgen-form__textarea nextgen-form__textarea--readonly"
+                id="nextgen-standard"
+                rows="6"
+                readonly
+                data-nextgen-standard
+              ></textarea>
+            </div>
+
+            <div class="nextgen-form__field">
+              <label class="nextgen-form__label" for="nextgen-notes">Additional notes</label>
+              <textarea
+                class="nextgen-form__textarea"
+                id="nextgen-notes"
+                name="notes"
+                rows="4"
+                placeholder="Capture extra context, launch partners, or follow-up questions."
+                data-nextgen-notes
+              ></textarea>
+            </div>
+          </div>
+
+          <footer class="nextgen-form__footer">
+            <button class="btn ghost" type="button" data-nextgen-cancel>Cancel</button>
+            <button class="btn primary" type="submit">Save brief</button>
+          </footer>
+        </form>
+      </div>
+    </div>
 
     <div class="lovablesheet-modal-layer" data-board-layer hidden>
       <div class="lovablesheet-modal-overlay" data-board-modal-overlay></div>
