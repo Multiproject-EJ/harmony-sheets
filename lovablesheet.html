@@ -108,23 +108,6 @@
         <h1 id="lovablesheet-workflow-title">Bring clarity to every planning sprint</h1>
       </header>
 
-      <div class="lovablesheet-workflow__body">
-        <section id="code-library" class="lovablesheet-code-library" aria-labelledby="code-library-title">
-          <div class="lovablesheet-code-library__inner">
-            <h2 id="code-library-title">LovableSheet module library</h2>
-            <p>Reference the interactive modules that power the LovableSheet admin surface. Use the quick navigation to jump to each module&rsquo;s configuration details.</p>
-
-            <section class="lovablesheet-library-guides" aria-labelledby="lovablesheet-guides-title">
-              <h3 id="lovablesheet-guides-title">Implementation references</h3>
-              <p>Need to update requirements or refresh guidance before shipping a new template? Use these quick links to review the published playbooks and source files.</p>
-              <ul class="lovablesheet-library-guides__list">
-                <li><a href="docs/module-publishing-playbook.md#new-module-implementation" target="_blank" rel="noopener">Module Publishing Playbook</a> &mdash; outlines required content fields, asset specs, CSS hooks, and QA steps for every launch.</li>
-                <li><a href="products.json" target="_blank" rel="noopener">products.json</a> &mdash; edit copy, pricing, sheet IDs, and metadata that surface in the public storefront.</li>
-              </ul>
-            </section>
-          </div>
-        </section>
-      </div>
     </article>
 
     <section class="lovablesheet-pipeline" aria-labelledby="todo-pipeline-title">
@@ -169,6 +152,7 @@
                 <th scope="col">Type</th>
                 <th scope="col">Badge</th>
                 <th scope="col" class="admin-table__price">Price</th>
+                <th scope="col" class="admin-table__brief">Use in Brief</th>
               </tr>
             </thead>
             <tbody>
@@ -182,6 +166,17 @@
                   <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$29</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Budget Blueprint"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -193,6 +188,17 @@
                   <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$24</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Shared Memory Keeper"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -204,6 +210,17 @@
                   <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$19</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Couples Connection Journal"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -215,6 +232,17 @@
                   <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$19</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Meal &amp; Movement Planner"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -226,6 +254,17 @@
                   <span class="admin-pipeline__badge" data-badge="new">New</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$9</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Date Night Generator"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -237,6 +276,17 @@
                   <span class="admin-pipeline__badge" data-badge="new">New</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$11</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Weekly Reflection Guide"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -248,6 +298,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$8</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Bucket List Builder"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -259,6 +320,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$24</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Cash-Flow Dashboard"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -270,6 +342,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$8</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Celebration Planner"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -281,6 +364,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$7</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Community Service Tracker"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -292,6 +386,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$6</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Connection Rituals"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -303,6 +408,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$12</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Creative Hobby Dashboard"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -314,6 +430,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$12</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Daily Ritual Prompts"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -325,6 +452,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$15</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Debt Snowball Coach"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -336,6 +474,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$6</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Gratitude &amp; Intention Log"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -347,6 +496,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$7</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Habit Loop Tracker"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -358,6 +518,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$12</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Shared Family Agenda"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -369,6 +540,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$18</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Skill Tracker Pro"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -380,6 +562,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$12</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Sleep Routine Builder"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
               <tr>
                 <td data-label="Product">
@@ -391,6 +584,17 @@
                   <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
                 </td>
                 <td data-label="Price" class="admin-table__price">$9</td>
+                <td data-label="Use in Brief" class="admin-table__brief">
+                  <button
+                    type="button"
+                    class="pipeline-brief-button"
+                    data-pipeline-brief
+                    data-product-name="Weekend Adventure Planner"
+                  >
+                    <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                    <span class="pipeline-brief-button__label">Use in Brief</span>
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -409,13 +613,45 @@
             </p>
           </div>
           <div class="admin__panel-actions">
-            <button class="btn primary" type="button" data-nextgen-open>New brief</button>
+            <button class="btn btn--nextgen-brief" type="button" data-nextgen-open>
+              <span class="nextgen-brief-button__icon" aria-hidden="true">✨</span>
+              <span class="nextgen-brief-button__label">Create product brief</span>
+            </button>
           </div>
         </div>
         <div class="admin__panel-body lovablesheet-nextgen__body">
+          <section id="code-library" class="lovablesheet-code-library" aria-labelledby="code-library-title">
+            <div class="lovablesheet-code-library__inner">
+              <h2 id="code-library-title">LovableSheet module library</h2>
+              <p>
+                Reference the interactive modules that power the LovableSheet admin surface. Use the quick navigation to jump to
+                each module&rsquo;s configuration details.
+              </p>
+
+              <section class="lovablesheet-library-guides" aria-labelledby="lovablesheet-guides-title">
+                <h3 id="lovablesheet-guides-title">Implementation references</h3>
+                <p>
+                  Need to update requirements or refresh guidance before shipping a new template? Use these quick links to review
+                  the published playbooks and source files.
+                </p>
+                <ul class="lovablesheet-library-guides__list">
+                  <li>
+                    <a href="docs/module-publishing-playbook.md#new-module-implementation" target="_blank" rel="noopener"
+                      >Module Publishing Playbook</a
+                    >
+                    &mdash; outlines required content fields, asset specs, CSS hooks, and QA steps for every launch.
+                  </li>
+                  <li>
+                    <a href="products.json" target="_blank" rel="noopener">products.json</a>
+                    &mdash; edit copy, pricing, sheet IDs, and metadata that surface in the public storefront.
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </section>
           <div class="lovablesheet-nextgen__status" data-nextgen-status role="status" aria-live="polite"></div>
           <div class="lovablesheet-nextgen__empty" data-nextgen-empty>
-            <p>No Next Gen Engine briefs saved yet. Use “New brief” to capture the first concept.</p>
+            <p>No Next Gen Engine briefs saved yet. Use “Create product brief” to capture the first concept.</p>
           </div>
           <div class="lovablesheet-nextgen__list" data-nextgen-list hidden></div>
         </div>
@@ -477,15 +713,12 @@
                         <select class="brain-board__select" id="brain-board-select" data-board-select>
                           <option value="default">Default Board (Demo)</option>
                         </select>
-                        <button class="btn primary brain-board__save" type="button" data-board-save>Save to Supabase</button>
+                        <button class="btn primary brain-board__launch" type="button" data-board-launch="brain">
+                          Launch brain board
+                        </button>
                       </div>
                       <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
                     </div>
-                  </div>
-                  <div class="lovablesheet-library__actions">
-                    <button class="btn primary lovablesheet-library__button" type="button" data-board-launch="brain">
-                      Launch brain board
-                    </button>
                   </div>
                 </article>
               </div>

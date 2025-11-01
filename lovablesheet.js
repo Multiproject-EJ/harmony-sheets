@@ -294,6 +294,7 @@ function requireAdmin(user) {
   initNextGenEngineBriefs();
   setupBoardLibrary();
   initCollapsiblePipelineTables();
+  setupPipelineBriefLaunchers();
   return true;
 }
 
@@ -989,6 +990,92 @@ function closeNextGenModal(options = {}) {
     nextGenState.activeTrigger.focus();
   }
   nextGenState.activeTrigger = null;
+}
+
+function extractPipelineProductName(button) {
+  if (!button) {
+    return "";
+  }
+
+  const datasetName = typeof button.dataset.productName === "string" ? button.dataset.productName.trim() : "";
+  if (datasetName) {
+    return datasetName;
+  }
+
+  const label = button.querySelector(".pipeline-brief-button__label");
+  if (label?.textContent) {
+    const text = label.textContent.trim();
+    if (text) {
+      return text;
+    }
+  }
+
+  const fallback = button.textContent?.trim();
+  return fallback || "";
+}
+
+function launchNextGenBriefFromPipeline(trigger) {
+  if (!trigger) {
+    return;
+  }
+
+  if (!nextGenState.initialized) {
+    initNextGenEngineBriefs();
+  }
+
+  const productName = extractPipelineProductName(trigger);
+
+  resetNextGenForm();
+  setNextGenFormStatus("");
+
+  const { nameInput } = nextGenState.elements;
+  if (nameInput) {
+    nameInput.value = productName;
+  }
+
+  openNextGenModal(trigger);
+
+  if (nameInput) {
+    window.requestAnimationFrame(() => {
+      const length = nameInput.value.length;
+      try {
+        nameInput.setSelectionRange?.(length, length);
+      } catch (_error) {
+        /* Some inputs may not support selection when type="number" etc. */
+      }
+    });
+  }
+}
+
+function setupPipelineBriefLaunchers() {
+  const tables = Array.from(document.querySelectorAll("[data-pipeline-table]"));
+  if (tables.length === 0) {
+    return;
+  }
+
+  tables.forEach((table) => {
+    if (!(table instanceof HTMLElement)) {
+      return;
+    }
+
+    if (table.dataset.pipelineBriefInitialized === "true") {
+      return;
+    }
+
+    table.dataset.pipelineBriefInitialized = "true";
+
+    table.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-pipeline-brief]");
+      if (!button) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      launchNextGenBriefFromPipeline(button);
+    });
+  });
 }
 
 function sanitizeNextGenId(value, fallback) {
