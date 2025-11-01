@@ -510,6 +510,10 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .brain-board__note:focus-within{box-shadow:0 22px 38px rgba(15,23,42,.2)}
 .brain-board__note[data-group-mode="true"] .brain-board__handle{box-shadow:0 0 0 3px rgba(59,130,246,.28)}
 .brain-board__handle{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;cursor:grab;user-select:none;touch-action:none}
+.brain-board__label-button{appearance:none;-webkit-appearance:none;border:none;background:transparent;padding:2px 6px;border-radius:10px;margin:-2px 0;font:inherit;color:inherit;display:inline-flex;align-items:center;gap:6px;cursor:pointer;transition:background .18s ease,box-shadow .18s ease}
+.brain-board__label-button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.28);background:rgba(148,163,184,.16)}
+.brain-board__label-button:hover{background:rgba(148,163,184,.14)}
+.brain-board__label-button[aria-disabled="true"],.brain-board__label-button[disabled]{cursor:default;opacity:.7;background:transparent;box-shadow:none}
 .brain-board__label{font-weight:700;font-size:.95rem;letter-spacing:.04em;text-transform:uppercase;color:color-mix(in srgb,var(--note-ink) 74%,#111827)}
 .brain-board__actions{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
 .brain-board__color-control{position:relative;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
@@ -559,6 +563,16 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .brain-board__group{background:rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.18);border-radius:999px;padding:6px 14px;font:inherit;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#1e293b;cursor:pointer;transition:background .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease}
 .brain-board__group:hover,.brain-board__group:focus-visible{background:rgba(59,130,246,.14);border-color:rgba(59,130,246,.42);color:#1d4ed8;outline:none;box-shadow:0 8px 18px rgba(59,130,246,.2)}
 .brain-board__group.is-active{background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.48);color:#1d4ed8}
+.brain-board__label-editor{position:fixed;z-index:2600;display:grid;gap:14px;min-width:220px;max-width:280px;padding:16px 18px;border-radius:16px;background:rgba(255,255,255,.98);border:1px solid rgba(148,163,184,.35);box-shadow:0 26px 48px rgba(15,23,42,.24)}
+.brain-board__label-editor[hidden]{display:none!important}
+.brain-board__label-editor-field{display:grid;gap:6px}
+.brain-board__label-editor-heading{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#475569}
+.brain-board__label-editor-input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,.4);background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(241,245,249,.78));font:inherit;font-size:.95rem;color:#0f172a;box-shadow:inset 0 1px 2px rgba(255,255,255,.7);transition:border-color .18s ease,box-shadow .18s ease}
+.brain-board__label-editor-input:focus{border-color:rgba(59,130,246,.55);box-shadow:0 0 0 3px rgba(59,130,246,.2),inset 0 1px 2px rgba(255,255,255,.8);outline:none}
+.brain-board__label-editor-emojis{display:flex;flex-wrap:wrap;gap:8px}
+.brain-board__label-editor-emoji{border:none;border-radius:12px;padding:8px 10px;font-size:1.1rem;line-height:1;background:rgba(248,250,252,.88);box-shadow:0 8px 16px rgba(15,23,42,.15);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.brain-board__label-editor-emoji:is(:hover,:focus-visible){transform:translateY(-1px) scale(1.05);background:rgba(226,232,240,.95);box-shadow:0 12px 22px rgba(59,130,246,.18);outline:none}
+.brain-board__label-editor-emoji:active{transform:scale(.96)}
 .brain-board__body{flex:1;min-height:132px;padding:12px;border-radius:14px;background:rgba(255,255,255,.7);box-shadow:inset 0 1px 2px rgba(255,255,255,.8),inset 0 -1px 0 rgba(148,163,184,.18);border:1px solid rgba(148,163,184,.28);font-size:1rem;line-height:1.5;outline:none;overflow-wrap:anywhere}
 .brain-board__body:focus{border-color:rgba(59,130,246,.45);box-shadow:0 0 0 3px rgba(59,130,246,.2),inset 0 1px 2px rgba(255,255,255,.8)}
 .brain-board__body[data-placeholder]:empty::before{content:attr(data-placeholder);color:#94a3b8}

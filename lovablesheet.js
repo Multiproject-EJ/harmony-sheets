@@ -482,6 +482,18 @@ class StickyBoard {
     this.columnSnapThreshold = BRAIN_BOARD_DEFAULT_SNAP_THRESHOLD;
     this.snapIndicatorTimeouts = new WeakMap();
 
+    this.labelEditor = {
+      container: null,
+      input: null,
+      emojiButtons: [],
+      note: null,
+      trigger: null,
+      initialValue: ""
+    };
+    this.boundLabelEditorOutside = this.handleLabelEditorOutside.bind(this);
+    this.boundLabelEditorFocus = this.handleLabelEditorFocus.bind(this);
+    this.boundLabelEditorReposition = this.repositionLabelEditor.bind(this);
+
     this.scaleMin = BOARD_SCALE_MIN;
     this.scaleMax = BOARD_SCALE_MAX;
     this.scaleStep = BOARD_SCALE_STEP;
@@ -554,6 +566,8 @@ class StickyBoard {
       this.closeMenu();
     };
     this.columnVisualFrame = null;
+
+    this.initializeLabelEditor();
   }
 
   initialize() {
@@ -810,6 +824,10 @@ class StickyBoard {
 
     if (this.activeColorMenu?.note === note) {
       this.closeColorMenu();
+    }
+
+    if (this.labelEditor.note === note) {
+      this.closeLabelEditor();
     }
 
     const wasFocused = note.contains(document.activeElement);
@@ -1345,6 +1363,236 @@ class StickyBoard {
     note.removeAttribute("data-snap-indicator");
   }
 
+  initializeLabelEditor() {
+    const container = this.root?.querySelector("[data-note-label-editor]") ?? null;
+    const input = container?.querySelector("[data-note-label-input]") ?? null;
+    const emojiButtons = container ? Array.from(container.querySelectorAll("[data-note-label-emoji]")) : [];
+
+    this.labelEditor.container = container;
+    this.labelEditor.input = input ?? null;
+    this.labelEditor.emojiButtons = emojiButtons;
+    this.labelEditor.note = null;
+    this.labelEditor.trigger = null;
+    this.labelEditor.initialValue = "";
+
+    if (!container) {
+      return;
+    }
+
+    if (input) {
+      input.addEventListener("input", () => {
+        this.syncLabelEditorInput();
+      });
+      input.addEventListener("keydown", (event) => {
+        this.handleLabelEditorInputKeydown(event);
+      });
+    }
+
+    emojiButtons.forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        const emoji = button.dataset.noteLabelEmoji || button.textContent || "";
+        if (!emoji) return;
+        this.insertLabelEmoji(emoji);
+      });
+    });
+  }
+
+  syncLabelEditorInput() {
+    if (!this.labelEditor.note || !this.labelEditor.input) return;
+    const labelEl = this.labelEditor.note.querySelector("[data-note-label]");
+    if (!labelEl) return;
+    labelEl.textContent = this.labelEditor.input.value || "";
+  }
+
+  insertLabelEmoji(emoji) {
+    if (!this.labelEditor.input) return;
+    const input = this.labelEditor.input;
+    const start = Number.isFinite(input.selectionStart) ? input.selectionStart : input.value.length;
+    const end = Number.isFinite(input.selectionEnd) ? input.selectionEnd : input.value.length;
+    const nextValue = `${input.value.slice(0, start)}${emoji}${input.value.slice(end)}`;
+    input.value = nextValue;
+    const nextCursor = start + emoji.length;
+    if (typeof input.setSelectionRange === "function") {
+      input.setSelectionRange(nextCursor, nextCursor);
+    }
+    this.syncLabelEditorInput();
+    input.focus({ preventScroll: true });
+  }
+
+  handleLabelEditorInputKeydown(event) {
+    if (!this.labelEditor.container || this.labelEditor.container.hidden) {
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      this.restoreLabelEditorInitialValue();
+      this.closeLabelEditor({ restoreFocus: true });
+      return;
+    }
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      this.syncLabelEditorInput();
+      this.closeLabelEditor({ restoreFocus: true });
+    }
+  }
+
+  restoreLabelEditorInitialValue() {
+    if (!this.labelEditor.note) return;
+    const labelEl = this.labelEditor.note.querySelector("[data-note-label]");
+    if (!labelEl) return;
+    const initial = this.labelEditor.initialValue || "";
+    if (this.labelEditor.input) {
+      this.labelEditor.input.value = initial;
+    }
+    labelEl.textContent = initial;
+  }
+
+  openLabelEditor(note, trigger) {
+    if (!this.labelEditor.container || !note || !trigger) {
+      return;
+    }
+
+    if (!this.labelEditor.container.hidden && this.labelEditor.note === note) {
+      this.closeLabelEditor({ restoreFocus: true });
+      return;
+    }
+
+    this.closeLabelEditor();
+
+    const labelEl = note.querySelector("[data-note-label]");
+    const currentValue = labelEl?.textContent ?? "";
+
+    this.labelEditor.note = note;
+    this.labelEditor.trigger = trigger;
+    this.labelEditor.initialValue = currentValue;
+
+    if (this.labelEditor.input) {
+      this.labelEditor.input.value = currentValue;
+    }
+
+    trigger.setAttribute("aria-expanded", "true");
+
+    this.labelEditor.container.hidden = false;
+    this.repositionLabelEditor();
+    window.requestAnimationFrame(() => {
+      this.repositionLabelEditor();
+      if (this.labelEditor.input) {
+        this.labelEditor.input.focus({ preventScroll: true });
+        const end = this.labelEditor.input.value.length;
+        if (typeof this.labelEditor.input.setSelectionRange === "function") {
+          this.labelEditor.input.setSelectionRange(0, end);
+        }
+      }
+    });
+
+    document.addEventListener("pointerdown", this.boundLabelEditorOutside, true);
+    document.addEventListener("focusin", this.boundLabelEditorFocus, true);
+    window.addEventListener("resize", this.boundLabelEditorReposition);
+    document.addEventListener("scroll", this.boundLabelEditorReposition, true);
+  }
+
+  closeLabelEditor(options = {}) {
+    if (!this.labelEditor.container) {
+      return;
+    }
+
+    const { restoreFocus = false } = options;
+    const trigger = this.labelEditor.trigger;
+
+    if (!this.labelEditor.container.hidden) {
+      this.labelEditor.container.hidden = true;
+    }
+    this.labelEditor.container.style.top = "";
+    this.labelEditor.container.style.left = "";
+
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", "false");
+    }
+
+    document.removeEventListener("pointerdown", this.boundLabelEditorOutside, true);
+    document.removeEventListener("focusin", this.boundLabelEditorFocus, true);
+    window.removeEventListener("resize", this.boundLabelEditorReposition);
+    document.removeEventListener("scroll", this.boundLabelEditorReposition, true);
+
+    this.labelEditor.note = null;
+    this.labelEditor.trigger = null;
+    this.labelEditor.initialValue = "";
+
+    if (restoreFocus) {
+      trigger?.focus?.({ preventScroll: true });
+    }
+  }
+
+  handleLabelEditorOutside(event) {
+    if (!this.labelEditor.container || this.labelEditor.container.hidden) {
+      return;
+    }
+    const target = event.target;
+    if (this.labelEditor.container.contains(target)) {
+      return;
+    }
+    if (this.labelEditor.trigger?.contains(target)) {
+      return;
+    }
+    this.closeLabelEditor();
+  }
+
+  handleLabelEditorFocus(event) {
+    if (!this.labelEditor.container || this.labelEditor.container.hidden) {
+      return;
+    }
+    const target = event.target;
+    if (this.labelEditor.container.contains(target)) {
+      return;
+    }
+    if (this.labelEditor.trigger?.contains(target)) {
+      return;
+    }
+    this.closeLabelEditor();
+  }
+
+  repositionLabelEditor() {
+    if (!this.labelEditor.container || this.labelEditor.container.hidden || !this.labelEditor.trigger) {
+      return;
+    }
+
+    const container = this.labelEditor.container;
+    const trigger = this.labelEditor.trigger;
+    const triggerRect = trigger.getBoundingClientRect();
+    if (!triggerRect || (triggerRect.width === 0 && triggerRect.height === 0)) {
+      return;
+    }
+
+    container.style.top = "0px";
+    container.style.left = "0px";
+    const popoverRect = container.getBoundingClientRect();
+
+    const margin = 16;
+    const viewportWidth = document.documentElement?.clientWidth || window.innerWidth || 0;
+    const viewportHeight = document.documentElement?.clientHeight || window.innerHeight || 0;
+
+    let top = triggerRect.bottom + 12;
+    let left = triggerRect.left + triggerRect.width / 2 - popoverRect.width / 2;
+
+    if (left < margin) {
+      left = margin;
+    } else if (left + popoverRect.width > viewportWidth - margin) {
+      left = Math.max(margin, viewportWidth - margin - popoverRect.width);
+    }
+
+    if (top + popoverRect.height > viewportHeight - margin) {
+      top = triggerRect.top - 12 - popoverRect.height;
+    }
+
+    if (top < margin) {
+      top = Math.min(triggerRect.bottom + 12, Math.max(margin, viewportHeight - margin - popoverRect.height));
+    }
+
+    container.style.top = `${Math.round(top)}px`;
+    container.style.left = `${Math.round(left)}px`;
+  }
+
   setupNote(note) {
     if (!note) return;
 
@@ -1371,11 +1619,14 @@ class StickyBoard {
           event.target.closest("[data-note-group]") ||
           event.target.closest("[data-note-color-toggle]") ||
           event.target.closest("[data-note-color-picker]") ||
-          event.target.closest("[data-note-menu-button]")
+          event.target.closest("[data-note-menu-button]") ||
+          event.target.closest("[data-note-label-trigger]")
         ) {
           return;
         }
         event.preventDefault();
+
+        this.closeLabelEditor();
 
         const pointerId = event.pointerId;
         const boardWidth = this.workspace.clientWidth;
@@ -1560,6 +1811,26 @@ class StickyBoard {
       });
     }
 
+    const labelTrigger = note.querySelector("[data-note-label-trigger]");
+    if (labelTrigger) {
+      labelTrigger.setAttribute("aria-expanded", "false");
+      if (this.labelEditor.container) {
+        labelTrigger.removeAttribute("aria-disabled");
+        labelTrigger.removeAttribute("disabled");
+        labelTrigger.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (!this.labelEditor.container.hidden && this.labelEditor.note === note) {
+            this.closeLabelEditor({ restoreFocus: true });
+          } else {
+            this.openLabelEditor(note, labelTrigger);
+          }
+        });
+      } else {
+        labelTrigger.setAttribute("aria-disabled", "true");
+      }
+    }
+
     const colorToggle = note.querySelector("[data-note-color-toggle]");
     const colorMenu = note.querySelector("[data-note-color-menu]");
     const colorPicker = note.querySelector("[data-note-color-picker]");
@@ -1725,6 +1996,7 @@ class StickyBoard {
 
   renderNotes(notes = []) {
     if (!this.workspace) return;
+    this.closeLabelEditor();
     this.workspace.innerHTML = "";
     cloneNotes(notes).forEach((noteData) => {
       const noteElement = this.createNoteElement(noteData);
