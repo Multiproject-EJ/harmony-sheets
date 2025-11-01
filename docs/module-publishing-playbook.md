@@ -1,6 +1,8 @@
 # Module Publishing Playbook
 
-This guide covers the workflow for shipping new Harmony Sheets storefront modules from content entry through launch QA. It lives alongside the website codebase so it remains distinct from the Google Sheets demo repo in `Google sheets products/`.
+This guide covers the workflow for shipping new Harmony Sheets storefront modules from content entry through launch QA. It lives alongside the website codebase to document the hand-off between the public store, the internal admin tools, and the Google Sheets source files stored in `Google sheets products/` and `Google sheets demo/`.
+
+When a module graduates from the demo site, copy the Apps Script bundle from the repo into the production Google Sheet's script editor. The sheet itself acts as the product database, while the HTML service popup provides the UI layer inside Google Sheets. This ensures the downloadable file customers receive matches the experience previewed on harmony-sheets.com.
 
 ## How to add new modules
 
