@@ -60,6 +60,60 @@ const NOTE_MAX_WIDTH = 560;
 const NOTE_MIN_HEIGHT = 210;
 const NOTE_MAX_HEIGHT = 840;
 
+const NEXTGEN_FEATURE_OPTIONS = [
+  { id: "screen-size", label: "Screen size" },
+  { id: "phone-ready", label: "Phone ready" },
+  { id: "themes", label: "Themes" },
+  { id: "menu-x", label: "Menu X" },
+  { id: "database-in-sheet", label: "Database in sheet" },
+  { id: "ai", label: "AI" },
+  { id: "images-storing", label: "Images storing" }
+];
+const NEXTGEN_FEATURE_MAP = new Map(NEXTGEN_FEATURE_OPTIONS.map((feature) => [feature.id, feature]));
+const NEXTGEN_STANDARD_TEXT = [
+  "Produce a google sheets product by completing the following:",
+  "1) Make the product page JSON with the stats.",
+  "2) Push it to Supabase.",
+  "3) Fetch from Supabase.",
+  "4) Produce the Google Sheet and HTML (1 file only) and add to a new folder in the ‘Google sheets products and demo’ directory in the repo.",
+  "   Link the finished product (the HTML) to the interactive demo section on the product page."
+].join("\n");
+const NEXTGEN_STORAGE_KEY = "lovablesheet.nextGenEngineBriefs";
+
+const nextGenState = {
+  initialized: false,
+  selectedFeatures: [],
+  savedBriefs: [],
+  products: [],
+  productMap: new Map(),
+  activeTrigger: null,
+  keydownHandler: null,
+  elements: {
+    section: null,
+    openButton: null,
+    status: null,
+    list: null,
+    empty: null,
+    layer: null,
+    overlay: null,
+    modal: null,
+    form: null,
+    nameInput: null,
+    featureSelect: null,
+    featureList: null,
+    featureEmpty: null,
+    descriptionInput: null,
+    notesInput: null,
+    standardTextarea: null,
+    productsContainer: null,
+    productsLoading: null,
+    productsError: null,
+    formStatus: null,
+    cancelButton: null,
+    closeButton: null
+  }
+};
+
 let brainBoardInitialized = false;
 let flowchartBoardInitialized = false;
 let brainBoard = null;
@@ -152,9 +206,772 @@ function requireAdmin(user) {
   }
 
   showSection("content");
+  initNextGenEngineBriefs();
   setupBoardLibrary();
   initCollapsiblePipelineTables();
   return true;
+}
+
+function getNextGenStoredBriefs() {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return [];
+  }
+
+  try {
+    const raw = window.localStorage.getItem(NEXTGEN_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed
+      .map((item) => normalizeNextGenBrief(item))
+      .filter((item) => item !== null);
+  } catch (error) {
+    console.warn("[lovablesheet] Failed to parse stored Next Gen briefs", error);
+    return [];
+  }
+}
+
+function persistNextGenBriefs(briefs) {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(NEXTGEN_STORAGE_KEY, JSON.stringify(briefs));
+  } catch (error) {
+    console.error("[lovablesheet] Unable to persist Next Gen briefs", error);
+    throw error;
+  }
+}
+
+function setNextGenStatus(message, tone) {
+  const statusEl = nextGenState.elements.status;
+  if (!statusEl) return;
+  statusEl.textContent = message || "";
+  if (tone) {
+    statusEl.dataset.tone = tone;
+  } else {
+    statusEl.removeAttribute("data-tone");
+  }
+}
+
+function setNextGenFormStatus(message, tone) {
+  const statusEl = nextGenState.elements.formStatus;
+  if (!statusEl) return;
+  statusEl.textContent = message || "";
+  if (tone) {
+    statusEl.dataset.tone = tone;
+  } else {
+    statusEl.removeAttribute("data-tone");
+  }
+}
+
+function populateNextGenFeatureOptions() {
+  const select = nextGenState.elements.featureSelect;
+  if (!select) return;
+
+  const existingValues = new Set(Array.from(select.options).map((option) => option.value));
+  NEXTGEN_FEATURE_OPTIONS.forEach((feature) => {
+    if (existingValues.has(feature.id)) return;
+    const option = document.createElement("option");
+    option.value = feature.id;
+    option.textContent = feature.label;
+    select.appendChild(option);
+  });
+}
+
+function renderNextGenSelectedFeatures() {
+  const list = nextGenState.elements.featureList;
+  const empty = nextGenState.elements.featureEmpty;
+  if (!list) return;
+
+  list.innerHTML = "";
+  const features = nextGenState.selectedFeatures;
+  if (!features.length) {
+    if (empty) {
+      empty.hidden = false;
+    }
+    return;
+  }
+
+  if (empty) {
+    empty.hidden = true;
+  }
+
+  const fragment = document.createDocumentFragment();
+  features.forEach((featureId) => {
+    const feature = NEXTGEN_FEATURE_MAP.get(featureId) || { id: featureId, label: featureId };
+    const item = document.createElement("li");
+    item.className = "nextgen-form__chip";
+    item.dataset.nextgenFeature = feature.id;
+
+    const labelSpan = document.createElement("span");
+    labelSpan.textContent = feature.label;
+    item.appendChild(labelSpan);
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "nextgen-form__chip-remove";
+    removeButton.dataset.nextgenFeatureRemove = feature.id;
+    removeButton.setAttribute("aria-label", `Remove ${feature.label}`);
+    removeButton.innerHTML = "&times;";
+    item.appendChild(removeButton);
+
+    fragment.appendChild(item);
+  });
+
+  list.appendChild(fragment);
+}
+
+function addNextGenFeature(featureId) {
+  if (!featureId || !NEXTGEN_FEATURE_MAP.has(featureId)) {
+    return false;
+  }
+
+  if (nextGenState.selectedFeatures.includes(featureId)) {
+    return false;
+  }
+
+  nextGenState.selectedFeatures.push(featureId);
+  renderNextGenSelectedFeatures();
+  return true;
+}
+
+function removeNextGenFeature(featureId) {
+  const index = nextGenState.selectedFeatures.indexOf(featureId);
+  if (index === -1) return;
+
+  nextGenState.selectedFeatures.splice(index, 1);
+  renderNextGenSelectedFeatures();
+}
+
+function resetNextGenForm() {
+  const {
+    form,
+    featureSelect,
+    descriptionInput,
+    notesInput,
+    productsContainer,
+    standardTextarea
+  } = nextGenState.elements;
+
+  form?.reset();
+  if (featureSelect) {
+    featureSelect.value = "";
+  }
+  if (descriptionInput) {
+    descriptionInput.value = "";
+  }
+  if (notesInput) {
+    notesInput.value = "";
+  }
+  if (standardTextarea) {
+    standardTextarea.value = NEXTGEN_STANDARD_TEXT;
+  }
+
+  nextGenState.selectedFeatures = [];
+  renderNextGenSelectedFeatures();
+
+  if (productsContainer) {
+    productsContainer.querySelectorAll("input[type='checkbox']").forEach((input) => {
+      input.checked = false;
+    });
+  }
+
+  setNextGenFormStatus("");
+}
+
+function handleNextGenModalKeydown(event) {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeNextGenModal({ reset: false, focusTrigger: false });
+  }
+}
+
+function openNextGenModal(trigger) {
+  const { layer, modal, nameInput } = nextGenState.elements;
+  if (!layer || !modal) return;
+
+  nextGenState.activeTrigger = trigger || null;
+  layer.hidden = false;
+  modal.hidden = false;
+  layer.setAttribute("aria-hidden", "false");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("lovablesheet-modal-open");
+
+  if (!nextGenState.keydownHandler) {
+    nextGenState.keydownHandler = handleNextGenModalKeydown;
+    document.addEventListener("keydown", nextGenState.keydownHandler);
+  }
+
+  window.setTimeout(() => {
+    nameInput?.focus?.();
+  }, 0);
+}
+
+function closeNextGenModal(options = {}) {
+  const { reset = false, focusTrigger = true } = options;
+  const { layer, modal } = nextGenState.elements;
+  if (!layer || !modal) return;
+
+  modal.hidden = true;
+  layer.hidden = true;
+  layer.setAttribute("aria-hidden", "true");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("lovablesheet-modal-open");
+
+  if (nextGenState.keydownHandler) {
+    document.removeEventListener("keydown", nextGenState.keydownHandler);
+    nextGenState.keydownHandler = null;
+  }
+
+  if (reset) {
+    resetNextGenForm();
+  }
+
+  if (focusTrigger && nextGenState.activeTrigger && typeof nextGenState.activeTrigger.focus === "function") {
+    nextGenState.activeTrigger.focus();
+  }
+  nextGenState.activeTrigger = null;
+}
+
+function sanitizeNextGenId(value, fallback) {
+  const base = typeof value === "string" && value.trim() ? value.trim() : fallback;
+  return base ? base.replace(/[^a-zA-Z0-9_-]+/g, "-") : fallback;
+}
+
+async function fetchNextGenProducts() {
+  const { productsLoading, productsError } = nextGenState.elements;
+  if (productsLoading) {
+    productsLoading.hidden = false;
+  }
+  if (productsError) {
+    productsError.hidden = true;
+  }
+
+  try {
+    const response = await fetch("products.json", { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+    const data = await response.json();
+    if (!Array.isArray(data)) {
+      throw new Error("products.json did not return an array.");
+    }
+
+    const seenIds = new Set();
+    const normalized = data
+      .map((item, index) => {
+        if (!item || typeof item !== "object") return null;
+        const rawId = typeof item.id === "string" && item.id.trim() ? item.id.trim() : `product-${index + 1}`;
+        const id = sanitizeNextGenId(rawId, `product-${index + 1}`);
+        const name = typeof item.name === "string" && item.name.trim() ? item.name.trim() : id;
+        const draft = Boolean(item.draft);
+        if (seenIds.has(id)) {
+          return null;
+        }
+        seenIds.add(id);
+        return { id, name, draft };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+
+    nextGenState.products = normalized;
+    nextGenState.productMap.clear();
+    normalized.forEach((product) => {
+      nextGenState.productMap.set(product.id, product.name);
+    });
+
+    renderNextGenProductOptions(normalized);
+  } catch (error) {
+    console.error("[lovablesheet] Unable to load products for Next Gen brief", error);
+    if (productsError) {
+      productsError.hidden = false;
+    }
+  } finally {
+    if (productsLoading) {
+      productsLoading.hidden = true;
+    }
+  }
+}
+
+function renderNextGenProductOptions(products) {
+  const container = nextGenState.elements.productsContainer;
+  const productsError = nextGenState.elements.productsError;
+  if (!container) return;
+
+  container.innerHTML = "";
+  if (productsError) {
+    productsError.hidden = true;
+  }
+
+  if (!products.length) {
+    const empty = document.createElement("p");
+    empty.className = "nextgen-form__loading";
+    empty.textContent = "No products found in the catalog.";
+    container.appendChild(empty);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  products.forEach((product, index) => {
+    const optionId = `nextgen-product-${sanitizeNextGenId(product.id, String(index))}`;
+    const label = document.createElement("label");
+    label.className = "nextgen-form__product-option";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.name = "nextgen-inspiration";
+    input.id = optionId;
+    input.value = product.id;
+    input.dataset.label = product.name;
+    if (product.draft) {
+      input.dataset.draft = "true";
+    }
+
+    const copyWrap = document.createElement("span");
+    copyWrap.className = "nextgen-form__product-copy";
+
+    const nameEl = document.createElement("span");
+    nameEl.className = "nextgen-form__product-name";
+    nameEl.textContent = product.name;
+    copyWrap.appendChild(nameEl);
+
+    const metaEl = document.createElement("span");
+    metaEl.className = "nextgen-form__product-meta";
+    metaEl.textContent = product.draft ? "Draft • Internal preview" : "Live in storefront";
+    copyWrap.appendChild(metaEl);
+
+    label.appendChild(input);
+    label.appendChild(copyWrap);
+    fragment.appendChild(label);
+  });
+
+  container.appendChild(fragment);
+}
+
+function appendNextGenTextSection(parent, title, text) {
+  if (!parent || !text) return;
+  const section = document.createElement("div");
+  section.className = "lovablesheet-nextgen__section";
+  const heading = document.createElement("p");
+  heading.className = "lovablesheet-nextgen__section-title";
+  heading.textContent = title;
+  section.appendChild(heading);
+  const body = document.createElement("p");
+  body.className = "lovablesheet-nextgen__text";
+  body.textContent = text;
+  section.appendChild(body);
+  parent.appendChild(section);
+}
+
+function appendNextGenFeaturesSection(parent, features) {
+  if (!parent || !Array.isArray(features) || !features.length) return;
+  const section = document.createElement("div");
+  section.className = "lovablesheet-nextgen__section";
+  const heading = document.createElement("p");
+  heading.className = "lovablesheet-nextgen__section-title";
+  heading.textContent = "Feature highlights";
+  section.appendChild(heading);
+  const list = document.createElement("ul");
+  list.className = "lovablesheet-nextgen__features";
+  features.forEach((feature) => {
+    if (!feature) return;
+    const id = typeof feature.id === "string" ? feature.id : "";
+    const label = typeof feature.label === "string" && feature.label ? feature.label : id;
+    if (!label) return;
+    const item = document.createElement("li");
+    item.className = "lovablesheet-nextgen__feature";
+    item.textContent = label;
+    list.appendChild(item);
+  });
+  section.appendChild(list);
+  parent.appendChild(section);
+}
+
+function appendNextGenInspirationSection(parent, inspiration) {
+  if (!parent || !Array.isArray(inspiration) || !inspiration.length) return;
+  const section = document.createElement("div");
+  section.className = "lovablesheet-nextgen__section lovablesheet-nextgen__inspiration";
+  const heading = document.createElement("p");
+  heading.className = "lovablesheet-nextgen__section-title";
+  heading.textContent = "Inspiration products";
+  section.appendChild(heading);
+  const list = document.createElement("ul");
+  list.className = "lovablesheet-nextgen__inspiration-list";
+  inspiration.forEach((item) => {
+    if (!item) return;
+    const name = typeof item.name === "string" && item.name ? item.name : item.id;
+    if (!name) return;
+    const row = document.createElement("li");
+    row.className = "lovablesheet-nextgen__inspiration-item";
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = name;
+    row.appendChild(nameSpan);
+    if (item.draft) {
+      const badge = document.createElement("span");
+      badge.className = "lovablesheet-nextgen__badge";
+      badge.textContent = "Draft";
+      row.appendChild(badge);
+    }
+    list.appendChild(row);
+  });
+  section.appendChild(list);
+  parent.appendChild(section);
+}
+
+function formatNextGenTimestamp(value) {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) {
+    return "Saved";
+  }
+  try {
+    return date.toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short"
+    });
+  } catch (error) {
+    return date.toISOString();
+  }
+}
+
+function renderNextGenSavedBriefs() {
+  const { list, empty } = nextGenState.elements;
+  if (!list || !empty) return;
+
+  list.innerHTML = "";
+  const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
+  if (!briefs.length) {
+    empty.hidden = false;
+    list.hidden = true;
+    return;
+  }
+
+  empty.hidden = true;
+  list.hidden = false;
+
+  const fragment = document.createDocumentFragment();
+  briefs.forEach((brief) => {
+    if (!brief) return;
+    const entry = document.createElement("details");
+    entry.className = "lovablesheet-nextgen__entry";
+
+    const summary = document.createElement("summary");
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = brief.productName || "Untitled brief";
+    summary.appendChild(nameSpan);
+    const dateSpan = document.createElement("span");
+    dateSpan.className = "lovablesheet-nextgen__summary-date";
+    dateSpan.textContent = formatNextGenTimestamp(brief.createdAt);
+    summary.appendChild(dateSpan);
+    entry.appendChild(summary);
+
+    const content = document.createElement("div");
+    content.className = "lovablesheet-nextgen__entry-content";
+    appendNextGenFeaturesSection(content, brief.features);
+    appendNextGenTextSection(content, "Free text field", brief.description);
+    appendNextGenTextSection(content, "Additional notes", brief.notes);
+    appendNextGenInspirationSection(content, brief.inspiration);
+    appendNextGenTextSection(content, "Fixed standard text", brief.standardText);
+
+    const actions = document.createElement("div");
+    actions.className = "lovablesheet-nextgen__actions";
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "btn ghost lovablesheet-nextgen__delete";
+    deleteButton.dataset.nextgenDelete = brief.id;
+    deleteButton.textContent = "Delete brief";
+    actions.appendChild(deleteButton);
+    content.appendChild(actions);
+
+    entry.appendChild(content);
+    fragment.appendChild(entry);
+  });
+
+  list.appendChild(fragment);
+}
+
+function handleNextGenDelete(briefId) {
+  if (!briefId) return;
+  const index = nextGenState.savedBriefs.findIndex((brief) => brief.id === briefId);
+  if (index === -1) return;
+
+  const [removed] = nextGenState.savedBriefs.splice(index, 1);
+  try {
+    persistNextGenBriefs(nextGenState.savedBriefs);
+  } catch (error) {
+    nextGenState.savedBriefs.splice(index, 0, removed);
+    setNextGenStatus("We couldn't delete that brief. Please try again.", "error");
+    return;
+  }
+
+  renderNextGenSavedBriefs();
+  const productName = removed?.productName ? `“${removed.productName}”` : "that brief";
+  setNextGenStatus(`Deleted ${productName} from your Next Gen briefs.`, "success");
+}
+
+function normalizeNextGenBrief(brief) {
+  if (!brief || typeof brief !== "object") {
+    return null;
+  }
+
+  const id = typeof brief.id === "string" && brief.id.trim()
+    ? brief.id.trim()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const productName = typeof brief.productName === "string" && brief.productName.trim()
+    ? brief.productName.trim()
+    : "Untitled brief";
+  const description = typeof brief.description === "string" ? brief.description.trim() : "";
+  const notes = typeof brief.notes === "string" ? brief.notes.trim() : "";
+  const standardText = typeof brief.standardText === "string" && brief.standardText.trim()
+    ? brief.standardText
+    : NEXTGEN_STANDARD_TEXT;
+  const createdAt = typeof brief.createdAt === "string" && brief.createdAt.trim()
+    ? brief.createdAt.trim()
+    : new Date().toISOString();
+
+  const features = Array.isArray(brief.features)
+    ? brief.features
+        .map((feature) => {
+          if (!feature) return null;
+          if (typeof feature === "string") {
+            const normalized = NEXTGEN_FEATURE_MAP.get(feature);
+            if (normalized) {
+              return { id: normalized.id, label: normalized.label };
+            }
+            return { id: feature, label: feature };
+          }
+          if (typeof feature === "object") {
+            const rawId = typeof feature.id === "string" && feature.id ? feature.id : typeof feature.value === "string" ? feature.value : "";
+            const normalized = NEXTGEN_FEATURE_MAP.get(rawId);
+            const label = typeof feature.label === "string" && feature.label
+              ? feature.label
+              : normalized?.label || rawId;
+            if (!label) return null;
+            return {
+              id: normalized?.id || rawId || label,
+              label
+            };
+          }
+          return null;
+        })
+        .filter((item) => item && item.label)
+    : [];
+
+  const inspiration = Array.isArray(brief.inspiration)
+    ? brief.inspiration
+        .map((item) => {
+          if (!item || typeof item !== "object") {
+            return null;
+          }
+          const rawId = typeof item.id === "string" && item.id
+            ? item.id
+            : typeof item.value === "string"
+              ? item.value
+              : "";
+          const name = typeof item.name === "string" && item.name
+            ? item.name
+            : typeof item.title === "string" && item.title
+              ? item.title
+              : nextGenState.productMap.get(rawId) || rawId;
+          if (!rawId && !name) {
+            return null;
+          }
+          return {
+            id: rawId || name,
+            name: name || rawId,
+            draft: Boolean(item.draft)
+          };
+        })
+        .filter(Boolean)
+    : [];
+
+  return {
+    id,
+    productName,
+    description,
+    notes,
+    standardText,
+    createdAt,
+    features,
+    inspiration
+  };
+}
+
+function handleNextGenFormSubmit(event) {
+  event.preventDefault();
+
+  const { nameInput, descriptionInput, notesInput, productsContainer, standardTextarea } = nextGenState.elements;
+  const productName = nameInput?.value?.trim() ?? "";
+  if (!productName) {
+    setNextGenFormStatus("Name of product is required.", "error");
+    nameInput?.focus?.();
+    return;
+  }
+
+  const features = nextGenState.selectedFeatures.map((featureId) => {
+    const feature = NEXTGEN_FEATURE_MAP.get(featureId) || { id: featureId, label: featureId };
+    return { id: feature.id, label: feature.label };
+  });
+
+  const description = descriptionInput?.value?.trim() ?? "";
+  const notes = notesInput?.value?.trim() ?? "";
+
+  const inspiration = [];
+  if (productsContainer) {
+    productsContainer.querySelectorAll("input[type='checkbox']").forEach((input) => {
+      if (!input.checked) return;
+      const id = input.value;
+      const name = input.dataset.label || nextGenState.productMap.get(id) || id;
+      const draft = input.dataset.draft === "true";
+      inspiration.push({ id, name, draft });
+    });
+  }
+
+  const brief = normalizeNextGenBrief({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    productName,
+    description,
+    notes,
+    standardText: standardTextarea?.value || NEXTGEN_STANDARD_TEXT,
+    features,
+    inspiration,
+    createdAt: new Date().toISOString()
+  });
+
+  if (!brief) {
+    setNextGenFormStatus("We couldn't build this brief. Please try again.", "error");
+    return;
+  }
+
+  nextGenState.savedBriefs = [brief, ...nextGenState.savedBriefs];
+  try {
+    persistNextGenBriefs(nextGenState.savedBriefs);
+  } catch (error) {
+    nextGenState.savedBriefs.shift();
+    setNextGenFormStatus("We couldn't save your brief. Clear some storage and try again.", "error");
+    return;
+  }
+
+  renderNextGenSavedBriefs();
+  setNextGenStatus(`Saved “${brief.productName}” to your Next Gen briefs.`, "success");
+  closeNextGenModal({ reset: true, focusTrigger: true });
+}
+
+function initNextGenEngineBriefs() {
+  if (nextGenState.initialized) return;
+
+  const section = document.querySelector("[data-nextgen-section]");
+  if (!section) {
+    nextGenState.initialized = true;
+    return;
+  }
+
+  const elements = nextGenState.elements;
+  elements.section = section;
+  elements.openButton = section.querySelector("[data-nextgen-open]") ?? null;
+  elements.status = section.querySelector("[data-nextgen-status]") ?? null;
+  elements.list = section.querySelector("[data-nextgen-list]") ?? null;
+  elements.empty = section.querySelector("[data-nextgen-empty]") ?? null;
+  elements.layer = document.querySelector("[data-nextgen-layer]") ?? null;
+  elements.overlay = elements.layer?.querySelector("[data-nextgen-overlay]") ?? null;
+  elements.modal = elements.layer?.querySelector("[data-nextgen-modal]") ?? null;
+  elements.form = elements.modal?.querySelector("[data-nextgen-form]") ?? null;
+  elements.nameInput = elements.form?.querySelector("[data-nextgen-name]") ?? null;
+  elements.featureSelect = elements.form?.querySelector("[data-nextgen-feature-select]") ?? null;
+  elements.featureList = elements.form?.querySelector("[data-nextgen-feature-list]") ?? null;
+  elements.featureEmpty = elements.form?.querySelector("[data-nextgen-feature-empty]") ?? null;
+  elements.descriptionInput = elements.form?.querySelector("[data-nextgen-description]") ?? null;
+  elements.notesInput = elements.form?.querySelector("[data-nextgen-notes]") ?? null;
+  elements.standardTextarea = elements.form?.querySelector("[data-nextgen-standard]") ?? null;
+  elements.productsContainer = elements.form?.querySelector("[data-nextgen-products]") ?? null;
+  elements.productsLoading = elements.form?.querySelector("[data-nextgen-products-loading]") ?? null;
+  elements.productsError = elements.form?.querySelector("[data-nextgen-products-error]") ?? null;
+  elements.formStatus = elements.form?.querySelector("[data-nextgen-form-status]") ?? null;
+  elements.cancelButton = elements.form?.querySelector("[data-nextgen-cancel]") ?? null;
+  elements.closeButton = elements.form?.querySelector("[data-nextgen-close]") ?? null;
+
+  if (elements.standardTextarea) {
+    elements.standardTextarea.value = NEXTGEN_STANDARD_TEXT;
+  }
+
+  populateNextGenFeatureOptions();
+  renderNextGenSelectedFeatures();
+
+  nextGenState.savedBriefs = getNextGenStoredBriefs();
+  renderNextGenSavedBriefs();
+  setNextGenStatus("");
+
+  if (elements.openButton) {
+    elements.openButton.addEventListener("click", () => {
+      setNextGenFormStatus("");
+      openNextGenModal(elements.openButton);
+    });
+  }
+
+  if (elements.overlay) {
+    elements.overlay.addEventListener("click", () => {
+      closeNextGenModal({ reset: true, focusTrigger: true });
+    });
+  }
+
+  if (elements.closeButton) {
+    elements.closeButton.addEventListener("click", () => {
+      closeNextGenModal({ reset: true, focusTrigger: true });
+    });
+  }
+
+  if (elements.cancelButton) {
+    elements.cancelButton.addEventListener("click", () => {
+      closeNextGenModal({ reset: true, focusTrigger: true });
+    });
+  }
+
+  if (elements.featureSelect) {
+    elements.featureSelect.addEventListener("change", (event) => {
+      const value = event.target.value;
+      if (!value) return;
+      const added = addNextGenFeature(value);
+      event.target.value = "";
+      if (!added) {
+        setNextGenFormStatus("That feature is already selected.", "error");
+      } else {
+        setNextGenFormStatus("");
+      }
+    });
+  }
+
+  if (elements.featureList) {
+    elements.featureList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-nextgen-feature-remove]");
+      if (!button) return;
+      const featureId = button.dataset.nextgenFeatureRemove;
+      if (!featureId) return;
+      removeNextGenFeature(featureId);
+    });
+  }
+
+  if (elements.form) {
+    elements.form.addEventListener("submit", handleNextGenFormSubmit);
+  }
+
+  if (elements.list) {
+    elements.list.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-nextgen-delete]");
+      if (!button) return;
+      const briefId = button.dataset.nextgenDelete;
+      if (!briefId) return;
+      handleNextGenDelete(briefId);
+    });
+  }
+
+  fetchNextGenProducts();
+
+  nextGenState.initialized = true;
 }
 
 function clamp(value, min, max) {
