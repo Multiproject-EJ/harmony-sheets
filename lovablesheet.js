@@ -55,6 +55,10 @@ const BOARD_SCALE_MIN = 0.6;
 const BOARD_SCALE_MAX = 1.4;
 const BOARD_SCALE_STEP = 0.1;
 const BOARD_SCALE_TOLERANCE = 0.001;
+const NOTE_MIN_WIDTH = 160;
+const NOTE_MAX_WIDTH = 560;
+const NOTE_MIN_HEIGHT = 210;
+const NOTE_MAX_HEIGHT = 840;
 
 let brainBoardInitialized = false;
 let flowchartBoardInitialized = false;
@@ -436,11 +440,18 @@ function cloneNotes(notes = []) {
     color: normalizeNoteColorValue(note.color),
     x: Number.isFinite(Number(note.x)) ? Number(note.x) : 0,
     y: Number.isFinite(Number(note.y)) ? Number(note.y) : 0,
+    width: parsePositiveNumber(note.width),
+    height: parsePositiveNumber(note.height),
     label: typeof note.label === "string" ? note.label : "",
     body: typeof note.body === "string" ? note.body : "",
     placeholder: typeof note.placeholder === "string" ? note.placeholder : "",
     shape: normalizeNoteShapeValue(note.shape)
   }));
+}
+
+function parsePositiveNumber(value) {
+  const parsed = Number.parseFloat(value ?? "");
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 function normalizeNoteShapeValue(shape) {
@@ -482,6 +493,10 @@ class StickyBoard {
     this.noteShapes = BRAIN_BOARD_NOTE_SHAPE_MAP;
     this.shapeIds = BRAIN_BOARD_NOTE_SHAPE_IDS;
     this.defaultShape = BRAIN_BOARD_DEFAULT_SHAPE;
+    this.noteMinWidth = NOTE_MIN_WIDTH;
+    this.noteMaxWidth = NOTE_MAX_WIDTH;
+    this.noteMinHeight = NOTE_MIN_HEIGHT;
+    this.noteMaxHeight = NOTE_MAX_HEIGHT;
 
     this.scale = BOARD_SCALE_DEFAULT;
     const initialScaleAttr = this.root?.dataset.boardInitialScale;
@@ -907,6 +922,53 @@ class StickyBoard {
     note.style.setProperty("--note-custom-glow", glowColor);
   }
 
+  setNoteSize(note, width, height) {
+    if (!note) return;
+
+    if (Number.isFinite(width) && width > 0) {
+      const minWidth = this.noteMinWidth || NOTE_MIN_WIDTH;
+      const maxWidth = Number.isFinite(this.noteMaxWidth) ? this.noteMaxWidth : width;
+      const resolvedMax = Number.isFinite(maxWidth) ? Math.max(minWidth, maxWidth) : minWidth;
+      const clampedWidth = clamp(width, minWidth, resolvedMax);
+      note.dataset.width = `${clampedWidth}`;
+      note.style.setProperty("--note-width", `${clampedWidth}px`);
+    } else {
+      delete note.dataset.width;
+      note.style.removeProperty("--note-width");
+    }
+
+    if (Number.isFinite(height) && height > 0) {
+      const minHeight = this.noteMinHeight || NOTE_MIN_HEIGHT;
+      const maxHeight = Number.isFinite(this.noteMaxHeight) ? this.noteMaxHeight : height;
+      const resolvedMaxHeight = Number.isFinite(maxHeight) ? Math.max(minHeight, maxHeight) : minHeight;
+      const clampedHeight = clamp(height, minHeight, resolvedMaxHeight);
+      note.dataset.height = `${clampedHeight}`;
+      note.style.setProperty("--note-height", `${clampedHeight}px`);
+    } else {
+      delete note.dataset.height;
+      note.style.removeProperty("--note-height");
+    }
+  }
+
+  ensureResizeHandle(note) {
+    if (!note) return null;
+    let handle = note.querySelector("[data-note-resize]");
+    if (!handle) {
+      handle = document.createElement("button");
+      handle.type = "button";
+      handle.className = "brain-board__resize-handle";
+      handle.dataset.noteResize = "true";
+      handle.setAttribute("aria-label", "Resize sticky note");
+      handle.setAttribute("tabindex", "-1");
+      const srLabel = document.createElement("span");
+      srLabel.className = "sr-only";
+      srLabel.textContent = "Resize sticky note";
+      handle.appendChild(srLabel);
+      note.appendChild(handle);
+    }
+    return handle;
+  }
+
   ensureNoteShape(note) {
     if (!note) {
       return this.defaultShape;
@@ -1289,6 +1351,9 @@ class StickyBoard {
     const x = Number.parseFloat(note.dataset.x || "0");
     const y = Number.parseFloat(note.dataset.y || "0");
     this.setNotePosition(note, x, y);
+    const storedWidth = Number.parseFloat(note.dataset.width || "NaN");
+    const storedHeight = Number.parseFloat(note.dataset.height || "NaN");
+    this.setNoteSize(note, storedWidth, storedHeight);
     this.ensureNoteShape(note);
     this.updateColorControls(note);
 
@@ -1400,6 +1465,91 @@ class StickyBoard {
       });
     }
 
+    const resizeHandle = this.ensureResizeHandle(note);
+    if (resizeHandle && !resizeHandle.dataset.resizeBound) {
+      resizeHandle.dataset.resizeBound = "true";
+      resizeHandle.addEventListener("pointerdown", (event) => {
+        if (!this.workspace) return;
+        if (event.button && event.button !== 0) return;
+        event.preventDefault();
+
+        const pointerId = event.pointerId;
+        const origin = { x: event.clientX, y: event.clientY };
+        const startWidth = note.offsetWidth;
+        const startHeight = note.offsetHeight;
+        const startX = Number.parseFloat(note.dataset.x || "0");
+        const startY = Number.parseFloat(note.dataset.y || "0");
+        const boardWidthUnits = this.workspace.clientWidth / this.scale;
+        const boardHeightUnits = this.workspace.clientHeight / this.scale;
+
+        note.dataset.resizing = "true";
+        resizeHandle.setPointerCapture(pointerId);
+
+        const onPointerMove = (moveEvent) => {
+          const deltaX = (moveEvent.clientX - origin.x) / this.scale;
+          const deltaY = (moveEvent.clientY - origin.y) / this.scale;
+
+          const availableWidth = Number.isFinite(boardWidthUnits)
+            ? Math.max(this.noteMinWidth, boardWidthUnits - startX)
+            : Math.max(this.noteMinWidth, this.noteMaxWidth || this.noteMinWidth);
+          const availableHeight = Number.isFinite(boardHeightUnits)
+            ? Math.max(this.noteMinHeight, boardHeightUnits - startY)
+            : Math.max(this.noteMinHeight, this.noteMaxHeight || this.noteMinHeight);
+
+          const maxWidth = Number.isFinite(this.noteMaxWidth)
+            ? Math.min(this.noteMaxWidth, availableWidth)
+            : availableWidth;
+          const maxHeight = Number.isFinite(this.noteMaxHeight)
+            ? Math.min(this.noteMaxHeight, availableHeight)
+            : availableHeight;
+
+          const resolvedMaxWidth = Number.isFinite(maxWidth) ? Math.max(this.noteMinWidth, maxWidth) : this.noteMinWidth;
+          const resolvedMaxHeight = Number.isFinite(maxHeight) ? Math.max(this.noteMinHeight, maxHeight) : this.noteMinHeight;
+
+          const nextWidth = clamp(startWidth + deltaX, this.noteMinWidth, resolvedMaxWidth);
+          const nextHeight = clamp(startHeight + deltaY, this.noteMinHeight, resolvedMaxHeight);
+
+          this.setNoteSize(note, nextWidth, nextHeight);
+          this.scheduleColumnVisualUpdate();
+        };
+
+        const finalizeResize = () => {
+          delete note.dataset.resizing;
+          if (resizeHandle.hasPointerCapture(pointerId)) {
+            resizeHandle.releasePointerCapture(pointerId);
+          }
+          resizeHandle.removeEventListener("pointermove", onPointerMove);
+          resizeHandle.removeEventListener("pointerup", finalizeResize);
+          resizeHandle.removeEventListener("pointercancel", finalizeResize);
+
+          const boardWidth = this.workspace.clientWidth;
+          const boardHeight = this.workspace.clientHeight;
+          const currentX = Number.parseFloat(note.dataset.x || "0");
+          const currentY = Number.parseFloat(note.dataset.y || "0");
+
+          if (boardWidth > 0) {
+            const maxX = Math.max(0, (boardWidth - note.offsetWidth * this.scale) / this.scale);
+            if (currentX > maxX) {
+              this.setNotePosition(note, maxX, currentY);
+            }
+          }
+
+          if (boardHeight > 0) {
+            const maxY = Math.max(0, (boardHeight - note.offsetHeight * this.scale) / this.scale);
+            if (currentY > maxY) {
+              this.setNotePosition(note, Number.parseFloat(note.dataset.x || "0"), maxY);
+            }
+          }
+
+          this.scheduleColumnVisualUpdate();
+        };
+
+        resizeHandle.addEventListener("pointermove", onPointerMove);
+        resizeHandle.addEventListener("pointerup", finalizeResize);
+        resizeHandle.addEventListener("pointercancel", finalizeResize);
+      });
+    }
+
     const groupButton = note.querySelector("[data-note-group]");
     if (groupButton) {
       groupButton.addEventListener("click", () => {
@@ -1491,6 +1641,10 @@ class StickyBoard {
     const shape = normalizeNoteShapeValue(noteData?.shape);
     element.dataset.shape = shape;
 
+    const noteWidth = parsePositiveNumber(noteData?.width);
+    const noteHeight = parsePositiveNumber(noteData?.height);
+    this.setNoteSize(element, noteWidth ?? Number.NaN, noteHeight ?? Number.NaN);
+
     const x = Number.isFinite(Number(noteData?.x)) ? Number(noteData.x) : 0;
     const y = Number.isFinite(Number(noteData?.y)) ? Number(noteData.y) : 0;
     this.setNotePosition(element, x, y);
@@ -1559,6 +1713,8 @@ class StickyBoard {
         color: note.dataset.customColor || note.dataset.color || "sunshine",
         x: Number.parseFloat(note.dataset.x || "0") || 0,
         y: Number.parseFloat(note.dataset.y || "0") || 0,
+        width: parsePositiveNumber(note.dataset.width),
+        height: parsePositiveNumber(note.dataset.height),
         label: labelEl ? labelEl.textContent?.trim() || "" : "",
         body: bodyEl ? bodyEl.innerHTML : "",
         placeholder: bodyEl?.getAttribute("data-placeholder") || "",
