@@ -392,7 +392,9 @@
                         <div class="brain-board__columns" data-board-columns-overlay aria-hidden="true"></div>
                         <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-shape="classic" data-x="32" data-y="40">
                           <div class="brain-board__handle" data-note-handle>
-                            <span class="brain-board__label" data-note-label>Quick capture</span>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Quick capture</span>
+                            </button>
                             <div class="brain-board__actions">
                               <div class="brain-board__color-control" data-note-color-control>
                                 <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
@@ -446,7 +448,9 @@
 
                         <div class="brain-board__note" role="listitem" data-note data-color="meadow" data-shape="classic" data-x="232" data-y="40">
                           <div class="brain-board__handle" data-note-handle>
-                            <span class="brain-board__label" data-note-label>In progress</span>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>In progress</span>
+                            </button>
                             <div class="brain-board__actions">
                               <div class="brain-board__color-control" data-note-color-control>
                                 <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
@@ -500,7 +504,9 @@
 
                         <div class="brain-board__note" role="listitem" data-note data-color="ocean" data-shape="classic" data-x="432" data-y="40">
                           <div class="brain-board__handle" data-note-handle>
-                            <span class="brain-board__label" data-note-label>Opportunities</span>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Opportunities</span>
+                            </button>
                             <div class="brain-board__actions">
                               <div class="brain-board__color-control" data-note-color-control>
                                 <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
@@ -554,7 +560,9 @@
 
                         <div class="brain-board__note" role="listitem" data-note data-color="blossom" data-shape="classic" data-x="632" data-y="40">
                           <div class="brain-board__handle" data-note-handle>
-                            <span class="brain-board__label" data-note-label>Backlog</span>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Backlog</span>
+                            </button>
                             <div class="brain-board__actions">
                               <div class="brain-board__color-control" data-note-color-control>
                                 <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
@@ -604,6 +612,20 @@
                             </div>
                           </div>
                           <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Collect user stories that need deeper grooming.</div>
+                        </div>
+                      </div>
+                      <div class="brain-board__label-editor" id="brain-board-label-editor" data-note-label-editor role="dialog" aria-modal="false" aria-label="Edit sticky title" hidden>
+                        <label class="brain-board__label-editor-field" for="brain-board-label-input">
+                          <span class="brain-board__label-editor-heading">Sticky title</span>
+                          <input class="brain-board__label-editor-input" id="brain-board-label-input" type="text" name="brain-board-label" maxlength="60" autocomplete="off" autocapitalize="sentences" data-note-label-input placeholder="Add a sticky title">
+                        </label>
+                        <div class="brain-board__label-editor-emojis" role="group" aria-label="Quick emoji suggestions">
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="✨" aria-label="Add sparkles">✨</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="💡" aria-label="Add lightbulb">💡</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="🔥" aria-label="Add fire">🔥</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="✅" aria-label="Add check mark">✅</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="🚀" aria-label="Add rocket">🚀</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="❤️" aria-label="Add heart">❤️</button>
                         </div>
                       </div>
                       <div class="brain-board-menu brain-board-menu--fab" role="group" aria-label="Brain board quick tools" data-board-menu>
@@ -724,7 +746,9 @@
                     <template id="brain-board-note-template">
                       <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-shape="classic" data-x="0" data-y="0">
                         <div class="brain-board__handle" data-note-handle>
-                          <span class="brain-board__label" data-note-label>Note</span>
+                          <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                            <span class="brain-board__label" data-note-label>Note</span>
+                          </button>
                           <div class="brain-board__actions">
                             <div class="brain-board__color-control" data-note-color-control>
                               <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
@@ -775,7 +799,9 @@
                       <div class="brain-board__workspace brain-board__workspace--flowchart" data-board-workspace role="list" aria-label="Flowchart sticky board preview">
                         <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-shape="classic" data-x="32" data-y="40">
                           <div class="brain-board__handle" data-note-handle>
-                            <span class="brain-board__label" data-note-label>Kickoff</span>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Kickoff</span>
+                            </button>
                             <div class="brain-board__actions">
                               <div class="brain-board__color-control" data-note-color-control>
                                 <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
@@ -828,7 +854,9 @@
                         </div>
                         <div class="brain-board__note" role="listitem" data-note data-color="meadow" data-shape="classic" data-x="232" data-y="40">
                           <div class="brain-board__handle" data-note-handle>
-                            <span class="brain-board__label" data-note-label>Decision lane</span>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Decision lane</span>
+                            </button>
                             <div class="brain-board__actions">
                               <div class="brain-board__color-control" data-note-color-control>
                                 <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
@@ -881,7 +909,9 @@
                         </div>
                         <div class="brain-board__note" role="listitem" data-note data-color="ocean" data-shape="classic" data-x="432" data-y="40">
                           <div class="brain-board__handle" data-note-handle>
-                            <span class="brain-board__label" data-note-label>Parallel tasks</span>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Parallel tasks</span>
+                            </button>
                             <div class="brain-board__actions">
                               <div class="brain-board__color-control" data-note-color-control>
                                 <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
@@ -934,7 +964,9 @@
                         </div>
                         <div class="brain-board__note" role="listitem" data-note data-color="blossom" data-shape="classic" data-x="632" data-y="40">
                           <div class="brain-board__handle" data-note-handle>
-                            <span class="brain-board__label" data-note-label>Wrap up</span>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Wrap up</span>
+                            </button>
                             <div class="brain-board__actions">
                               <div class="brain-board__color-control" data-note-color-control>
                                 <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
