@@ -17,6 +17,39 @@ const REVIEW_CATEGORIES = [
   { key: 'identity', label: 'Identity' }
 ];
 
+const LEVEL_CHECKLIST_STORAGE_KEY = 'hs-admin-level-checklists-v1';
+
+const LEVEL_CHECKLIST_ITEMS = {
+  marketing: [
+    'Confirm product hero visuals updated',
+    'Review description tone and clarity',
+    'Verify launch email draft complete',
+    'Refresh testimonial highlights',
+    'Update promotional links'
+  ],
+  optimization: [
+    'Audit spreadsheet formulas',
+    'Run performance benchmark tests',
+    'Validate onboarding instructions',
+    'Review cross-sheet references',
+    'Document optimization opportunities'
+  ],
+  safeLegal: [
+    'Confirm copyright attributions',
+    'Verify policy compliance',
+    'Review disclaimers and warnings',
+    'Check accessibility standards',
+    'Approve final legal summary'
+  ],
+  identity: [
+    'Ensure brand colors match guide',
+    'Review typography consistency',
+    'Align imagery with persona',
+    'Refresh mission statement reference',
+    'Update voice and tone checklist'
+  ]
+};
+
 const STATUS_LABELS = {
   1: 'Ready',
   2: 'In progress',
@@ -35,6 +68,7 @@ const els = {
   status: document.querySelector('[data-status]'),
   statusIndicator: document.querySelector('[data-status-indicator]'),
   workspaceLabel: document.querySelector('[data-workspace-label]'),
+  tableHead: document.querySelector('[data-products-table-head]'),
   tableBody: document.querySelector('[data-products-table]'),
   tableMeta: document.querySelector('[data-table-meta]'),
   tableContainer: document.querySelector('[data-table-container]'),
@@ -55,6 +89,10 @@ const els = {
   guideModal: document.querySelector('[data-editing-guide-modal]'),
   guideDialog: document.querySelector('[data-editing-guide-dialog]'),
   guideDismissTriggers: document.querySelectorAll('[data-editing-guide-dismiss]'),
+  levelModal: document.querySelector('[data-level-modal]'),
+  levelModalDialog: document.querySelector('[data-level-modal-dialog]'),
+  levelModalDismissTriggers: document.querySelectorAll('[data-level-modal-dismiss]'),
+  levelTableBody: document.querySelector('[data-level-table]'),
   productModal: document.querySelector('[data-product-modal]'),
   productModalDialog: document.querySelector('[data-product-modal-dialog]'),
   productModalDismissTriggers: document.querySelectorAll('[data-product-modal-dismiss]'),
@@ -90,9 +128,12 @@ const formFields = {
 let lastFocusedGuideTrigger = null;
 let lastFocusedEditorTrigger = null;
 let lastFocusedEditorTriggerId = null;
+let lastFocusedLevelTrigger = null;
 let pendingSupabaseCheck = null;
 let lastProductAction = null;
 let currentPreviewUrl = null;
+const levelModalState = { open: false, selectedId: null };
+let levelChecklistState = loadLevelChecklistState();
 
 function getGuideFocusableElements() {
   if (!els.guideModal) return [];
@@ -431,6 +472,102 @@ function escapeHtml(value) {
   return escapeAttribute(value);
 }
 
+function getChecklistTemplate(categoryKey) {
+  const items = LEVEL_CHECKLIST_ITEMS[categoryKey];
+  return Array.isArray(items) ? items.slice() : [];
+}
+
+function loadLevelChecklistState() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return {};
+  }
+  try {
+    const stored = window.localStorage.getItem(LEVEL_CHECKLIST_STORAGE_KEY);
+    if (!stored) return {};
+    const parsed = JSON.parse(stored);
+    if (parsed && typeof parsed === 'object') {
+      return parsed;
+    }
+  } catch (error) {
+    console.warn('[editor] Failed to load level checklist state', error);
+  }
+  return {};
+}
+
+function persistLevelChecklistState() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return;
+  }
+  try {
+    window.localStorage.setItem(
+      LEVEL_CHECKLIST_STORAGE_KEY,
+      JSON.stringify(levelChecklistState || {})
+    );
+  } catch (error) {
+    console.warn('[editor] Failed to persist level checklist state', error);
+  }
+}
+
+function getLevelChecklist(productId, categoryKey) {
+  const template = getChecklistTemplate(categoryKey);
+  const total = template.length;
+  if (!total) return [];
+  if (!productId) {
+    return new Array(total).fill(false);
+  }
+  if (!levelChecklistState || typeof levelChecklistState !== 'object') {
+    levelChecklistState = {};
+  }
+  const productState =
+    levelChecklistState[productId] && typeof levelChecklistState[productId] === 'object'
+      ? levelChecklistState[productId]
+      : {};
+  const stored = Array.isArray(productState[categoryKey]) ? productState[categoryKey] : [];
+  const normalized = template.map((_, index) => Boolean(stored[index]));
+  return normalized;
+}
+
+function setLevelChecklist(productId, categoryKey, values) {
+  if (!productId) return;
+  if (!levelChecklistState || typeof levelChecklistState !== 'object') {
+    levelChecklistState = {};
+  }
+  if (!levelChecklistState[productId] || typeof levelChecklistState[productId] !== 'object') {
+    levelChecklistState[productId] = {};
+  }
+  levelChecklistState[productId][categoryKey] = Array.isArray(values) ? values.slice() : [];
+  persistLevelChecklistState();
+}
+
+function setLevelChecklistValue(productId, categoryKey, index, checked) {
+  const template = getChecklistTemplate(categoryKey);
+  if (!template.length) return;
+  const values = getLevelChecklist(productId, categoryKey);
+  if (index < 0 || index >= values.length) return;
+  values[index] = Boolean(checked);
+  setLevelChecklist(productId, categoryKey, values);
+}
+
+function getChecklistCompletion(productId, categoryKey) {
+  const values = getLevelChecklist(productId, categoryKey);
+  const total = values.length;
+  const completed = values.filter(Boolean).length;
+  return { completed, total };
+}
+
+function isChecklistComplete(productId, categoryKey) {
+  const { completed, total } = getChecklistCompletion(productId, categoryKey);
+  return total > 0 && completed === total;
+}
+
+function getProductLevelSummary(productId) {
+  const totalCategories = REVIEW_CATEGORIES.length;
+  const completedCategories = REVIEW_CATEGORIES.reduce((count, category) => {
+    return count + (isChecklistComplete(productId, category.key) ? 1 : 0);
+  }, 0);
+  return { completedCategories, totalCategories };
+}
+
 function normalizeDraftFlag(value) {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'string') {
@@ -712,7 +849,7 @@ async function loadProducts() {
 
 function renderErrorRow(message) {
   if (!els.tableBody) return;
-  els.tableBody.innerHTML = `<tr><td colspan="5" class="admin-table__empty">${message}</td></tr>`;
+  els.tableBody.innerHTML = `<tr><td colspan="6" class="admin-table__empty">${message}</td></tr>`;
   if (els.tableMeta) {
     els.tableMeta.textContent = '0 products';
   }
@@ -770,41 +907,61 @@ function getFilteredProducts() {
 }
 
 function renderReviewStatusCell(product, category) {
-  const entry = getReviewEntry(product, category.key);
-  const productName = product.name || product.id || 'Untitled product';
-  const score = entry.score;
-  const tone = getStatusTone(score);
-  const classes = ['admin-status-pill', `admin-status-pill--${tone}`];
-  if (score == null) {
-    classes.push('admin-status-pill--empty');
-  } else {
-    classes.push(`admin-status-pill--score-${score}`);
+  const template = getChecklistTemplate(category.key);
+  const values = getLevelChecklist(product.id, category.key);
+  const total = template.length;
+  const completed = values.filter(Boolean).length;
+  const isComplete = total > 0 && completed === total;
+  const triggerClasses = ['level-checklist__trigger'];
+  if (isComplete) {
+    triggerClasses.push('is-complete');
   }
-  const label = getStatusLabel(score);
-  const displayValue = score == null ? 'Set' : String(score);
-  const payload = {
-    entityType: 'product',
-    entityId: product.id || null,
-    entityName: productName,
-    categoryKey: category.key,
-    categoryLabel: category.label,
-    score,
-    statusLabel: label,
-    tone,
-    note: entry.note || '',
-    tasks: Array.isArray(entry.tasks) ? entry.tasks : []
-  };
-  const encodedPayload = encodeStatusPayload(payload);
-  const ariaLabel =
-    score == null
-      ? `${category.label} status for ${productName} not set`
-      : `${category.label} status for ${productName}: level ${score} — ${label}`;
+  const panelId = `level-panel-${product.id}-${category.key}`;
+  const safePanelId = escapeAttribute(panelId);
+  const safeProductId = escapeAttribute(product.id || '');
+  const progressText = total ? `${completed}/${total}` : '0/0';
+  const checklistItems = template
+    .map((item, index) => {
+      const checkboxId = `level-check-${product.id}-${category.key}-${index}`;
+      const safeCheckboxId = escapeAttribute(checkboxId);
+      const checked = values[index] ? ' checked' : '';
+      return `
+            <li class="level-checklist__item">
+              <label class="level-checklist__label" for="${safeCheckboxId}">
+                <input type="checkbox" id="${safeCheckboxId}" data-checklist-checkbox data-product-id="${safeProductId}" data-category="${escapeAttribute(category.key)}" data-index="${index}"${checked}>
+                <span>${escapeHtml(item)}</span>
+              </label>
+            </li>
+          `;
+    })
+    .join('');
   return `
-      <td data-label="${category.label}">
-        <button type="button" class="${classes.join(' ')}" data-status-trigger data-status-entity="product" data-status-payload="${escapeAttribute(encodedPayload)}" aria-label="${escapeAttribute(ariaLabel)}">
-          <span class="admin-status-pill__value">${escapeHtml(displayValue)}</span>
-          <span class="admin-status-pill__label">${escapeHtml(label)}</span>
+      <td data-label="${escapeAttribute(category.label)}">
+        <button
+          type="button"
+          class="${triggerClasses.join(' ')}"
+          data-checklist-trigger
+          data-product-id="${safeProductId}"
+          data-category="${escapeAttribute(category.key)}"
+          aria-expanded="false"
+          aria-controls="${safePanelId}"
+        >
+          <span class="level-checklist__trigger-label">${escapeHtml(category.label)}</span>
+          <span class="level-checklist__progress" data-checklist-progress>${escapeHtml(progressText)}</span>
         </button>
+        <div
+          class="level-checklist"
+          id="${safePanelId}"
+          data-checklist-panel
+          data-product-id="${safeProductId}"
+          data-category="${escapeAttribute(category.key)}"
+          hidden
+        >
+          <p class="level-checklist__hint">Mark the steps you have completed for ${escapeHtml(category.label.toLowerCase())}.</p>
+          <ul class="level-checklist__items">
+            ${checklistItems}
+          </ul>
+        </div>
       </td>
   `;
 }
@@ -829,9 +986,12 @@ function renderProductRow(product) {
   const badges = formatBadges(product.badges);
   const price = product.price || '—';
   const labelName = escapeAttribute(product.name || product.id || 'product');
-  const statusCells = REVIEW_CATEGORIES.map((category) =>
-    renderReviewStatusCell(product, category)
-  ).join('');
+  const { completedCategories, totalCategories } = getProductLevelSummary(product.id);
+  const levelButtonClasses = ['admin-level-trigger'];
+  if (totalCategories > 0 && completedCategories === totalCategories) {
+    levelButtonClasses.push('admin-level-trigger--complete');
+  }
+  const progressValue = `${completedCategories}/${totalCategories || 0}`;
 
   return `
     <tr ${attributes}>
@@ -852,9 +1012,287 @@ function renderProductRow(product) {
           <span class="sr-only">${statusLabel} status for ${product.name || 'Untitled product'}</span>
         </label>
       </td>
+      <td class="admin-table__level" data-label="Level">
+        <button
+          type="button"
+          class="${levelButtonClasses.join(' ')}"
+          data-level-trigger
+          data-product-id="${escapeAttribute(product.id || '')}"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+        >
+          <span class="admin-level-trigger__label">Level</span>
+          <span class="admin-level-trigger__progress" data-level-summary>${escapeHtml(progressValue)}</span>
+        </button>
+      </td>
+    </tr>
+  `;
+}
+
+function renderLevelTableRow(product) {
+  const productName = product.name || 'Untitled product';
+  const productTagline = product.tagline || '';
+  const lifeAreas = formatLifeAreas(product.lifeAreas);
+  const badges = formatBadges(product.badges);
+  const price = product.price || '—';
+  const draftLabel = product.draft ? 'Draft' : 'Active';
+  const rowClasses = ['admin-level-table__row'];
+  if (levelModalState.selectedId && levelModalState.selectedId === product.id) {
+    rowClasses.push('is-target');
+  }
+  const classAttr = rowClasses.length ? ` class="${rowClasses.join(' ')}"` : '';
+  const statusCells = REVIEW_CATEGORIES.map((category) =>
+    renderReviewStatusCell(product, category)
+  ).join('');
+
+  return `
+    <tr data-level-row data-id="${escapeAttribute(product.id || '')}"${classAttr}>
+      <th scope="row" data-label="Product">
+        <span class="admin-table__name">${escapeHtml(productName)}</span>
+        <span class="admin-table__tagline">${escapeHtml(productTagline)}</span>
+      </th>
+      <td data-label="Life areas">${escapeHtml(lifeAreas)}</td>
+      <td data-label="Labels">${escapeHtml(badges)}</td>
+      <td class="admin-table__price" data-label="Price">${escapeHtml(price)}</td>
+      <td class="admin-table__status" data-label="Draft">
+        <span class="admin-level-table__draft">${escapeHtml(draftLabel)}</span>
+      </td>
       ${statusCells}
     </tr>
   `;
+}
+
+function focusLevelTableRow(productId) {
+  if (!els.levelTableBody) return;
+  const rows = Array.from(els.levelTableBody.querySelectorAll('[data-level-row]'));
+  rows.forEach((row) => {
+    row.classList.remove('is-target');
+  });
+  if (!productId) return;
+  const safeId = escapeSelector(productId);
+  const target = els.levelTableBody.querySelector(`[data-level-row][data-id="${safeId}"]`);
+  if (target) {
+    target.classList.add('is-target');
+    target.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function renderLevelTable(selectedId = null) {
+  if (!els.levelTableBody) return;
+  const products = getFilteredProducts();
+  if (!products.length) {
+    els.levelTableBody.innerHTML = '<tr><td colspan="9" class="admin-table__empty">No products available.</td></tr>';
+    return;
+  }
+  const hasSelection = selectedId && products.some((product) => product.id === selectedId);
+  levelModalState.selectedId = hasSelection ? selectedId : null;
+  const rows = products.map((product) => renderLevelTableRow(product)).join('');
+  els.levelTableBody.innerHTML = rows;
+  if (levelModalState.open) {
+    focusLevelTableRow(levelModalState.selectedId);
+  }
+}
+
+function getLevelFocusableElements() {
+  if (!els.levelModal) return [];
+  const selectors = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+  return Array.from(els.levelModal.querySelectorAll(selectors)).filter((element) => {
+    if (!(element instanceof HTMLElement)) return false;
+    if (element.hasAttribute('disabled')) return false;
+    if (element.getAttribute('aria-hidden') === 'true') return false;
+    if (!els.levelModalDialog) return element.offsetParent !== null;
+    return element.offsetParent !== null || element === els.levelModalDialog;
+  });
+}
+
+function closeAllChecklistPanels(exceptPanel = null) {
+  if (!els.levelModal) return;
+  const panels = Array.from(els.levelModal.querySelectorAll('[data-checklist-panel]'));
+  panels.forEach((panel) => {
+    if (panel === exceptPanel) {
+      panel.hidden = false;
+    } else {
+      panel.hidden = true;
+    }
+  });
+  const triggers = Array.from(els.levelModal.querySelectorAll('[data-checklist-trigger]'));
+  triggers.forEach((trigger) => {
+    const { productId, category } = trigger.dataset;
+    if (!productId || !category) {
+      trigger.setAttribute('aria-expanded', 'false');
+      return;
+    }
+    const isMatch =
+      exceptPanel &&
+      exceptPanel.dataset.productId === productId &&
+      exceptPanel.dataset.category === category;
+    trigger.setAttribute('aria-expanded', isMatch ? 'true' : 'false');
+  });
+}
+
+function updateLevelSummary(productId) {
+  if (!productId) return;
+  const { completedCategories, totalCategories } = getProductLevelSummary(productId);
+  const progressText = `${completedCategories}/${totalCategories || 0}`;
+  const safeId = escapeSelector(productId);
+  const trigger = els.tableBody?.querySelector(
+    `[data-level-trigger][data-product-id="${safeId}"]`
+  );
+  if (trigger) {
+    const progressEl = trigger.querySelector('[data-level-summary]');
+    if (progressEl) {
+      progressEl.textContent = progressText;
+    }
+    trigger.classList.toggle(
+      'admin-level-trigger--complete',
+      totalCategories > 0 && completedCategories === totalCategories
+    );
+  }
+  if (els.levelModal && els.levelModal.classList.contains('is-open')) {
+    focusLevelTableRow(productId);
+  }
+}
+
+function updateChecklistUi(productId, categoryKey) {
+  if (!productId || !categoryKey) return;
+  const { completed, total } = getChecklistCompletion(productId, categoryKey);
+  const progressText = total ? `${completed}/${total}` : '0/0';
+  if (els.levelModal) {
+    const safeId = escapeSelector(productId);
+    const trigger = els.levelModal.querySelector(
+      `[data-checklist-trigger][data-product-id="${safeId}"][data-category="${categoryKey}"]`
+    );
+    if (trigger) {
+      const progressEl = trigger.querySelector('[data-checklist-progress]');
+      if (progressEl) {
+        progressEl.textContent = progressText;
+      }
+      trigger.classList.toggle('is-complete', total > 0 && completed === total);
+    }
+  }
+  updateLevelSummary(productId);
+}
+
+function handleChecklistTrigger(event) {
+  const trigger = event.target.closest('[data-checklist-trigger]');
+  if (!trigger) return;
+  event.preventDefault();
+  const { productId, category } = trigger.dataset;
+  if (!productId || !category) return;
+  const safeId = escapeSelector(productId);
+  const panel = els.levelModal?.querySelector(
+    `[data-checklist-panel][data-product-id="${safeId}"][data-category="${category}"]`
+  );
+  if (!panel) return;
+  const isOpen = !panel.hidden;
+  if (isOpen) {
+    closeAllChecklistPanels();
+    trigger.focus();
+  } else {
+    closeAllChecklistPanels(panel);
+    const firstCheckbox = panel.querySelector('[data-checklist-checkbox]');
+    if (firstCheckbox instanceof HTMLElement) {
+      firstCheckbox.focus();
+    }
+  }
+}
+
+function handleChecklistCheckboxChange(event) {
+  const checkbox = event.target.closest('[data-checklist-checkbox]');
+  if (!checkbox) return;
+  const { productId, category, index } = checkbox.dataset;
+  if (!productId || !category) return;
+  const itemIndex = Number.parseInt(index, 10);
+  if (!Number.isFinite(itemIndex)) return;
+  setLevelChecklistValue(productId, category, itemIndex, checkbox.checked);
+  updateChecklistUi(productId, category);
+}
+
+function handleLevelModalKeydown(event) {
+  if (!els.levelModal?.classList.contains('is-open')) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeLevelModal();
+    return;
+  }
+  if (event.key === 'Tab') {
+    const focusable = getLevelFocusableElements();
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey) {
+      if (document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else if (document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+}
+
+function openLevelModal(trigger) {
+  if (!els.levelModal) return;
+  const productId = trigger?.dataset?.productId || null;
+  levelModalState.selectedId = productId;
+  renderLevelTable(productId);
+  closeAllChecklistPanels();
+  lastFocusedLevelTrigger = trigger instanceof HTMLElement ? trigger : null;
+  if (lastFocusedLevelTrigger) {
+    lastFocusedLevelTrigger.setAttribute('aria-expanded', 'true');
+  }
+  levelModalState.open = true;
+  els.levelModal.hidden = false;
+  requestAnimationFrame(() => {
+    els.levelModal?.classList.add('is-open');
+    document.body.classList.add('admin-level-open');
+    const focusTarget =
+      els.levelModalDialog || getLevelFocusableElements()[0] || els.levelModal;
+    focusTarget?.focus();
+  });
+  document.addEventListener('keydown', handleLevelModalKeydown);
+}
+
+function closeLevelModal({ restoreFocus = true } = {}) {
+  if (!els.levelModal) return;
+  els.levelModal.classList.remove('is-open');
+  document.body.classList.remove('admin-level-open');
+  document.removeEventListener('keydown', handleLevelModalKeydown);
+  closeAllChecklistPanels();
+  if (lastFocusedLevelTrigger) {
+    lastFocusedLevelTrigger.setAttribute('aria-expanded', 'false');
+  }
+  els.levelModal.hidden = true;
+  levelModalState.open = false;
+  if (restoreFocus && lastFocusedLevelTrigger && typeof lastFocusedLevelTrigger.focus === 'function') {
+    lastFocusedLevelTrigger.focus();
+  }
+  lastFocusedLevelTrigger = null;
+}
+
+function handleLevelTriggerClick(event) {
+  const trigger = event.target.closest('[data-level-trigger]');
+  if (!trigger) return;
+  event.preventDefault();
+  openLevelModal(trigger);
+}
+
+function setupLevelModal() {
+  if (!els.levelModal) return;
+  els.levelModalDismissTriggers?.forEach((trigger) => {
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      closeLevelModal();
+    });
+  });
+  els.levelModal.addEventListener('click', (event) => {
+    if (event.target === els.levelModal) {
+      closeLevelModal();
+    }
+  });
+  els.levelModalDialog?.addEventListener('click', handleChecklistTrigger);
+  els.levelModalDialog?.addEventListener('change', handleChecklistCheckboxChange);
 }
 
 function renderTable() {
@@ -862,11 +1300,13 @@ function renderTable() {
   const products = getFilteredProducts();
 
   if (!products.length) {
-    els.tableBody.innerHTML = '<tr><td colspan="9" class="admin-table__empty">No products found. Adjust your filters or add a new product.</td></tr>';
+    els.tableBody.innerHTML = '<tr><td colspan="6" class="admin-table__empty">No products found. Adjust your filters or add a new product.</td></tr>';
   } else {
     const rows = products.map((product) => renderProductRow(product)).join('');
     els.tableBody.innerHTML = rows;
   }
+
+  renderLevelTable(levelModalState.selectedId);
 
   if (els.tableMeta) {
     const total = state.products.length;
@@ -1410,8 +1850,9 @@ function handleKeyboardNavigation(event) {
 
 function registerEvents() {
   els.tableBody?.addEventListener('change', handleDraftToggle);
+  els.tableBody?.addEventListener('click', handleLevelTriggerClick);
   els.tableBody?.addEventListener('click', handleTableClick);
-  document.querySelector('.admin-table thead')?.addEventListener('click', handleSort);
+  els.tableHead?.addEventListener('click', handleSort);
   els.search?.addEventListener('input', handleSearch);
   els.areaFilter?.addEventListener('change', handleSearch);
   els.addButton?.addEventListener('click', handleAddProduct);
@@ -1493,6 +1934,7 @@ export function subscribeToCatalog(callback) {
   };
 }
 
+setupLevelModal();
 setupProductModal();
 setupGuideModal();
 registerEvents();
