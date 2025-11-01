@@ -102,29 +102,31 @@
     </div>
   </section>
   <section class="lovablesheet-content" data-lovablesheet-content hidden>
-    <section class="lovablesheet-nextgen" aria-labelledby="nextgen-engine-title" data-nextgen-section>
-      <div class="admin__panel admin__panel--nextgen">
-        <div class="admin__panel-head">
-          <div>
-            <p class="lovablesheet-nextgen__eyebrow">Next Gen brief</p>
-            <h2 id="nextgen-engine-title">Google Sheet next Gen Engine</h2>
-            <p class="admin__panel-sub">
-              Capture exploratory product briefs, link them to live inspiration modules, and keep the launch playbook close at hand.
-            </p>
+    <article class="lovablesheet-workflow" aria-labelledby="lovablesheet-workflow-title">
+      <header class="lovablesheet-workflow__intro">
+        <p class="lovablesheet-eyebrow">Simple Workflow</p>
+        <h1 id="lovablesheet-workflow-title">Bring clarity to every planning sprint</h1>
+      </header>
+
+      <div class="lovablesheet-workflow__body">
+        <section id="code-library" class="lovablesheet-code-library" aria-labelledby="code-library-title">
+          <div class="lovablesheet-code-library__inner">
+            <h2 id="code-library-title">LovableSheet module library</h2>
+            <p>Reference the interactive modules that power the LovableSheet admin surface. Use the quick navigation to jump to each module&rsquo;s configuration details.</p>
+
+            <section class="lovablesheet-library-guides" aria-labelledby="lovablesheet-guides-title">
+              <h3 id="lovablesheet-guides-title">Implementation references</h3>
+              <p>Need to update requirements or refresh guidance before shipping a new template? Use these quick links to review the published playbooks and source files.</p>
+              <ul class="lovablesheet-library-guides__list">
+                <li><a href="docs/module-publishing-playbook.md#new-module-implementation" target="_blank" rel="noopener">Module Publishing Playbook</a> &mdash; outlines required content fields, asset specs, CSS hooks, and QA steps for every launch.</li>
+                <li><a href="products.json" target="_blank" rel="noopener">products.json</a> &mdash; edit copy, pricing, sheet IDs, and metadata that surface in the public storefront.</li>
+              </ul>
+            </section>
           </div>
-          <div class="admin__panel-actions">
-            <button class="btn primary" type="button" data-nextgen-open>New brief</button>
-          </div>
-        </div>
-        <div class="admin__panel-body lovablesheet-nextgen__body">
-          <div class="lovablesheet-nextgen__status" data-nextgen-status role="status" aria-live="polite"></div>
-          <div class="lovablesheet-nextgen__empty" data-nextgen-empty>
-            <p>No Next Gen Engine briefs saved yet. Use “New brief” to capture the first concept.</p>
-          </div>
-          <div class="lovablesheet-nextgen__list" data-nextgen-list hidden></div>
-        </div>
+        </section>
       </div>
-    </section>
+    </article>
+
     <section class="lovablesheet-pipeline" aria-labelledby="todo-pipeline-title">
       <div class="admin__panel admin__panel--pipeline" aria-labelledby="todo-pipeline-title">
         <div class="admin__panel-head">
@@ -395,119 +397,157 @@
         </div>
       </div>
     </section>
-    <article class="lovablesheet-workflow" aria-labelledby="lovablesheet-workflow-title">
-      <header class="lovablesheet-workflow__intro">
-        <p class="lovablesheet-eyebrow">Simple Workflow</p>
-        <h1 id="lovablesheet-workflow-title">Bring clarity to every planning sprint</h1>
-      </header>
 
-      <section id="code-library" class="lovablesheet-code-library" aria-labelledby="code-library-title">
-        <div class="lovablesheet-code-library__inner">
-          <h2 id="code-library-title">LovableSheet module library</h2>
-          <p>Reference the interactive modules that power the LovableSheet admin surface. Use the quick navigation to jump to each module&rsquo;s configuration details.</p>
-
-          <section class="lovablesheet-library-guides" aria-labelledby="lovablesheet-guides-title">
-            <h3 id="lovablesheet-guides-title">Implementation references</h3>
-            <p>Need to update requirements or refresh guidance before shipping a new template? Use these quick links to review the published playbooks and source files.</p>
-            <ul class="lovablesheet-library-guides__list">
-              <li><a href="docs/module-publishing-playbook.md#new-module-implementation" target="_blank" rel="noopener">Module Publishing Playbook</a> &mdash; outlines required content fields, asset specs, CSS hooks, and QA steps for every launch.</li>
-              <li><a href="products.json" target="_blank" rel="noopener">products.json</a> &mdash; edit copy, pricing, sheet IDs, and metadata that surface in the public storefront.</li>
-            </ul>
-          </section>
-        </div>
-      </section>
-
-      <section class="lovablesheet-library" aria-label="LovableSheet board library">
-        <div class="lovablesheet-library__grid">
-          <div class="lovablesheet-library__column lovablesheet-library__column--boards">
-            <article class="lovablesheet-library__card lovablesheet-library__card--brain">
-              <div class="lovablesheet-library__preview lovablesheet-library__preview--brain" aria-hidden="true"></div>
-              <div class="lovablesheet-library__content">
-                <p class="lovablesheet-library__eyebrow">Sticky board</p>
-                <h2 class="lovablesheet-library__title">Brain board</h2>
-                <p class="lovablesheet-library__description">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
-                <p class="lovablesheet-library__description lovablesheet-library__description--secondary">
-                  Use the brain board to rough out initiatives, quick wins, and backlog ideas. Drag notes anywhere, recolor them, and rally similar ideas with a single move.
-                </p>
-                <ul class="lovablesheet-library__list">
-                  <li>Drag, recolor, and cluster quick ideas in real time.</li>
-                  <li>Switch between saved Supabase boards in a click.</li>
-                  <li>Rally similar notes with grouped color moves.</li>
-                </ul>
-                <div class="brain-board-library">
-                  <p class="brain-board-library__eyebrow">Brain board setup</p>
-                  <h3 class="brain-board-library__title">Board library</h3>
-                  <p class="brain-board-library__description">
-                    Choose which Supabase board to load before launching the brain board, then save new sticky note sessions without leaving this page.
-                  </p>
-                  <div class="brain-board-library__form">
-                    <label class="brain-board-library__label" for="brain-board-select">Boards</label>
-                    <select class="brain-board__select" id="brain-board-select" data-board-select>
-                      <option value="default">Default Board (Demo)</option>
-                    </select>
-                    <button class="btn primary brain-board__save" type="button" data-board-save>Save to Supabase</button>
-                  </div>
-                  <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
-                </div>
-              </div>
-              <div class="lovablesheet-library__actions">
-                <button class="btn primary lovablesheet-library__button" type="button" data-board-launch="brain">
-                  Launch brain board
-                </button>
-              </div>
-            </article>
-
-            <article class="lovablesheet-library__card lovablesheet-library__card--flowchart">
-              <div class="lovablesheet-library__preview lovablesheet-library__preview--flowchart" aria-hidden="true"></div>
-              <div class="lovablesheet-library__content">
-                <p class="lovablesheet-library__eyebrow">Sticky board</p>
-                <h2 class="lovablesheet-library__title">Flowchart board</h2>
-                <p class="lovablesheet-library__description">Sketch branching journeys and implementation checkpoints side-by-side with the sticky note toolkit.</p>
-                <ul class="lovablesheet-library__list">
-                  <li>Map kickoff triggers, decisions, and wrap-up steps.</li>
-                  <li>Compile every note into a ready-to-share AI prompt.</li>
-                  <li>Stay zoomed-in on swimlanes with precision controls.</li>
-                </ul>
-              </div>
-              <div class="lovablesheet-library__actions">
-                <button class="btn secondary lovablesheet-library__button" type="button" data-board-launch="flowchart">
-                  Launch flowchart board
-                </button>
-              </div>
-            </article>
+    <section class="lovablesheet-nextgen" aria-labelledby="nextgen-engine-title" data-nextgen-section>
+      <div class="admin__panel admin__panel--nextgen">
+        <div class="admin__panel-head">
+          <div>
+            <p class="lovablesheet-nextgen__eyebrow">Next Gen brief</p>
+            <h2 id="nextgen-engine-title">Google Sheet next Gen Engine</h2>
+            <p class="admin__panel-sub">
+              Capture exploratory product briefs, link them to live inspiration modules, and keep the launch playbook close at hand.
+            </p>
           </div>
-
-          <div class="lovablesheet-library__column lovablesheet-library__column--controls">
-            <section class="lovablesheet-controls lovablesheet-controls--flowchart" aria-labelledby="lovablesheet-flowchart-controls-title">
-              <p class="lovablesheet-controls__eyebrow">Flowchart board</p>
-              <h2 class="lovablesheet-controls__title" id="lovablesheet-flowchart-controls-title">Prompt compiler</h2>
-              <p class="lovablesheet-controls__description">Stitch every flowchart note into an AI-ready brief. Generate, tweak, and copy the compiled prompt right beside the launcher.</p>
-              <div class="lovablesheet-controls__prompt">
-                <div class="flowchart-prompt" data-flowchart-prompt>
-                  <div class="flowchart-prompt__heading">
-                    <span class="flowchart-prompt__eyebrow">Putting it together</span>
-                    <p class="flowchart-prompt__description">Compile the notes from this flowchart into a single prompt. Each note is stitched together in sequence so you can quickly brief a teammate or power an AI workflow.</p>
-                  </div>
-                  <div class="flowchart-prompt__actions">
-                    <button class="flowchart-prompt__action flowchart-prompt__action--primary" type="button" data-flowchart-prompt-generate>
-                      Compile flowchart context
-                    </button>
-                    <button class="flowchart-prompt__action flowchart-prompt__action--ghost" type="button" data-flowchart-prompt-copy>
-                      Copy prompt
-                    </button>
-                  </div>
-                  <label class="flowchart-prompt__output">
-                    <span class="sr-only">Compiled flowchart prompt</span>
-                    <textarea class="flowchart-prompt__textarea" rows="6" readonly data-flowchart-prompt-output placeholder="Your compiled flowchart prompt will appear here."></textarea>
-                  </label>
-                  <p class="flowchart-prompt__status" data-flowchart-prompt-status role="status" aria-live="polite"></p>
-                </div>
-              </div>
-            </section>
+          <div class="admin__panel-actions">
+            <button class="btn primary" type="button" data-nextgen-open>New brief</button>
           </div>
         </div>
-      </section>
-    </article>
+        <div class="admin__panel-body lovablesheet-nextgen__body">
+          <div class="lovablesheet-nextgen__status" data-nextgen-status role="status" aria-live="polite"></div>
+          <div class="lovablesheet-nextgen__empty" data-nextgen-empty>
+            <p>No Next Gen Engine briefs saved yet. Use “New brief” to capture the first concept.</p>
+          </div>
+          <div class="lovablesheet-nextgen__list" data-nextgen-list hidden></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="thinking-tools" aria-labelledby="thinking-tools-title">
+      <div class="thinking-tools__header">
+        <h2 id="thinking-tools-title">Thinking Tools</h2>
+        <p class="thinking-tools__description">Launch the sticky boards you need without leaving the flow. Pop each workspace open from a tidy control strip.</p>
+      </div>
+      <div class="thinking-tools__pills">
+        <button
+          class="thinking-pill"
+          type="button"
+          data-thinking-toggle="brain"
+          aria-expanded="false"
+          aria-controls="thinking-panel-brain"
+        >
+          Brain board
+        </button>
+        <button
+          class="thinking-pill thinking-pill--flowchart"
+          type="button"
+          data-thinking-toggle="flowchart"
+          aria-expanded="false"
+          aria-controls="thinking-panel-flowchart"
+        >
+          Flowchart <span class="thinking-pill__meta">[draft]</span>
+        </button>
+      </div>
+      <div class="thinking-tools__panels">
+        <div class="thinking-panel" id="thinking-panel-brain" data-thinking-panel="brain" hidden>
+          <div class="lovablesheet-library lovablesheet-library--single">
+            <div class="lovablesheet-library__grid">
+              <div class="lovablesheet-library__column lovablesheet-library__column--boards">
+                <article class="lovablesheet-library__card lovablesheet-library__card--brain">
+                  <div class="lovablesheet-library__preview lovablesheet-library__preview--brain" aria-hidden="true"></div>
+                  <div class="lovablesheet-library__content">
+                    <p class="lovablesheet-library__eyebrow">Sticky board</p>
+                    <h3 class="lovablesheet-library__title">Brain board</h3>
+                    <p class="lovablesheet-library__description">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
+                    <p class="lovablesheet-library__description lovablesheet-library__description--secondary">
+                      Use the brain board to rough out initiatives, quick wins, and backlog ideas. Drag notes anywhere, recolor them, and rally similar ideas with a single move.
+                    </p>
+                    <ul class="lovablesheet-library__list">
+                      <li>Drag, recolor, and cluster quick ideas in real time.</li>
+                      <li>Switch between saved Supabase boards in a click.</li>
+                      <li>Rally similar notes with grouped color moves.</li>
+                    </ul>
+                    <div class="brain-board-library">
+                      <p class="brain-board-library__eyebrow">Brain board setup</p>
+                      <h4 class="brain-board-library__title">Board library</h4>
+                      <p class="brain-board-library__description">
+                        Choose which Supabase board to load before launching the brain board, then save new sticky note sessions without leaving this page.
+                      </p>
+                      <div class="brain-board-library__form">
+                        <label class="brain-board-library__label" for="brain-board-select">Boards</label>
+                        <select class="brain-board__select" id="brain-board-select" data-board-select>
+                          <option value="default">Default Board (Demo)</option>
+                        </select>
+                        <button class="btn primary brain-board__save" type="button" data-board-save>Save to Supabase</button>
+                      </div>
+                      <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
+                    </div>
+                  </div>
+                  <div class="lovablesheet-library__actions">
+                    <button class="btn primary lovablesheet-library__button" type="button" data-board-launch="brain">
+                      Launch brain board
+                    </button>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thinking-panel" id="thinking-panel-flowchart" data-thinking-panel="flowchart" hidden>
+          <div class="lovablesheet-library lovablesheet-library--flowchart">
+            <div class="lovablesheet-library__grid">
+              <div class="lovablesheet-library__column lovablesheet-library__column--boards">
+                <article class="lovablesheet-library__card lovablesheet-library__card--flowchart">
+                  <div class="lovablesheet-library__preview lovablesheet-library__preview--flowchart" aria-hidden="true"></div>
+                  <div class="lovablesheet-library__content">
+                    <p class="lovablesheet-library__eyebrow">Sticky board</p>
+                    <h3 class="lovablesheet-library__title">Flowchart board</h3>
+                    <p class="lovablesheet-library__description">Sketch branching journeys and implementation checkpoints side-by-side with the sticky note toolkit.</p>
+                    <ul class="lovablesheet-library__list">
+                      <li>Map kickoff triggers, decisions, and wrap-up steps.</li>
+                      <li>Compile every note into a ready-to-share AI prompt.</li>
+                      <li>Stay zoomed-in on swimlanes with precision controls.</li>
+                    </ul>
+                  </div>
+                  <div class="lovablesheet-library__actions">
+                    <button class="btn secondary lovablesheet-library__button" type="button" data-board-launch="flowchart">
+                      Launch flowchart board
+                    </button>
+                  </div>
+                </article>
+              </div>
+              <div class="lovablesheet-library__column lovablesheet-library__column--controls">
+                <section class="lovablesheet-controls lovablesheet-controls--flowchart" aria-labelledby="lovablesheet-flowchart-controls-title">
+                  <p class="lovablesheet-controls__eyebrow">Flowchart board</p>
+                  <h3 class="lovablesheet-controls__title" id="lovablesheet-flowchart-controls-title">Prompt compiler</h3>
+                  <p class="lovablesheet-controls__description">Stitch every flowchart note into an AI-ready brief. Generate, tweak, and copy the compiled prompt right beside the launcher.</p>
+                  <div class="lovablesheet-controls__prompt">
+                    <div class="flowchart-prompt" data-flowchart-prompt>
+                      <div class="flowchart-prompt__heading">
+                        <span class="flowchart-prompt__eyebrow">Putting it together</span>
+                        <p class="flowchart-prompt__description">Compile the notes from this flowchart into a single prompt. Each note is stitched together in sequence so you can quickly brief a teammate or power an AI workflow.</p>
+                      </div>
+                      <div class="flowchart-prompt__actions">
+                        <button class="flowchart-prompt__action flowchart-prompt__action--primary" type="button" data-flowchart-prompt-generate>
+                          Compile flowchart context
+                        </button>
+                        <button class="flowchart-prompt__action flowchart-prompt__action--ghost" type="button" data-flowchart-prompt-copy>
+                          Copy prompt
+                        </button>
+                      </div>
+                      <label class="flowchart-prompt__output">
+                        <span class="sr-only">Compiled flowchart prompt</span>
+                        <textarea class="flowchart-prompt__textarea" rows="6" readonly data-flowchart-prompt-output placeholder="Your compiled flowchart prompt will appear here."></textarea>
+                      </label>
+                      <p class="flowchart-prompt__status" data-flowchart-prompt-status role="status" aria-live="polite"></p>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <div class="nextgen-modal-layer" data-nextgen-layer hidden>
       <div class="nextgen-modal-overlay" data-nextgen-overlay></div>

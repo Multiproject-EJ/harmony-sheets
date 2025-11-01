@@ -177,6 +177,13 @@ const sections = {
 
 const messageEl = document.querySelector("[data-lovablesheet-message]");
 
+const thinkingToolButtons = Array.from(document.querySelectorAll("[data-thinking-toggle]"));
+const thinkingToolPanels = new Map(
+  Array.from(document.querySelectorAll("[data-thinking-panel]"))
+    .map((panel) => [panel.dataset.thinkingPanel, panel])
+    .filter(([id]) => Boolean(id))
+);
+
 let supabaseClient = null;
 let authSubscription = null;
 let redirecting = false;
@@ -202,6 +209,62 @@ function redirectTo(target) {
   window.setTimeout(() => {
     redirecting = false;
   }, 0);
+}
+
+function setThinkingPanelVisibility(panelId, visible) {
+  if (!panelId) return;
+
+  const panel = thinkingToolPanels.get(panelId);
+  const trigger = thinkingToolButtons.find((button) => button.dataset.thinkingToggle === panelId);
+
+  if (!panel || !trigger) {
+    return;
+  }
+
+  if (visible) {
+    panel.hidden = false;
+    panel.classList.add("thinking-panel--active");
+    trigger.setAttribute("aria-expanded", "true");
+  } else {
+    panel.hidden = true;
+    panel.classList.remove("thinking-panel--active");
+    trigger.setAttribute("aria-expanded", "false");
+  }
+}
+
+function collapseThinkingPanels(exceptPanelId) {
+  thinkingToolPanels.forEach((_panel, id) => {
+    if (id === exceptPanelId) return;
+    setThinkingPanelVisibility(id, false);
+  });
+}
+
+function initializeThinkingTools() {
+  if (!thinkingToolButtons.length || !thinkingToolPanels.size) {
+    return;
+  }
+
+  thinkingToolButtons.forEach((button) => {
+    const { thinkingToggle } = button.dataset;
+    if (!thinkingToggle || !thinkingToolPanels.has(thinkingToggle)) {
+      button.setAttribute("aria-expanded", "false");
+      return;
+    }
+
+    setThinkingPanelVisibility(thinkingToggle, false);
+
+    button.addEventListener("click", () => {
+      const isExpanded = button.getAttribute("aria-expanded") === "true";
+
+      if (isExpanded) {
+        setThinkingPanelVisibility(thinkingToggle, false);
+        return;
+      }
+
+      collapseThinkingPanels(thinkingToggle);
+      setThinkingPanelVisibility(thinkingToggle, true);
+    });
+  });
 }
 
 function handleUnauthorized(message, redirectTarget) {
@@ -3999,6 +4062,8 @@ async function handleSaveBoard() {
     setBoardSaveButtonsDisabled(false);
   }
 }
+
+initializeThinkingTools();
 
 async function init() {
   showSection("loading");
