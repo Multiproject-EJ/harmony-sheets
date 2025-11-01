@@ -490,8 +490,8 @@
         </div>
         <div class="admin__table-wrap" data-table-container>
           <div class="admin__table-scroll" role="presentation">
-            <table class="admin-table" aria-describedby="product-table-title">
-              <thead>
+            <table class="admin-table admin-table--compact" aria-describedby="product-table-title">
+              <thead data-products-table-head>
                 <tr>
                   <th scope="col">
                     <button type="button" class="admin-table__sort" data-sort="name">Product</button>
@@ -506,18 +506,60 @@
                     <button type="button" class="admin-table__sort" data-sort="price">Price</button>
                   </th>
                   <th scope="col" class="admin-table__status">Draft</th>
-                  <th scope="col">Marketing</th>
-                  <th scope="col">Optimization</th>
-                  <th scope="col">SAFE &amp; Legal</th>
-                  <th scope="col">Identity</th>
+                  <th scope="col">Level</th>
                 </tr>
               </thead>
               <tbody data-products-table>
                 <tr>
-                  <td colspan="9" class="admin-table__empty">Loading products…</td>
+                  <td colspan="6" class="admin-table__empty">Loading products…</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+        <div class="admin-level-modal" data-level-modal hidden>
+          <div class="admin-level-modal__backdrop" data-level-modal-dismiss></div>
+          <div
+            class="admin-level-modal__dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="level-modal-title"
+            data-level-modal-dialog
+            tabindex="-1"
+          >
+            <button class="admin-level-modal__close" type="button" data-level-modal-dismiss aria-label="Close level details">×</button>
+            <header class="admin-level-modal__header">
+              <div>
+                <h2 class="admin-level-modal__title" id="level-modal-title">Product levels</h2>
+                <p class="admin-level-modal__subtitle">
+                  Review marketing, optimization, safety, and identity checklists for each product.
+                </p>
+              </div>
+            </header>
+            <div class="admin-level-modal__body">
+              <div class="admin__table-scroll" role="presentation">
+                <table class="admin-table admin-level-table" aria-describedby="level-modal-title">
+                  <thead>
+                    <tr>
+                      <th scope="col">Product</th>
+                      <th scope="col">Life areas</th>
+                      <th scope="col">Labels</th>
+                      <th scope="col" class="admin-table__price">Price</th>
+                      <th scope="col" class="admin-table__status">Draft</th>
+                      <th scope="col">Marketing</th>
+                      <th scope="col">Optimization</th>
+                      <th scope="col">SAFE &amp; Legal</th>
+                      <th scope="col">Identity</th>
+                    </tr>
+                  </thead>
+                  <tbody data-level-table>
+                    <tr>
+                      <td colspan="9" class="admin-table__empty">Loading levels…</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
         <footer class="admin__panel-foot">
