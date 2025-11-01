@@ -552,7 +552,7 @@ class StickyBoard {
     });
 
     this.bindControls();
-    this.applyScale();
+    this.fitToNotes();
     this.scheduleColumnVisualUpdate();
     return true;
   }
@@ -722,6 +722,20 @@ class StickyBoard {
     }
 
     return clamp(fitScale, this.scaleMin, this.scaleMax);
+  }
+
+  fitToNotes() {
+    const targetScale = this.getFitScale();
+    if (!Number.isFinite(targetScale)) {
+      this.applyScale();
+      return;
+    }
+
+    if (Math.abs(targetScale - this.scale) > this.scaleTolerance) {
+      this.setScale(targetScale);
+    } else {
+      this.applyScale();
+    }
   }
 
   applyScale() {
@@ -1563,7 +1577,7 @@ class StickyBoard {
         this.setupNote(noteElement);
       }
     });
-    this.applyScale();
+    this.fitToNotes();
     this.scheduleColumnVisualUpdate();
   }
 }
@@ -1657,6 +1671,12 @@ function openBoardModal(boardId, trigger) {
 
   activeBoardModalId = boardId;
   activeBoardTrigger = trigger && typeof trigger.focus === "function" ? trigger : null;
+
+  if (boardId === "brain" && brainBoard) {
+    brainBoard.fitToNotes();
+  } else if (boardId === "flowchart" && flowchartBoard) {
+    flowchartBoard.fitToNotes();
+  }
 
   const dialog = modal.querySelector("[data-board-modal-dialog]");
   if (dialog) {
