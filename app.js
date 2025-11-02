@@ -4649,56 +4649,70 @@ App.initProduct = async function() {
             </div>
           </div>`;
 
-        const iframe = screen.querySelector('iframe');
-        const viewport = screen.querySelector('[data-demo-viewport]');
+        const previewViewport = screen.querySelector('[data-demo-viewport]');
+        const previewIframe = previewViewport ? previewViewport.querySelector('iframe') : null;
         const BASE_WIDTH = 1152;
         const BASE_HEIGHT = 864;
 
-        const scaleFrame = () => {
-          if (!viewport || !iframe) return;
-          const width = viewport.clientWidth;
-          const height = viewport.clientHeight;
-          if (!width || !height) return;
-          const scale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
-          iframe.style.width = `${BASE_WIDTH}px`;
-          iframe.style.height = `${BASE_HEIGHT}px`;
-          iframe.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        const centerIframe = iframeEl => {
+          if (!iframeEl) return;
+          iframeEl.style.position = 'absolute';
+          iframeEl.style.left = '50%';
+          iframeEl.style.top = '50%';
+          iframeEl.style.transformOrigin = 'center';
+          iframeEl.style.pointerEvents = 'auto';
         };
 
-        if (iframe) {
-          iframe.style.position = 'absolute';
-          iframe.style.left = '50%';
-          iframe.style.top = '50%';
-          iframe.style.transformOrigin = 'center';
-          iframe.style.pointerEvents = 'auto';
-          iframe.addEventListener('load', () => {
-            virtualDemoFrame.removeAttribute('data-loading');
-            scaleFrame();
-          });
-        }
-
-        if (typeof ResizeObserver !== 'undefined' && viewport) {
-          const resizeObserver = new ResizeObserver(() => scaleFrame());
-          resizeObserver.observe(viewport);
-        }
-
-        window.addEventListener('resize', scaleFrame);
-        requestAnimationFrame(() => scaleFrame());
+        const scaleIframeToContainer = (iframeEl, containerEl) => {
+          if (!iframeEl || !containerEl) return;
+          const { clientWidth, clientHeight } = containerEl;
+          if (!clientWidth || !clientHeight) return;
+          const scale = Math.min(clientWidth / BASE_WIDTH, clientHeight / BASE_HEIGHT);
+          iframeEl.style.width = `${BASE_WIDTH}px`;
+          iframeEl.style.height = `${BASE_HEIGHT}px`;
+          iframeEl.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        };
 
         let modalInstance;
         let modalKeybound = false;
         let launchButton = null;
+        let modalViewport = null;
+        let modalIframe = null;
+        let modalResizeObserver = null;
 
-        if (viewport) {
-          viewport.setAttribute('tabindex', '0');
-          viewport.setAttribute('role', 'group');
-          viewport.setAttribute('aria-label', `${product.name} interactive preview`);
-          viewport.removeAttribute('aria-haspopup');
-          viewport.removeAttribute('aria-expanded');
+        const scaleAllFrames = () => {
+          if (previewIframe && previewViewport) scaleIframeToContainer(previewIframe, previewViewport);
+          if (modalIframe && modalViewport && modalInstance && !modalInstance.hasAttribute('hidden')) {
+            scaleIframeToContainer(modalIframe, modalViewport);
+          }
+        };
 
-          launchButton = viewport.querySelector('[data-demo-launch]');
+        if (previewIframe) {
+          centerIframe(previewIframe);
+          previewIframe.addEventListener('load', () => {
+            virtualDemoFrame.removeAttribute('data-loading');
+            scaleAllFrames();
+          });
+        }
+
+        if (typeof ResizeObserver !== 'undefined' && previewViewport) {
+          const previewObserver = new ResizeObserver(() => scaleAllFrames());
+          previewObserver.observe(previewViewport);
+        }
+
+        window.addEventListener('resize', scaleAllFrames);
+        requestAnimationFrame(() => scaleAllFrames());
+
+        if (previewViewport) {
+          previewViewport.setAttribute('tabindex', '0');
+          previewViewport.setAttribute('role', 'group');
+          previewViewport.setAttribute('aria-label', `${product.name} interactive preview`);
+          previewViewport.removeAttribute('aria-haspopup');
+          previewViewport.removeAttribute('aria-expanded');
+
+          launchButton = previewViewport.querySelector('[data-demo-launch]');
           if (!launchButton) {
-            viewport.insertAdjacentHTML('beforeend', `
+            previewViewport.insertAdjacentHTML('beforeend', `
               <button type="button" class="virtual-demo__cta" data-demo-launch>
                 <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
                   <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
@@ -4706,7 +4720,7 @@ App.initProduct = async function() {
                 <span>Launch interactive demo</span>
               </button>
             `);
-            launchButton = viewport.querySelector('[data-demo-launch]');
+            launchButton = previewViewport.querySelector('[data-demo-launch]');
           }
 
           if (launchButton) {
@@ -4760,7 +4774,9 @@ App.initProduct = async function() {
                     <span aria-hidden="true">×</span>
                   </button>
                   <div class="virtual-demo-modal__body">
-                    <iframe loading="lazy" allowfullscreen></iframe>
+                    <div class="virtual-demo-modal__viewport" data-demo-modal-viewport>
+                      <iframe loading="lazy" allowfullscreen></iframe>
+                    </div>
                   </div>
                 </div>`;
 
@@ -4769,6 +4785,22 @@ App.initProduct = async function() {
               modalInstance.querySelectorAll('[data-demo-dismiss]').forEach(element => {
                 element.addEventListener('click', () => closeModal());
               });
+
+              modalViewport = modalInstance.querySelector('[data-demo-modal-viewport]');
+              modalIframe = modalInstance.querySelector('iframe');
+
+              if (modalIframe) {
+                centerIframe(modalIframe);
+                if (!modalIframe.dataset.scaleBound) {
+                  modalIframe.addEventListener('load', () => scaleAllFrames());
+                  modalIframe.dataset.scaleBound = 'true';
+                }
+              }
+
+              if (typeof ResizeObserver !== 'undefined' && modalViewport && !modalResizeObserver) {
+                modalResizeObserver = new ResizeObserver(() => scaleIframeToContainer(modalIframe, modalViewport));
+                modalResizeObserver.observe(modalViewport);
+              }
             }
 
             if (!modalKeybound) {
@@ -4791,7 +4823,10 @@ App.initProduct = async function() {
             }
 
             modalEl.removeAttribute('hidden');
-            requestAnimationFrame(() => modalEl.classList.add('is-active'));
+            requestAnimationFrame(() => {
+              modalEl.classList.add('is-active');
+              scaleAllFrames();
+            });
             document.body.classList.add('virtual-demo-modal-open');
             if (launchButton) launchButton.setAttribute('aria-expanded', 'true');
 
