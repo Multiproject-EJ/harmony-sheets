@@ -183,6 +183,10 @@ const thinkingToolPanels = new Map(
     .map((panel) => [panel.dataset.thinkingPanel, panel])
     .filter(([id]) => Boolean(id))
 );
+const thinkingToolsContainer = document.querySelector("[data-thinking-tools]");
+const thinkingToolsToggleButton = document.querySelector("[data-thinking-tools-toggle]");
+const thinkingToolsCloseButton = document.querySelector("[data-thinking-tools-close]");
+let thinkingToolsDocumentClickListenerAdded = false;
 const ideaStageElements = {
   stage: document.querySelector("[data-idea-stage]"),
   output: document.querySelector("[data-idea-output]"),
@@ -270,9 +274,95 @@ function collapseThinkingPanels(exceptPanelId) {
   });
 }
 
+function setThinkingToolsOpen(open) {
+  if (!thinkingToolsContainer || !thinkingToolsToggleButton) {
+    return;
+  }
+
+  thinkingToolsContainer.hidden = !open;
+  thinkingToolsContainer.classList.toggle("thinking-tools--open", open);
+  thinkingToolsToggleButton.setAttribute("aria-expanded", open ? "true" : "false");
+  thinkingToolsToggleButton.classList.toggle("thinking-tools-toggle--spinning", open);
+
+  if (open) {
+    thinkingToolsContainer.scrollTop = 0;
+  }
+
+  if (!thinkingToolsDocumentClickListenerAdded) {
+    document.addEventListener("click", (event) => {
+      if (!thinkingToolsContainer || thinkingToolsContainer.hidden) {
+        return;
+      }
+
+      const target = event.target instanceof Node ? event.target : null;
+      if (!target) {
+        return;
+      }
+
+      if (thinkingToolsContainer.contains(target)) {
+        return;
+      }
+      if (thinkingToolsToggleButton && thinkingToolsToggleButton.contains(target)) {
+        return;
+      }
+
+      setThinkingToolsOpen(false);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      if (!thinkingToolsContainer || thinkingToolsContainer.hidden) {
+        return;
+      }
+
+      setThinkingToolsOpen(false);
+      if (thinkingToolsToggleButton) {
+        thinkingToolsToggleButton.focus();
+      }
+    });
+
+    thinkingToolsDocumentClickListenerAdded = true;
+  }
+
+  if (!open) {
+    collapseThinkingPanels();
+  }
+}
+
 function initializeThinkingTools() {
   if (!thinkingToolButtons.length || !thinkingToolPanels.size) {
     return;
+  }
+
+  setThinkingToolsOpen(false);
+
+  if (thinkingToolsToggleButton) {
+    thinkingToolsToggleButton.addEventListener("click", () => {
+      const isExpanded = thinkingToolsToggleButton.getAttribute("aria-expanded") === "true";
+      const nextState = !isExpanded;
+      setThinkingToolsOpen(nextState);
+
+      if (nextState) {
+        window.requestAnimationFrame(() => {
+          const firstThinkingToggle = thinkingToolsContainer?.querySelector("[data-thinking-toggle]");
+          if (firstThinkingToggle instanceof HTMLElement) {
+            firstThinkingToggle.focus();
+          }
+        });
+      }
+    });
+  }
+
+  if (thinkingToolsCloseButton) {
+    thinkingToolsCloseButton.addEventListener("click", () => {
+      setThinkingToolsOpen(false);
+      if (thinkingToolsToggleButton) {
+        thinkingToolsToggleButton.focus();
+      }
+    });
   }
 
   thinkingToolButtons.forEach((button) => {

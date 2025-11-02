@@ -103,12 +103,37 @@
     </div>
   </section>
   <section class="lovablesheet-content" data-lovablesheet-content hidden>
+    <button
+      class="thinking-tools-toggle"
+      type="button"
+      data-thinking-tools-toggle
+      aria-expanded="false"
+      aria-controls="thinking-tools-panel"
+    >
+      <span class="thinking-tools-toggle__icon" aria-hidden="true">🧠</span>
+      <span class="thinking-tools-toggle__label" aria-hidden="true">Tools</span>
+      <span class="sr-only">Toggle Thinking Tools</span>
+    </button>
     <div class="lovablesheet-layout">
-      <aside class="thinking-tools" aria-labelledby="thinking-tools-title">
+      <aside
+        class="thinking-tools thinking-tools--floating"
+        aria-labelledby="thinking-tools-title"
+        id="thinking-tools-panel"
+        data-thinking-tools
+        hidden
+      >
         <div class="thinking-tools__inner">
           <div class="thinking-tools__header">
             <h2 id="thinking-tools-title">Thinking Tools</h2>
             <p class="thinking-tools__description">Launch the sticky boards you need without leaving the flow. Pop each workspace open from a tidy control strip.</p>
+            <button
+              class="thinking-tools__close"
+              type="button"
+              data-thinking-tools-close
+              aria-label="Close Thinking Tools"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
           </div>
           <div class="thinking-tools__pills">
             <button
