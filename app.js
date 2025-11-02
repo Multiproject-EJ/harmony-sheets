@@ -3067,30 +3067,32 @@ App.initNavDropdown = function() {
               </div>
             </div>
             <div class="nav-mega__scroll">
-              <table class="nav-mega__table" data-nav-table aria-label="${initialLabel} list">
-                <thead>
-                  <tr>
-                    <th scope="col" class="nav-mega__product-header" style="width:56%">
-                      <span class="nav-mega__product-header-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="8"/>
-                            <circle cx="12" cy="12" r="2.8"/>
-                            <path d="M12 3.5V8M20.5 12H16M12 20.5V16M3.5 12H8"/>
-                          </g>
-                        </svg>
-                      </span>
-                      <span>Product</span>
-                    </th>
-                    <th scope="col" style="width:18%">Type</th>
-                    <th scope="col" style="width:14%">Badge</th>
-                    <th scope="col" style="width:12%">Price</th>
-                  </tr>
-                </thead>
-                <tbody data-nav-rows>
-                  <tr class="nav-mega__empty-row"><td colspan="4">Loading Life Harmony tools…</td></tr>
-                </tbody>
-              </table>
+              <div class="nav-mega__table-shell">
+                <table class="nav-mega__table" data-nav-table aria-label="${initialLabel} list">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="nav-mega__product-header" style="width:56%">
+                        <span class="nav-mega__product-header-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                              <circle cx="12" cy="12" r="8"/>
+                              <circle cx="12" cy="12" r="2.8"/>
+                              <path d="M12 3.5V8M20.5 12H16M12 20.5V16M3.5 12H8"/>
+                            </g>
+                          </svg>
+                        </span>
+                        <span>Product</span>
+                      </th>
+                      <th scope="col" style="width:18%">Type</th>
+                      <th scope="col" style="width:14%">Badge</th>
+                      <th scope="col" style="width:12%">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody data-nav-rows>
+                    <tr class="nav-mega__empty-row"><td colspan="4">Loading Life Harmony tools…</td></tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
             <div class="nav-mega__pager">
               <span class="nav-mega__pager-info" data-nav-info>Loading…</span>
