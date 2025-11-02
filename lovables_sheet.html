@@ -704,35 +704,32 @@
                   </div>
                 </div>
                 <div class="admin__panel-body lovablesheet-nextgen__body">
-                  <section id="code-library" class="lovablesheet-code-library" aria-labelledby="code-library-title">
-                    <div class="lovablesheet-code-library__inner">
-                      <h2 id="code-library-title">LovableSheet module library</h2>
-                      <p>
-                        Reference the interactive modules that power the LovableSheet admin surface. Use the quick navigation to jump to
-                        each module&rsquo;s configuration details.
-                      </p>
-
-                      <section class="lovablesheet-library-guides" aria-labelledby="lovablesheet-guides-title">
-                        <h3 id="lovablesheet-guides-title">Implementation references</h3>
-                        <p>
-                          Need to update requirements or refresh guidance before shipping a new template? Use these quick links to review the
-                          published playbooks and source files.
+                  <div class="lovablesheet-nextgen__overview">
+                    <article
+                      class="idea-summary-card idea-summary-card--nextgen"
+                      data-nextgen-summary-card
+                      data-summary-state="empty"
+                    >
+                      <header class="idea-summary-card__header">
+                        <span class="idea-summary-card__status" data-nextgen-summary-status>Locked</span>
+                        <span class="idea-summary-card__state" data-nextgen-summary-state-text>Awaiting product selection</span>
+                      </header>
+                      <div class="idea-summary-card__body">
+                        <h3 class="idea-summary-card__title">Next Gen brief</h3>
+                        <p class="idea-summary-card__description" data-nextgen-summary-description>
+                          Pick a product in Step 1 to compile the Google Sheet Next Gen Engine brief.
                         </p>
-                        <ul class="lovablesheet-library-guides__list">
-                          <li>
-                            <a href="docs/module-publishing-playbook.md#new-module-implementation" target="_blank" rel="noopener"
-                              >Module Publishing Playbook</a
-                            >
-                            &mdash; outlines required content fields, asset specs, CSS hooks, and QA steps for every launch.
-                          </li>
-                          <li>
-                            <a href="products.json" target="_blank" rel="noopener">products.json</a>
-                            &mdash; edit copy, pricing, sheet IDs, and metadata that surface in the public storefront.
-                          </li>
-                        </ul>
-                      </section>
-                    </div>
-                  </section>
+                        <button class="lovablesheet-nextgen__library-button" type="button" data-module-library-open>
+                          View LovableSheet module library
+                        </button>
+                      </div>
+                      <footer class="idea-summary-card__footer">
+                        <button class="idea-summary-card__button" type="button" data-nextgen-open>
+                          Create product brief
+                        </button>
+                      </footer>
+                    </article>
+                  </div>
                 </div>
                 <div class="lovablesheet-nextgen__status" data-nextgen-status role="status" aria-live="polite"></div>
                 <div class="lovablesheet-nextgen__empty" data-nextgen-empty>
@@ -743,6 +740,60 @@
             </section>
           </div>
         </section>
+
+    <div class="lovablesheet-library-modal" data-module-library-layer hidden>
+      <div class="lovablesheet-library-modal__overlay" data-module-library-overlay></div>
+      <div
+        class="lovablesheet-library-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="module-library-title"
+        data-module-library-dialog
+        tabindex="-1"
+        hidden
+      >
+        <header class="lovablesheet-library-modal__header">
+          <div>
+            <p class="lovablesheet-library-modal__eyebrow">Reference hub</p>
+            <h2 class="lovablesheet-library-modal__title" id="module-library-title">LovableSheet module library</h2>
+          </div>
+          <button class="lovablesheet-library-modal__close" type="button" data-module-library-close aria-label="Close module library">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </header>
+        <div class="lovablesheet-library-modal__body">
+          <section id="code-library" class="lovablesheet-code-library" aria-labelledby="code-library-title">
+            <div class="lovablesheet-code-library__inner">
+              <h3 id="code-library-title">LovableSheet module library</h3>
+              <p>
+                Reference the interactive modules that power the LovableSheet admin surface. Use the quick navigation to jump to each module&rsquo;s
+                configuration details.
+              </p>
+
+              <section class="lovablesheet-library-guides" aria-labelledby="lovablesheet-guides-title">
+                <h4 id="lovablesheet-guides-title">Implementation references</h4>
+                <p>
+                  Need to update requirements or refresh guidance before shipping a new template? Use these quick links to review the published
+                  playbooks and source files.
+                </p>
+                <ul class="lovablesheet-library-guides__list">
+                  <li>
+                    <a href="docs/module-publishing-playbook.md#new-module-implementation" target="_blank" rel="noopener"
+                      >Module Publishing Playbook</a
+                    >
+                    &mdash; outlines required content fields, asset specs, CSS hooks, and QA steps for every launch.
+                  </li>
+                  <li>
+                    <a href="products.json" target="_blank" rel="noopener">products.json</a>
+                    &mdash; edit copy, pricing, sheet IDs, and metadata that surface in the public storefront.
+                  </li>
+                </ul>
+              </section>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
 
         <section
           class="lovablesheet-stage lovablesheet-stage--codex"

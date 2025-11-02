@@ -97,9 +97,13 @@ const nextGenState = {
   keydownHandler: null,
   inspirationDialogOpen: false,
   inspirationKeydownHandler: null,
+  libraryOpen: false,
+  libraryTrigger: null,
+  libraryKeydownHandler: null,
   elements: {
     section: null,
     openButton: null,
+    openButtons: [],
     status: null,
     list: null,
     empty: null,
@@ -132,7 +136,16 @@ const nextGenState = {
     inspirationDialogCancel: null,
     formStatus: null,
     cancelButton: null,
-    closeButton: null
+    closeButton: null,
+    summaryCard: null,
+    summaryStatus: null,
+    summaryState: null,
+    summaryDescription: null,
+    libraryButton: null,
+    libraryLayer: null,
+    libraryOverlay: null,
+    libraryDialog: null,
+    libraryClose: null
   }
 };
 
@@ -692,6 +705,52 @@ function updateStepTwoAvailability() {
 
   if (connector) {
     connector.classList.toggle("lovablesheet-stage__connector--active", hasSelection);
+  }
+
+  updateNextGenSummaryCard(hasSelection);
+}
+
+function updateNextGenSummaryCard(hasSelection) {
+  const {
+    summaryCard,
+    summaryStatus,
+    summaryState,
+    summaryDescription
+  } = nextGenState.elements;
+
+  if (!summaryCard) {
+    return;
+  }
+
+  const productName = ideaStageState.selectedProduct.trim();
+
+  summaryCard.dataset.summaryState = hasSelection ? "ready" : "empty";
+  summaryCard.dataset.nextgenSelected = hasSelection ? "true" : "false";
+
+  if (hasSelection) {
+    summaryCard.removeAttribute("aria-disabled");
+  } else {
+    summaryCard.setAttribute("aria-disabled", "true");
+  }
+
+  if (summaryStatus) {
+    summaryStatus.textContent = hasSelection ? "Product ready" : "Locked";
+  }
+
+  if (summaryState) {
+    summaryState.textContent = hasSelection
+      ? productName
+        ? `Brief “${productName}” next`
+        : "Ready to brief"
+      : "Awaiting product selection";
+  }
+
+  if (summaryDescription) {
+    summaryDescription.textContent = hasSelection
+      ? productName
+        ? `Open the Next Gen Engine brief to capture the plan for “${productName}”.`
+        : "Open the Next Gen Engine brief to capture the plan for your selected product."
+      : "Pick a product in Step 1 to compile the Google Sheet Next Gen Engine brief.";
   }
 }
 
@@ -1719,6 +1778,77 @@ function closeNextGenModal(options = {}) {
   nextGenState.activeTrigger = null;
 }
 
+function handleModuleLibraryKeydown(event) {
+  if (event.key !== "Escape") {
+    return;
+  }
+
+  event.preventDefault();
+  closeModuleLibrary({ focusTrigger: true });
+}
+
+function openModuleLibrary(trigger) {
+  const { libraryLayer, libraryDialog } = nextGenState.elements;
+  if (!libraryLayer || !libraryDialog || nextGenState.libraryOpen) {
+    return;
+  }
+
+  libraryLayer.hidden = false;
+  libraryLayer.setAttribute("aria-hidden", "false");
+  libraryDialog.hidden = false;
+  libraryDialog.setAttribute("aria-hidden", "false");
+
+  nextGenState.libraryOpen = true;
+  nextGenState.libraryTrigger = trigger || null;
+
+  document.body.classList.add("lovablesheet-modal-open");
+
+  if (!nextGenState.libraryKeydownHandler) {
+    nextGenState.libraryKeydownHandler = handleModuleLibraryKeydown;
+    document.addEventListener("keydown", nextGenState.libraryKeydownHandler);
+  }
+
+  window.setTimeout(() => {
+    const focusTarget =
+      nextGenState.elements.libraryClose ||
+      libraryDialog.querySelector("a, button, [tabindex]:not([tabindex='-1'])") ||
+      libraryDialog;
+
+    if (focusTarget && typeof focusTarget.focus === "function") {
+      focusTarget.focus();
+    }
+  }, 0);
+}
+
+function closeModuleLibrary(options = {}) {
+  const { focusTrigger = true } = options;
+  const { libraryLayer, libraryDialog } = nextGenState.elements;
+  if (!libraryLayer || !libraryDialog || !nextGenState.libraryOpen) {
+    return;
+  }
+
+  libraryLayer.hidden = true;
+  libraryLayer.setAttribute("aria-hidden", "true");
+  libraryDialog.hidden = true;
+  libraryDialog.setAttribute("aria-hidden", "true");
+
+  if (nextGenState.libraryKeydownHandler) {
+    document.removeEventListener("keydown", nextGenState.libraryKeydownHandler);
+    nextGenState.libraryKeydownHandler = null;
+  }
+
+  nextGenState.libraryOpen = false;
+
+  const { libraryTrigger } = nextGenState;
+  nextGenState.libraryTrigger = null;
+
+  document.body.classList.remove("lovablesheet-modal-open");
+
+  if (focusTrigger && libraryTrigger && typeof libraryTrigger.focus === "function") {
+    libraryTrigger.focus();
+  }
+}
+
 function extractPipelineProductName(button) {
   if (!button) {
     return "";
@@ -2306,7 +2436,8 @@ function initNextGenEngineBriefs() {
 
   const elements = nextGenState.elements;
   elements.section = section;
-  elements.openButton = section.querySelector("[data-nextgen-open]") ?? null;
+  elements.openButtons = Array.from(section.querySelectorAll("[data-nextgen-open]"));
+  elements.openButton = elements.openButtons[0] ?? null;
   elements.status = section.querySelector("[data-nextgen-status]") ?? null;
   elements.list = section.querySelector("[data-nextgen-list]") ?? null;
   elements.empty = section.querySelector("[data-nextgen-empty]") ?? null;
@@ -2340,6 +2471,15 @@ function initNextGenEngineBriefs() {
   elements.formStatus = elements.form?.querySelector("[data-nextgen-form-status]") ?? null;
   elements.cancelButton = elements.form?.querySelector("[data-nextgen-cancel]") ?? null;
   elements.closeButton = elements.form?.querySelector("[data-nextgen-close]") ?? null;
+  elements.summaryCard = section.querySelector("[data-nextgen-summary-card]") ?? null;
+  elements.summaryStatus = section.querySelector("[data-nextgen-summary-status]") ?? null;
+  elements.summaryState = section.querySelector("[data-nextgen-summary-state-text]") ?? null;
+  elements.summaryDescription = section.querySelector("[data-nextgen-summary-description]") ?? null;
+  elements.libraryButton = section.querySelector("[data-module-library-open]") ?? null;
+  elements.libraryLayer = document.querySelector("[data-module-library-layer]") ?? null;
+  elements.libraryOverlay = elements.libraryLayer?.querySelector("[data-module-library-overlay]") ?? null;
+  elements.libraryDialog = elements.libraryLayer?.querySelector("[data-module-library-dialog]") ?? null;
+  elements.libraryClose = elements.libraryLayer?.querySelector("[data-module-library-close]") ?? null;
 
   applyNextGenStandardText(nextGenState.standardText);
   setNextGenStandardEditing(false);
@@ -2353,10 +2493,12 @@ function initNextGenEngineBriefs() {
   renderNextGenSavedBriefs();
   setNextGenStatus("");
 
-  if (elements.openButton) {
-    elements.openButton.addEventListener("click", () => {
-      setNextGenFormStatus("");
-      openNextGenModal(elements.openButton);
+  if (elements.openButtons.length) {
+    elements.openButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setNextGenFormStatus("");
+        openNextGenModal(button);
+      });
     });
   }
 
@@ -2375,6 +2517,42 @@ function initNextGenEngineBriefs() {
   if (elements.cancelButton) {
     elements.cancelButton.addEventListener("click", () => {
       closeNextGenModal({ reset: true, focusTrigger: true });
+    });
+  }
+
+  if (elements.summaryCard) {
+    elements.summaryCard.addEventListener("click", (event) => {
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target?.closest("[data-nextgen-open]")) {
+        return;
+      }
+      if (target?.closest("[data-module-library-open]")) {
+        return;
+      }
+      if (!ideaStageState.selectedProduct.trim()) {
+        return;
+      }
+      setNextGenFormStatus("");
+      openNextGenModal(elements.openButton || elements.summaryCard);
+    });
+  }
+
+  if (elements.libraryButton) {
+    elements.libraryButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      openModuleLibrary(elements.libraryButton);
+    });
+  }
+
+  if (elements.libraryOverlay) {
+    elements.libraryOverlay.addEventListener("click", () => {
+      closeModuleLibrary({ focusTrigger: true });
+    });
+  }
+
+  if (elements.libraryClose) {
+    elements.libraryClose.addEventListener("click", () => {
+      closeModuleLibrary({ focusTrigger: true });
     });
   }
 
@@ -2465,6 +2643,7 @@ function initNextGenEngineBriefs() {
 
   fetchNextGenProducts();
   loadNextGenStandardFromSupabase();
+  updateNextGenSummaryCard(ideaStageState.selectedProduct.trim().length > 0);
 
   nextGenState.initialized = true;
 }
