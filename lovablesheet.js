@@ -193,6 +193,18 @@ const ideaStageElements = {
   hint: document.querySelector("[data-step-two-hint]"),
   clearButton: document.querySelector("[data-idea-clear]"),
   container: document.querySelector("[data-idea-output-container]"),
+  summaryCard: document.querySelector("[data-idea-summary-card]"),
+  summaryStatus: document.querySelector("[data-idea-summary-status]"),
+  summaryState: document.querySelector("[data-idea-summary-state]"),
+  summaryTitle: document.querySelector("[data-idea-summary-title]"),
+  summaryDescription: document.querySelector("[data-idea-summary-description]"),
+  openModalButton: document.querySelector("[data-idea-open-modal]"),
+  modalLayer: document.querySelector("[data-idea-modal-layer]"),
+  modalDialog: document.querySelector("[data-idea-modal-dialog]"),
+  modalOverlay: document.querySelector("[data-idea-modal-overlay]"),
+  closeModalButton: document.querySelector("[data-idea-modal-close]"),
+  successIndicator: document.querySelector("[data-idea-success]"),
+  connector: document.querySelector("[data-idea-connector]"),
   stepTwo: document.querySelector("[data-step-two]"),
   lock: document.querySelector("[data-step-two-lock]"),
   draftTable: document.querySelector("[data-draft-table]"),
@@ -211,7 +223,11 @@ const stepThreeElements = {
 };
 const ideaStageState = {
   selectedProduct: "",
-  initialized: false
+  selectionSource: "empty",
+  initialized: false,
+  modalOpen: false,
+  modalTrigger: null,
+  modalKeydownHandler: null
 };
 const stepThreeState = {
   initialized: false,
@@ -514,8 +530,131 @@ function renderDraftModelsTable(products = []) {
   });
 }
 
+function getIdeaSummaryCopy(state, productName) {
+  const trimmedName = typeof productName === "string" && productName.trim().length > 0 ? productName.trim() : "";
+  const quotedName = trimmedName ? `“${trimmedName}”` : "your next concept";
+
+  switch (state) {
+    case "draft":
+      return {
+        status: "Draft in play",
+        stateText: "Reviewing draft models",
+        title: trimmedName || "Draft concept selected",
+        description: trimmedName
+          ? `${quotedName} is in draft mode. Open the workspace to review and finalize details.`
+          : "A draft concept is in review. Open the workspace to keep refining."
+      };
+    case "ready":
+      return {
+        status: "Selected",
+        stateText: "Ready for briefing",
+        title: trimmedName || "Concept locked in",
+        description: trimmedName
+          ? `${quotedName} is queued for Step 2. Open the workspace to revisit the pipeline anytime.`
+          : "A concept is ready for Step 2. Open the workspace to make adjustments."
+      };
+    default:
+      return {
+        status: "Empty slot",
+        stateText: "Awaiting concept",
+        title: "No concept selected",
+        description: "Tap to explore the Todo do pipeline and draft models."
+      };
+  }
+}
+
+function updateIdeaSummary() {
+  const { summaryCard, summaryStatus, summaryState, summaryTitle, summaryDescription } = ideaStageElements;
+  if (!summaryCard) {
+    return;
+  }
+
+  const state = ideaStageState.selectionSource;
+  const copy = getIdeaSummaryCopy(state, ideaStageState.selectedProduct);
+
+  summaryCard.dataset.summaryState = state;
+
+  if (summaryStatus) {
+    summaryStatus.textContent = copy.status;
+  }
+  if (summaryState) {
+    summaryState.textContent = copy.stateText;
+  }
+  if (summaryTitle) {
+    summaryTitle.textContent = copy.title;
+  }
+  if (summaryDescription) {
+    summaryDescription.textContent = copy.description;
+  }
+}
+
+function handleIdeaModalKeydown(event) {
+  if (event.key !== "Escape") {
+    return;
+  }
+
+  event.preventDefault();
+  closeIdeaModal();
+}
+
+function openIdeaModal(trigger) {
+  const { modalLayer, modalDialog } = ideaStageElements;
+  if (!modalLayer || !modalDialog || ideaStageState.modalOpen) {
+    return;
+  }
+
+  ideaStageState.modalOpen = true;
+  ideaStageState.modalTrigger = trigger instanceof HTMLElement ? trigger : null;
+
+  modalLayer.hidden = false;
+  modalLayer.setAttribute("aria-hidden", "false");
+  modalDialog.removeAttribute("aria-hidden");
+
+  document.body.classList.add("lovablesheet-modal-open");
+
+  window.setTimeout(() => {
+    try {
+      modalDialog.focus();
+    } catch (_error) {
+      /* Some browsers might not support focus on generic containers. */
+    }
+  }, 0);
+
+  if (!ideaStageState.modalKeydownHandler) {
+    ideaStageState.modalKeydownHandler = handleIdeaModalKeydown;
+    document.addEventListener("keydown", ideaStageState.modalKeydownHandler);
+  }
+}
+
+function closeIdeaModal(options = {}) {
+  const { focusTrigger = true } = options;
+  const { modalLayer, modalDialog } = ideaStageElements;
+  if (!modalLayer || !modalDialog || !ideaStageState.modalOpen) {
+    return;
+  }
+
+  modalLayer.hidden = true;
+  modalLayer.setAttribute("aria-hidden", "true");
+  modalDialog.setAttribute("aria-hidden", "true");
+
+  document.body.classList.remove("lovablesheet-modal-open");
+
+  if (ideaStageState.modalKeydownHandler) {
+    document.removeEventListener("keydown", ideaStageState.modalKeydownHandler);
+    ideaStageState.modalKeydownHandler = null;
+  }
+
+  const { modalTrigger } = ideaStageState;
+  ideaStageState.modalTrigger = null;
+  ideaStageState.modalOpen = false;
+
+  if (focusTrigger && modalTrigger && typeof modalTrigger.focus === "function") {
+    modalTrigger.focus();
+  }
+}
+
 function updateStepTwoAvailability() {
-  const { stepTwo, container, clearButton, lock } = ideaStageElements;
+  const { stepTwo, container, clearButton, lock, successIndicator, connector } = ideaStageElements;
   const hasSelection = ideaStageState.selectedProduct.trim().length > 0;
 
   if (stepTwo) {
@@ -540,6 +679,14 @@ function updateStepTwoAvailability() {
   if (clearButton) {
     clearButton.hidden = !hasSelection;
     clearButton.disabled = !hasSelection;
+  }
+
+  if (successIndicator) {
+    successIndicator.classList.toggle("lovablesheet-idea__success--active", hasSelection);
+  }
+
+  if (connector) {
+    connector.classList.toggle("lovablesheet-stage__connector--active", hasSelection);
   }
 }
 
@@ -748,9 +895,24 @@ function initializeStepThree() {
   }
 }
 
-function setIdeaStageSelection(productName) {
+function setIdeaStageSelection(productName, options = {}) {
+  const previousProduct = ideaStageState.selectedProduct;
+  const previousSource = ideaStageState.selectionSource;
   const nextValue = typeof productName === "string" ? productName.trim() : "";
+
+  let nextSource = "empty";
+  if (nextValue) {
+    if (options.source === "draft" || options.source === "ready") {
+      nextSource = options.source;
+    } else if (previousProduct && previousProduct === nextValue && previousSource !== "empty") {
+      nextSource = previousSource;
+    } else {
+      nextSource = "ready";
+    }
+  }
+
   ideaStageState.selectedProduct = nextValue;
+  ideaStageState.selectionSource = nextSource;
 
   const { output, hint } = ideaStageElements;
   if (output) {
@@ -763,6 +925,7 @@ function setIdeaStageSelection(productName) {
       : "Select a product from the tables to unlock Step 2.";
   }
 
+  updateIdeaSummary();
   updateStepTwoAvailability();
 }
 
@@ -772,9 +935,17 @@ function initializeIdeaStage() {
   }
 
   ideaStageState.initialized = true;
-  setIdeaStageSelection("");
+  setIdeaStageSelection("", { source: "reset" });
 
-  const { clearButton, draftTable, draftEmpty } = ideaStageElements;
+  const {
+    clearButton,
+    draftTable,
+    draftEmpty,
+    openModalButton,
+    modalOverlay,
+    closeModalButton,
+    summaryCard
+  } = ideaStageElements;
   if (draftTable) {
     draftTable.hidden = true;
   }
@@ -784,7 +955,36 @@ function initializeIdeaStage() {
 
   if (clearButton) {
     clearButton.addEventListener("click", () => {
-      setIdeaStageSelection("");
+      setIdeaStageSelection("", { source: "reset" });
+    });
+  }
+
+  if (openModalButton) {
+    openModalButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      openIdeaModal(openModalButton);
+    });
+  }
+
+  if (summaryCard) {
+    summaryCard.addEventListener("click", (event) => {
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target?.closest("[data-idea-open-modal]")) {
+        return;
+      }
+      openIdeaModal(openModalButton || summaryCard);
+    });
+  }
+
+  if (modalOverlay) {
+    modalOverlay.addEventListener("click", () => {
+      closeIdeaModal();
+    });
+  }
+
+  if (closeModalButton) {
+    closeModalButton.addEventListener("click", () => {
+      closeIdeaModal();
     });
   }
 }
@@ -1546,8 +1746,9 @@ function launchNextGenBriefFromPipeline(trigger) {
   }
 
   const productName = extractPipelineProductName(trigger);
+  const fromDraftTable = Boolean(trigger.closest("[data-draft-table]"));
 
-  setIdeaStageSelection(productName);
+  setIdeaStageSelection(productName, { source: fromDraftTable ? "draft" : "ready" });
 
   resetNextGenForm();
   setNextGenFormStatus("");
@@ -1557,6 +1758,7 @@ function launchNextGenBriefFromPipeline(trigger) {
     nameInput.value = productName;
   }
 
+  closeIdeaModal({ focusTrigger: false });
   openNextGenModal(trigger);
 
   if (nameInput) {
