@@ -1718,7 +1718,9 @@ details.faq summary{cursor:pointer;font-weight:600}
    Admin Control Center
 ----------------------------------------------------- */
 .admin{padding:48px 20px 80px;max-width:1200px;margin:0 auto;display:grid;gap:40px}
-.admin__intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:24px}
+.admin__control-panel{display:grid;gap:28px;margin-bottom:32px}
+.admin__control-panel .admin__headline{max-width:640px}
+.admin__workspace{display:grid;gap:32px}
 .admin__status-group{display:flex;flex-wrap:wrap;gap:16px;width:100%}
 .admin__status-group>.admin__status-card{flex:1 1 260px}
 .admin__panel-insight{width:100%}
@@ -1810,7 +1812,34 @@ details.faq summary{cursor:pointer;font-weight:600}
 
 .admin__grid{display:grid;grid-template-columns:1fr;gap:32px;align-items:start}
 .admin__panel{background:#fff;border:1px solid rgba(148,163,184,.28);border-radius:24px;box-shadow:0 24px 60px rgba(15,23,42,.1);padding:24px;display:grid;gap:18px}
+.admin-sales-dashboard{background:#fff;border:1px solid rgba(148,163,184,.28);border-radius:24px;box-shadow:0 24px 60px rgba(15,23,42,.1);padding:32px;display:grid;gap:28px}
+.admin-sales-dashboard__header{display:grid;gap:12px;max-width:640px}
+.admin-sales-dashboard__title{margin:0;font-size:1.8rem;color:#0f172a}
+.admin-sales-dashboard__lede{margin:0;color:#475569;font-size:1.04rem;line-height:1.5}
+.admin-sales-dashboard__grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.admin-sales-card{background:#0f172a;color:#f8fafc;border-radius:20px;padding:20px;display:grid;gap:8px;box-shadow:0 22px 48px rgba(15,23,42,.28)}
+.admin-sales-card__title{margin:0;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(226,232,240,.74)}
+.admin-sales-card__value{margin:0;font-size:1.64rem;font-weight:700}
+.admin-sales-card__trend{margin:0;font-size:.92rem;font-weight:600;color:rgba(226,232,240,.76)}
+.admin-sales-card__trend[data-trend="up"],.admin-sales-card__trend[data-trend="new"]{color:#4ade80}
+.admin-sales-card__trend[data-trend="down"]{color:#fca5a5}
+.admin-sales-card__trend[data-trend="neutral"],.admin-sales-card__trend[data-trend="flat"]{color:rgba(226,232,240,.72)}
+.admin-sales-card__hint{margin:0;font-size:.85rem;color:rgba(226,232,240,.68);line-height:1.5}
+.admin-sales-dashboard__insights{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.admin-sales-panel{background:linear-gradient(145deg,rgba(226,232,240,.55),rgba(241,245,249,.85));border:1px solid rgba(148,163,184,.32);border-radius:20px;padding:20px 22px;display:grid;gap:12px;box-shadow:0 18px 44px rgba(148,163,184,.22)}
+.admin-sales-panel__title{margin:0;font-size:1.08rem;color:#0f172a}
+.admin-sales-panel__text{margin:0;color:#334155;line-height:1.6}
+.admin-sales-panel__meta{margin:0;font-size:.85rem;color:#64748b}
+.admin-sales-panel__list{margin:0;padding-left:20px;display:grid;gap:10px;color:#334155;font-size:.92rem}
+.admin-sales-panel__list li{list-style:disc}
 .admin-control-center{display:grid;gap:24px}
+.admin-tabs-group{display:grid;gap:24px}
+.admin-tabs--primary{width:100%;justify-content:space-between}
+.admin-tabs--primary .admin-tabs__list{width:100%;justify-content:flex-start;padding:10px;border-radius:18px;background:rgba(248,250,252,.92);border:1px solid rgba(148,163,184,.3);box-shadow:0 22px 48px rgba(15,23,42,.16)}
+.admin-tabs--primary .admin-tabs__tab{font-size:1rem;letter-spacing:.02em;text-transform:none;color:#1f2937}
+.admin-tabs--primary .admin-tabs__tab:is(:hover,:focus-visible){background:rgba(226,232,240,.9);color:#0f172a}
+.admin-tabs--primary .admin-tabs__tab.is-active{background:#0f172a;color:#fff;box-shadow:0 24px 54px rgba(15,23,42,.32)}
+.admin-tabs--primary .admin-tabs__tab.is-active:is(:hover,:focus-visible){background:#1e293b}
 .admin-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 .admin-tabs__list{display:inline-flex;align-items:center;gap:10px;padding:6px;border-radius:999px;background:rgba(148,163,184,.16);border:1px solid rgba(148,163,184,.26)}
 .admin-tabs__tab{border:none;background:transparent;padding:10px 18px;border-radius:999px;font:600 .92rem/1 "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#475569;cursor:pointer;transition:background .2s ease,color .2s ease,transform .2s ease}
@@ -2069,6 +2098,9 @@ body.admin-guide-open{overflow:hidden}
   .admin-editor-modal{padding:16px}
   .admin-editor-modal__dialog{max-height:calc(100vh - 32px);padding:32px;border-radius:28px}
   .admin-editor-modal__close{top:14px;right:14px;width:42px;height:42px;font-size:1.4rem}
+  .admin-tabs--primary .admin-tabs__list{box-shadow:0 18px 44px rgba(15,23,42,.18)}
+  .admin-sales-dashboard{padding:28px;gap:24px}
+  .admin-sales-dashboard__grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
 }
 
 @media (max-width:720px){
@@ -2086,6 +2118,10 @@ body.admin-guide-open{overflow:hidden}
   .admin-ai-modal__close{top:12px;right:12px;width:40px;height:40px;font-size:1.3rem}
   .admin-form__header{flex-direction:column;align-items:flex-start}
   .admin-form__header-actions{width:100%;justify-content:flex-start}
+  .admin-tabs--primary .admin-tabs__list{flex-wrap:wrap}
+  .admin-sales-dashboard{padding:24px}
+  .admin-sales-dashboard__grid{grid-template-columns:1fr}
+  .admin-sales-dashboard__insights{grid-template-columns:1fr}
 }
 
 @media (max-width:560px){
@@ -2094,7 +2130,9 @@ body.admin-guide-open{overflow:hidden}
 }
 
 @media (max-width:640px){
-  .admin__intro{gap:20px}
+  .admin__control-panel{gap:24px;margin-bottom:28px}
+  .admin-tabs--primary .admin-tabs__list{padding:8px}
+  .admin-sales-dashboard{padding:22px}
   .admin__status-card{flex-direction:column;align-items:flex-start}
   .admin__status-card--workspace{align-items:stretch}
   .admin__workspace-status{align-items:flex-start}

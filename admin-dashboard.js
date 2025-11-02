@@ -37,7 +37,9 @@ if (!rootHook) {
     3: "danger"
   };
 
-  const tabNav = document.querySelector("[data-admin-tabs]");
+  const tabRoots = contentSection
+    ? Array.from(contentSection.querySelectorAll("[data-admin-tabs-root]"))
+    : [];
 
   const statusPopoverEls = {
     overlay: document.querySelector("[data-status-overlay]"),
@@ -58,27 +60,39 @@ if (!rootHook) {
     raf: null
   };
 
-  function getTabPanels() {
-    if (!contentSection) return new Map();
-    const panels = Array.from(
-      contentSection.querySelectorAll("[data-admin-tab-panel]")
+  function getTabButtons(root) {
+    if (!root) return [];
+    return Array.from(root.querySelectorAll("[data-admin-tab]")).filter(
+      (button) => button.closest("[data-admin-tabs-root]") === root
     );
-    const panelMap = new Map();
-    panels.forEach((panel) => {
-      const key = panel.dataset.adminTabPanel;
-      if (key && !panelMap.has(key)) {
-        panelMap.set(key, panel);
-      }
-    });
-    return panelMap;
   }
 
-  function activateAdminTab(tabKey, options = {}) {
+  function getTabPanels(root) {
+    if (!root) return [];
+    const panels = [];
+    const panelNodes = Array.from(
+      root.querySelectorAll("[data-admin-tab-panel]")
+    );
+    panelNodes.forEach((panel) => {
+      if (panel.closest("[data-admin-tabs-root]") !== root) return;
+      const key = panel.dataset.adminTabPanel;
+      if (!key) return;
+      if (!panels.some((entry) => entry.key === key)) {
+        panels.push({ key, panel });
+      }
+    });
+    return panels;
+  }
+
+  function activateAdminTab(root, tabKey, options = {}) {
     const { focus = false } = options;
-    if (!tabNav) return;
-    const panels = getTabPanels();
-    if (!panels.has(tabKey)) return;
-    const buttons = Array.from(tabNav.querySelectorAll("[data-admin-tab]"));
+    if (!root || !tabKey) return;
+    const buttons = getTabButtons(root);
+    if (!buttons.length) return;
+    const panels = getTabPanels(root);
+    if (!panels.length) return;
+    const targetPanel = panels.find((entry) => entry.key === tabKey);
+    if (!targetPanel) return;
     buttons.forEach((button) => {
       const key = button.dataset.adminTab;
       const isActive = key === tabKey;
@@ -89,19 +103,19 @@ if (!rootHook) {
         button.focus();
       }
     });
-    panels.forEach((panel, key) => {
+    panels.forEach(({ key, panel }) => {
       const isVisible = key === tabKey;
       panel.hidden = !isVisible;
       panel.setAttribute("aria-hidden", isVisible ? "false" : "true");
     });
   }
 
-  function initAdminTabs() {
-    if (!tabNav) return;
-    const buttons = Array.from(tabNav.querySelectorAll("[data-admin-tab]"));
+  function initAdminTabs(root) {
+    if (!root) return;
+    const buttons = getTabButtons(root);
     if (!buttons.length) return;
-    const panels = getTabPanels();
-    if (!panels.size) return;
+    const panels = getTabPanels(root);
+    if (!panels.length) return;
     const defaultTab =
       buttons.find((button) => button.classList.contains("is-active"))?.dataset
         .adminTab || buttons[0].dataset.adminTab;
@@ -112,7 +126,7 @@ if (!rootHook) {
       if (!nextButton) return;
       const nextKey = nextButton.dataset.adminTab;
       if (nextKey) {
-        activateAdminTab(nextKey, { focus: true });
+        activateAdminTab(root, nextKey, { focus: true });
       }
     };
 
@@ -121,7 +135,7 @@ if (!rootHook) {
         event.preventDefault();
         const key = button.dataset.adminTab;
         if (key) {
-          activateAdminTab(key);
+          activateAdminTab(root, key);
         }
       });
       button.addEventListener("keydown", (event) => {
@@ -135,7 +149,9 @@ if (!rootHook) {
       });
     });
 
-    activateAdminTab(defaultTab);
+    if (defaultTab) {
+      activateAdminTab(root, defaultTab);
+    }
   }
 
   function decodeStatusPayload(trigger) {
@@ -458,21 +474,38 @@ if (!rootHook) {
   }
 
 
-  initCollapsiblePipelineTables();
-  initAdminTabs();
-  initStatusPopovers();
+    initCollapsiblePipelineTables();
+    tabRoots.forEach((root) => initAdminTabs(root));
+    initStatusPopovers();
+
+  const selectAll = (selector) =>
+    Array.from(document.querySelectorAll(selector));
+
+  const forEachElement = (targets, callback) => {
+    if (!targets || typeof callback !== "function") return;
+    const elements = Array.isArray(targets)
+      ? targets
+      : targets
+      ? [targets]
+      : [];
+    elements.forEach((element) => {
+      if (element) {
+        callback(element);
+      }
+    });
+  };
 
   const salesEls = {
-    source: document.querySelector("[data-sales-source]"),
-    updated: document.querySelector("[data-sales-updated]"),
-    revenueMonth: document.querySelector("[data-sales-revenue-month]"),
-    revenueMonthChange: document.querySelector("[data-sales-revenue-month-change]"),
-    ordersMonth: document.querySelector("[data-sales-orders-month]"),
-    ordersMonthChange: document.querySelector("[data-sales-orders-month-change]"),
-    revenueDay: document.querySelector("[data-sales-revenue-day]"),
-    revenueDayChange: document.querySelector("[data-sales-revenue-day-change]"),
-    topProduct: document.querySelector("[data-sales-top-product]"),
-    topShare: document.querySelector("[data-sales-top-share]")
+    source: selectAll("[data-sales-source]"),
+    updated: selectAll("[data-sales-updated]"),
+    revenueMonth: selectAll("[data-sales-revenue-month]"),
+    revenueMonthChange: selectAll("[data-sales-revenue-month-change]"),
+    ordersMonth: selectAll("[data-sales-orders-month]"),
+    ordersMonthChange: selectAll("[data-sales-orders-month-change]"),
+    revenueDay: selectAll("[data-sales-revenue-day]"),
+    revenueDayChange: selectAll("[data-sales-revenue-day-change]"),
+    topProduct: selectAll("[data-sales-top-product]"),
+    topShare: selectAll("[data-sales-top-share]")
   };
 
   const supabaseTestDefaults = {
@@ -988,50 +1021,62 @@ if (!rootHook) {
     };
   }
 
-  function applyChange(element, descriptor) {
-    if (!element) return;
+  function applyChange(targets, descriptor) {
+    if (!targets) return;
     const text = descriptor?.text && String(descriptor.text).trim();
-    element.textContent = text || "—";
     const trend = descriptor?.trend || "neutral";
-    element.dataset.trend = trend;
+    forEachElement(targets, (element) => {
+      element.textContent = text || "—";
+      element.dataset.trend = trend;
+    });
   }
 
   function updateSalesSnapshot(snapshot = {}) {
     if (!snapshot || typeof snapshot !== "object") return;
-    const hasSalesEls = Object.values(salesEls || {}).some(Boolean);
+    const hasSalesEls = Object.values(salesEls || {}).some((value) =>
+      Array.isArray(value) ? value.length > 0 : Boolean(value)
+    );
     if (!hasSalesEls) return;
 
-    if (salesEls.source) {
-      salesEls.source.textContent = snapshot.source || "—";
-    }
+    forEachElement(salesEls.source, (element) => {
+      element.textContent = snapshot.source || "—";
+    });
 
-    if (salesEls.updated) {
+    if (Array.isArray(salesEls.updated) && salesEls.updated.length) {
       if (snapshot.updated) {
         const formatted = formatTimestamp(snapshot.updated);
         if (formatted) {
-          salesEls.updated.dateTime = formatted.iso;
-          salesEls.updated.setAttribute("datetime", formatted.iso);
           const relative = formatRelativeTime(formatted.date);
           const parts = [formatted.display];
           if (relative) {
             parts.push(`(${relative})`);
           }
-          salesEls.updated.textContent = parts.join(" ");
+          forEachElement(salesEls.updated, (element) => {
+            element.dateTime = formatted.iso;
+            element.setAttribute("datetime", formatted.iso);
+            element.textContent = parts.join(" ");
+          });
         } else {
-          salesEls.updated.dateTime = "";
-          salesEls.updated.removeAttribute("datetime");
-          salesEls.updated.textContent = snapshot.updated;
+          forEachElement(salesEls.updated, (element) => {
+            element.dateTime = "";
+            element.removeAttribute("datetime");
+            element.textContent = snapshot.updated;
+          });
         }
       } else {
-        salesEls.updated.dateTime = "";
-        salesEls.updated.removeAttribute("datetime");
-        salesEls.updated.textContent = "—";
+        forEachElement(salesEls.updated, (element) => {
+          element.dateTime = "";
+          element.removeAttribute("datetime");
+          element.textContent = "—";
+        });
       }
     }
 
-    if (salesEls.revenueMonth) {
+    if (Array.isArray(salesEls.revenueMonth) && salesEls.revenueMonth.length) {
       const revenue = formatCurrency(snapshot?.revenueMonth?.current);
-      salesEls.revenueMonth.textContent = revenue || "—";
+      forEachElement(salesEls.revenueMonth, (element) => {
+        element.textContent = revenue || "—";
+      });
       applyChange(
         salesEls.revenueMonthChange,
         describePercentChange(snapshot?.revenueMonth?.current, snapshot?.revenueMonth?.previous, {
@@ -1041,11 +1086,14 @@ if (!rootHook) {
       );
     }
 
-    if (salesEls.ordersMonth) {
+    if (Array.isArray(salesEls.ordersMonth) && salesEls.ordersMonth.length) {
       const orders = formatNumber(snapshot?.ordersMonth?.current, {
         maximumFractionDigits: 0
       });
-      salesEls.ordersMonth.textContent = orders ? `${orders} orders` : "—";
+      const orderText = orders ? `${orders} orders` : "—";
+      forEachElement(salesEls.ordersMonth, (element) => {
+        element.textContent = orderText;
+      });
       applyChange(
         salesEls.ordersMonthChange,
         describePercentChange(snapshot?.ordersMonth?.current, snapshot?.ordersMonth?.previous, {
@@ -1055,9 +1103,11 @@ if (!rootHook) {
       );
     }
 
-    if (salesEls.revenueDay) {
+    if (Array.isArray(salesEls.revenueDay) && salesEls.revenueDay.length) {
       const dayRevenue = formatCurrency(snapshot?.revenueDay?.current);
-      salesEls.revenueDay.textContent = dayRevenue || "—";
+      forEachElement(salesEls.revenueDay, (element) => {
+        element.textContent = dayRevenue || "—";
+      });
       applyChange(
         salesEls.revenueDayChange,
         describePercentChange(snapshot?.revenueDay?.current, snapshot?.revenueDay?.previous, {
@@ -1067,14 +1117,17 @@ if (!rootHook) {
       );
     }
 
-    if (salesEls.topProduct) {
+    if (Array.isArray(salesEls.topProduct) && salesEls.topProduct.length) {
       const top = snapshot?.topProduct || {};
       const name = top.name || "—";
       const share =
         typeof top.currentShare === "number" && Number.isFinite(top.currentShare)
           ? formatNumber(top.currentShare * 100, { maximumFractionDigits: 1 })
           : null;
-      salesEls.topProduct.textContent = share ? `${name} — ${share}% of revenue` : name;
+      const topText = share ? `${name} — ${share}% of revenue` : name;
+      forEachElement(salesEls.topProduct, (element) => {
+        element.textContent = topText;
+      });
       applyChange(
         salesEls.topShare,
         describePointChange(top.currentShare, top.previousShare, {
