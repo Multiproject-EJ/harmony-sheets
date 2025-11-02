@@ -244,7 +244,7 @@ nav,nav *{pointer-events:auto;}
 .lovablesheet-stage__lock-icon{font-size:2rem;line-height:1}
 .lovablesheet-stage[data-stage-locked="true"] .lovablesheet-stage__lock{opacity:1;visibility:visible}
 .lovablesheet-stage[data-stage-locked="true"] .lovablesheet-stage__panels{filter:saturate(.7) blur(1px);pointer-events:none;user-select:none}
-.lovablesheet-idea__overview{display:flex;justify-content:flex-start}
+.lovablesheet-idea__overview{display:flex;justify-content:center}
 .idea-summary-card{position:relative;display:flex;flex-direction:column;gap:18px;width:100%;max-width:min(520px,92vw);padding:clamp(24px,4vw,32px);border-radius:26px;border:1px solid rgba(148,163,184,.28);background:linear-gradient(150deg,rgba(248,250,252,.94),rgba(226,232,240,.78));box-shadow:0 22px 44px rgba(15,23,42,.12);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;cursor:pointer}
 .idea-summary-card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s ease;box-shadow:0 0 0 3px rgba(59,130,246,.28),0 22px 48px rgba(30,64,175,.18)}
 .idea-summary-card:is(:hover,:focus-within){transform:translateY(-2px);box-shadow:0 30px 56px rgba(15,23,42,.18);border-color:rgba(59,130,246,.32)}
