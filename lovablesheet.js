@@ -195,9 +195,24 @@ const ideaStageElements = {
   draftTableBody: document.querySelector("[data-draft-table-body]"),
   draftEmpty: document.querySelector("[data-draft-empty]")
 };
+const stepThreeElements = {
+  stage: document.querySelector("[data-step-three]"),
+  lock: document.querySelector("[data-step-three-lock]"),
+  hint: document.querySelector("[data-step-three-hint]"),
+  latest: document.querySelector("[data-step-three-latest]"),
+  output: document.querySelector("[data-step-three-output]"),
+  status: document.querySelector("[data-step-three-status]"),
+  generateButton: document.querySelector("[data-step-three-generate]"),
+  sendButton: document.querySelector("[data-step-three-send]")
+};
 const ideaStageState = {
   selectedProduct: "",
   initialized: false
+};
+const stepThreeState = {
+  initialized: false,
+  latestBriefId: "",
+  latestPrompt: ""
 };
 
 let supabaseClient = null;
@@ -435,6 +450,211 @@ function updateStepTwoAvailability() {
   if (clearButton) {
     clearButton.hidden = !hasSelection;
     clearButton.disabled = !hasSelection;
+  }
+}
+
+function setStepThreeHint(message) {
+  const { hint } = stepThreeElements;
+  if (!hint) return;
+  hint.textContent = message || "";
+}
+
+function setStepThreeStatus(message, tone) {
+  const { status } = stepThreeElements;
+  if (!status) return;
+  status.textContent = message || "";
+  if (tone) {
+    status.dataset.tone = tone;
+  } else {
+    status.removeAttribute("data-tone");
+  }
+}
+
+function setStepThreeOutput(value) {
+  const { output } = stepThreeElements;
+  const nextValue = typeof value === "string" ? value : "";
+  if (output) {
+    output.value = nextValue;
+  }
+  stepThreeState.latestPrompt = nextValue;
+}
+
+function updateStepThreeLatestBriefLabel(brief) {
+  const { latest } = stepThreeElements;
+  if (!latest) return;
+
+  if (brief) {
+    const savedAt = formatNextGenTimestamp(brief.createdAt);
+    latest.hidden = false;
+    latest.textContent = savedAt ? `Latest brief: ${brief.productName || "Untitled brief"} • Saved ${savedAt}` : `Latest brief: ${brief.productName || "Untitled brief"}`;
+  } else {
+    latest.hidden = true;
+    latest.textContent = "";
+  }
+}
+
+function buildStepThreePrompt(brief) {
+  if (!brief) {
+    return "";
+  }
+
+  const description = brief.description || "No description provided.";
+  const notes = brief.notes || "None provided.";
+
+  const features = Array.isArray(brief.features) && brief.features.length
+    ? brief.features.map((feature) => `- ${feature.label || feature.id || "Feature"}`).join("\n")
+    : "- No feature highlights captured.";
+
+  const inspiration = Array.isArray(brief.inspiration) && brief.inspiration.length
+    ? brief.inspiration.map((item) => {
+        if (!item) return "";
+        const name = item.name || item.id || "Inspiration";
+        const draftBadge = item.draft ? " (draft)" : "";
+        const scope = item.scope === "features" ? "Feature inspiration" : "Full model";
+        const details = item.scope === "features" && item.details ? ` — Focus: ${item.details}` : "";
+        return `- ${name}${draftBadge} • ${scope}${details}`;
+      }).filter(Boolean).join("\n")
+    : "- No inspiration products recorded.";
+
+  const standardText = brief.standardText || NEXTGEN_DEFAULT_STANDARD_TEXT;
+
+  return [
+    `You are preparing marketing materials for the Harmony Sheets product "${brief.productName || "Untitled brief"}".`,
+    "Use the structured context below to craft launch copy, emails, and promotional assets.",
+    "",
+    "Product description:",
+    description,
+    "",
+    "Feature highlights:",
+    features,
+    "",
+    "Inspiration references:",
+    inspiration,
+    "",
+    "Standard delivery requirements:",
+    standardText,
+    "",
+    "Additional notes:",
+    notes
+  ].join("\n");
+}
+
+function updateStepThreeAvailability() {
+  const { stage, lock, generateButton, sendButton } = stepThreeElements;
+  const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
+  const hasBriefs = briefs.length > 0;
+
+  if (stage) {
+    stage.dataset.stageLocked = hasBriefs ? "false" : "true";
+    if (hasBriefs) {
+      stage.removeAttribute("aria-disabled");
+    } else {
+      stage.setAttribute("aria-disabled", "true");
+    }
+  }
+
+  if (lock) {
+    lock.hidden = hasBriefs;
+  }
+
+  setStepThreeHint(hasBriefs
+    ? "Step 3 unlocked — build a Codex prompt from your latest brief."
+    : "Create a Next Gen brief to unlock Step 3.");
+
+  if (generateButton) {
+    generateButton.disabled = !hasBriefs;
+    if (!hasBriefs) {
+      generateButton.setAttribute("aria-disabled", "true");
+    } else {
+      generateButton.removeAttribute("aria-disabled");
+    }
+  }
+
+  if (sendButton) {
+    sendButton.disabled = !hasBriefs;
+    if (!hasBriefs) {
+      sendButton.setAttribute("aria-disabled", "true");
+    } else {
+      sendButton.removeAttribute("aria-disabled");
+    }
+  }
+
+  const latestBrief = hasBriefs ? briefs[0] : null;
+  updateStepThreeLatestBriefLabel(latestBrief);
+
+  if (!hasBriefs) {
+    stepThreeState.latestBriefId = "";
+    setStepThreeOutput("");
+    setStepThreeStatus("");
+    return;
+  }
+
+  const selectedExists = briefs.some((brief) => brief.id === stepThreeState.latestBriefId);
+  const latestChanged = latestBrief && latestBrief.id !== stepThreeState.latestBriefId;
+
+  if (!selectedExists || latestChanged) {
+    stepThreeState.latestBriefId = latestBrief?.id || "";
+    if (stepThreeState.latestPrompt) {
+      setStepThreeStatus("Latest brief updated. Generate a fresh Codex prompt to reflect the new details.", "info");
+    }
+    setStepThreeOutput("");
+  }
+}
+
+function handleStepThreeGenerate() {
+  const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
+  if (!briefs.length) {
+    setStepThreeStatus("Save a Next Gen brief to generate a Codex prompt.", "error");
+    return;
+  }
+
+  const latestBrief = briefs[0];
+  const prompt = buildStepThreePrompt(latestBrief);
+  if (!prompt) {
+    setStepThreeStatus("We couldn't create a prompt from that brief. Please try again.", "error");
+    return;
+  }
+
+  setStepThreeOutput(prompt);
+  stepThreeState.latestBriefId = latestBrief.id || "";
+  setStepThreeStatus(`Codex prompt created for “${latestBrief.productName || "Untitled brief"}”.`, "success");
+}
+
+function handleStepThreeSend() {
+  if (!stepThreeState.latestPrompt) {
+    setStepThreeStatus("Generate a Codex prompt before sending it to marketing.", "error");
+    return;
+  }
+
+  const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
+  const targetBrief = briefs.find((brief) => brief.id === stepThreeState.latestBriefId) || briefs[0] || null;
+  const productName = targetBrief?.productName ? `“${targetBrief.productName}”` : "This prompt";
+  setStepThreeStatus(`${productName} is ready for marketing handoff. (Sending workflow coming soon.)`, "info");
+}
+
+function initializeStepThree() {
+  if (stepThreeState.initialized) {
+    return;
+  }
+
+  stepThreeState.initialized = true;
+  setStepThreeOutput("");
+  setStepThreeStatus("");
+  updateStepThreeAvailability();
+
+  const { generateButton, sendButton } = stepThreeElements;
+
+  if (generateButton) {
+    generateButton.addEventListener("click", () => {
+      setStepThreeStatus("");
+      handleStepThreeGenerate();
+    });
+  }
+
+  if (sendButton) {
+    sendButton.addEventListener("click", () => {
+      handleStepThreeSend();
+    });
   }
 }
 
@@ -1528,6 +1748,7 @@ function renderNextGenSavedBriefs() {
 
   list.innerHTML = "";
   const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
+  updateStepThreeAvailability();
   if (!briefs.length) {
     empty.hidden = false;
     list.hidden = true;
@@ -4383,6 +4604,7 @@ async function handleSaveBoard() {
 }
 
 initializeIdeaStage();
+initializeStepThree();
 initializeThinkingTools();
 
 async function init() {

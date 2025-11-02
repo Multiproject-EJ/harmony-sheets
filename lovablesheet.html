@@ -965,6 +965,72 @@
           </div>
         </section>
 
+        <section
+          class="lovablesheet-stage lovablesheet-stage--codex"
+          aria-labelledby="lovablesheet-codex-stage"
+          data-step-three
+          data-stage-locked="true"
+          aria-disabled="true"
+        >
+          <header class="lovablesheet-stage__header">
+            <p class="lovablesheet-stage__eyebrow">Step 3</p>
+            <div>
+              <h2 id="lovablesheet-codex-stage">Codex handoff</h2>
+              <p class="lovablesheet-stage__description">
+                Turn your saved Next Gen briefs into a Codex-ready marketing prompt.
+              </p>
+            </div>
+          </header>
+          <div class="lovablesheet-stage__lock" data-step-three-lock aria-hidden="true">
+            <div class="lovablesheet-stage__lock-inner">
+              <span class="lovablesheet-stage__lock-icon" aria-hidden="true">🔒</span>
+              <p>Create a Next Gen brief in Step 2 to unlock Codex handoff tools.</p>
+            </div>
+          </div>
+          <div class="lovablesheet-stage__panels">
+            <section class="lovablesheet-codex" aria-labelledby="lovablesheet-codex-title" data-step-three-container>
+              <div class="admin__panel admin__panel--codex">
+                <div class="admin__panel-head">
+                  <div>
+                    <p class="lovablesheet-nextgen__eyebrow">Codex tools</p>
+                    <h2 id="lovablesheet-codex-title">Marketing prompt launcher</h2>
+                    <p class="admin__panel-sub">
+                      Use the most recent Next Gen brief to draft a Codex-ready prompt and kick off the marketing workflow.
+                    </p>
+                  </div>
+                  <div class="admin__panel-actions admin__panel-actions--codex">
+                    <button class="flowchart-prompt__action flowchart-prompt__action--primary" type="button" data-step-three-generate>
+                      <span class="flowchart-prompt__action-icon" aria-hidden="true">⚡</span>
+                      <span class="flowchart-prompt__action-label">Create Codex prompt</span>
+                    </button>
+                    <button class="flowchart-prompt__action flowchart-prompt__action--ghost" type="button" data-step-three-send>
+                      <span class="flowchart-prompt__action-icon" aria-hidden="true">📤</span>
+                      <span class="flowchart-prompt__action-label">Send to marketing</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="admin__panel-body lovablesheet-codex__body">
+                  <p class="lovablesheet-codex__hint" data-step-three-hint>
+                    Create a Next Gen brief to unlock Step 3.
+                  </p>
+                  <p class="lovablesheet-codex__latest" data-step-three-latest hidden></p>
+                  <label class="flowchart-prompt__output">
+                    <span class="flowchart-prompt__eyebrow">Codex prompt</span>
+                    <textarea
+                      class="flowchart-prompt__textarea"
+                      rows="8"
+                      readonly
+                      data-step-three-output
+                      placeholder="Generate a Codex prompt from your latest Next Gen brief."
+                    ></textarea>
+                  </label>
+                  <p class="flowchart-prompt__status" data-step-three-status role="status" aria-live="polite"></p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
       </div>
     </div>
   </section>
