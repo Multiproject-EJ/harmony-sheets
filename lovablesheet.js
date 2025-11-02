@@ -183,6 +183,21 @@ const thinkingToolPanels = new Map(
     .map((panel) => [panel.dataset.thinkingPanel, panel])
     .filter(([id]) => Boolean(id))
 );
+const ideaStageElements = {
+  stage: document.querySelector("[data-idea-stage]"),
+  output: document.querySelector("[data-idea-output]"),
+  hint: document.querySelector("[data-step-two-hint]"),
+  clearButton: document.querySelector("[data-idea-clear]"),
+  container: document.querySelector("[data-idea-output-container]"),
+  stepTwo: document.querySelector("[data-step-two]"),
+  draftTable: document.querySelector("[data-draft-table]"),
+  draftTableBody: document.querySelector("[data-draft-table-body]"),
+  draftEmpty: document.querySelector("[data-draft-empty]")
+};
+const ideaStageState = {
+  selectedProduct: "",
+  initialized: false
+};
 
 let supabaseClient = null;
 let authSubscription = null;
@@ -265,6 +280,192 @@ function initializeThinkingTools() {
       setThinkingPanelVisibility(thinkingToggle, true);
     });
   });
+}
+
+function formatLifeAreaLabel(lifeAreas) {
+  if (!Array.isArray(lifeAreas) || lifeAreas.length === 0) {
+    return "Life area: Draft";
+  }
+
+  const rawValue = String(lifeAreas[0] ?? "").trim();
+  if (!rawValue) {
+    return "Life area: Draft";
+  }
+
+  const normalized = rawValue
+    .replace(/[_-]+/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  return `Life area: ${normalized}`;
+}
+
+function deriveDraftType(product) {
+  if (!product) {
+    return "Draft concept";
+  }
+
+  const nameSegments = typeof product.name === "string"
+    ? product.name.split("—").map((segment) => segment.trim()).filter(Boolean)
+    : [];
+
+  if (nameSegments.length > 1) {
+    return nameSegments.slice(1).join(" — ");
+  }
+
+  if (typeof product.tagline === "string" && product.tagline.trim()) {
+    return product.tagline.trim();
+  }
+
+  return "Draft concept";
+}
+
+function renderDraftModelsTable(products = []) {
+  const { draftTable, draftTableBody, draftEmpty } = ideaStageElements;
+  if (!draftTableBody || !draftTable) {
+    return;
+  }
+
+  draftTableBody.innerHTML = "";
+
+  const drafts = Array.isArray(products) ? products.filter((product) => product && product.draft) : [];
+
+  if (drafts.length === 0) {
+    draftTable.hidden = true;
+    if (draftEmpty) {
+      draftEmpty.hidden = false;
+      draftEmpty.textContent = "No draft models found in the admin catalog.";
+    }
+    return;
+  }
+
+  draftTable.hidden = false;
+  if (draftEmpty) {
+    draftEmpty.hidden = true;
+  }
+
+  drafts.forEach((product) => {
+    const row = document.createElement("tr");
+
+    const displayName = typeof product.displayName === "string" && product.displayName.trim()
+      ? product.displayName.trim()
+      : (typeof product.name === "string" ? product.name.trim() : "Draft concept");
+
+    const productCell = document.createElement("td");
+    productCell.dataset.label = "Product";
+
+    const lifeArea = document.createElement("span");
+    lifeArea.className = "admin-pipeline__life-area";
+    lifeArea.textContent = formatLifeAreaLabel(product.lifeAreas);
+
+    const nameEl = document.createElement("span");
+    nameEl.className = "admin-pipeline__product";
+    nameEl.textContent = displayName;
+
+    productCell.append(lifeArea, nameEl);
+
+    const typeCell = document.createElement("td");
+    typeCell.dataset.label = "Type";
+    typeCell.textContent = deriveDraftType(product);
+
+    const badgeCell = document.createElement("td");
+    badgeCell.dataset.label = "Badge";
+    const badge = document.createElement("span");
+    badge.className = "admin-pipeline__badge";
+    badge.dataset.badge = "draft";
+    badge.textContent = "Draft";
+    badgeCell.appendChild(badge);
+
+    const priceCell = document.createElement("td");
+    priceCell.dataset.label = "Price";
+    priceCell.className = "admin-table__price";
+    priceCell.textContent = typeof product.price === "string" && product.price.trim() ? product.price.trim() : "—";
+
+    const briefCell = document.createElement("td");
+    briefCell.dataset.label = "Use in Brief";
+    briefCell.className = "admin-table__brief";
+
+    const briefButton = document.createElement("button");
+    briefButton.type = "button";
+    briefButton.className = "pipeline-brief-button";
+    briefButton.dataset.pipelineBrief = "";
+    briefButton.dataset.productName = displayName;
+
+    const buttonIcon = document.createElement("span");
+    buttonIcon.className = "pipeline-brief-button__icon";
+    buttonIcon.setAttribute("aria-hidden", "true");
+    buttonIcon.textContent = "📝";
+
+    const buttonLabel = document.createElement("span");
+    buttonLabel.className = "pipeline-brief-button__label";
+    buttonLabel.textContent = "Use in Brief";
+
+    briefButton.append(buttonIcon, buttonLabel);
+    briefCell.appendChild(briefButton);
+
+    row.append(productCell, typeCell, badgeCell, priceCell, briefCell);
+    draftTableBody.appendChild(row);
+  });
+}
+
+function updateStepTwoAvailability() {
+  const { stepTwo, container, clearButton } = ideaStageElements;
+  const hasSelection = ideaStageState.selectedProduct.trim().length > 0;
+
+  if (stepTwo) {
+    stepTwo.hidden = !hasSelection;
+  }
+
+  if (container) {
+    container.classList.toggle("lovablesheet-idea__selection--active", hasSelection);
+    container.dataset.ideaSelected = hasSelection ? "true" : "false";
+  }
+
+  if (clearButton) {
+    clearButton.hidden = !hasSelection;
+    clearButton.disabled = !hasSelection;
+  }
+}
+
+function setIdeaStageSelection(productName) {
+  const nextValue = typeof productName === "string" ? productName.trim() : "";
+  ideaStageState.selectedProduct = nextValue;
+
+  const { output, hint } = ideaStageElements;
+  if (output) {
+    output.textContent = nextValue || "No product selected yet.";
+  }
+
+  if (hint) {
+    hint.textContent = nextValue
+      ? "Step 2 unlocked — open the Next Gen brief to continue."
+      : "Select a product from the tables to unlock Step 2.";
+  }
+
+  updateStepTwoAvailability();
+}
+
+function initializeIdeaStage() {
+  if (ideaStageState.initialized) {
+    return;
+  }
+
+  ideaStageState.initialized = true;
+  setIdeaStageSelection("");
+
+  const { clearButton, draftTable, draftEmpty } = ideaStageElements;
+  if (draftTable) {
+    draftTable.hidden = true;
+  }
+  if (draftEmpty) {
+    draftEmpty.hidden = true;
+  }
+
+  if (clearButton) {
+    clearButton.addEventListener("click", () => {
+      setIdeaStageSelection("");
+    });
+  }
 }
 
 function handleUnauthorized(message, redirectTarget) {
@@ -1025,6 +1226,8 @@ function launchNextGenBriefFromPipeline(trigger) {
 
   const productName = extractPipelineProductName(trigger);
 
+  setIdeaStageSelection(productName);
+
   resetNextGenForm();
   setNextGenFormStatus("");
 
@@ -1114,7 +1317,16 @@ async function fetchNextGenProducts() {
           return null;
         }
         seenIds.add(id);
-        return { id, name, draft };
+
+        const segments = name.split("—").map((segment) => segment.trim()).filter(Boolean);
+        const displayName = segments.length > 0 ? segments[0] : name;
+        const price = typeof item.price === "string" && item.price.trim() ? item.price.trim() : "";
+        const lifeAreas = Array.isArray(item.lifeAreas)
+          ? item.lifeAreas.map((area) => String(area ?? "").trim()).filter(Boolean)
+          : [];
+        const tagline = typeof item.tagline === "string" ? item.tagline.trim() : "";
+
+        return { id, name, displayName, draft, price, lifeAreas, tagline };
       })
       .filter(Boolean)
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
@@ -1126,10 +1338,19 @@ async function fetchNextGenProducts() {
     });
 
     renderNextGenProductOptions(normalized);
+    renderDraftModelsTable(normalized);
   } catch (error) {
     console.error("[lovablesheet] Unable to load products for Next Gen brief", error);
     if (productsError) {
       productsError.hidden = false;
+    }
+    renderDraftModelsTable([]);
+    if (ideaStageElements.draftTable) {
+      ideaStageElements.draftTable.hidden = true;
+    }
+    if (ideaStageElements.draftEmpty) {
+      ideaStageElements.draftEmpty.hidden = false;
+      ideaStageElements.draftEmpty.textContent = "We couldn't load draft models. Refresh to try again.";
     }
   } finally {
     if (productsLoading) {
@@ -4150,6 +4371,7 @@ async function handleSaveBoard() {
   }
 }
 
+initializeIdeaStage();
 initializeThinkingTools();
 
 async function init() {
