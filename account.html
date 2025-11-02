@@ -156,6 +156,17 @@
             </div>
           </dl>
         </article>
+        <article class="account-panel">
+          <h2>Share your ideas</h2>
+          <p class="muted">Have a template in mind or a feature request? Send it our way so we can build what you need next.</p>
+          <form id="suggest-form" class="suggest">
+            <input type="hidden" name="type" value="Suggestion">
+            <input type="hidden" id="product_id" name="product_id" value="account">
+            <label>Your idea <textarea name="message" required></textarea></label>
+            <button type="submit" class="btn">Send suggestion</button>
+            <span id="suggest-status" class="muted"></span>
+          </form>
+        </article>
       </div>
     </div>
   </section>
