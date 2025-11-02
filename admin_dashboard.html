@@ -105,7 +105,12 @@
   </section>
 
   <section class="admin-dashboard-content" data-admin-dashboard-content hidden>
-    <section class="admin__intro">
+    <section class="admin__control-panel" aria-labelledby="control-panel-title">
+      <div class="admin__headline">
+        <span class="admin__eyebrow">Control Panel</span>
+        <h1 class="admin__title" id="control-panel-title">Harmony Sheets Control Center</h1>
+        <p class="admin__lede">Review every template in one smart table, edit product details on the fly, manage life-area labels, and export an updated catalog for the storefront.</p>
+      </div>
       <div class="admin__status-group">
         <div class="admin__status-card admin__status-card--workspace admin__status-card--collapsible" role="status">
           <section class="admin__sales" aria-labelledby="admin-sales-title">
@@ -212,47 +217,80 @@
           </div>
         </div>
       </div>
-      <div class="admin__headline">
-        <span class="admin__eyebrow">Product Operations</span>
-        <h1 class="admin__title" id="control-center-title">Harmony Sheets Control Center</h1>
-        <p class="admin__lede">Review every template in one smart table, edit product details on the fly, manage life-area labels, and export an updated catalog for the storefront.</p>
-      </div>
     </section>
 
-    <section class="admin__grid">
-      <section
-        class="admin-control-center"
-        data-admin-control-center
-        aria-labelledby="control-center-title"
-      >
-        <nav class="admin-tabs" data-admin-tabs aria-label="Catalog views">
+    <section class="admin__workspace">
+      <div class="admin-tabs-group" data-admin-tabs-root="primary">
+        <nav class="admin-tabs admin-tabs--primary" data-admin-tabs aria-label="Admin dashboard sections">
           <div class="admin-tabs__list" role="tablist">
             <button
               type="button"
               class="admin-tabs__tab is-active"
               role="tab"
-              id="admin-tab-products-trigger"
+              id="admin-primary-marketing-trigger"
               aria-selected="true"
-              aria-controls="admin-tab-products"
-              data-admin-tab="products"
+              aria-controls="admin-primary-marketing"
+              data-admin-tab="marketing"
             >
-              Products
+              Marketing
             </button>
             <button
               type="button"
               class="admin-tabs__tab"
               role="tab"
-              id="admin-tab-bundles-trigger"
+              id="admin-primary-sales-trigger"
               aria-selected="false"
-              aria-controls="admin-tab-bundles"
-              data-admin-tab="bundles"
+              aria-controls="admin-primary-sales"
+              data-admin-tab="sales"
               tabindex="-1"
             >
-              Bundles
+              Sales Stats
             </button>
           </div>
         </nav>
-        <div class="admin-tabs__panels">
+            <div class="admin-tabs__panels" data-admin-tab-panels>
+              <div
+            class="admin-tabs__panel"
+            id="admin-primary-marketing"
+            role="tabpanel"
+            aria-labelledby="admin-primary-marketing-trigger"
+            data-admin-tab-panel="marketing"
+          >
+    <section class="admin__grid">
+      <section
+        class="admin-control-center"
+        data-admin-control-center
+        aria-labelledby="control-panel-title"
+      >
+        <div class="admin-tabs-group" data-admin-tabs-root="catalog">
+          <nav class="admin-tabs" data-admin-tabs aria-label="Catalog views">
+            <div class="admin-tabs__list" role="tablist">
+              <button
+                type="button"
+                class="admin-tabs__tab is-active"
+                role="tab"
+                id="admin-tab-products-trigger"
+                aria-selected="true"
+                aria-controls="admin-tab-products"
+                data-admin-tab="products"
+              >
+                Products
+              </button>
+              <button
+                type="button"
+                class="admin-tabs__tab"
+                role="tab"
+                id="admin-tab-bundles-trigger"
+                aria-selected="false"
+                aria-controls="admin-tab-bundles"
+                data-admin-tab="bundles"
+                tabindex="-1"
+              >
+                Bundles
+              </button>
+            </div>
+          </nav>
+          <div class="admin-tabs__panels" data-admin-tab-panels>
           <div
             class="admin-tabs__panel"
             id="admin-tab-products"
@@ -953,6 +991,75 @@
           </div>
         </div>
       </section>
+    </section>
+          </div>
+          <div
+            class="admin-tabs__panel"
+            id="admin-primary-sales"
+            role="tabpanel"
+            aria-labelledby="admin-primary-sales-trigger"
+            data-admin-tab-panel="sales"
+            hidden
+            aria-hidden="true"
+          >
+            <section class="admin-sales-dashboard" aria-labelledby="sales-dashboard-title">
+              <header class="admin-sales-dashboard__header">
+                <span class="admin__eyebrow">Sales Stats</span>
+                <h2 class="admin-sales-dashboard__title" id="sales-dashboard-title">Revenue &amp; conversion insights</h2>
+                <p class="admin-sales-dashboard__lede">
+                  Monitor live Stripe performance, spot trends, and share quick wins with the go-to-market team.
+                </p>
+              </header>
+              <div class="admin-sales-dashboard__grid">
+                <article class="admin-sales-card">
+                  <h3 class="admin-sales-card__title">Revenue (30 days)</h3>
+                  <p class="admin-sales-card__value" data-sales-revenue-month>—</p>
+                  <p class="admin-sales-card__trend" data-sales-revenue-month-change>—</p>
+                  <p class="admin-sales-card__hint">Aim for double-digit growth compared to the previous month.</p>
+                </article>
+                <article class="admin-sales-card">
+                  <h3 class="admin-sales-card__title">Orders (30 days)</h3>
+                  <p class="admin-sales-card__value" data-sales-orders-month>—</p>
+                  <p class="admin-sales-card__trend" data-sales-orders-month-change>—</p>
+                  <p class="admin-sales-card__hint">Keep conversion experiments aligned with funnel lift goals.</p>
+                </article>
+                <article class="admin-sales-card">
+                  <h3 class="admin-sales-card__title">Revenue (24 hours)</h3>
+                  <p class="admin-sales-card__value" data-sales-revenue-day>—</p>
+                  <p class="admin-sales-card__trend" data-sales-revenue-day-change>—</p>
+                  <p class="admin-sales-card__hint">Watch for promo spikes or unexpected slowdowns in daily sales.</p>
+                </article>
+                <article class="admin-sales-card">
+                  <h3 class="admin-sales-card__title">Top product</h3>
+                  <p class="admin-sales-card__value" data-sales-top-product>—</p>
+                  <p class="admin-sales-card__trend" data-sales-top-share>—</p>
+                  <p class="admin-sales-card__hint">Highlight the winning offer in this week's campaigns.</p>
+                </article>
+              </div>
+              <div class="admin-sales-dashboard__insights">
+                <section class="admin-sales-panel">
+                  <h3 class="admin-sales-panel__title">Performance pulse</h3>
+                  <p class="admin-sales-panel__text">
+                    <span data-sales-top-product>—</span> is currently leading revenue share at
+                    <span data-sales-top-share>—</span>. Sync the landing page messaging so the narrative matches what buyers love.
+                  </p>
+                  <p class="admin-sales-panel__meta">
+                    Data refreshed <time data-sales-updated datetime=""></time> via <span data-sales-source>Stripe Live</span>.
+                  </p>
+                </section>
+                <section class="admin-sales-panel">
+                  <h3 class="admin-sales-panel__title">Team focus</h3>
+                  <ul class="admin-sales-panel__list">
+                    <li>Coordinate bundle upsells around the current top performer.</li>
+                    <li>Audit paid ads to double-check cost-per-order for the week.</li>
+                    <li>Draft the Friday sales digest with highlights and watchouts.</li>
+                  </ul>
+                </section>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
     </section>
     <div class="admin-status-overlay" data-status-overlay hidden></div>
     <div
