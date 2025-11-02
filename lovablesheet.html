@@ -282,627 +282,405 @@
               </p>
             </div>
           </header>
-          <div class="lovablesheet-stage__panels">
-            <section class="lovablesheet-pipeline" aria-labelledby="todo-pipeline-title">
-              <div class="admin__panel admin__panel--pipeline" aria-labelledby="todo-pipeline-title">
-                <div class="admin__panel-head">
-                  <div>
-                    <h2 id="todo-pipeline-title">«Todo do» product pipeline</h2>
-                    <p class="admin__panel-sub">
-                      Track upcoming spreadsheet experiences and align launch priorities for the Todo do mini product line.
-                    </p>
-                  </div>
-                  <div class="admin__panel-actions admin__panel-actions--pipeline">
-                    <button
-                      type="button"
-                      class="admin__pipeline-toggle"
-                      data-pipeline-toggle
-                      aria-controls="todo-pipeline-table"
-                      aria-expanded="false"
-                      hidden
-                    >
-                      <span class="admin__pipeline-toggle-icon" aria-hidden="true">
-                        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                      </span>
-                      <span data-pipeline-toggle-label>Expand full pipeline</span>
-                    </button>
-                  </div>
-                </div>
-                <div class="admin__pipeline-body">
-                  <p id="todo-pipeline-hint" class="sr-only">This table shows the first three Todo do products. Use the pipeline toggle button to reveal or collapse the remaining items.</p>
-                  <table
-                    class="admin-table admin-table--compact admin-table--pipeline"
-                    aria-describedby="todo-pipeline-title todo-pipeline-hint"
-                    data-pipeline-table
-                    data-preview-count="3"
-                    id="todo-pipeline-table"
-                  >
-                    <thead>
-                      <tr>
-                        <th scope="col">Product</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Badge</th>
-                        <th scope="col" class="admin-table__price">Price</th>
-                        <th scope="col" class="admin-table__brief">Use in Brief</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Finances</span>
-                          <span class="admin-pipeline__product">Budget Blueprint</span>
-                        </td>
-                        <td data-label="Type">Budget</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$29</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Budget Blueprint"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Love</span>
-                          <span class="admin-pipeline__product">Shared Memory Keeper</span>
-                        </td>
-                        <td data-label="Type">Template</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$24</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Shared Memory Keeper"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Love</span>
-                          <span class="admin-pipeline__product">Couples Connection Journal</span>
-                        </td>
-                        <td data-label="Type">Journal</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$19</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Couples Connection Journal"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Health</span>
-                          <span class="admin-pipeline__product">Meal &amp; Movement Planner</span>
-                        </td>
-                        <td data-label="Type">Planner</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$19</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Meal &amp; Movement Planner"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Love</span>
-                          <span class="admin-pipeline__product">Date Night Generator</span>
-                        </td>
-                        <td data-label="Type">Tool</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="new">New</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$9</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Date Night Generator"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Career</span>
-                          <span class="admin-pipeline__product">Weekly Reflection Guide</span>
-                        </td>
-                        <td data-label="Type">Guide</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="new">New</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$11</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Weekly Reflection Guide"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Fun</span>
-                          <span class="admin-pipeline__product">Personal Retreat Architect</span>
-                        </td>
-                        <td data-label="Type">Retreat</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$18</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Personal Retreat Architect"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Fun</span>
-                          <span class="admin-pipeline__product">Adventure Budget Planner</span>
-                        </td>
-                        <td data-label="Type">Planner</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$14</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Adventure Budget Planner"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Family</span>
-                          <span class="admin-pipeline__product">Sunday Reset Hub</span>
-                        </td>
-                        <td data-label="Type">Hub</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="new">New</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$16</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Sunday Reset Hub"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Personal Growth</span>
-                          <span class="admin-pipeline__product">Learning Momentum Lab</span>
-                        </td>
-                        <td data-label="Type">Lab</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$18</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Learning Momentum Lab"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Health</span>
-                          <span class="admin-pipeline__product">Morning Momentum Map</span>
-                        </td>
-                        <td data-label="Type">Map</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$12</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Morning Momentum Map"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Career</span>
-                          <span class="admin-pipeline__product">Focus Sprint Planner</span>
-                        </td>
-                        <td data-label="Type">Planner</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$17</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Focus Sprint Planner"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Community</span>
-                          <span class="admin-pipeline__product">Neighborly Exchange</span>
-                        </td>
-                        <td data-label="Type">Exchange</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="new">New</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$13</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Neighborly Exchange"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Career</span>
-                          <span class="admin-pipeline__product">Momentum Ledger</span>
-                        </td>
-                        <td data-label="Type">Ledger</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$21</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Momentum Ledger"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Personal Growth</span>
-                          <span class="admin-pipeline__product">Habit Story Studio</span>
-                        </td>
-                        <td data-label="Type">Studio</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$15</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Habit Story Studio"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Finances</span>
-                          <span class="admin-pipeline__product">Savings Sprint Hub</span>
-                        </td>
-                        <td data-label="Type">Hub</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$20</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Savings Sprint Hub"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Community</span>
-                          <span class="admin-pipeline__product">Neighborhood Workshop Lab</span>
-                        </td>
-                        <td data-label="Type">Lab</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$18</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Neighborhood Workshop Lab"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Family</span>
-                          <span class="admin-pipeline__product">Shared Story Studio</span>
-                        </td>
-                        <td data-label="Type">Studio</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$17</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Shared Story Studio"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Fun</span>
-                          <span class="admin-pipeline__product">Bucket List Builder</span>
-                        </td>
-                        <td data-label="Type">Builder</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$8</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Bucket List Builder"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Finances</span>
-                          <span class="admin-pipeline__product">Cash-Flow Dashboard</span>
-                        </td>
-                        <td data-label="Type">Dashboard</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$24</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Cash-Flow Dashboard"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Family</span>
-                          <span class="admin-pipeline__product">Celebration Planner</span>
-                        </td>
-                        <td data-label="Type">Planner</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$8</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Celebration Planner"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Spirituality</span>
-                          <span class="admin-pipeline__product">Community Service Tracker</span>
-                        </td>
-                        <td data-label="Type">Tracker</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$7</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Community Service Tracker"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Family</span>
-                          <span class="admin-pipeline__product">Connection Rituals</span>
-                        </td>
-                        <td data-label="Type">Ideas</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$6</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Connection Rituals"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td data-label="Product">
-                          <span class="admin-pipeline__life-area">Life area: Fun</span>
-                          <span class="admin-pipeline__product">Creative Hobby Dashboard</span>
-                        </td>
-                        <td data-label="Type">Dashboard</td>
-                        <td data-label="Badge">
-                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
-                        </td>
-                        <td data-label="Price" class="admin-table__price">$12</td>
-                        <td data-label="Use in Brief" class="admin-table__brief">
-                          <button
-                            type="button"
-                            class="pipeline-brief-button"
-                            data-pipeline-brief
-                            data-product-name="Creative Hobby Dashboard"
-                          >
-                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
-                            <span class="pipeline-brief-button__label">Use in Brief</span>
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+
+<div class="lovablesheet-idea__overview">
+  <article class="idea-summary-card" data-idea-summary-card data-summary-state="empty">
+    <header class="idea-summary-card__header">
+      <span class="idea-summary-card__status" data-idea-summary-status>Empty slot</span>
+      <span class="idea-summary-card__state" data-idea-summary-state>Awaiting concept</span>
+    </header>
+    <div class="idea-summary-card__body">
+      <h3 class="idea-summary-card__title" data-idea-summary-title>No concept selected</h3>
+      <p class="idea-summary-card__description" data-idea-summary-description>
+        Tap to explore the Todo do pipeline and draft models.
+      </p>
+    </div>
+    <footer class="idea-summary-card__footer">
+      <button class="idea-summary-card__button" type="button" data-idea-open-modal>
+        Open idea workspace
+      </button>
+    </footer>
+  </article>
+</div>
+<div class="lovablesheet-idea__modal" data-idea-modal-layer hidden>
+  <div class="lovablesheet-idea__modal-overlay" data-idea-modal-overlay></div>
+  <div
+    class="lovablesheet-idea__modal-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="idea-modal-title"
+    data-idea-modal-dialog
+    tabindex="-1"
+  >
+    <header class="lovablesheet-idea__modal-header">
+      <div>
+        <p class="lovablesheet-idea__modal-eyebrow">Step 1 workspace</p>
+        <h3 id="idea-modal-title">Idea generation</h3>
+        <p class="lovablesheet-idea__modal-sub">
+          Gather launch-ready concepts, compare drafts, and lock the product you want to brief next.
+        </p>
+      </div>
+      <button
+        class="lovablesheet-idea__modal-close"
+        type="button"
+        data-idea-modal-close
+        aria-label="Close idea workspace"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+    </header>
+    <div class="lovablesheet-idea__modal-body">
+      <div class="lovablesheet-stage__panels">
+        <section class="lovablesheet-pipeline" aria-labelledby="todo-pipeline-title">
+          <div class="admin__panel admin__panel--pipeline" aria-labelledby="todo-pipeline-title">
+            <div class="admin__panel-head">
+              <div>
+                <h2 id="todo-pipeline-title">«Todo do» product pipeline</h2>
+                <p class="admin__panel-sub">
+                  Track upcoming spreadsheet experiences and align launch priorities for the Todo do mini product line.
+                </p>
               </div>
-            </section>
-            <section class="lovablesheet-pipeline lovablesheet-pipeline--drafts" aria-labelledby="draft-models-title">
-              <div class="admin__panel admin__panel--pipeline" aria-labelledby="draft-models-title">
-                <div class="admin__panel-head">
-                  <div>
-                    <h2 id="draft-models-title">Draft models</h2>
-                    <p class="admin__panel-sub">
-                      Review in-progress Harmony Sheets concepts synced from the admin dashboard.
-                    </p>
-                  </div>
-                </div>
-                <div class="admin__pipeline-body">
-                  <p id="draft-models-hint" class="sr-only">Select a draft product to prefill the Next Gen brief.</p>
-                  <table
-                    class="admin-table admin-table--compact admin-table--pipeline"
-                    aria-describedby="draft-models-title draft-models-hint"
-                    data-draft-table
-                  >
-                    <thead>
-                      <tr>
-                        <th scope="col">Product</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Badge</th>
-                        <th scope="col" class="admin-table__price">Price</th>
-                        <th scope="col" class="admin-table__brief">Use in Brief</th>
-                      </tr>
-                    </thead>
-                    <tbody data-draft-table-body></tbody>
-                  </table>
-                  <p class="lovablesheet-drafts-empty" data-draft-empty hidden>No draft models found in the admin catalog.</p>
-                </div>
+              <div class="admin__panel-actions admin__panel-actions--pipeline">
+                <button
+                  type="button"
+                  class="admin__pipeline-toggle"
+                  data-pipeline-toggle
+                  aria-controls="todo-pipeline-table"
+                  aria-expanded="false"
+                  hidden
+                >
+                  <span class="admin__pipeline-toggle-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                  <span data-pipeline-toggle-label>Expand full pipeline</span>
+                </button>
               </div>
-            </section>
-          </div>
-          <div class="lovablesheet-idea__selection" data-idea-output-container>
-            <div class="lovablesheet-idea__selection-head">
-              <h3 id="idea-output-title">The product selected is…</h3>
-              <button class="btn ghost lovablesheet-idea__clear" type="button" data-idea-clear hidden>Clear selection</button>
             </div>
-            <p class="lovablesheet-idea__hint" data-step-two-hint>Select a product from the tables to unlock Step 2.</p>
-            <output class="lovablesheet-idea__output" data-idea-output aria-live="polite" aria-describedby="idea-output-title">No product selected yet.</output>
+            <div class="admin__pipeline-body">
+              <p id="todo-pipeline-hint" class="sr-only">This table shows the first three Todo do products. Use the pipeline toggle button to reveal or collapse the remaining items.</p>
+              <table
+                class="admin-table admin-table--compact admin-table--pipeline"
+                aria-describedby="todo-pipeline-title todo-pipeline-hint"
+                data-pipeline-table
+                data-preview-count="3"
+                id="todo-pipeline-table"
+              >
+                <thead>
+                  <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Badge</th>
+                    <th scope="col" class="admin-table__price">Price</th>
+                    <th scope="col" class="admin-table__brief">Use in Brief</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Finances</span>
+                      <span class="admin-pipeline__product">Budget Blueprint</span>
+                    </td>
+                    <td data-label="Type">Budget</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$29</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Budget Blueprint"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Love</span>
+                      <span class="admin-pipeline__product">Shared Memory Keeper</span>
+                    </td>
+                    <td data-label="Type">Template</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$24</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Shared Memory Keeper"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Love</span>
+                      <span class="admin-pipeline__product">Couples Connection Journal</span>
+                    </td>
+                    <td data-label="Type">Journal</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$19</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Couples Connection Journal"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Health</span>
+                      <span class="admin-pipeline__product">Meal &amp; Movement Planner</span>
+                    </td>
+                    <td data-label="Type">Planner</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$19</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Meal &amp; Movement Planner"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Love</span>
+                      <span class="admin-pipeline__product">Date Night Generator</span>
+                    </td>
+                    <td data-label="Type">Tool</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge" data-badge="new">New</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$9</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Date Night Generator"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Career</span>
+                      <span class="admin-pipeline__product">Weekly Reflection Guide</span>
+                    </td>
+                    <td data-label="Type">Planner</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$24</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Weekly Reflection Guide"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Fun</span>
+                      <span class="admin-pipeline__product">Adventure Day Planner</span>
+                    </td>
+                    <td data-label="Type">Planner</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge" data-badge="new">New</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$12</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Adventure Day Planner"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Fun</span>
+                      <span class="admin-pipeline__product">Creative Hobby Dashboard</span>
+                    </td>
+                    <td data-label="Type">Dashboard</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$14</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Creative Hobby Dashboard"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Community</span>
+                      <span class="admin-pipeline__product">Community Service Tracker</span>
+                    </td>
+                    <td data-label="Type">Tracker</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$16</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Community Service Tracker"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Family</span>
+                      <span class="admin-pipeline__product">Connection Rituals</span>
+                    </td>
+                    <td data-label="Type">Ideas</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$6</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Connection Rituals"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td data-label="Product">
+                      <span class="admin-pipeline__life-area">Life area: Fun</span>
+                      <span class="admin-pipeline__product">Creative Hobby Dashboard</span>
+                    </td>
+                    <td data-label="Type">Dashboard</td>
+                    <td data-label="Badge">
+                      <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                    </td>
+                    <td data-label="Price" class="admin-table__price">$12</td>
+                    <td data-label="Use in Brief" class="admin-table__brief">
+                      <button
+                        type="button"
+                        class="pipeline-brief-button"
+                        data-pipeline-brief
+                        data-product-name="Creative Hobby Dashboard"
+                      >
+                        <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                        <span class="pipeline-brief-button__label">Use in Brief</span>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
+        </section>
+        <section class="lovablesheet-pipeline lovablesheet-pipeline--drafts" aria-labelledby="draft-models-title">
+          <div class="admin__panel admin__panel--pipeline" aria-labelledby="draft-models-title">
+            <div class="admin__panel-head">
+              <div>
+                <h2 id="draft-models-title">Draft models</h2>
+                <p class="admin__panel-sub">
+                  Review in-progress Harmony Sheets concepts synced from the admin dashboard.
+                </p>
+              </div>
+            </div>
+            <div class="admin__pipeline-body">
+              <p id="draft-models-hint" class="sr-only">Select a draft product to prefill the Next Gen brief.</p>
+              <table
+                class="admin-table admin-table--compact admin-table--pipeline"
+                aria-describedby="draft-models-title draft-models-hint"
+                data-draft-table
+              >
+                <thead>
+                  <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Badge</th>
+                    <th scope="col" class="admin-table__price">Price</th>
+                    <th scope="col" class="admin-table__brief">Use in Brief</th>
+                  </tr>
+                </thead>
+                <tbody data-draft-table-body></tbody>
+              </table>
+              <p class="lovablesheet-drafts-empty" data-draft-empty hidden>No draft models found in the admin catalog.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="lovablesheet-idea__selection" data-idea-output-container>
+  <div class="lovablesheet-idea__selection-head">
+    <div class="lovablesheet-idea__selection-title">
+      <h3 id="idea-output-title">The product selected is…</h3>
+      <span class="lovablesheet-idea__success" data-idea-success aria-hidden="true">
+        <span class="lovablesheet-idea__success-icon">✨</span>
+      </span>
+    </div>
+    <button class="btn ghost lovablesheet-idea__clear" type="button" data-idea-clear hidden>Clear selection</button>
+  </div>
+  <p class="lovablesheet-idea__hint" data-step-two-hint>Select a product from the tables to unlock Step 2.</p>
+  <output class="lovablesheet-idea__output" data-idea-output aria-live="polite" aria-describedby="idea-output-title">No product selected yet.</output>
+</div>
+<div class="lovablesheet-stage__connector" data-idea-connector aria-hidden="true">
+  <div class="lovablesheet-stage__connector-line"></div>
+  <div class="lovablesheet-stage__connector-signal" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
         </section>
 
 
