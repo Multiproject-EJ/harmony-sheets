@@ -2967,18 +2967,6 @@ App.initNavDropdown = function() {
     return "";
   };
 
-  const getPreviewSource = item => {
-    if (!item) return "";
-    const list = Array.isArray(item.previewImages) ? item.previewImages : [];
-    const cleaned = list
-      .map(src => (typeof src === "string" ? src.trim() : ""))
-      .filter(Boolean);
-    if (!cleaned.length && item.image) {
-      cleaned.push(item.image);
-    }
-    return cleaned.length ? cleaned[0] : "";
-  };
-
   const updateActive = () => {
     if (!panelEl) return;
     if (!areaOrder.includes(navState.cat)) {
@@ -3047,9 +3035,6 @@ App.initNavDropdown = function() {
             const name = App.escapeHtml(item.name || "Harmony Sheets tool");
             const type = App.escapeHtml(item.type || "Template");
             const navId = String(item.id || `${navState.cat}-item-${index}`);
-            const previewSrc = getPreviewSource(item);
-            const previewAttr = previewSrc ? ` data-preview-image="${App.escapeHtml(previewSrc)}"` : "";
-            const previewClass = previewSrc ? " has-preview" : "";
             const accentColor = item.accentColor ? App.escapeHtml(item.accentColor) : "";
             const dotStyle = accentColor ? ` style="--nav-dot:${accentColor}"` : "";
             const areaInfo =
@@ -3059,7 +3044,7 @@ App.initNavDropdown = function() {
               "Life area";
             const areaLabelText = `Life area: ${areaInfo}`;
             const areaLabel = App.escapeHtml(areaLabelText);
-            return `<tr class="nav-mega__row${previewClass}" data-nav-item="${App.escapeHtml(navId)}"${previewAttr}><td class="nav-mega__product-cell"><span class="nav-mega__dot nav-mega__dot--row"${dotStyle} aria-hidden="true"></span><span class="sr-only">${areaLabel}</span><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+            return `<tr class="nav-mega__row" data-nav-item="${App.escapeHtml(navId)}"><td class="nav-mega__product-cell"><span class="nav-mega__dot nav-mega__dot--row"${dotStyle} aria-hidden="true"></span><span class="sr-only">${areaLabel}</span><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
         rowsEl.innerHTML = rows;
@@ -4666,24 +4651,26 @@ App.initProduct = async function() {
 
         const iframe = screen.querySelector('iframe');
         const viewport = screen.querySelector('[data-demo-viewport]');
-        const BASE_WIDTH = 1300;
-        const BASE_HEIGHT = 800;
+        const BASE_WIDTH = 1152;
+        const BASE_HEIGHT = 864;
 
         const scaleFrame = () => {
           if (!viewport || !iframe) return;
           const width = viewport.clientWidth;
-          if (!width) return;
-          const scale = width / BASE_WIDTH;
+          const height = viewport.clientHeight;
+          if (!width || !height) return;
+          const scale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
           iframe.style.width = `${BASE_WIDTH}px`;
           iframe.style.height = `${BASE_HEIGHT}px`;
-          iframe.style.transform = `scale(${scale})`;
+          iframe.style.transform = `translate(-50%, -50%) scale(${scale})`;
         };
 
         if (iframe) {
           iframe.style.position = 'absolute';
-          iframe.style.left = '0';
-          iframe.style.top = '0';
-          iframe.style.transformOrigin = 'top left';
+          iframe.style.left = '50%';
+          iframe.style.top = '50%';
+          iframe.style.transformOrigin = 'center';
+          iframe.style.pointerEvents = 'auto';
           iframe.addEventListener('load', () => {
             virtualDemoFrame.removeAttribute('data-loading');
             scaleFrame();
@@ -4698,32 +4685,41 @@ App.initProduct = async function() {
         window.addEventListener('resize', scaleFrame);
         requestAnimationFrame(() => scaleFrame());
 
+        let modalInstance;
+        let modalKeybound = false;
+        let launchButton = null;
+
         if (viewport) {
           viewport.setAttribute('tabindex', '0');
-          viewport.setAttribute('role', 'button');
-          viewport.setAttribute('aria-haspopup', 'dialog');
-          viewport.setAttribute('aria-expanded', 'false');
-          viewport.setAttribute('aria-label', `Open the interactive ${product.name} demo`);
+          viewport.setAttribute('role', 'group');
+          viewport.setAttribute('aria-label', `${product.name} interactive preview`);
+          viewport.removeAttribute('aria-haspopup');
+          viewport.removeAttribute('aria-expanded');
 
-          if (!viewport.querySelector('.virtual-demo__cta')) {
+          launchButton = viewport.querySelector('[data-demo-launch]');
+          if (!launchButton) {
             viewport.insertAdjacentHTML('beforeend', `
-              <div class="virtual-demo__cta">
+              <button type="button" class="virtual-demo__cta" data-demo-launch>
                 <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
                   <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
                 <span>Launch interactive demo</span>
-              </div>
+              </button>
             `);
+            launchButton = viewport.querySelector('[data-demo-launch]');
           }
 
-          let modalInstance;
-          let modalKeybound = false;
+          if (launchButton) {
+            launchButton.setAttribute('aria-haspopup', 'dialog');
+            launchButton.setAttribute('aria-expanded', 'false');
+            launchButton.setAttribute('aria-label', `Launch the interactive ${product.name} demo in a modal window`);
+          }
 
           const closeModal = () => {
             if (!modalInstance || modalInstance.hasAttribute('hidden')) return;
             modalInstance.classList.remove('is-active');
             document.body.classList.remove('virtual-demo-modal-open');
-            viewport.setAttribute('aria-expanded', 'false');
+            if (launchButton) launchButton.setAttribute('aria-expanded', 'false');
 
             const iframeEl = modalInstance.querySelector('iframe');
             if (iframeEl) iframeEl.blur();
@@ -4742,7 +4738,9 @@ App.initProduct = async function() {
               if (modalInstance && !modalInstance.classList.contains('is-active')) finalizeClose();
             }, 320);
 
-            window.setTimeout(() => viewport.focus(), 50);
+            window.setTimeout(() => {
+              if (launchButton) launchButton.focus();
+            }, 50);
           };
 
           const handleGlobalKeydown = event => {
@@ -4795,23 +4793,19 @@ App.initProduct = async function() {
             modalEl.removeAttribute('hidden');
             requestAnimationFrame(() => modalEl.classList.add('is-active'));
             document.body.classList.add('virtual-demo-modal-open');
-            viewport.setAttribute('aria-expanded', 'true');
+            if (launchButton) launchButton.setAttribute('aria-expanded', 'true');
 
             const closeButton = modalEl.querySelector('.virtual-demo-modal__close');
             window.setTimeout(() => closeButton && closeButton.focus(), 150);
           };
 
-          viewport.addEventListener('click', event => {
-            event.preventDefault();
-            openModal();
-          });
-
-          viewport.addEventListener('keydown', event => {
-            if (event.key === 'Enter' || event.key === ' ') {
+          if (launchButton && !launchButton.dataset.demoBound) {
+            launchButton.addEventListener('click', event => {
               event.preventDefault();
               openModal();
-            }
-          });
+            });
+            launchButton.dataset.demoBound = 'true';
+          }
         }
       } else if (screen) {
         const guideSection = App.qs('#p-virtual-guide');
