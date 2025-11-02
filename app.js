@@ -4,6 +4,71 @@
 
 const App = {};
 
+App.COMMUNITY_FEEDBACK_HTML = `
+  <section class="so-feedback" aria-labelledby="community-modal-title">
+    <div class="so-hero">
+      <div>
+        <h1 id="community-modal-title">Community town square 🏡</h1>
+        <p>Pick the product you use → vote on the top 3 things we should build → or drop a new idea. Admins can view all products.</p>
+        <p class="so-feedback__support">Prefer the detailed feedback form? <a href="faq.html#contact">Visit Support & FAQ →</a></p>
+      </div>
+      <div class="so-hero-img">🧑‍🎨</div>
+    </div>
+
+    <div class="so-row">
+      <div>
+        <div class="so-product-bar" id="soProductBar"></div>
+
+        <div class="so-panel">
+          <div class="so-panel-title">
+            <span id="soCurrentProductTitle">Features</span>
+            <button class="so-btn-secondary" type="button" id="soShowAllBtn">Show all</button>
+          </div>
+          <div class="so-panel-sub">Tap to vote. You can vote on up to 3 for this product.</div>
+          <div class="so-top3" id="soTop3"></div>
+        </div>
+
+        <div class="so-panel">
+          <div class="so-panel-title">
+            <span>What people ask for (bubble size = votes)</span>
+          </div>
+          <div class="so-cloud" id="soCloud"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="so-panel">
+          <div class="so-panel-title">
+            <span>Share an idea</span>
+          </div>
+          <div class="so-panel-sub">Tell us what would make this product better. We’ll attach it to the selected product.</div>
+          <div class="so-ideas">
+            <textarea id="soIdeaInput" placeholder="Example: Let me export storyboards as transparent PNGs…"></textarea>
+            <button class="so-btn-primary" type="button" id="soAddIdeaBtn">Submit idea</button>
+          </div>
+        </div>
+
+        <div class="so-panel so-admin">
+          <div>
+            <p class="so-admin-title">Team mode</p>
+            <p class="so-admin-sub">Toggle admin mode to view every product and combined votes.</p>
+          </div>
+          <div class="so-admin-actions">
+            <button class="so-btn-secondary" type="button" id="soToggleAdminBtn">Toggle admin</button>
+          </div>
+          <p class="so-panel-sub" id="soAdminInfo" style="margin:0;">Admin mode off.</p>
+        </div>
+
+        <div class="so-footer">
+          <p class="so-footer-title">Need direct help?</p>
+          <p>Use the support form or email <a href="mailto:support@harmony-sheets.com">support@harmony-sheets.com</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+`;
+
+
 App.createIcon = function(content) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${content}</svg>`;
 };
@@ -2242,6 +2307,7 @@ App.init = function() {
 
   // Build enhanced browse menu
   App.initNavDropdown();
+  App.initCommunityModal();
 
   // Hero headline rotation (home page)
   App.initHeroRotation();
@@ -2444,6 +2510,309 @@ App.initAuthLink = function() {
   App.closeAccountMenu = closeMenu;
   closeMenu();
 };
+
+App.initCommunityModal = function() {
+  const triggers = App.qsa('[data-community-open]');
+  if (!triggers.length) return;
+
+  const userProducts = [
+    { id: "p-char", name: "Character Studio", emoji: "🎭" },
+    { id: "p-story", name: "Storyboard Pro", emoji: "🎬" },
+    { id: "p-write", name: "Screenwriting", emoji: "📝" }
+  ];
+  const allProducts = [
+    ...userProducts,
+    { id: "p-assets", name: "Assets library", emoji: "📦" },
+    { id: "p-ai", name: "AI scene maker", emoji: "🤖" }
+  ];
+  const featuresByProduct = {
+    "p-char": [
+      { id: "f1", title: "PNG export (no BG)", desc: "Export clean characters for other tools.", votes: 32 },
+      { id: "f2", title: "Pose presets", desc: "Click → character shifts pose.", votes: 21 },
+      { id: "f3", title: "Expression library", desc: "Happy/sad/shock etc.", votes: 17 },
+      { id: "f4", title: "Color palettes", desc: "Save character styles.", votes: 9 }
+    ],
+    "p-story": [
+      { id: "s1", title: "AI camera suggestions", desc: "Angle, zoom, shot type.", votes: 40 },
+      { id: "s2", title: "Scene continuity checker", desc: "Keep characters consistent.", votes: 28 },
+      { id: "s3", title: "PDF storyboard export", desc: "Share with clients.", votes: 12 }
+    ],
+    "p-write": [
+      { id: "w1", title: "Beat sheet view", desc: "High-level outline first.", votes: 14 },
+      { id: "w2", title: "Export to Final Draft", desc: "One-click export.", votes: 26 },
+      { id: "w3", title: "Character arc assistant", desc: "Track motivation by scene.", votes: 7 }
+    ],
+    "p-assets": [
+      { id: "a1", title: "Tagging system", desc: "Find props faster.", votes: 6 }
+    ],
+    "p-ai": [
+      { id: "ai1", title: "Image-to-scene", desc: "Use ref image and generate variations.", votes: 33 }
+    ]
+  };
+
+  const state = {
+    modal: null,
+    dialog: null,
+    overlay: null,
+    closeBtn: null,
+    body: null,
+    boardInitialized: false,
+    isAdmin: false,
+    currentProductId: userProducts[0]?.id || allProducts[0]?.id || null,
+    voteTracker: {},
+    keydownAttached: false
+  };
+
+  const handleKeydown = event => {
+    if (event.key === "Escape" && state.modal && state.modal.classList.contains("is-open")) {
+      closeModal();
+    }
+  };
+
+  const closeModal = () => {
+    if (!state.modal) return;
+    state.modal.classList.remove("is-open");
+    state.modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("community-modal-open");
+  };
+
+  const createModal = () => {
+    if (state.modal) return;
+    const modal = document.createElement("div");
+    modal.className = "community-modal";
+    modal.setAttribute("data-community-modal", "");
+    modal.setAttribute("aria-hidden", "true");
+    modal.innerHTML = `
+      <div class="community-modal__overlay" data-community-overlay></div>
+      <div class="community-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="community-modal-title" tabindex="-1" data-community-dialog>
+        <button class="community-modal__close" type="button" data-community-close aria-label="Close community feedback">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="community-modal__body" data-community-body></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    state.modal = modal;
+    state.overlay = modal.querySelector('[data-community-overlay]');
+    state.closeBtn = modal.querySelector('[data-community-close]');
+    state.body = modal.querySelector('[data-community-body]');
+    state.dialog = modal.querySelector('[data-community-dialog]');
+
+    if (state.overlay) state.overlay.addEventListener('click', closeModal);
+    if (state.closeBtn) state.closeBtn.addEventListener('click', closeModal);
+    if (!state.keydownAttached) {
+      document.addEventListener('keydown', handleKeydown);
+      state.keydownAttached = true;
+    }
+  };
+
+  const ensureBoard = () => {
+    if (state.boardInitialized || !state.body) return;
+    state.body.innerHTML = App.COMMUNITY_FEEDBACK_HTML;
+    setupBoard(state.body);
+    state.boardInitialized = true;
+  };
+
+  const openModal = event => {
+    if (event) event.preventDefault();
+    createModal();
+    ensureBoard();
+    if (typeof App.closeNavMenu === "function") App.closeNavMenu();
+    if (!state.modal) return;
+    state.modal.classList.add("is-open");
+    state.modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("community-modal-open");
+    const focusTarget = state.dialog || state.closeBtn;
+    if (focusTarget) {
+      requestAnimationFrame(() => focusTarget.focus());
+    }
+  };
+
+  const getVisibleProducts = () => (state.isAdmin ? allProducts : userProducts);
+
+  const getProductName = id => {
+    const all = [...allProducts];
+    const found = all.find(item => item.id === id);
+    return found ? found.name : "Product";
+  };
+
+  const ensureCurrentProduct = () => {
+    const list = getVisibleProducts();
+    if (!list.length) {
+      state.currentProductId = null;
+      return;
+    }
+    if (!state.currentProductId || !list.some(product => product.id === state.currentProductId)) {
+      state.currentProductId = list[0].id;
+    }
+  };
+
+  const setupBoard = root => {
+    const productBar = root.querySelector('#soProductBar');
+    const top3El = root.querySelector('#soTop3');
+    const cloudEl = root.querySelector('#soCloud');
+    const currentProductTitle = root.querySelector('#soCurrentProductTitle');
+    const adminInfo = root.querySelector('#soAdminInfo');
+    const ideaInput = root.querySelector('#soIdeaInput');
+    const addIdeaBtn = root.querySelector('#soAddIdeaBtn');
+    const toggleAdminBtn = root.querySelector('#soToggleAdminBtn');
+    const showAllBtn = root.querySelector('#soShowAllBtn');
+
+    if (!productBar || !top3El || !cloudEl || !currentProductTitle || !adminInfo) {
+      return;
+    }
+
+    const updateAdminInfo = () => {
+      if (!state.isAdmin) {
+        adminInfo.textContent = "Admin mode off.";
+        return;
+      }
+      const productId = state.currentProductId;
+      const feats = productId ? featuresByProduct[productId] || [] : [];
+      const totalVotes = feats.reduce((sum, feature) => sum + feature.votes, 0);
+      adminInfo.textContent = `Product: ${getProductName(productId)} • Features: ${feats.length} • Total votes: ${totalVotes}`;
+    };
+
+    const renderProducts = () => {
+      const list = getVisibleProducts();
+      productBar.innerHTML = "";
+      ensureCurrentProduct();
+      list.forEach(product => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'so-chip';
+        if (product.id === state.currentProductId) chip.dataset.active = 'true';
+        chip.innerHTML = `${product.emoji} ${product.name}`;
+        chip.addEventListener('click', () => {
+          state.currentProductId = product.id;
+          renderProducts();
+          renderForCurrentProduct();
+        });
+        productBar.appendChild(chip);
+      });
+      if (state.isAdmin) {
+        const badge = document.createElement('span');
+        badge.className = 'so-chip so-admin-pill';
+        badge.textContent = 'Admin view';
+        productBar.appendChild(badge);
+      }
+    };
+
+    const renderForCurrentProduct = () => {
+      const productId = state.currentProductId;
+      const feats = productId ? featuresByProduct[productId] || [] : [];
+      currentProductTitle.textContent = productId ? `Features for ${getProductName(productId)}` : 'Features';
+      const sorted = [...feats].sort((a, b) => b.votes - a.votes);
+      const top3 = sorted.slice(0, 3);
+
+      top3El.innerHTML = "";
+      top3.forEach(feature => {
+        const card = document.createElement('div');
+        card.className = 'so-feature-card';
+        card.innerHTML = `
+          <div class="so-feature-info">
+            <div class="so-feature-title">${feature.title}</div>
+            <div class="so-feature-desc">${feature.desc}</div>
+          </div>
+          <button class="so-vote-pill" data-id="${feature.id}" type="button">
+            ▲ ${feature.votes}
+          </button>
+        `;
+        top3El.appendChild(card);
+      });
+
+      cloudEl.innerHTML = "";
+      sorted.forEach(feature => {
+        const bubble = document.createElement('button');
+        bubble.type = 'button';
+        bubble.className = 'so-bubble';
+        bubble.dataset.size = feature.votes > 30 ? 'lg' : feature.votes > 15 ? 'md' : 'sm';
+        bubble.textContent = `${feature.title} (${feature.votes})`;
+        bubble.addEventListener('click', () => voteFeature(feature.id));
+        cloudEl.appendChild(bubble);
+      });
+
+      updateAdminInfo();
+    };
+
+    const voteFeature = featureId => {
+      const productId = state.currentProductId;
+      if (!productId) return;
+      const feats = featuresByProduct[productId];
+      if (!feats) return;
+      const feature = feats.find(item => item.id === featureId);
+      if (!feature) return;
+
+      if (!state.voteTracker[productId]) state.voteTracker[productId] = new Set();
+      const userVotes = state.voteTracker[productId];
+
+      if (userVotes.has(featureId)) {
+        userVotes.delete(featureId);
+        feature.votes = Math.max(0, feature.votes - 1);
+      } else {
+        if (userVotes.size >= 3) {
+          window.alert('You can vote on max 3 features for this product right now.');
+          return;
+        }
+        userVotes.add(featureId);
+        feature.votes += 1;
+      }
+
+      renderForCurrentProduct();
+    };
+
+    top3El.addEventListener('click', event => {
+      const pill = event.target.closest('.so-vote-pill');
+      if (!pill) return;
+      voteFeature(pill.dataset.id);
+    });
+
+    if (addIdeaBtn && ideaInput) {
+      addIdeaBtn.addEventListener('click', () => {
+        const text = ideaInput.value.trim();
+        if (!text) return;
+        const productId = state.currentProductId;
+        if (!productId) return;
+        const feats = featuresByProduct[productId] || (featuresByProduct[productId] = []);
+        feats.push({
+          id: 'u' + Date.now(),
+          title: text,
+          desc: 'User idea',
+          votes: 0
+        });
+        ideaInput.value = '';
+        renderForCurrentProduct();
+      });
+    }
+
+    if (toggleAdminBtn) {
+      toggleAdminBtn.addEventListener('click', () => {
+        state.isAdmin = !state.isAdmin;
+        renderProducts();
+        renderForCurrentProduct();
+      });
+    }
+
+    if (showAllBtn) {
+      showAllBtn.addEventListener('click', () => {
+        const name = getProductName(state.currentProductId);
+        window.alert('TODO: open modal / new page with full feature list for ' + name);
+      });
+    }
+
+    renderProducts();
+    renderForCurrentProduct();
+  };
+
+  triggers.forEach(trigger => {
+    trigger.addEventListener('click', openModal);
+  });
+
+  App.openCommunityModal = openModal;
+  App.closeCommunityModal = closeModal;
+};
+
+
 App.initNav = function() {
   const toggle = App.qs(".nav-toggle");
   const nav = App.qs(".main-nav");
