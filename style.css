@@ -2021,6 +2021,8 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-tabs__panels{display:grid;gap:24px}
 .admin-tabs__panel{display:grid;gap:24px}
 .admin-tabs__panel[hidden]{display:none!important}
+.admin-tabs--primary [data-admin-catalog-toggle]{display:flex;align-items:center}
+.admin-tabs--primary [data-admin-catalog-toggle] .admin-tabs__list{margin:0}
 .admin__panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
 .admin__panel-head h2{margin:0;font-size:1.5rem}
 .admin__panel-sub{margin:6px 0 0;color:#64748b;max-width:440px}

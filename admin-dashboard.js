@@ -41,6 +41,37 @@ if (!rootHook) {
     ? Array.from(contentSection.querySelectorAll("[data-admin-tabs-root]"))
     : [];
 
+  const primaryTabRoot = contentSection?.querySelector(
+    "[data-admin-tabs-root=\"primary\"]"
+  );
+  const catalogTabRoot = contentSection?.querySelector(
+    "[data-admin-tabs-root=\"catalog\"]"
+  );
+  const catalogToggle = contentSection?.querySelector(
+    "[data-admin-catalog-toggle]"
+  );
+
+  function setCatalogToggleVisibility(isVisible) {
+    if (!catalogToggle) return;
+    catalogToggle.toggleAttribute("hidden", !isVisible);
+    catalogToggle.setAttribute("aria-hidden", isVisible ? "false" : "true");
+  }
+
+  function updateCatalogToggleState(activeKey) {
+    if (!catalogToggle) return;
+    const buttons = Array.from(
+      catalogToggle.querySelectorAll("[data-catalog-view]")
+    );
+    if (!buttons.length) return;
+    buttons.forEach((button) => {
+      const key = button.dataset.catalogView;
+      const isActive = key === activeKey;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-selected", isActive ? "true" : "false");
+      button.setAttribute("tabindex", isActive ? "0" : "-1");
+    });
+  }
+
   const statusPopoverEls = {
     overlay: document.querySelector("[data-status-overlay]"),
     popover: document.querySelector("[data-status-popover]"),
@@ -164,6 +195,12 @@ if (!rootHook) {
     });
     if (root instanceof HTMLElement) {
       root.dataset.adminTabActive = tabKey;
+    }
+    if (root === catalogTabRoot) {
+      updateCatalogToggleState(tabKey);
+    }
+    if (root === primaryTabRoot) {
+      setCatalogToggleVisibility(tabKey === "marketing");
     }
   }
 
@@ -1067,6 +1104,59 @@ if (!rootHook) {
 
     initCollapsiblePipelineTables();
     tabRoots.forEach((root) => initAdminTabs(root));
+
+    if (catalogToggle && catalogTabRoot) {
+      const buttons = Array.from(
+        catalogToggle.querySelectorAll("[data-catalog-view]")
+      );
+      const focusByOffset = (currentIndex, offset) => {
+        if (!buttons.length) return;
+        const nextIndex =
+          (currentIndex + offset + buttons.length) % buttons.length;
+        const nextButton = buttons[nextIndex];
+        if (!nextButton) return;
+        const nextKey = nextButton.dataset.catalogView;
+        if (nextKey) {
+          activateAdminTab(catalogTabRoot, nextKey, { focus: true });
+        }
+      };
+
+      buttons.forEach((button, index) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          const key = button.dataset.catalogView;
+          if (key) {
+            activateAdminTab(catalogTabRoot, key);
+          }
+        });
+        button.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowRight") {
+            event.preventDefault();
+            focusByOffset(index, 1);
+          } else if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            focusByOffset(index, -1);
+          }
+        });
+      });
+
+      const activeCatalogKey =
+        catalogTabRoot.dataset.adminTabActive ||
+        buttons.find((button) => button.classList.contains("is-active"))?.dataset
+          .catalogView ||
+        buttons[0]?.dataset.catalogView;
+      updateCatalogToggleState(activeCatalogKey);
+    }
+
+    if (primaryTabRoot) {
+      const activePrimaryKey =
+        primaryTabRoot.dataset.adminTabActive ||
+        primaryTabRoot
+          .querySelector("[data-admin-tab].is-active")
+          ?.dataset?.adminTab ||
+        primaryTabRoot.querySelector("[data-admin-tab]")?.dataset?.adminTab;
+      setCatalogToggleVisibility(activePrimaryKey === "marketing");
+    }
     initStatusPopovers();
 
   const selectAll = (selector) =>
