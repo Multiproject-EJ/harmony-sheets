@@ -183,6 +183,36 @@
       <div class="admin-tabs-group" data-admin-tabs-root="primary">
         <nav class="admin-tabs admin-tabs--primary" data-admin-tabs aria-label="Admin dashboard sections">
           <div class="admin-tabs__list" role="tablist">
+            <div
+              class="admin-tabs admin-tabs--catalog"
+              data-admin-catalog-toggle
+              hidden
+              aria-label="Catalog views"
+              aria-hidden="true"
+            >
+              <div class="admin-tabs__list" role="tablist">
+                <button
+                  type="button"
+                  class="admin-tabs__tab is-active"
+                  role="tab"
+                  data-catalog-view="products"
+                  aria-selected="true"
+                  tabindex="0"
+                >
+                  Products
+                </button>
+                <button
+                  type="button"
+                  class="admin-tabs__tab"
+                  role="tab"
+                  data-catalog-view="bundles"
+                  aria-selected="false"
+                  tabindex="-1"
+                >
+                  Bundles
+                </button>
+              </div>
+            </div>
             <button
               type="button"
               class="admin-tabs__tab is-active"
@@ -247,7 +277,14 @@
         aria-labelledby="control-panel-title"
       >
         <div class="admin-tabs-group" data-admin-tabs-root="catalog">
-          <nav class="admin-tabs" data-admin-tabs aria-label="Catalog views">
+          <nav
+            class="admin-tabs sr-only"
+            data-admin-tabs
+            data-admin-catalog-nav
+            aria-label="Catalog views"
+            aria-hidden="true"
+            hidden
+          >
             <div class="admin-tabs__list" role="tablist">
               <button
                 type="button"
