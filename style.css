@@ -2010,10 +2010,10 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-tabs-group{display:grid;gap:24px}
 .admin-tabs--primary{width:100%;justify-content:space-between}
 .admin-tabs--primary .admin-tabs__list{width:100%;justify-content:flex-start;padding:10px;border-radius:18px;background:rgba(248,250,252,.92);border:1px solid rgba(148,163,184,.3);box-shadow:0 22px 48px rgba(15,23,42,.16)}
-.admin-tabs--primary .admin-tabs__tab{font-size:1rem;letter-spacing:.02em;text-transform:none;color:#1f2937}
-.admin-tabs--primary .admin-tabs__tab:is(:hover,:focus-visible){background:rgba(226,232,240,.9);color:#0f172a}
-.admin-tabs--primary .admin-tabs__tab.is-active{background:#0f172a;color:#fff;box-shadow:0 24px 54px rgba(15,23,42,.32)}
-.admin-tabs--primary .admin-tabs__tab.is-active:is(:hover,:focus-visible){background:#1e293b}
+.admin-tabs--primary .admin-tabs__tab{font-size:.9rem;padding:8px 16px;border-radius:14px;letter-spacing:.015em;text-transform:none;color:#0f4c81}
+.admin-tabs--primary .admin-tabs__tab:is(:hover,:focus-visible){background:rgba(191,219,254,.6);color:#0b3d66}
+.admin-tabs--primary .admin-tabs__tab.is-active{background:#0f4c81;color:#fff;box-shadow:0 18px 42px rgba(15,76,129,.32)}
+.admin-tabs--primary .admin-tabs__tab.is-active:is(:hover,:focus-visible){background:#0b3d66}
 .admin-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 .admin-tabs__list{display:inline-flex;align-items:center;gap:10px;padding:6px;border-radius:999px;background:rgba(148,163,184,.16);border:1px solid rgba(148,163,184,.26)}
 .admin-tabs__tab{border:none;background:transparent;padding:10px 18px;border-radius:999px;font:600 .92rem/1 "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#475569;cursor:pointer;transition:background .2s ease,color .2s ease,transform .2s ease}
