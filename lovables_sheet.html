@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <!-- Legacy alias for LovableSheet page. Keep content in sync with lovablesheet.html. -->
   <title>LovableSheet — Harmony Sheets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -93,6 +92,7 @@
       <h1>Loading LovableSheet</h1>
       <p>Verifying your admin access…</p>
     </div>
+
   </section>
   <section class="lovablesheet-state" data-lovablesheet-unauthorized hidden>
     <div class="account-card">
@@ -102,306 +102,1797 @@
     </div>
   </section>
   <section class="lovablesheet-content" data-lovablesheet-content hidden>
-    <article class="lovablesheet-workflow" aria-labelledby="lovablesheet-workflow-title">
-      <header class="lovablesheet-workflow__intro">
-        <p class="lovablesheet-eyebrow">Simple Workflow</p>
-        <h1 id="lovablesheet-workflow-title">Bring clarity to every planning sprint</h1>
-        <p class="lovablesheet-workflow__description">Use the brain board to rough out initiatives, quick wins, and backlog ideas. Drag notes anywhere, recolor them, and rally similar ideas with a single move.</p>
-      </header>
-
-      <section class="brain-board" data-brain-board data-sticky-board="brain" aria-labelledby="brain-board-title">
-        <div class="brain-board__header">
-          <h2 id="brain-board-title">Brain board</h2>
-          <p class="brain-board__summary">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
-        </div>
-        <div class="brain-board__workspace-wrapper">
-          <div class="brain-board__workspace" data-board-workspace role="list">
-            <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-shape="classic" data-x="32" data-y="40">
-              <div class="brain-board__handle" data-note-handle>
-                <span class="brain-board__label" data-note-label>Quick capture</span>
-                <div class="brain-board__actions">
-                  <div class="brain-board__color-control" data-note-color-control>
-                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
-                      <span class="sr-only">Change note color</span>
-                      <span class="brain-board__color-preview" data-note-color-preview></span>
-                    </button>
-                    <div class="brain-board__color-menu" data-note-color-menu hidden>
-                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
-                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
-                      </div>
-                      <label class="brain-board__custom-color">
-                        <span class="brain-board__custom-color-label">Custom color</span>
-                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
-                      </label>
-                      <div class="brain-board__menu-divider" role="presentation"></div>
-                      <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
-                        <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
-                      </div>
-                      <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
-                        <p class="brain-board__menu-heading">Change type</p>
-                        <div class="brain-board__menu-options">
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
-                        </div>
-                      </div>
-                      <div class="brain-board__menu-section" role="group" aria-label="Connectors">
-                        <p class="brain-board__menu-heading">Connectors</p>
-                        <div class="brain-board__menu-options">
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
-                </div>
-              </div>
-              <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Kick off Monday standup talking points.</div>
-            </div>
-
-            <div class="brain-board__note" role="listitem" data-note data-color="meadow" data-shape="classic" data-x="232" data-y="40">
-              <div class="brain-board__handle" data-note-handle>
-                <span class="brain-board__label" data-note-label>In progress</span>
-                <div class="brain-board__actions">
-                  <div class="brain-board__color-control" data-note-color-control>
-                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
-                      <span class="sr-only">Change note color</span>
-                      <span class="brain-board__color-preview" data-note-color-preview></span>
-                    </button>
-                    <div class="brain-board__color-menu" data-note-color-menu hidden>
-                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
-                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
-                      </div>
-                      <label class="brain-board__custom-color">
-                        <span class="brain-board__custom-color-label">Custom color</span>
-                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
-                      </label>
-                      <div class="brain-board__menu-divider" role="presentation"></div>
-                      <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
-                        <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
-                      </div>
-                      <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
-                        <p class="brain-board__menu-heading">Change type</p>
-                        <div class="brain-board__menu-options">
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
-                        </div>
-                      </div>
-                      <div class="brain-board__menu-section" role="group" aria-label="Connectors">
-                        <p class="brain-board__menu-heading">Connectors</p>
-                        <div class="brain-board__menu-options">
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
-                </div>
-              </div>
-              <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Outline the onboarding tutorial checkpoints.</div>
-            </div>
-
-            <div class="brain-board__note" role="listitem" data-note data-color="ocean" data-shape="classic" data-x="432" data-y="40">
-              <div class="brain-board__handle" data-note-handle>
-                <span class="brain-board__label" data-note-label>Opportunities</span>
-                <div class="brain-board__actions">
-                  <div class="brain-board__color-control" data-note-color-control>
-                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
-                      <span class="sr-only">Change note color</span>
-                      <span class="brain-board__color-preview" data-note-color-preview></span>
-                    </button>
-                    <div class="brain-board__color-menu" data-note-color-menu hidden>
-                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
-                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
-                      </div>
-                      <label class="brain-board__custom-color">
-                        <span class="brain-board__custom-color-label">Custom color</span>
-                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
-                      </label>
-                      <div class="brain-board__menu-divider" role="presentation"></div>
-                      <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
-                        <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
-                      </div>
-                      <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
-                        <p class="brain-board__menu-heading">Change type</p>
-                        <div class="brain-board__menu-options">
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
-                        </div>
-                      </div>
-                      <div class="brain-board__menu-section" role="group" aria-label="Connectors">
-                        <p class="brain-board__menu-heading">Connectors</p>
-                        <div class="brain-board__menu-options">
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
-                </div>
-              </div>
-              <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Research integrations that reduce copy-paste loops.</div>
-            </div>
-
-            <div class="brain-board__note" role="listitem" data-note data-color="blossom" data-shape="classic" data-x="632" data-y="40">
-              <div class="brain-board__handle" data-note-handle>
-                <span class="brain-board__label" data-note-label>Backlog</span>
-                <div class="brain-board__actions">
-                  <div class="brain-board__color-control" data-note-color-control>
-                    <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
-                      <span class="sr-only">Change note color</span>
-                      <span class="brain-board__color-preview" data-note-color-preview></span>
-                    </button>
-                    <div class="brain-board__color-menu" data-note-color-menu hidden>
-                      <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
-                        <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
-                        <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
-                      </div>
-                      <label class="brain-board__custom-color">
-                        <span class="brain-board__custom-color-label">Custom color</span>
-                        <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
-                      </label>
-                      <div class="brain-board__menu-divider" role="presentation"></div>
-                      <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
-                        <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
-                      </div>
-                      <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
-                        <p class="brain-board__menu-heading">Change type</p>
-                        <div class="brain-board__menu-options">
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
-                        </div>
-                      </div>
-                      <div class="brain-board__menu-section" role="group" aria-label="Connectors">
-                        <p class="brain-board__menu-heading">Connectors</p>
-                        <div class="brain-board__menu-options">
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
-                          <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
-                </div>
-              </div>
-              <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Collect user stories that need deeper grooming.</div>
-            </div>
+    <div class="lovablesheet-layout">
+      <aside class="thinking-tools" aria-labelledby="thinking-tools-title">
+        <div class="thinking-tools__inner">
+          <div class="thinking-tools__header">
+            <h2 id="thinking-tools-title">Thinking Tools</h2>
+            <p class="thinking-tools__description">Launch the sticky boards you need without leaving the flow. Pop each workspace open from a tidy control strip.</p>
           </div>
-          <div class="brain-board-menu" role="group" aria-label="Brain board quick tools">
-            <div class="brain-board-menu__cluster" role="group" aria-label="Workspace quick controls">
-              <div class="brain-board-menu__primary" role="group" aria-label="Workspace layout options">
-                <button class="brain-board-menu__placeholder" type="button" aria-label="Placeholder option 1"></button>
-                <button class="brain-board-menu__placeholder" type="button" aria-label="Placeholder option 2"></button>
-                <button class="brain-board-menu__placeholder" type="button" aria-label="Placeholder option 3"></button>
-                <span class="brain-board-menu__divider" aria-hidden="true"></span>
-                <button class="brain-board-menu__screen" type="button" aria-label="Small screen layout">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="7" y="6" width="10" height="9" rx="1.8"></rect>
-                      <rect x="10" y="17" width="4" height="1.5" rx="0.75"></rect>
-                    </g>
-                  </svg>
-                </button>
-                <button class="brain-board-menu__screen" type="button" aria-label="Medium screen layout">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="5.5" y="5.5" width="13" height="10.5" rx="2"></rect>
-                      <rect x="9" y="17.5" width="6" height="1.5" rx="0.75"></rect>
-                    </g>
-                  </svg>
-                </button>
-                <button class="brain-board-menu__screen" type="button" aria-label="Large screen layout">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="4" y="5" width="16" height="11" rx="2"></rect>
-                      <rect x="8.5" y="18" width="7" height="1.5" rx="0.75"></rect>
-                    </g>
-                  </svg>
-                </button>
-              </div>
-              <div class="brain-board-menu__zoom" role="group" aria-label="Zoom controls">
-                <button class="brain-board-menu__zoom-button" type="button" data-board-zoom-out aria-label="Zoom out">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="11" cy="11" r="6"></circle>
-                      <path d="M20 20l-4.2-4.2"></path>
-                      <path d="M8 11h6"></path>
-                    </g>
-                  </svg>
-                </button>
-                <span class="brain-board-menu__zoom-display" data-board-zoom-display>100%</span>
-                <button class="brain-board-menu__zoom-button" type="button" data-board-zoom-in aria-label="Zoom in">
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="11" cy="11" r="6"></circle>
-                      <path d="M20 20l-4.2-4.2"></path>
-                      <path d="M11 8v6"></path>
-                      <path d="M8 11h6"></path>
-                    </g>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <button class="brain-board-menu__add" type="button" data-board-add>
-              <span class="sr-only">Add new sticky note</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 4.8h7.2L19.2 9v8.2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6.8a2 2 0 0 1 2-2Z"></path>
-                  <path d="M14.2 4.8v3.4a1 1 0 0 0 1 1H18"></path>
-                  <path d="M12 11.2v6"></path>
-                  <path d="M9 14.2h6"></path>
-                </g>
-              </svg>
+          <div class="thinking-tools__pills">
+            <button
+              class="thinking-pill"
+              type="button"
+              data-thinking-toggle="brain"
+              aria-expanded="false"
+              aria-controls="thinking-panel-brain"
+            >
+              <span class="thinking-pill__icon" aria-hidden="true">🧠</span>
+              <span class="thinking-pill__label">Brain board</span>
+            </button>
+            <button
+              class="thinking-pill thinking-pill--flowchart"
+              type="button"
+              data-thinking-toggle="flowchart"
+              aria-expanded="false"
+              aria-controls="thinking-panel-flowchart"
+            >
+              <span class="thinking-pill__icon" aria-hidden="true">🗺️</span>
+              <span class="thinking-pill__label">
+                Flowchart <span class="thinking-pill__meta">[draft]</span>
+              </span>
             </button>
           </div>
         </div>
-      </section>
+        <div class="thinking-tools__panels">
+          <div class="thinking-panel" id="thinking-panel-brain" data-thinking-panel="brain" hidden>
+            <div class="lovablesheet-library lovablesheet-library--single">
+              <div class="lovablesheet-library__grid">
+                <div class="lovablesheet-library__column lovablesheet-library__column--boards">
+                  <article class="lovablesheet-library__card lovablesheet-library__card--brain">
+                    <div class="lovablesheet-library__preview lovablesheet-library__preview--brain" aria-hidden="true"></div>
+                    <div class="lovablesheet-library__content">
+                      <p class="lovablesheet-library__eyebrow">Sticky board</p>
+                      <h3 class="lovablesheet-library__title">Brain board</h3>
+                      <p class="lovablesheet-library__description">A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
+                      <p class="lovablesheet-library__description lovablesheet-library__description--secondary">
+                        Use the brain board to rough out initiatives, quick wins, and backlog ideas. Drag notes anywhere, recolor them, and rally similar ideas with a single move.
+                      </p>
+                      <ul class="lovablesheet-library__list">
+                        <li>Drag, recolor, and cluster quick ideas in real time.</li>
+                        <li>Switch between saved Supabase boards in a click.</li>
+                        <li>Rally similar notes with grouped color moves.</li>
+                      </ul>
+                      <div class="brain-board-library">
+                        <p class="brain-board-library__eyebrow">Brain board setup</p>
+                        <h4 class="brain-board-library__title">Board library</h4>
+                        <p class="brain-board-library__description">
+                          Choose which Supabase board to load before launching the brain board, then save new sticky note sessions without leaving this page.
+                        </p>
+                        <div class="brain-board-library__form">
+                          <label class="brain-board-library__label" for="brain-board-select">Boards</label>
+                          <select class="brain-board__select" id="brain-board-select" data-board-select>
+                            <option value="default">Default Board (Demo)</option>
+                          </select>
+                          <button class="btn primary brain-board__launch" type="button" data-board-launch="brain">
+                            Launch brain board
+                          </button>
+                        </div>
+                        <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="thinking-panel" id="thinking-panel-flowchart" data-thinking-panel="flowchart" hidden>
+            <div class="lovablesheet-library lovablesheet-library--flowchart">
+              <div class="lovablesheet-library__grid">
+                <div class="lovablesheet-library__column lovablesheet-library__column--boards">
+                  <article class="lovablesheet-library__card lovablesheet-library__card--flowchart">
+                    <div class="lovablesheet-library__preview lovablesheet-library__preview--flowchart" aria-hidden="true"></div>
+                    <div class="lovablesheet-library__content">
+                      <p class="lovablesheet-library__eyebrow">Sticky board</p>
+                      <h3 class="lovablesheet-library__title">Flowchart board</h3>
+                      <p class="lovablesheet-library__description">Sketch branching journeys and implementation checkpoints side-by-side with the sticky note toolkit.</p>
+                      <ul class="lovablesheet-library__list">
+                        <li>Map kickoff triggers, decisions, and wrap-up steps.</li>
+                        <li>Compile every note into a ready-to-share AI prompt.</li>
+                        <li>Stay zoomed-in on swimlanes with precision controls.</li>
+                      </ul>
+                    </div>
+                    <div class="lovablesheet-library__actions">
+                      <button class="btn secondary lovablesheet-library__button" type="button" data-board-launch="flowchart">
+                        Launch flowchart board
+                      </button>
+                    </div>
+                  </article>
+                </div>
+                <div class="lovablesheet-library__column lovablesheet-library__column--controls">
+                  <section class="lovablesheet-controls lovablesheet-controls--flowchart" aria-labelledby="lovablesheet-flowchart-controls-title">
+                    <p class="lovablesheet-controls__eyebrow">Flowchart board</p>
+                    <h3 class="lovablesheet-controls__title" id="lovablesheet-flowchart-controls-title">Prompt compiler</h3>
+                    <p class="lovablesheet-controls__description">Stitch every flowchart note into an AI-ready brief. Generate, tweak, and copy the compiled prompt right beside the launcher.</p>
+                    <div class="lovablesheet-controls__prompt">
+                      <div class="flowchart-prompt" data-flowchart-prompt>
+                        <div class="flowchart-prompt__heading">
+                          <span class="flowchart-prompt__eyebrow">Putting it together</span>
+                          <p class="flowchart-prompt__description">Compile the notes from this flowchart into a single prompt. Each note is stitched together in sequence so you can quickly brief a teammate or power an AI workflow.</p>
+                        </div>
+                        <div class="flowchart-prompt__actions">
+                          <button class="flowchart-prompt__action flowchart-prompt__action--primary" type="button" data-flowchart-prompt-generate>
+                            Compile flowchart context
+                          </button>
+                          <button class="flowchart-prompt__action flowchart-prompt__action--ghost" type="button" data-flowchart-prompt-copy>
+                            Copy prompt
+                          </button>
+                        </div>
+                        <label class="flowchart-prompt__output">
+                          <span class="sr-only">Compiled flowchart prompt</span>
+                          <textarea class="flowchart-prompt__textarea" rows="6" readonly data-flowchart-prompt-output placeholder="Your compiled flowchart prompt will appear here."></textarea>
+                        </label>
+                        <p class="flowchart-prompt__status" data-flowchart-prompt-status role="status" aria-live="polite"></p>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div class="lovablesheet-main">
+        <article class="lovablesheet-workflow" aria-labelledby="lovablesheet-workflow-title">
+      <header class="lovablesheet-workflow__intro">
+        <p class="lovablesheet-eyebrow">Simple Workflow</p>
+        <h1 id="lovablesheet-workflow-title">Bring clarity to every planning sprint</h1>
+      </header>
+
     </article>
+
+
+        <section
+          class="lovablesheet-stage lovablesheet-stage--idea"
+          aria-labelledby="lovablesheet-idea-title"
+          data-idea-stage
+        >
+          <header class="lovablesheet-stage__header">
+            <p class="lovablesheet-stage__eyebrow">Step 1</p>
+            <div>
+              <h2 id="lovablesheet-idea-title">Idea generation</h2>
+              <p class="lovablesheet-stage__description">
+                Gather launch-ready concepts, compare drafts, and lock the product you want to brief next.
+              </p>
+            </div>
+          </header>
+          <div class="lovablesheet-stage__panels">
+            <section class="lovablesheet-pipeline" aria-labelledby="todo-pipeline-title">
+              <div class="admin__panel admin__panel--pipeline" aria-labelledby="todo-pipeline-title">
+                <div class="admin__panel-head">
+                  <div>
+                    <h2 id="todo-pipeline-title">«Todo do» product pipeline</h2>
+                    <p class="admin__panel-sub">
+                      Track upcoming spreadsheet experiences and align launch priorities for the Todo do mini product line.
+                    </p>
+                  </div>
+                  <div class="admin__panel-actions admin__panel-actions--pipeline">
+                    <button
+                      type="button"
+                      class="admin__pipeline-toggle"
+                      data-pipeline-toggle
+                      aria-controls="todo-pipeline-table"
+                      aria-expanded="false"
+                      hidden
+                    >
+                      <span class="admin__pipeline-toggle-icon" aria-hidden="true">
+                        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </span>
+                      <span data-pipeline-toggle-label>Expand full pipeline</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="admin__pipeline-body">
+                  <p id="todo-pipeline-hint" class="sr-only">This table shows the first three Todo do products. Use the pipeline toggle button to reveal or collapse the remaining items.</p>
+                  <table
+                    class="admin-table admin-table--compact admin-table--pipeline"
+                    aria-describedby="todo-pipeline-title todo-pipeline-hint"
+                    data-pipeline-table
+                    data-preview-count="3"
+                    id="todo-pipeline-table"
+                  >
+                    <thead>
+                      <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Badge</th>
+                        <th scope="col" class="admin-table__price">Price</th>
+                        <th scope="col" class="admin-table__brief">Use in Brief</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Finances</span>
+                          <span class="admin-pipeline__product">Budget Blueprint</span>
+                        </td>
+                        <td data-label="Type">Budget</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$29</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Budget Blueprint"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Love</span>
+                          <span class="admin-pipeline__product">Shared Memory Keeper</span>
+                        </td>
+                        <td data-label="Type">Template</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$24</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Shared Memory Keeper"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Love</span>
+                          <span class="admin-pipeline__product">Couples Connection Journal</span>
+                        </td>
+                        <td data-label="Type">Journal</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$19</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Couples Connection Journal"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Health</span>
+                          <span class="admin-pipeline__product">Meal &amp; Movement Planner</span>
+                        </td>
+                        <td data-label="Type">Planner</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$19</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Meal &amp; Movement Planner"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Love</span>
+                          <span class="admin-pipeline__product">Date Night Generator</span>
+                        </td>
+                        <td data-label="Type">Tool</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="new">New</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$9</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Date Night Generator"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Career</span>
+                          <span class="admin-pipeline__product">Weekly Reflection Guide</span>
+                        </td>
+                        <td data-label="Type">Guide</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="new">New</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$11</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Weekly Reflection Guide"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Fun</span>
+                          <span class="admin-pipeline__product">Personal Retreat Architect</span>
+                        </td>
+                        <td data-label="Type">Retreat</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$18</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Personal Retreat Architect"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Fun</span>
+                          <span class="admin-pipeline__product">Adventure Budget Planner</span>
+                        </td>
+                        <td data-label="Type">Planner</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$14</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Adventure Budget Planner"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Family</span>
+                          <span class="admin-pipeline__product">Sunday Reset Hub</span>
+                        </td>
+                        <td data-label="Type">Hub</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="new">New</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$16</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Sunday Reset Hub"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Personal Growth</span>
+                          <span class="admin-pipeline__product">Learning Momentum Lab</span>
+                        </td>
+                        <td data-label="Type">Lab</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$18</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Learning Momentum Lab"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Health</span>
+                          <span class="admin-pipeline__product">Morning Momentum Map</span>
+                        </td>
+                        <td data-label="Type">Map</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$12</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Morning Momentum Map"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Career</span>
+                          <span class="admin-pipeline__product">Focus Sprint Planner</span>
+                        </td>
+                        <td data-label="Type">Planner</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$17</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Focus Sprint Planner"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Community</span>
+                          <span class="admin-pipeline__product">Neighborly Exchange</span>
+                        </td>
+                        <td data-label="Type">Exchange</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="new">New</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$13</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Neighborly Exchange"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Career</span>
+                          <span class="admin-pipeline__product">Momentum Ledger</span>
+                        </td>
+                        <td data-label="Type">Ledger</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$21</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Momentum Ledger"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Personal Growth</span>
+                          <span class="admin-pipeline__product">Habit Story Studio</span>
+                        </td>
+                        <td data-label="Type">Studio</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$15</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Habit Story Studio"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Finances</span>
+                          <span class="admin-pipeline__product">Savings Sprint Hub</span>
+                        </td>
+                        <td data-label="Type">Hub</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="best-seller">Best-seller</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$20</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Savings Sprint Hub"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Community</span>
+                          <span class="admin-pipeline__product">Neighborhood Workshop Lab</span>
+                        </td>
+                        <td data-label="Type">Lab</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$18</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Neighborhood Workshop Lab"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Family</span>
+                          <span class="admin-pipeline__product">Shared Story Studio</span>
+                        </td>
+                        <td data-label="Type">Studio</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge" data-badge="popular">Popular</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$17</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Shared Story Studio"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Fun</span>
+                          <span class="admin-pipeline__product">Bucket List Builder</span>
+                        </td>
+                        <td data-label="Type">Builder</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$8</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Bucket List Builder"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Finances</span>
+                          <span class="admin-pipeline__product">Cash-Flow Dashboard</span>
+                        </td>
+                        <td data-label="Type">Dashboard</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$24</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Cash-Flow Dashboard"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Family</span>
+                          <span class="admin-pipeline__product">Celebration Planner</span>
+                        </td>
+                        <td data-label="Type">Planner</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$8</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Celebration Planner"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Spirituality</span>
+                          <span class="admin-pipeline__product">Community Service Tracker</span>
+                        </td>
+                        <td data-label="Type">Tracker</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$7</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Community Service Tracker"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Family</span>
+                          <span class="admin-pipeline__product">Connection Rituals</span>
+                        </td>
+                        <td data-label="Type">Ideas</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$6</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Connection Rituals"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td data-label="Product">
+                          <span class="admin-pipeline__life-area">Life area: Fun</span>
+                          <span class="admin-pipeline__product">Creative Hobby Dashboard</span>
+                        </td>
+                        <td data-label="Type">Dashboard</td>
+                        <td data-label="Badge">
+                          <span class="admin-pipeline__badge admin-pipeline__badge--empty">—</span>
+                        </td>
+                        <td data-label="Price" class="admin-table__price">$12</td>
+                        <td data-label="Use in Brief" class="admin-table__brief">
+                          <button
+                            type="button"
+                            class="pipeline-brief-button"
+                            data-pipeline-brief
+                            data-product-name="Creative Hobby Dashboard"
+                          >
+                            <span class="pipeline-brief-button__icon" aria-hidden="true">📝</span>
+                            <span class="pipeline-brief-button__label">Use in Brief</span>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+            <section class="lovablesheet-pipeline lovablesheet-pipeline--drafts" aria-labelledby="draft-models-title">
+              <div class="admin__panel admin__panel--pipeline" aria-labelledby="draft-models-title">
+                <div class="admin__panel-head">
+                  <div>
+                    <h2 id="draft-models-title">Draft models</h2>
+                    <p class="admin__panel-sub">
+                      Review in-progress Harmony Sheets concepts synced from the admin dashboard.
+                    </p>
+                  </div>
+                </div>
+                <div class="admin__pipeline-body">
+                  <p id="draft-models-hint" class="sr-only">Select a draft product to prefill the Next Gen brief.</p>
+                  <table
+                    class="admin-table admin-table--compact admin-table--pipeline"
+                    aria-describedby="draft-models-title draft-models-hint"
+                    data-draft-table
+                  >
+                    <thead>
+                      <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Badge</th>
+                        <th scope="col" class="admin-table__price">Price</th>
+                        <th scope="col" class="admin-table__brief">Use in Brief</th>
+                      </tr>
+                    </thead>
+                    <tbody data-draft-table-body></tbody>
+                  </table>
+                  <p class="lovablesheet-drafts-empty" data-draft-empty hidden>No draft models found in the admin catalog.</p>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div class="lovablesheet-idea__selection" data-idea-output-container>
+            <div class="lovablesheet-idea__selection-head">
+              <h3 id="idea-output-title">The product selected is…</h3>
+              <button class="btn ghost lovablesheet-idea__clear" type="button" data-idea-clear hidden>Clear selection</button>
+            </div>
+            <p class="lovablesheet-idea__hint" data-step-two-hint>Select a product from the tables to unlock Step 2.</p>
+            <output class="lovablesheet-idea__output" data-idea-output aria-live="polite" aria-describedby="idea-output-title">No product selected yet.</output>
+          </div>
+        </section>
+
+
+
+
+
+
+        <section
+          class="lovablesheet-stage lovablesheet-stage--nextgen"
+          aria-labelledby="lovablesheet-nextgen-stage"
+          data-step-two
+          data-stage-locked="true"
+          aria-disabled="true"
+        >
+          <header class="lovablesheet-stage__header">
+            <p class="lovablesheet-stage__eyebrow">Step 2</p>
+            <div>
+              <h2 id="lovablesheet-nextgen-stage">Next Gen brief</h2>
+              <p class="lovablesheet-stage__description">
+                Compile the Google Sheet Next Gen Engine brief once a product is selected.
+              </p>
+            </div>
+          </header>
+          <div class="lovablesheet-stage__lock" data-step-two-lock aria-hidden="true">
+            <div class="lovablesheet-stage__lock-inner">
+              <span class="lovablesheet-stage__lock-icon" aria-hidden="true">🔒</span>
+              <p>Select a product from Step 1 to unlock the Next Gen brief.</p>
+            </div>
+          </div>
+          <div class="lovablesheet-stage__panels">
+            <section class="lovablesheet-nextgen" aria-labelledby="nextgen-engine-title" data-nextgen-section>
+              <div class="admin__panel admin__panel--nextgen">
+                <div class="admin__panel-head">
+                  <div>
+                    <p class="lovablesheet-nextgen__eyebrow">Next Gen brief</p>
+                    <h2 id="nextgen-engine-title">Google Sheet next Gen Engine</h2>
+                    <p class="admin__panel-sub">
+                      Capture exploratory product briefs, link them to live inspiration modules, and keep the launch playbook close at hand.
+                    </p>
+                  </div>
+                  <div class="admin__panel-actions">
+                    <button class="btn btn--nextgen-brief" type="button" data-nextgen-open>
+                      <span class="nextgen-brief-button__icon" aria-hidden="true">✨</span>
+                      <span class="nextgen-brief-button__label">Create product brief</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="admin__panel-body lovablesheet-nextgen__body">
+                  <section id="code-library" class="lovablesheet-code-library" aria-labelledby="code-library-title">
+                    <div class="lovablesheet-code-library__inner">
+                      <h2 id="code-library-title">LovableSheet module library</h2>
+                      <p>
+                        Reference the interactive modules that power the LovableSheet admin surface. Use the quick navigation to jump to
+                        each module&rsquo;s configuration details.
+                      </p>
+
+                      <section class="lovablesheet-library-guides" aria-labelledby="lovablesheet-guides-title">
+                        <h3 id="lovablesheet-guides-title">Implementation references</h3>
+                        <p>
+                          Need to update requirements or refresh guidance before shipping a new template? Use these quick links to review the
+                          published playbooks and source files.
+                        </p>
+                        <ul class="lovablesheet-library-guides__list">
+                          <li>
+                            <a href="docs/module-publishing-playbook.md#new-module-implementation" target="_blank" rel="noopener"
+                              >Module Publishing Playbook</a
+                            >
+                            &mdash; outlines required content fields, asset specs, CSS hooks, and QA steps for every launch.
+                          </li>
+                          <li>
+                            <a href="products.json" target="_blank" rel="noopener">products.json</a>
+                            &mdash; edit copy, pricing, sheet IDs, and metadata that surface in the public storefront.
+                          </li>
+                        </ul>
+                      </section>
+                    </div>
+                  </section>
+                </div>
+                <div class="lovablesheet-nextgen__status" data-nextgen-status role="status" aria-live="polite"></div>
+                <div class="lovablesheet-nextgen__empty" data-nextgen-empty>
+                  <p>No Next Gen Engine briefs saved yet. Use “Create product brief” to capture the first concept.</p>
+                </div>
+                <div class="lovablesheet-nextgen__list" data-nextgen-list hidden></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section
+          class="lovablesheet-stage lovablesheet-stage--codex"
+          aria-labelledby="lovablesheet-codex-stage"
+          data-step-three
+          data-stage-locked="true"
+          aria-disabled="true"
+        >
+          <header class="lovablesheet-stage__header">
+            <p class="lovablesheet-stage__eyebrow">Step 3</p>
+            <div>
+              <h2 id="lovablesheet-codex-stage">Codex handoff</h2>
+              <p class="lovablesheet-stage__description">
+                Turn your saved Next Gen briefs into a Codex-ready marketing prompt.
+              </p>
+            </div>
+          </header>
+          <div class="lovablesheet-stage__lock" data-step-three-lock aria-hidden="true">
+            <div class="lovablesheet-stage__lock-inner">
+              <span class="lovablesheet-stage__lock-icon" aria-hidden="true">🔒</span>
+              <p>Create a Next Gen brief in Step 2 to unlock Codex handoff tools.</p>
+            </div>
+          </div>
+          <div class="lovablesheet-stage__panels">
+            <section class="lovablesheet-codex" aria-labelledby="lovablesheet-codex-title" data-step-three-container>
+              <div class="admin__panel admin__panel--codex">
+                <div class="admin__panel-head">
+                  <div>
+                    <p class="lovablesheet-nextgen__eyebrow">Codex tools</p>
+                    <h2 id="lovablesheet-codex-title">Marketing prompt launcher</h2>
+                    <p class="admin__panel-sub">
+                      Use the most recent Next Gen brief to draft a Codex-ready prompt and kick off the marketing workflow.
+                    </p>
+                  </div>
+                  <div class="admin__panel-actions admin__panel-actions--codex">
+                    <button class="flowchart-prompt__action flowchart-prompt__action--primary" type="button" data-step-three-generate>
+                      <span class="flowchart-prompt__action-icon" aria-hidden="true">⚡</span>
+                      <span class="flowchart-prompt__action-label">Create Codex prompt</span>
+                    </button>
+                    <button class="flowchart-prompt__action flowchart-prompt__action--ghost" type="button" data-step-three-send>
+                      <span class="flowchart-prompt__action-icon" aria-hidden="true">📤</span>
+                      <span class="flowchart-prompt__action-label">Send to marketing</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="admin__panel-body lovablesheet-codex__body">
+                  <p class="lovablesheet-codex__hint" data-step-three-hint>
+                    Create a Next Gen brief to unlock Step 3.
+                  </p>
+                  <p class="lovablesheet-codex__latest" data-step-three-latest hidden></p>
+                  <label class="flowchart-prompt__output">
+                    <span class="flowchart-prompt__eyebrow">Codex prompt</span>
+                    <textarea
+                      class="flowchart-prompt__textarea"
+                      rows="8"
+                      readonly
+                      data-step-three-output
+                      placeholder="Generate a Codex prompt from your latest Next Gen brief."
+                    ></textarea>
+                  </label>
+                  <p class="flowchart-prompt__status" data-step-three-status role="status" aria-live="polite"></p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+    <div class="nextgen-modal-layer" data-nextgen-layer hidden>
+      <div class="nextgen-modal-overlay" data-nextgen-overlay></div>
+      <div
+        class="nextgen-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="nextgen-form-title"
+        data-nextgen-modal
+        hidden
+      >
+        <form class="nextgen-form" data-nextgen-form novalidate>
+          <header class="nextgen-form__header">
+            <div>
+              <p class="nextgen-form__eyebrow">Next Gen brief</p>
+              <h2 class="nextgen-form__title" id="nextgen-form-title">Google Sheet next Gen Engine</h2>
+              <p class="nextgen-form__subtitle">
+                Document a concept, tag the Harmony Sheets products that inspired it, and keep the delivery checklist within reach.
+              </p>
+            </div>
+            <button class="nextgen-form__close" type="button" data-nextgen-close aria-label="Close Next Gen brief form">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </header>
+
+          <div class="nextgen-form__body">
+            <div class="nextgen-form__status" data-nextgen-form-status role="status" aria-live="polite"></div>
+
+            <div class="nextgen-form__field">
+              <label class="nextgen-form__label" for="nextgen-name">Name of product</label>
+              <input
+                class="nextgen-form__input"
+                id="nextgen-name"
+                name="name"
+                type="text"
+                placeholder="e.g. Harmony Sheets Flow Studio"
+                autocomplete="off"
+                required
+                data-nextgen-name
+              >
+            </div>
+
+            <fieldset class="nextgen-form__field nextgen-form__field--features">
+              <legend class="nextgen-form__label">Product description</legend>
+              <p class="nextgen-form__hint">
+                Add feature highlights from the dropdown, then expand on the concept with freeform copy.
+              </p>
+              <div class="nextgen-form__feature-picker">
+                <label class="nextgen-form__picker-label" for="nextgen-feature-select">Feature highlights</label>
+                <select class="nextgen-form__select" id="nextgen-feature-select" data-nextgen-feature-select>
+                  <option value="">Choose a feature…</option>
+                </select>
+                <p class="nextgen-form__hint">Select a feature to add it to the list below. Repeat as needed.</p>
+                <p class="nextgen-form__empty" data-nextgen-feature-empty>No feature highlights selected yet.</p>
+                <ul class="nextgen-form__chips" data-nextgen-feature-list aria-live="polite" aria-label="Selected feature highlights"></ul>
+              </div>
+              <label class="nextgen-form__picker-label" for="nextgen-description">Free text field</label>
+              <textarea
+                class="nextgen-form__textarea"
+                id="nextgen-description"
+                name="description"
+                rows="4"
+                placeholder="Summarize the problem it solves, the experience, and the wow moments."
+                data-nextgen-description
+              ></textarea>
+            </fieldset>
+
+            <fieldset class="nextgen-form__field nextgen-form__field--products">
+              <legend class="nextgen-form__label">Inspiration products</legend>
+              <p class="nextgen-form__hint">Check any existing Harmony Sheets products&mdash;including drafts&mdash;that informed this idea.</p>
+              <button class="btn ghost nextgen-form__inspiration-open" type="button" data-nextgen-inspiration-open>Find inspiration</button>
+              <div class="nextgen-form__inspiration-selected" data-nextgen-inspiration-selected hidden>
+                <p class="nextgen-form__empty" data-nextgen-inspiration-empty>No inspiration selected yet. Use “Find inspiration”.</p>
+                <div class="nextgen-form__inspiration-list" data-nextgen-inspiration-list></div>
+              </div>
+            </fieldset>
+
+            <div class="nextgen-form__field nextgen-form__field--standard">
+              <div class="nextgen-form__field-header">
+                <label class="nextgen-form__label" for="nextgen-standard">Fixed standard text</label>
+                <div class="nextgen-form__standard-actions">
+                  <button class="nextgen-form__standard-button" type="button" data-nextgen-standard-edit>Edit text</button>
+                  <button class="nextgen-form__standard-button" type="button" data-nextgen-standard-cancel hidden>Cancel</button>
+                  <button class="nextgen-form__standard-button nextgen-form__standard-button--primary" type="button" data-nextgen-standard-save hidden>Save text</button>
+                </div>
+              </div>
+              <textarea
+                class="nextgen-form__textarea nextgen-form__textarea--readonly"
+                id="nextgen-standard"
+                rows="6"
+                readonly
+                data-nextgen-standard
+              ></textarea>
+              <p class="nextgen-form__standard-status" data-nextgen-standard-status></p>
+            </div>
+
+            <div class="nextgen-form__field">
+              <label class="nextgen-form__label" for="nextgen-notes">Additional notes</label>
+              <textarea
+                class="nextgen-form__textarea"
+                id="nextgen-notes"
+                name="notes"
+                rows="4"
+                placeholder="Capture extra context, launch partners, or follow-up questions."
+                data-nextgen-notes
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="nextgen-form__product-dialog" data-nextgen-products-dialog hidden aria-hidden="true">
+            <div class="nextgen-form__product-dialog-overlay" data-nextgen-products-overlay></div>
+            <div class="nextgen-form__product-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="nextgen-product-dialog-title">
+              <header class="nextgen-form__product-dialog-header">
+                <h3 class="nextgen-form__product-dialog-title" id="nextgen-product-dialog-title">Select inspiration</h3>
+                <button class="nextgen-form__product-dialog-close" type="button" data-nextgen-products-close aria-label="Close inspiration picker">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </header>
+              <div class="nextgen-form__product-dialog-body">
+                <p class="nextgen-form__loading" data-nextgen-products-loading>Loading product catalog…</p>
+                <p class="nextgen-form__error" data-nextgen-products-error hidden>We couldn't load the product catalog. Refresh the page to try again.</p>
+                <div class="nextgen-form__products" data-nextgen-products></div>
+              </div>
+              <footer class="nextgen-form__product-dialog-footer">
+                <button class="btn ghost" type="button" data-nextgen-products-cancel>Cancel</button>
+                <button class="btn primary" type="button" data-nextgen-products-apply>Use selection</button>
+              </footer>
+            </div>
+          </div>
+
+          <footer class="nextgen-form__footer">
+            <button class="btn ghost" type="button" data-nextgen-cancel>Cancel</button>
+            <button class="btn primary" type="submit">Save brief</button>
+          </footer>
+        </form>
+      </div>
+    </div>
+
+    <div class="lovablesheet-modal-layer" data-board-layer hidden>
+      <div class="lovablesheet-modal-overlay" data-board-modal-overlay></div>
+
+      <div class="lovablesheet-modal" data-board-modal="brain" hidden>
+        <div class="lovablesheet-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="brain-board-title" data-board-modal-dialog tabindex="-1">
+          <button class="lovablesheet-modal__close" type="button" data-board-close="brain" aria-label="Close brain board">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <div class="lovablesheet-modal__body">
+                  <section class="brain-board brain-board--modal" data-brain-board data-sticky-board="brain" aria-labelledby="brain-board-title">
+                    <div class="brain-board__header sr-only">
+                      <h2 id="brain-board-title">Brain board</h2>
+                    </div>
+                    <div class="brain-board__workspace-wrapper">
+                      <div class="brain-board__workspace" data-board-workspace data-board-columns="4" data-board-column-gap="48" data-board-snap-threshold="64" role="list">
+                        <div class="brain-board__columns" data-board-columns-overlay aria-hidden="true"></div>
+                        <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-shape="classic" data-x="32" data-y="40">
+                          <div class="brain-board__handle" data-note-handle>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Quick capture</span>
+                            </button>
+                            <div class="brain-board__actions">
+                              <div class="brain-board__color-control" data-note-color-control>
+                                <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                                  <span class="sr-only">Change note color</span>
+                                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                                </button>
+                                <div class="brain-board__color-menu" data-note-color-menu hidden>
+                                  <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                                  </div>
+                                  <label class="brain-board__custom-color">
+                                    <span class="brain-board__custom-color-label">Custom color</span>
+                                    <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                                  </label>
+                                  <div class="brain-board__menu-divider" role="presentation"></div>
+                                  <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
+                                    <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
+                                    <p class="brain-board__menu-heading">Change type</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
+                                    </div>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Connectors">
+                                    <p class="brain-board__menu-heading">Connectors</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+                            </div>
+                          </div>
+                          <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Kick off Monday standup talking points.</div>
+                        </div>
+
+                        <div class="brain-board__note" role="listitem" data-note data-color="meadow" data-shape="classic" data-x="232" data-y="40">
+                          <div class="brain-board__handle" data-note-handle>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>In progress</span>
+                            </button>
+                            <div class="brain-board__actions">
+                              <div class="brain-board__color-control" data-note-color-control>
+                                <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                                  <span class="sr-only">Change note color</span>
+                                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                                </button>
+                                <div class="brain-board__color-menu" data-note-color-menu hidden>
+                                  <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                                  </div>
+                                  <label class="brain-board__custom-color">
+                                    <span class="brain-board__custom-color-label">Custom color</span>
+                                    <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                                  </label>
+                                  <div class="brain-board__menu-divider" role="presentation"></div>
+                                  <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
+                                    <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
+                                    <p class="brain-board__menu-heading">Change type</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
+                                    </div>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Connectors">
+                                    <p class="brain-board__menu-heading">Connectors</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+                            </div>
+                          </div>
+                          <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Outline the onboarding tutorial checkpoints.</div>
+                        </div>
+
+                        <div class="brain-board__note" role="listitem" data-note data-color="ocean" data-shape="classic" data-x="432" data-y="40">
+                          <div class="brain-board__handle" data-note-handle>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Opportunities</span>
+                            </button>
+                            <div class="brain-board__actions">
+                              <div class="brain-board__color-control" data-note-color-control>
+                                <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                                  <span class="sr-only">Change note color</span>
+                                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                                </button>
+                                <div class="brain-board__color-menu" data-note-color-menu hidden>
+                                  <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                                  </div>
+                                  <label class="brain-board__custom-color">
+                                    <span class="brain-board__custom-color-label">Custom color</span>
+                                    <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                                  </label>
+                                  <div class="brain-board__menu-divider" role="presentation"></div>
+                                  <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
+                                    <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
+                                    <p class="brain-board__menu-heading">Change type</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
+                                    </div>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Connectors">
+                                    <p class="brain-board__menu-heading">Connectors</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+                            </div>
+                          </div>
+                          <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Research integrations that reduce copy-paste loops.</div>
+                        </div>
+
+                        <div class="brain-board__note" role="listitem" data-note data-color="blossom" data-shape="classic" data-x="632" data-y="40">
+                          <div class="brain-board__handle" data-note-handle>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Backlog</span>
+                            </button>
+                            <div class="brain-board__actions">
+                              <div class="brain-board__color-control" data-note-color-control>
+                                <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                                  <span class="sr-only">Change note color</span>
+                                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                                </button>
+                                <div class="brain-board__color-menu" data-note-color-menu hidden>
+                                  <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                                  </div>
+                                  <label class="brain-board__custom-color">
+                                    <span class="brain-board__custom-color-label">Custom color</span>
+                                    <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                                  </label>
+                                  <div class="brain-board__menu-divider" role="presentation"></div>
+                                  <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
+                                    <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
+                                    <p class="brain-board__menu-heading">Change type</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
+                                    </div>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Connectors">
+                                    <p class="brain-board__menu-heading">Connectors</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+                            </div>
+                          </div>
+                          <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Collect user stories that need deeper grooming.</div>
+                        </div>
+                      </div>
+                      <div class="brain-board__label-editor" id="brain-board-label-editor" data-note-label-editor role="dialog" aria-modal="false" aria-label="Edit sticky title" hidden>
+                        <label class="brain-board__label-editor-field" for="brain-board-label-input">
+                          <span class="brain-board__label-editor-heading">Sticky title</span>
+                          <input class="brain-board__label-editor-input" id="brain-board-label-input" type="text" name="brain-board-label" maxlength="60" autocomplete="off" autocapitalize="sentences" data-note-label-input placeholder="Add a sticky title">
+                        </label>
+                        <div class="brain-board__label-editor-emojis" role="group" aria-label="Quick emoji suggestions">
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="✨" aria-label="Add sparkles">✨</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="💡" aria-label="Add lightbulb">💡</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="🔥" aria-label="Add fire">🔥</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="✅" aria-label="Add check mark">✅</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="🚀" aria-label="Add rocket">🚀</button>
+                          <button class="brain-board__label-editor-emoji" type="button" data-note-label-emoji="❤️" aria-label="Add heart">❤️</button>
+                        </div>
+                      </div>
+                      <div class="brain-board-menu brain-board-menu--fab" role="group" aria-label="Brain board quick tools" data-board-menu>
+                        <button class="brain-board-menu__toggle" type="button" data-board-menu-toggle aria-expanded="false" aria-controls="brain-board-menu-actions">
+                          <span class="sr-only">Toggle brain board controls</span>
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M12 5v14"></path>
+                              <path d="M5 12h14"></path>
+                            </g>
+                          </svg>
+                        </button>
+                        <div class="brain-board-menu__actions" id="brain-board-menu-actions">
+                          <button class="brain-board-menu__action brain-board-menu__action--add" type="button" data-board-add>
+                            <span class="brain-board-menu__action-icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" focusable="false">
+                                <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M7 4.8h7.2L19.2 9v8.2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6.8a2 2 0 0 1 2-2Z"></path>
+                                  <path d="M14.2 4.8v3.4a1 1 0 0 0 1 1H18"></path>
+                                  <path d="M12 11.2v6"></path>
+                                  <path d="M9 14.2h6"></path>
+                                </g>
+                              </svg>
+                            </span>
+                            <span class="brain-board-menu__action-label">New sticky</span>
+                          </button>
+                          <div class="brain-board-menu__panel brain-board-menu__panel--zoom" role="group" aria-label="Zoom controls">
+                            <div class="brain-board-menu__panel-content">
+                              <div class="brain-board-menu__panel-header">
+                                <span>Zoom</span>
+                              </div>
+                              <div class="brain-board-menu__panel-controls">
+                                <button class="brain-board-menu__panel-button" type="button" data-board-zoom-out aria-label="Zoom out">
+                                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                      <circle cx="11" cy="11" r="6"></circle>
+                                      <path d="M20 20l-4.2-4.2"></path>
+                                      <path d="M8 11h6"></path>
+                                    </g>
+                                  </svg>
+                                </button>
+                                <div class="brain-board-menu__panel-track">
+                                  <input class="brain-board-menu__panel-slider" type="range" min="60" max="140" value="100" step="1" data-board-zoom-slider aria-label="Zoom level">
+                                  <span class="brain-board-menu__panel-display" data-board-zoom-display>100%</span>
+                                </div>
+                                <button class="brain-board-menu__panel-button" type="button" data-board-zoom-in aria-label="Zoom in">
+                                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                      <circle cx="11" cy="11" r="6"></circle>
+                                      <path d="M20 20l-4.2-4.2"></path>
+                                      <path d="M11 8v6"></path>
+                                      <path d="M8 11h6"></path>
+                                    </g>
+                                  </svg>
+                                </button>
+                                <button class="brain-board-menu__panel-button" type="button" data-board-zoom-fit aria-label="Fit notes to board">
+                                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                      <rect x="4.5" y="4.5" width="15" height="15" rx="2"></rect>
+                                      <path d="M9.5 8.5h-2v2"></path>
+                                      <path d="M14.5 8.5h2v2"></path>
+                                      <path d="M9.5 15.5h-2v-2"></path>
+                                      <path d="M14.5 15.5h2v-2"></path>
+                                    </g>
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <button class="brain-board-menu__action brain-board-menu__action--save" type="button" data-board-save-inline>
+                            <span class="brain-board-menu__action-icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" focusable="false">
+                                <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M6.5 4.5h11a1 1 0 0 1 .7.3l1.5 1.5a1 1 0 0 1 .3.7v11a1 1 0 0 1-1 1h-12a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Z"></path>
+                                  <path d="M9 4.5v5.5h6V4.5"></path>
+                                  <path d="M9 17.5h6"></path>
+                                </g>
+                              </svg>
+                            </span>
+                            <span class="brain-board-menu__action-label">Save</span>
+                          </button>
+                          <button class="brain-board-menu__action brain-board-menu__action--switch" type="button" data-board-switcher-open>
+                            <span class="brain-board-menu__action-icon" aria-hidden="true">
+                              <svg viewBox="0 0 24 24" focusable="false">
+                                <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                  <rect x="4.5" y="6" width="15" height="4.5" rx="1"></rect>
+                                  <rect x="4.5" y="13.5" width="15" height="4.5" rx="1"></rect>
+                                  <path d="M8 8h0.01"></path>
+                                  <path d="M8 15.5h0.01"></path>
+                                </g>
+                              </svg>
+                            </span>
+                            <span class="brain-board-menu__action-label">Switch board</span>
+                          </button>
+                        </div>
+                        <div class="brain-board-switcher" data-board-switcher hidden aria-hidden="true">
+                          <div class="brain-board-switcher__backdrop" data-board-switcher-dismiss></div>
+                          <div class="brain-board-switcher__dialog" role="dialog" aria-modal="true" aria-labelledby="brain-board-switcher-title" tabindex="-1">
+                            <div class="brain-board-switcher__header">
+                              <h3 class="brain-board-switcher__title" id="brain-board-switcher-title">Board controls</h3>
+                              <button class="brain-board-switcher__close" type="button" data-board-switcher-close aria-label="Close board controls">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <p class="brain-board-switcher__description">Save your current layout or switch to another board without leaving the workspace.</p>
+                            <label class="brain-board-switcher__field">
+                              <span class="brain-board-switcher__label">Boards</span>
+                              <select class="brain-board-switcher__select" data-board-switcher-select></select>
+                            </label>
+                            <div class="brain-board-switcher__actions">
+                              <button class="brain-board-switcher__button brain-board-switcher__button--save" type="button" data-board-switcher-save>Save layout</button>
+                              <button class="brain-board-switcher__button brain-board-switcher__button--load" type="button" data-board-switcher-load>Load board</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <template id="brain-board-note-template">
+                      <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-shape="classic" data-x="0" data-y="0">
+                        <div class="brain-board__handle" data-note-handle>
+                          <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                            <span class="brain-board__label" data-note-label>Note</span>
+                          </button>
+                          <div class="brain-board__actions">
+                            <div class="brain-board__color-control" data-note-color-control>
+                              <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                                <span class="sr-only">Change note color</span>
+                                <span class="brain-board__color-preview" data-note-color-preview></span>
+                              </button>
+                              <div class="brain-board__color-menu" data-note-color-menu hidden>
+                                <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                                  <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                                  <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                                  <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                                  <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                                  <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                                  <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                                  <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                                  <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                                  <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                                  <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                                </div>
+                                <label class="brain-board__custom-color">
+                                  <span class="brain-board__custom-color-label">Custom color</span>
+                                  <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                                </label>
+                              </div>
+                            </div>
+                            <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+                          </div>
+                        </div>
+                        <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea"></div>
+                      </div>
+                    </template>
+                  </section>
+          </div>
+        </div>
+      </div>
+
+      <div class="lovablesheet-modal" data-board-modal="flowchart" hidden>
+        <div class="lovablesheet-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="flowchart-board-title" data-board-modal-dialog tabindex="-1">
+          <button class="lovablesheet-modal__close" type="button" data-board-close="flowchart" aria-label="Close flowchart board">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <div class="lovablesheet-modal__body">
+                  <section class="brain-board brain-board--flowchart brain-board--modal" data-flowchart-board data-sticky-board="flowchart" data-board-initial-scale="0.85" aria-labelledby="flowchart-board-title">
+                    <div class="brain-board__header sr-only">
+                      <h2 id="flowchart-board-title">Flowchart</h2>
+                    </div>
+                    <div class="brain-board__workspace-wrapper">
+                      <div class="brain-board__workspace brain-board__workspace--flowchart" data-board-workspace role="list" aria-label="Flowchart sticky board preview">
+                        <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-shape="classic" data-x="32" data-y="40">
+                          <div class="brain-board__handle" data-note-handle>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Kickoff</span>
+                            </button>
+                            <div class="brain-board__actions">
+                              <div class="brain-board__color-control" data-note-color-control>
+                                <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                                  <span class="sr-only">Change note color</span>
+                                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                                </button>
+                                <div class="brain-board__color-menu" data-note-color-menu hidden>
+                                  <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                                  </div>
+                                  <label class="brain-board__custom-color">
+                                    <span class="brain-board__custom-color-label">Custom color</span>
+                                    <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                                  </label>
+                                  <div class="brain-board__menu-divider" role="presentation"></div>
+                                  <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
+                                    <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
+                                    <p class="brain-board__menu-heading">Change type</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
+                                    </div>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Connectors">
+                                    <p class="brain-board__menu-heading">Connectors</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+                            </div>
+                          </div>
+                          <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Highlight the entry trigger and what resources must be gathered before work starts.</div>
+                        </div>
+                        <div class="brain-board__note" role="listitem" data-note data-color="meadow" data-shape="classic" data-x="232" data-y="40">
+                          <div class="brain-board__handle" data-note-handle>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Decision lane</span>
+                            </button>
+                            <div class="brain-board__actions">
+                              <div class="brain-board__color-control" data-note-color-control>
+                                <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                                  <span class="sr-only">Change note color</span>
+                                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                                </button>
+                                <div class="brain-board__color-menu" data-note-color-menu hidden>
+                                  <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                                  </div>
+                                  <label class="brain-board__custom-color">
+                                    <span class="brain-board__custom-color-label">Custom color</span>
+                                    <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                                  </label>
+                                  <div class="brain-board__menu-divider" role="presentation"></div>
+                                  <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
+                                    <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
+                                    <p class="brain-board__menu-heading">Change type</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
+                                    </div>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Connectors">
+                                    <p class="brain-board__menu-heading">Connectors</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+                            </div>
+                          </div>
+                          <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Document the yes/no split and assign owners for each branch so nothing stalls.</div>
+                        </div>
+                        <div class="brain-board__note" role="listitem" data-note data-color="ocean" data-shape="classic" data-x="432" data-y="40">
+                          <div class="brain-board__handle" data-note-handle>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Parallel tasks</span>
+                            </button>
+                            <div class="brain-board__actions">
+                              <div class="brain-board__color-control" data-note-color-control>
+                                <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                                  <span class="sr-only">Change note color</span>
+                                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                                </button>
+                                <div class="brain-board__color-menu" data-note-color-menu hidden>
+                                  <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                                  </div>
+                                  <label class="brain-board__custom-color">
+                                    <span class="brain-board__custom-color-label">Custom color</span>
+                                    <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                                  </label>
+                                  <div class="brain-board__menu-divider" role="presentation"></div>
+                                  <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
+                                    <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
+                                    <p class="brain-board__menu-heading">Change type</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
+                                    </div>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Connectors">
+                                    <p class="brain-board__menu-heading">Connectors</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+                            </div>
+                          </div>
+                          <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">List the activities that can run concurrently to keep momentum and reduce idle time.</div>
+                        </div>
+                        <div class="brain-board__note" role="listitem" data-note data-color="blossom" data-shape="classic" data-x="632" data-y="40">
+                          <div class="brain-board__handle" data-note-handle>
+                            <button class="brain-board__label-button" type="button" data-note-label-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="brain-board-label-editor">
+                              <span class="brain-board__label" data-note-label>Wrap up</span>
+                            </button>
+                            <div class="brain-board__actions">
+                              <div class="brain-board__color-control" data-note-color-control>
+                                <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                                  <span class="sr-only">Change note color</span>
+                                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                                </button>
+                                <div class="brain-board__color-menu" data-note-color-menu hidden>
+                                  <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="amber" aria-label="Amber glow"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="coral" aria-label="Coral sunrise"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="lavender" aria-label="Lavender bloom"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="mint" aria-label="Mint fresh"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="sky" aria-label="Sky blue"></button>
+                                    <button class="brain-board__swatch" type="button" data-note-color="graphite" aria-label="Graphite gray"></button>
+                                  </div>
+                                  <label class="brain-board__custom-color">
+                                    <span class="brain-board__custom-color-label">Custom color</span>
+                                    <input class="brain-board__custom-color-input" type="color" value="#fef3c7" data-note-color-picker aria-label="Pick a custom note color">
+                                  </label>
+                                  <div class="brain-board__menu-divider" role="presentation"></div>
+                                  <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
+                                    <button class="brain-board__menu-button brain-board__menu-button--danger" type="button" data-note-menu-button data-note-delete>Delete sticky note</button>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Change sticky note type">
+                                    <p class="brain-board__menu-heading">Change type</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Clear sticky note (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">List view (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-type-option disabled aria-disabled="true">Drawing canvas (coming soon)</button>
+                                    </div>
+                                  </div>
+                                  <div class="brain-board__menu-section" role="group" aria-label="Connectors">
+                                    <p class="brain-board__menu-heading">Connectors</p>
+                                    <div class="brain-board__menu-options">
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector A (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector B (coming soon)</button>
+                                      <button class="brain-board__menu-pill" type="button" data-note-menu-button data-note-connector-option disabled aria-disabled="true">Connector C (coming soon)</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <button class="brain-board__group" type="button" data-note-group aria-pressed="false">Move color group</button>
+                            </div>
+                          </div>
+                          <div class="brain-board__body" contenteditable="true" spellcheck="false" data-note-body data-placeholder="Click to capture an idea">Capture the closing signals and follow-up steps that confirm the flow delivered its outcome.</div>
+                        </div>
+                      </div>
+                      <div class="brain-board-menu brain-board-menu--flowchart" role="group" aria-label="Flowchart quick tools">
+                        <div class="brain-board-menu__layout">
+                          <div class="brain-board-menu__stack">
+                            <div class="brain-board-menu__surface" role="group" aria-label="Flowchart layout controls">
+                              <div class="brain-board-menu__cluster" role="group" aria-label="Flowchart presets">
+                                <div class="brain-board-menu__primary" role="group" aria-label="Flowchart view options">
+                                  <button class="brain-board-menu__placeholder" type="button" aria-label="Toggle smart grid"></button>
+                                  <button class="brain-board-menu__placeholder" type="button" aria-label="Toggle anchors"></button>
+                                  <button class="brain-board-menu__placeholder" type="button" aria-label="Toggle swimlanes"></button>
+                                  <span class="brain-board-menu__divider" aria-hidden="true"></span>
+                                  <button class="brain-board-menu__screen" type="button" aria-label="Wide canvas preset">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3.8" y="5.2" width="16.4" height="11.6" rx="2.4"></rect>
+                                        <path d="M7.2 9.2h9.6"></path>
+                                        <path d="M7.2 12h5.8"></path>
+                                      </g>
+                                    </svg>
+                                  </button>
+                                  <button class="brain-board-menu__screen" type="button" aria-label="Storyboard preset">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="6" y="5" width="12" height="12" rx="2"></rect>
+                                        <path d="M9 9h6"></path>
+                                        <path d="M9 12h3.5"></path>
+                                      </g>
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="brain-board-menu__zoom" role="group" aria-label="Flowchart zoom controls">
+                              <button class="brain-board-menu__zoom-button" type="button" data-board-zoom-out aria-label="Zoom out">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                  <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="6"></circle>
+                                    <path d="M20 20l-4.2-4.2"></path>
+                                    <path d="M8 11h6"></path>
+                                  </g>
+                                </svg>
+                              </button>
+                              <div class="brain-board-menu__zoom-track">
+                                <input class="brain-board-menu__zoom-slider" type="range" min="60" max="140" value="85" step="1" data-board-zoom-slider aria-label="Zoom level">
+                                <span class="brain-board-menu__zoom-display" data-board-zoom-display>85%</span>
+                              </div>
+                              <button class="brain-board-menu__zoom-button" type="button" data-board-zoom-in aria-label="Zoom in">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                  <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="6"></circle>
+                                    <path d="M20 20l-4.2-4.2"></path>
+                                    <path d="M11 8v6"></path>
+                                    <path d="M8 11h6"></path>
+                                  </g>
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                          <button class="brain-board-menu__add" type="button" data-board-add>
+                            <span class="sr-only">Add new flowchart note</span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                              <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M7 4.8h7.2L19.2 9v8.2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6.8a2 2 0 0 1 2-2Z"></path>
+                                <path d="M14.2 4.8v3.4a1 1 0 0 0 1 1H18"></path>
+                                <path d="M12 11.2v6"></path>
+                                <path d="M9 14.2h6"></path>
+                              </g>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </section>
 </main>
 
