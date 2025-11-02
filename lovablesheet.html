@@ -117,7 +117,8 @@
               aria-expanded="false"
               aria-controls="thinking-panel-brain"
             >
-              Brain board
+              <span class="thinking-pill__icon" aria-hidden="true">🧠</span>
+              <span class="thinking-pill__label">Brain board</span>
             </button>
             <button
               class="thinking-pill thinking-pill--flowchart"
@@ -126,7 +127,10 @@
               aria-expanded="false"
               aria-controls="thinking-panel-flowchart"
             >
-              Flowchart <span class="thinking-pill__meta">[draft]</span>
+              <span class="thinking-pill__icon" aria-hidden="true">🗺️</span>
+              <span class="thinking-pill__label">
+                Flowchart <span class="thinking-pill__meta">[draft]</span>
+              </span>
             </button>
           </div>
         </div>
@@ -884,7 +888,8 @@
           class="lovablesheet-stage lovablesheet-stage--nextgen"
           aria-labelledby="lovablesheet-nextgen-stage"
           data-step-two
-          hidden
+          data-stage-locked="true"
+          aria-disabled="true"
         >
           <header class="lovablesheet-stage__header">
             <p class="lovablesheet-stage__eyebrow">Step 2</p>
@@ -895,6 +900,12 @@
               </p>
             </div>
           </header>
+          <div class="lovablesheet-stage__lock" data-step-two-lock aria-hidden="true">
+            <div class="lovablesheet-stage__lock-inner">
+              <span class="lovablesheet-stage__lock-icon" aria-hidden="true">🔒</span>
+              <p>Select a product from Step 1 to unlock the Next Gen brief.</p>
+            </div>
+          </div>
           <div class="lovablesheet-stage__panels">
             <section class="lovablesheet-nextgen" aria-labelledby="nextgen-engine-title" data-nextgen-section>
               <div class="admin__panel admin__panel--nextgen">
