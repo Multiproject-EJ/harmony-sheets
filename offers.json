@@ -1,0 +1,53 @@
+{
+  "updated": "2024-05-01T00:00:00.000Z",
+  "offers": [
+    {
+      "slug": "welcome-bundle",
+      "name": "Welcome to Harmony",
+      "tagline": "Start strong with an exclusive 20% launch savings",
+      "description": "Perfect for new members exploring Harmony Sheets. Unlock our most popular planners with a friendly welcome discount.",
+      "discountCode": "WELCOME20",
+      "discountValue": 20,
+      "discountType": "percent",
+      "savings": "Save 20% on any template",
+      "ctaLabel": "Shop templates",
+      "ctaUrl": "products.html",
+      "template": "New member",
+      "audience": "New subscribers",
+      "validThrough": "2024-12-31",
+      "active": true
+    },
+    {
+      "slug": "seasonal-refresh",
+      "name": "Seasonal Refresh",
+      "tagline": "Reboot your routines with a limited-time upgrade pack",
+      "description": "A curated set of productivity planners and dashboards designed to reset habits for the new season.",
+      "discountCode": "REFRESH25",
+      "discountValue": 25,
+      "discountType": "amount",
+      "savings": "Get $25 off featured bundles",
+      "ctaLabel": "View bundles",
+      "ctaUrl": "bundles.html",
+      "template": "Seasonal campaign",
+      "audience": "Existing customers",
+      "validThrough": "2024-09-30",
+      "active": false
+    },
+    {
+      "slug": "vip-upgrade",
+      "name": "VIP Upgrade",
+      "tagline": "Unlock premium templates with your loyalty bonus",
+      "description": "Give power users early access to premium dashboards, plus concierge onboarding for complex builds.",
+      "discountCode": "VIP40",
+      "discountValue": 40,
+      "discountType": "percent",
+      "savings": "Save 40% on premium products",
+      "ctaLabel": "Explore premium",
+      "ctaUrl": "bundle-premium.html",
+      "template": "VIP loyalty",
+      "audience": "Top repeat customers",
+      "validThrough": "2025-01-15",
+      "active": false
+    }
+  ]
+}
