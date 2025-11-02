@@ -104,6 +104,36 @@ if (!rootHook) {
         panels.push({ key, panel });
       }
     });
+
+    const buttonKeys = getTabButtons(root)
+      .map((button) => button?.dataset?.adminTab)
+      .filter((key) => typeof key === "string" && key.trim().length > 0);
+
+    buttonKeys.forEach((key) => {
+      if (!key) return;
+      if (panels.some((entry) => entry.key === key)) return;
+
+      const controlsId = root
+        .querySelector(`[data-admin-tab="${CSS.escape(key)}"]`)
+        ?.getAttribute("aria-controls");
+
+      let panel = null;
+
+      if (controlsId) {
+        panel = document.getElementById(controlsId) || null;
+      }
+
+      if (!panel) {
+        panel = document.querySelector(
+          `[data-admin-tab-panel="${CSS.escape(key)}"]`
+        );
+      }
+
+      if (panel instanceof HTMLElement) {
+        panels.push({ key, panel });
+      }
+    });
+
     return panels;
   }
 
