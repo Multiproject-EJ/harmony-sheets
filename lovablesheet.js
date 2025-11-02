@@ -190,6 +190,7 @@ const ideaStageElements = {
   clearButton: document.querySelector("[data-idea-clear]"),
   container: document.querySelector("[data-idea-output-container]"),
   stepTwo: document.querySelector("[data-step-two]"),
+  lock: document.querySelector("[data-step-two-lock]"),
   draftTable: document.querySelector("[data-draft-table]"),
   draftTableBody: document.querySelector("[data-draft-table-body]"),
   draftEmpty: document.querySelector("[data-draft-empty]")
@@ -409,11 +410,21 @@ function renderDraftModelsTable(products = []) {
 }
 
 function updateStepTwoAvailability() {
-  const { stepTwo, container, clearButton } = ideaStageElements;
+  const { stepTwo, container, clearButton, lock } = ideaStageElements;
   const hasSelection = ideaStageState.selectedProduct.trim().length > 0;
 
   if (stepTwo) {
-    stepTwo.hidden = !hasSelection;
+    if (hasSelection) {
+      stepTwo.dataset.stageLocked = "false";
+      stepTwo.removeAttribute("aria-disabled");
+    } else {
+      stepTwo.dataset.stageLocked = "true";
+      stepTwo.setAttribute("aria-disabled", "true");
+    }
+  }
+
+  if (lock) {
+    lock.hidden = hasSelection;
   }
 
   if (container) {
