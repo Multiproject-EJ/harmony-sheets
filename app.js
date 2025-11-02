@@ -876,6 +876,28 @@ App.normalizeVirtualDemoUrl = function(value) {
   }
 };
 
+App.VIRTUAL_DEMO_OVERRIDES = {
+  pomodoro: "Google sheets products/demo/pomodoro.html"
+};
+
+App.resolveVirtualDemoOverride = function(product) {
+  if (!product || typeof product !== "object") return "";
+
+  const keys = [];
+  if (typeof product.id === "string") keys.push(product.id);
+  if (typeof product.slug === "string") keys.push(product.slug);
+
+  for (const key of keys) {
+    const normalizedKey = key.trim().toLowerCase();
+    if (!normalizedKey) continue;
+    if (Object.prototype.hasOwnProperty.call(App.VIRTUAL_DEMO_OVERRIDES, normalizedKey)) {
+      return App.VIRTUAL_DEMO_OVERRIDES[normalizedKey];
+    }
+  }
+
+  return "";
+};
+
 App.normalizeProduct = function(product) {
   if (!product || typeof product !== "object") return product;
 
@@ -927,6 +949,22 @@ App.normalizeProduct = function(product) {
 
   if (Object.prototype.hasOwnProperty.call(normalized, "virtual_demo")) {
     delete normalized.virtual_demo;
+  }
+
+  if (typeof App.resolveVirtualDemoOverride === "function") {
+    const overrideValue = App.resolveVirtualDemoOverride(normalized);
+    if (overrideValue) {
+      const trimmedOverride = typeof overrideValue === "string" ? overrideValue.trim() : String(overrideValue).trim();
+      if (trimmedOverride) {
+        normalized.virtualDemo = trimmedOverride;
+        const resolvedOverride = App.normalizeVirtualDemoUrl(trimmedOverride);
+        if (resolvedOverride) {
+          normalized.virtualDemoUrl = resolvedOverride;
+        } else {
+          delete normalized.virtualDemoUrl;
+        }
+      }
+    }
   }
 
   return normalized;
@@ -4292,7 +4330,7 @@ App.initProduct = async function() {
     if (!product) return;
 
     App.currentProduct = product;
-    const normalizedVirtualDemoUrl = App.normalizeVirtualDemoUrl(product.virtualDemoUrl || product.virtualDemo);
+    const normalizedVirtualDemoUrl = App.normalizeVirtualDemoUrl(product.virtualDemo || product.virtualDemoUrl);
 
     if (product.draft) {
       document.body.classList.add("product-draft");
@@ -4410,7 +4448,13 @@ App.initProduct = async function() {
 
     // Virtual demo
     const virtualDemoFrame = App.qs('[data-virtual-demo]');
-    const DEFAULT_VIRTUAL_DEMO = App.normalizeVirtualDemoUrl('Google sheets products/demo/pomodoro.html');
+    const defaultVirtualDemoPath =
+      (typeof App.resolveVirtualDemoOverride === 'function'
+        ? App.resolveVirtualDemoOverride({ id: 'pomodoro' })
+        : "") ||
+      (App.VIRTUAL_DEMO_OVERRIDES && App.VIRTUAL_DEMO_OVERRIDES.pomodoro) ||
+      "Google sheets products/demo/pomodoro.html";
+    const DEFAULT_VIRTUAL_DEMO = App.normalizeVirtualDemoUrl(defaultVirtualDemoPath);
     if (virtualDemoFrame) {
       const screen = virtualDemoFrame.querySelector('.device-frame__screen');
       const virtualDemoUrl = normalizedVirtualDemoUrl || DEFAULT_VIRTUAL_DEMO;
