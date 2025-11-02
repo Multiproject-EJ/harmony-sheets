@@ -3021,7 +3021,7 @@ App.initNavDropdown = function() {
         const message = query
           ? `No matches for “${navState.q}”.`
           : info.empty || "Fresh tools coming soon.";
-        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="4">${App.escapeHtml(message)}</td></tr>`;
+        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="5">${App.escapeHtml(message)}</td></tr>`;
         setActiveRow(null);
       } else {
         const rows = sorted
@@ -3032,7 +3032,8 @@ App.initNavDropdown = function() {
               : "";
             const priceText = item.priceDisplay ? App.escapeHtml(item.priceDisplay) : "—";
             const url = App.escapeHtml(item.url || `products.html?area=${encodeURIComponent(navState.cat)}`);
-            const name = App.escapeHtml(item.name || "Harmony Sheets tool");
+            const rawName = item.name || "Harmony Sheets tool";
+            const name = App.escapeHtml(rawName);
             const type = App.escapeHtml(item.type || "Template");
             const navId = String(item.id || `${navState.cat}-item-${index}`);
             const accentColor = item.accentColor ? App.escapeHtml(item.accentColor) : "";
@@ -3044,10 +3045,68 @@ App.initNavDropdown = function() {
               "Life area";
             const areaLabelText = `Life area: ${areaInfo}`;
             const areaLabel = App.escapeHtml(areaLabelText);
-            return `<tr class="nav-mega__row" data-nav-item="${App.escapeHtml(navId)}"><td class="nav-mega__product-cell"><span class="nav-mega__dot nav-mega__dot--row"${dotStyle} aria-hidden="true"></span><span class="sr-only">${areaLabel}</span><a class="nav-mega__product-link" href="${url}">${name}</a></td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+            const previewSources = Array.isArray(item.previewImages) && item.previewImages.length
+              ? item.previewImages
+              : item.image
+              ? [item.image]
+              : [];
+            const previewThumbs = previewSources
+              .slice(0, 6)
+              .map(src => (typeof src === "string" ? src.trim() : ""))
+              .filter(Boolean);
+            const hasPreviews = previewThumbs.length > 0;
+            const defaultPreview = hasPreviews ? App.escapeHtml(previewThumbs[0]) : "";
+            const rowClasses = ["nav-mega__row"];
+            if (hasPreviews) rowClasses.push("has-preview");
+            const previewAttr = hasPreviews ? ` data-preview-image="${defaultPreview}"` : "";
+            const thumbsMarkup = hasPreviews
+              ? `<div class="nav-mega__thumbs">${previewThumbs
+                  .map((src, thumbIndex) => {
+                    const safeSrc = App.escapeHtml(src);
+                    const label = App.escapeHtml(`Preview image ${thumbIndex + 1} for ${rawName}`);
+                    const thumbClass = `nav-mega__thumb${thumbIndex === 0 ? " is-active" : ""}`;
+                    return `<button type="button" class="${thumbClass}" data-nav-thumb data-thumb-src="${safeSrc}" aria-label="${label}"><img src="${safeSrc}" alt=""></button>`;
+                  })
+                  .join("")}</div>`
+              : `<span class="nav-mega__no-images">0</span>`;
+            return `<tr class="${rowClasses.join(" ")}"${previewAttr} data-nav-item="${App.escapeHtml(navId)}"><td class="nav-mega__product-cell"><span class="nav-mega__dot nav-mega__dot--row"${dotStyle} aria-hidden="true"></span><span class="sr-only">${areaLabel}</span><a class="nav-mega__product-link" href="${url}">${name}</a></td><td class="nav-mega__images-cell">${thumbsMarkup}</td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
         rowsEl.innerHTML = rows;
+        rowsEl.querySelectorAll("[data-nav-item]").forEach(row => {
+          const thumbs = row.querySelectorAll("[data-nav-thumb]");
+          if (!thumbs.length) return;
+          thumbs.forEach(thumb => {
+            const updatePreview = () => {
+              const src = thumb.getAttribute("data-thumb-src") || "";
+              if (!src) return;
+              row.setAttribute("data-preview-image", src);
+              if (activePreviewRow === row) {
+                applyRowImage(row, src);
+              }
+              thumbs.forEach(btn => {
+                if (btn === thumb) {
+                  btn.classList.add("is-active");
+                } else {
+                  btn.classList.remove("is-active");
+                }
+              });
+            };
+            thumb.addEventListener("mouseenter", () => {
+              updatePreview();
+              setActiveRow(row);
+            });
+            thumb.addEventListener("focus", () => {
+              updatePreview();
+              setActiveRow(row);
+            });
+            thumb.addEventListener("click", event => {
+              event.preventDefault();
+              updatePreview();
+              setActiveRow(row);
+            });
+          });
+        });
         setActiveRow(null);
       }
     }
@@ -3095,7 +3154,7 @@ App.initNavDropdown = function() {
                 <table class="nav-mega__table" data-nav-table aria-label="${initialLabel} list">
                   <thead>
                     <tr>
-                      <th scope="col" class="nav-mega__product-header" style="width:56%">
+                      <th scope="col" class="nav-mega__product-header" style="width:42%">
                         <span class="nav-mega__product-header-icon" aria-hidden="true">
                           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -3107,13 +3166,14 @@ App.initNavDropdown = function() {
                         </span>
                         <span>Product</span>
                       </th>
-                      <th scope="col" style="width:18%">Type</th>
-                      <th scope="col" style="width:14%">Badge</th>
-                      <th scope="col" style="width:12%">Price</th>
+                      <th scope="col" style="width:20%">Images</th>
+                      <th scope="col" style="width:16%">Type</th>
+                      <th scope="col" style="width:12%">Badge</th>
+                      <th scope="col" style="width:10%">Price</th>
                     </tr>
                   </thead>
                   <tbody data-nav-rows>
-                    <tr class="nav-mega__empty-row"><td colspan="4">Loading Life Harmony tools…</td></tr>
+                    <tr class="nav-mega__empty-row"><td colspan="5">Loading Life Harmony tools…</td></tr>
                   </tbody>
                 </table>
               </div>
