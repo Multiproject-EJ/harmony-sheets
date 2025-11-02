@@ -956,6 +956,73 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .nav-item--bundles:hover .nav-flyout,.nav-item--bundles:focus-within .nav-flyout,.nav-item--bundles.is-open .nav-flyout{opacity:1;pointer-events:auto;visibility:visible;transform:translate3d(calc(-50% + var(--bundle-adjust,0px)),0,0)}
 .nav-flyout__content{display:grid;gap:18px}
 .nav-bundles-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;max-width:960px;margin:0 auto}
+.offers{padding:120px 24px 96px;max-width:1080px;margin:0 auto;display:grid;gap:64px}
+.offers-hero{display:grid;gap:16px;text-align:left}
+.offers-hero__eyebrow{font-size:0.875rem;font-weight:600;color:var(--brand);text-transform:uppercase;letter-spacing:0.08em}
+.offers-hero__title{font-size:2.75rem;margin:0;color:var(--nav-link-ink-strong)}
+.offers-hero__intro{font-size:1.125rem;max-width:720px;margin:0;color:var(--nav-link-ink)}
+.offers-hero__meta{display:flex;flex-wrap:wrap;gap:24px;margin:0;padding:0;list-style:none;color:var(--muted)}
+.offers-hero__meta div{display:flex;flex-direction:column;gap:4px;font-size:0.95rem}
+.offers-hero__meta dt{font-weight:600;color:var(--nav-link-ink)}
+.offers-grid{display:grid;gap:32px}
+.offers-grid__inner{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px}
+.offers-empty,.offers-error{text-align:center;padding:48px;border:1px dashed var(--border);border-radius:18px;font-size:1rem;color:var(--muted)}
+.offers-error{border-color:#f87171;background:rgba(248,113,113,.08);color:#b91c1c}
+.offer-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:20px;box-shadow:var(--shadow)}
+.offer-card__header{display:flex;flex-direction:column;gap:12px}
+.offer-card__badge{align-self:flex-start;padding:6px 14px;border-radius:999px;background:rgba(99,102,241,.12);color:#3730a3;font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
+.offer-card__title{margin:0;font-size:1.6rem;color:var(--nav-link-ink-strong)}
+.offer-card__tagline{margin:0;color:var(--nav-link-ink);font-weight:500}
+.offer-card__description{margin:0;color:var(--muted)}
+.offer-card__meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin:0;padding:0;font-size:0.9rem;color:var(--muted)}
+.offer-card__meta div{display:flex;flex-direction:column;gap:4px}
+.offer-card__meta dt{font-weight:600;color:var(--nav-link-ink)}
+.offer-card__code{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px dashed var(--border);border-radius:14px;background:rgba(99,102,241,.05)}
+.offer-card__code-label{font-size:0.85rem;font-weight:600;color:var(--nav-link-ink)}
+.offer-card__code-value{font-family:"Courier New",monospace;font-weight:700;color:#4c1d95}
+.offer-card__code-copy{padding:6px 14px;border-radius:999px;background:var(--brand);color:#fff;font-size:0.85rem;border:none;cursor:pointer}
+.offer-card__code-copy.is-copied{background:#047857}
+.offer-card__footer{display:flex;justify-content:space-between;gap:16px;align-items:center}
+.offer-card__footer .btn{flex-shrink:0}
+.offer-card__footer .btn.primary{padding:12px 24px;border-radius:16px}
+
+.admin-offers{display:grid;gap:24px}
+.admin-offers__actions{display:flex;flex-wrap:wrap;gap:12px}
+.admin-offers__summary{display:grid;gap:6px;font-size:0.95rem;color:var(--muted)}
+.admin-offers__counts{display:flex;flex-wrap:wrap;gap:8px;font-weight:600;color:var(--nav-link-ink)}
+.admin-offers__updated{margin:0;color:var(--muted)}
+.admin-offers__status{margin:0;font-size:0.9rem}
+.admin-offers__status[data-tone="success"]{color:#047857}
+.admin-offers__status[data-tone="warning"]{color:#b45309}
+.admin-offers__status[data-tone="danger"]{color:#b91c1c}
+.admin-offers__list{display:grid;gap:20px}
+.admin-offers__empty{margin:0;padding:36px;border:1px dashed var(--border);border-radius:18px;text-align:center;color:var(--muted);background:rgba(148,163,184,.1)}
+.admin-offer-card{border:1px solid var(--border);border-radius:20px;padding:24px;background:#fff;display:grid;gap:18px;box-shadow:0 14px 42px rgba(15,23,42,.06)}
+.admin-offer-card__header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.admin-offer-card__toggle{display:flex;align-items:center;gap:8px;font-size:0.9rem;font-weight:600;color:var(--nav-link-ink)}
+.admin-offer-card__toggle input{width:20px;height:20px}
+.admin-offer-card__badge{padding:6px 14px;border-radius:999px;background:rgba(59,130,246,.14);color:#1d4ed8;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
+.admin-offer-card__body h3{margin:0 0 6px;font-size:1.3rem;color:var(--nav-link-ink-strong)}
+.admin-offer-card__tagline{margin:0 0 6px;font-weight:600;color:var(--nav-link-ink)}
+.admin-offer-card__description{margin:0;color:var(--muted)}
+.admin-offer-card__meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:12px 0 0;font-size:0.85rem;color:var(--muted)}
+.admin-offer-card__meta dt{font-weight:600;color:var(--nav-link-ink)}
+.admin-offer-card__footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;align-items:center}
+.admin-offer-card__code{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px dashed var(--border);border-radius:14px;background:rgba(191,219,254,.3)}
+.admin-offer-card__code-value{font-family:"Courier New",monospace;font-weight:700;color:#1e3a8a}
+.admin-offer-card__code-empty{font-size:0.85rem;color:var(--muted)}
+.admin-offer-card__actions{display:flex;flex-wrap:wrap;gap:12px}
+.admin-offer-card__actions .admin__btn{font-size:0.85rem}
+
+@media (max-width:720px){
+  .offers{padding:96px 20px 80px;gap:48px}
+  .offers-hero__title{font-size:2.2rem}
+  .offers-grid__inner{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .offer-card{padding:24px;gap:16px}
+  .offer-card__footer{flex-direction:column;align-items:flex-start}
+  .admin-offer-card__footer{flex-direction:column;align-items:flex-start}
+  .admin-offers__actions{justify-content:flex-start}
+}
 .nav-bundle-card{display:flex;flex-direction:column;gap:10px;padding:18px 18px 20px;border-radius:18px;border:1px solid rgba(148,163,184,.18);background:linear-gradient(180deg,var(--bundle-accent-soft,rgba(99,102,241,.16)) 0%,#fff 58%);color:#0f172a;text-decoration:none;box-shadow:0 20px 44px rgba(15,23,42,.08);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 .nav-bundle-card:hover,.nav-bundle-card:focus-visible{transform:translateY(-3px);border-color:var(--bundle-accent,#6366f1);box-shadow:0 28px 60px rgba(15,23,42,.15);outline:none}
 .nav-bundle-card__badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--bundle-accent,#6366f1);color:#fff;font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 10px 24px color-mix(in srgb,var(--bundle-accent) 32%,transparent)}

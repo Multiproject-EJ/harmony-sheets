@@ -2253,6 +2253,7 @@ App.init = function() {
   if (App.qs("body.page-product")) App.initProduct();
   if (App.qs("#life-wheel")) App.initHome();
   if (App.qs("#bundles-grid")) App.initBundles();
+  if (App.qs("[data-offers-grid]")) App.initOffers();
 
   // Init suggest form everywhere
   App.initSuggestForm();
@@ -3487,6 +3488,202 @@ App.initBundles = async function() {
     console.error("Error loading bundles:", err);
     setStatus("We had trouble loading bundles. Please refresh and try again.");
   }
+};
+
+/*****************************************************
+ * Offers page (offers.html)
+ *****************************************************/
+App.initOffers = function() {
+  const grid = App.qs("[data-offers-grid]");
+  if (!grid || grid.dataset.offersInit === "true") return;
+  grid.dataset.offersInit = "true";
+
+  const emptyState = App.qs("[data-offers-empty]");
+  const errorState = App.qs("[data-offers-error]");
+  const countEl = App.qs("[data-offers-active-count]");
+  const updatedEl = App.qs("[data-offers-updated]");
+  const STORAGE_KEY = "harmony-sheets-offers-v1";
+
+  const setVisibility = (element, visible) => {
+    if (!element) return;
+    element.hidden = !visible;
+    element.setAttribute("aria-hidden", visible ? "false" : "true");
+  };
+
+  const describeSavings = offer => {
+    if (!offer) return "";
+    if (offer.savings) return offer.savings;
+    const value = Number(offer.discountValue);
+    if (Number.isFinite(value) && value > 0) {
+      return offer.discountType === "amount"
+        ? `$${value.toLocaleString()} off`
+        : `${value.toLocaleString()}% off`;
+    }
+    return "Limited offer";
+  };
+
+  const formatDate = value => {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  };
+
+  const buildOfferCard = offer => {
+    const slug = App.slugify(offer.slug || offer.name || "");
+    const id = slug ? `offer-${slug}` : "";
+    const title = App.escapeHtml(offer.name || "Special offer");
+    const tagline = App.escapeHtml(offer.tagline || "");
+    const description = App.escapeHtml(offer.description || "Unlock exclusive savings.");
+    const savings = App.escapeHtml(describeSavings(offer));
+    const code = App.escapeHtml(offer.discountCode || "");
+    const ctaLabel = App.escapeHtml(offer.ctaLabel || "Redeem offer");
+    const ctaUrl = App.escapeHtml(offer.ctaUrl || "products.html");
+    const targetAttrs = /^https?:/i.test(offer.ctaUrl || "")
+      ? ' target="_blank" rel="noopener"'
+      : "";
+    const template = App.escapeHtml(offer.template || "Campaign");
+    const audience = App.escapeHtml(offer.audience || "Harmony community");
+    const deadline = formatDate(offer.validThrough);
+
+    return `
+      <article class="offer-card"${id ? ` id="${id}"` : ""} data-offer-card>
+        <header class="offer-card__header">
+          <span class="offer-card__badge">${template}</span>
+          <h3 class="offer-card__title">${title}</h3>
+          ${tagline ? `<p class="offer-card__tagline">${tagline}</p>` : ""}
+        </header>
+        <div class="offer-card__body">
+          <p class="offer-card__description">${description}</p>
+          <dl class="offer-card__meta">
+            <div>
+              <dt>Audience</dt>
+              <dd>${audience}</dd>
+            </div>
+            <div>
+              <dt>Savings</dt>
+              <dd>${savings}</dd>
+            </div>
+            <div>
+              <dt>Valid through</dt>
+              <dd>${App.escapeHtml(deadline)}</dd>
+            </div>
+          </dl>
+          ${code ? `
+            <div class="offer-card__code" data-offer-code>
+              <span class="offer-card__code-label">Code</span>
+              <span class="offer-card__code-value">${code}</span>
+              <button type="button" class="offer-card__code-copy" data-offer-copy="${code}">Copy</button>
+            </div>
+          ` : ""}
+        </div>
+        <footer class="offer-card__footer">
+          <a class="btn primary" href="${ctaUrl}"${targetAttrs}>${ctaLabel}</a>
+        </footer>
+      </article>
+    `;
+  };
+
+  const copyCode = value => {
+    if (!value) return;
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(value).catch(() => {
+        console.warn("Failed to copy code to clipboard");
+      });
+    }
+  };
+
+  const attachCopyHandlers = () => {
+    App.qsa("[data-offer-copy]").forEach(button => {
+      button.addEventListener("click", () => {
+        const code = button.dataset.offerCopy;
+        copyCode(code);
+        button.classList.add("is-copied");
+        button.textContent = "Copied!";
+        window.setTimeout(() => {
+          button.classList.remove("is-copied");
+          button.textContent = "Copy";
+        }, 1800);
+      });
+    });
+  };
+
+  const renderOffers = (offers, meta = {}) => {
+    const active = Array.isArray(offers)
+      ? offers.filter(offer => offer && offer.active)
+      : [];
+
+    const showEmpty = !active.length && (!errorState || errorState.hidden);
+    setVisibility(emptyState, showEmpty);
+    if (countEl) countEl.textContent = active.length.toString();
+    if (updatedEl) {
+      updatedEl.textContent = meta.updated ? formatDate(meta.updated) : "—";
+    }
+
+    if (!active.length) {
+      grid.innerHTML = "";
+      return;
+    }
+
+    grid.innerHTML = active.map(buildOfferCard).join("");
+    attachCopyHandlers();
+  };
+
+  const mergeOffers = (baseline, overrides) => {
+    if (!Array.isArray(baseline)) return [];
+    if (!Array.isArray(overrides)) return baseline.slice();
+    const overrideBySlug = new Map();
+    overrides.forEach(entry => {
+      if (!entry) return;
+      const slug = entry.slug || entry.name;
+      if (!slug) return;
+      overrideBySlug.set(App.slugify(slug), entry);
+    });
+    return baseline.map(entry => {
+      const slug = App.slugify(entry.slug || entry.name || "");
+      if (!slug) return { ...entry };
+      if (!overrideBySlug.has(slug)) return { ...entry };
+      return { ...entry, ...overrideBySlug.get(slug) };
+    });
+  };
+
+  const readStoredOffers = () => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return null;
+      return Array.isArray(parsed.offers) ? parsed.offers : null;
+    } catch (error) {
+      console.warn("Failed to parse stored offers", error);
+      return null;
+    }
+  };
+
+  const loadOffers = async () => {
+    try {
+      const response = await fetch("offers.json", { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const payload = await response.json();
+      const baseline = Array.isArray(payload?.offers) ? payload.offers : [];
+      const overrides = readStoredOffers();
+      const offers = mergeOffers(baseline, overrides || []);
+      renderOffers(offers, { updated: payload?.updated });
+      setVisibility(errorState, false);
+      return offers;
+    } catch (error) {
+      console.error("Failed to load offers", error);
+      setVisibility(errorState, true);
+      renderOffers([], {});
+      return [];
+    }
+  };
+
+  loadOffers();
 };
 
 /*****************************************************

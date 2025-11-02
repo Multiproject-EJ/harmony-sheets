@@ -23,6 +23,7 @@ let accountLinkEl = dropdown?.querySelector("[data-account-link='account']");
 let adminLinkEl = dropdown?.querySelector("[data-account-link='admin']");
 let lovableSheetLinkEl = dropdown?.querySelector("[data-account-link='lovablesheet']");
 let adminWorkspaceLinkEl = dropdown?.querySelector("[data-account-link='admin-workspace']");
+let offersLinkEl = dropdown?.querySelector("[data-account-link='offers']");
 const skipModal = document.body.classList.contains("page-auth");
 const hasSupabaseConfig = isSupabaseConfigured();
 
@@ -161,6 +162,9 @@ function updateAccountLink(user) {
   if (!adminLinkEl || !dropdown.contains(adminLinkEl)) {
     adminLinkEl = dropdown.querySelector("[data-account-link='admin']");
   }
+  if (!offersLinkEl || !dropdown.contains(offersLinkEl)) {
+    offersLinkEl = dropdown.querySelector("[data-account-link='offers']");
+  }
   const lovableLink = ensureLovableSheetLink();
   const adminWorkspaceLink = ensureAdminWorkspaceLink();
   if (!accountLinkEl) return;
@@ -177,6 +181,10 @@ function updateAccountLink(user) {
       adminLinkEl.hidden = true;
       adminLinkEl.setAttribute("aria-hidden", "true");
     }
+    if (offersLinkEl) {
+      offersLinkEl.hidden = true;
+      offersLinkEl.setAttribute("aria-hidden", "true");
+    }
     if (lovableLink) {
       lovableLink.hidden = true;
       lovableLink.setAttribute("aria-hidden", "true");
@@ -190,6 +198,12 @@ function updateAccountLink(user) {
 
   accountLinkEl.href = ACCOUNT_PAGE_PATH;
   accountLinkEl.textContent = "My account";
+
+  if (offersLinkEl) {
+    offersLinkEl.hidden = false;
+    offersLinkEl.setAttribute("aria-hidden", "false");
+    offersLinkEl.href = "offers.html";
+  }
 
   const isAdmin = isAdminUser(user);
 

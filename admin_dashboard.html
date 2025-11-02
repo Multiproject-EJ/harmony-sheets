@@ -49,6 +49,7 @@
         </button>
         <div class="nav-dropdown" data-account-dropdown role="menu" aria-label="Account options" hidden>
           <a class="nav-dropdown__link" href="account.html" data-account-link="account">My account</a>
+          <a class="nav-dropdown__link" href="offers.html" data-account-link="offers" hidden aria-hidden="true">My offers</a>
           <a class="nav-dropdown__link" href="admin_dashboard.html" data-account-link="admin" hidden aria-hidden="true">Admin dashboard</a>
           <a class="nav-dropdown__link" href="lovablesheet.html" data-account-link="lovablesheet" hidden aria-hidden="true">LovableSheet</a>
           <a class="nav-dropdown__link" href="products.html#my-products" data-account-link="products">My products</a>
@@ -257,6 +258,44 @@
             data-admin-tab-panel="marketing"
           >
     <section class="admin__grid">
+      <section class="admin-offers" data-admin-offers>
+        <div class="admin__panel admin__panel--stacked">
+          <div class="admin__panel-head">
+            <div>
+              <span class="admin__eyebrow">Marketing Offers</span>
+              <h2 id="admin-offers-title">My Offers lineup</h2>
+              <p class="admin__panel-sub">Toggle campaign templates to feature on the My Offers page, copy discount codes, and prepare ready-to-send promos in seconds.</p>
+            </div>
+            <div class="admin__panel-actions admin-offers__actions">
+              <button class="btn-ghost admin__btn" type="button" data-admin-offers-refresh>
+                <span aria-hidden="true">⟳</span>
+                <span>Refresh data</span>
+              </button>
+              <button class="btn-ghost admin__btn" type="button" data-admin-offers-reset>
+                <span aria-hidden="true">⟲</span>
+                <span>Reset to defaults</span>
+              </button>
+              <button class="btn-ghost admin__btn" type="button" data-admin-offers-export>
+                <span aria-hidden="true">⇩</span>
+                <span>Download JSON</span>
+              </button>
+            </div>
+          </div>
+          <div class="admin-offers__summary" aria-live="polite">
+            <p class="admin-offers__counts">
+              <strong data-admin-offers-active>0</strong>
+              <span>active offers</span>
+              <span aria-hidden="true">•</span>
+              <span><span data-admin-offers-total>0</span> total templates</span>
+            </p>
+            <p class="admin-offers__updated">Updated <time data-admin-offers-updated datetime=""></time></p>
+            <p class="admin-offers__status" data-admin-offers-status>Loading offers…</p>
+          </div>
+          <div class="admin-offers__list" data-admin-offers-list aria-labelledby="admin-offers-title">
+            <p class="admin-offers__empty" data-admin-offers-empty>Offers will appear here once loaded.</p>
+          </div>
+        </div>
+      </section>
       <section
         class="admin-control-center"
         data-admin-control-center

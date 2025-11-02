@@ -60,6 +60,29 @@ if (!rootHook) {
     raf: null
   };
 
+  const OFFERS_STORAGE_KEY = "harmony-sheets-offers-v1";
+  const offersEls = {
+    panel: contentSection?.querySelector("[data-admin-offers]"),
+    list: contentSection?.querySelector("[data-admin-offers-list]"),
+    empty: contentSection?.querySelector("[data-admin-offers-empty]"),
+    status: contentSection?.querySelector("[data-admin-offers-status]"),
+    activeCount: contentSection?.querySelector("[data-admin-offers-active]"),
+    totalCount: contentSection?.querySelector("[data-admin-offers-total]"),
+    updated: contentSection?.querySelector("[data-admin-offers-updated]"),
+    refresh: contentSection?.querySelector("[data-admin-offers-refresh]"),
+    reset: contentSection?.querySelector("[data-admin-offers-reset]"),
+    export: contentSection?.querySelector("[data-admin-offers-export]")
+  };
+
+  const offersState = {
+    baseline: [],
+    offers: [],
+    updated: null,
+    loading: false
+  };
+
+  let offersInitialized = false;
+
   function getTabButtons(root) {
     if (!root) return [];
     return Array.from(root.querySelectorAll("[data-admin-tab]")).filter(
@@ -206,6 +229,540 @@ if (!rootHook) {
     item.appendChild(badge);
     item.appendChild(body);
     return item;
+  }
+
+  function slugifyOffer(value) {
+    const text = cleanText(value);
+    if (!text) return null;
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function normalizeOffer(raw, fallbackIndex = 0) {
+    if (!raw || typeof raw !== "object") return null;
+    const nameText = cleanText(raw.name);
+    const slug = slugifyOffer(raw.slug || raw.id || nameText);
+    const generatedSlug = slug || `offer-${fallbackIndex}`;
+    const name = nameText || generatedSlug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+    const tagline = cleanText(raw.tagline) || "";
+    const description = cleanText(raw.description) || "";
+    const audience = cleanText(raw.audience) || "Harmony community";
+    const template = cleanText(raw.template) || "Campaign";
+    const savings = cleanText(raw.savings) || "";
+    const ctaLabel = cleanText(raw.ctaLabel) || "Redeem offer";
+    const ctaUrl = cleanText(raw.ctaUrl) || "products.html";
+    const validThrough = cleanText(raw.validThrough) || "";
+    const code = cleanText(raw.discountCode) || "";
+    const typeInput = cleanText(raw.discountType);
+    const type = typeInput && typeInput.toLowerCase() === "amount" ? "amount" : "percent";
+    let discountValue = null;
+    if (typeof raw.discountValue === "number" && Number.isFinite(raw.discountValue)) {
+      discountValue = Math.round(raw.discountValue * 100) / 100;
+    } else if (typeof raw.discountValue === "string" && raw.discountValue.trim()) {
+      const parsed = Number.parseFloat(raw.discountValue);
+      if (Number.isFinite(parsed)) {
+        discountValue = Math.round(parsed * 100) / 100;
+      }
+    }
+
+    return {
+      slug: generatedSlug,
+      name,
+      tagline,
+      description,
+      audience,
+      template,
+      savings,
+      ctaLabel,
+      ctaUrl,
+      validThrough,
+      discountCode: code,
+      discountType: discountValue != null ? type : null,
+      discountValue,
+      active: Boolean(raw.active)
+    };
+  }
+
+  function describeOfferSavings(offer) {
+    if (!offer) return "";
+    if (offer.savings) return offer.savings;
+    if (offer.discountValue == null) return "Limited offer";
+    if (offer.discountType === "amount") {
+      return `$${offer.discountValue.toLocaleString()} off`;
+    }
+    return `${offer.discountValue.toLocaleString()}% off`;
+  }
+
+  function formatOfferDate(value) {
+    if (!value) {
+      return { display: "—", iso: "" };
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return { display: value, iso: "" };
+    }
+    return {
+      display: date.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }),
+      iso: date.toISOString()
+    };
+  }
+
+  function setOffersStatus(message, tone = "muted") {
+    if (!offersEls.status) return;
+    offersEls.status.textContent = message;
+    if (tone) {
+      offersEls.status.dataset.tone = tone;
+    } else if (offersEls.status.dataset) {
+      delete offersEls.status.dataset.tone;
+    }
+  }
+
+  function updateOffersSummary() {
+    const total = offersState.offers.length;
+    const active = offersState.offers.filter((offer) => offer?.active).length;
+    if (offersEls.activeCount) {
+      offersEls.activeCount.textContent = active.toString();
+    }
+    if (offersEls.totalCount) {
+      offersEls.totalCount.textContent = total.toString();
+    }
+    if (offersEls.updated) {
+      const formatted = formatOfferDate(offersState.updated);
+      offersEls.updated.textContent = formatted.display;
+      if (formatted.iso) {
+        offersEls.updated.setAttribute("datetime", formatted.iso);
+      } else {
+        offersEls.updated.removeAttribute("datetime");
+      }
+    }
+  }
+
+  function getOfferBySlug(slug) {
+    if (!slug) return null;
+    const normalized = slugifyOffer(slug);
+    if (!normalized) return null;
+    return offersState.offers.find((offer) => slugifyOffer(offer?.slug) === normalized) || null;
+  }
+
+  function copyOffersText(text) {
+    if (!text) return Promise.reject(new Error("Nothing to copy."));
+    const clipboard = navigator?.clipboard;
+    if (!clipboard || typeof clipboard.writeText !== "function") {
+      return Promise.reject(new Error("Clipboard access is unavailable."));
+    }
+    return clipboard.writeText(text);
+  }
+
+  function buildAdminOfferCard(offer) {
+    const card = document.createElement("article");
+    card.className = "admin-offer-card";
+    card.dataset.offerSlug = offer.slug;
+
+    const header = document.createElement("header");
+    header.className = "admin-offer-card__header";
+
+    const toggleWrap = document.createElement("label");
+    toggleWrap.className = "admin-offer-card__toggle";
+    toggleWrap.setAttribute("for", `offer-toggle-${offer.slug}`);
+    const toggle = document.createElement("input");
+    toggle.type = "checkbox";
+    toggle.id = `offer-toggle-${offer.slug}`;
+    toggle.checked = Boolean(offer.active);
+    toggle.dataset.adminOfferToggle = offer.slug;
+    toggle.setAttribute("aria-label", `Show ${offer.name} on My Offers page`);
+    const toggleLabel = document.createElement("span");
+    toggleLabel.textContent = "Show on My Offers page";
+    toggleWrap.appendChild(toggle);
+    toggleWrap.appendChild(toggleLabel);
+
+    const badge = document.createElement("span");
+    badge.className = "admin-offer-card__badge";
+    badge.textContent = offer.template || "Campaign";
+
+    header.appendChild(toggleWrap);
+    header.appendChild(badge);
+
+    const body = document.createElement("div");
+    body.className = "admin-offer-card__body";
+    const title = document.createElement("h3");
+    title.textContent = offer.name;
+    body.appendChild(title);
+    if (offer.tagline) {
+      const tagline = document.createElement("p");
+      tagline.className = "admin-offer-card__tagline";
+      tagline.textContent = offer.tagline;
+      body.appendChild(tagline);
+    }
+    if (offer.description) {
+      const description = document.createElement("p");
+      description.className = "admin-offer-card__description";
+      description.textContent = offer.description;
+      body.appendChild(description);
+    }
+
+    const meta = document.createElement("dl");
+    meta.className = "admin-offer-card__meta";
+    const metaAudience = document.createElement("div");
+    const metaAudienceTerm = document.createElement("dt");
+    metaAudienceTerm.textContent = "Audience";
+    const metaAudienceDef = document.createElement("dd");
+    metaAudienceDef.textContent = offer.audience || "Harmony community";
+    metaAudience.appendChild(metaAudienceTerm);
+    metaAudience.appendChild(metaAudienceDef);
+
+    const metaSavings = document.createElement("div");
+    const metaSavingsTerm = document.createElement("dt");
+    metaSavingsTerm.textContent = "Savings";
+    const metaSavingsDef = document.createElement("dd");
+    metaSavingsDef.textContent = describeOfferSavings(offer);
+    metaSavings.appendChild(metaSavingsTerm);
+    metaSavings.appendChild(metaSavingsDef);
+
+    const metaDate = document.createElement("div");
+    const metaDateTerm = document.createElement("dt");
+    metaDateTerm.textContent = "Valid through";
+    const metaDateDef = document.createElement("dd");
+    metaDateDef.textContent = formatOfferDate(offer.validThrough).display;
+    metaDate.appendChild(metaDateTerm);
+    metaDate.appendChild(metaDateDef);
+
+    meta.appendChild(metaAudience);
+    meta.appendChild(metaSavings);
+    meta.appendChild(metaDate);
+    body.appendChild(meta);
+
+    const footer = document.createElement("footer");
+    footer.className = "admin-offer-card__footer";
+
+    const codeWrap = document.createElement("div");
+    codeWrap.className = "admin-offer-card__code";
+    if (offer.discountCode) {
+      const codeLabel = document.createElement("span");
+      codeLabel.className = "admin-offer-card__code-value";
+      codeLabel.textContent = offer.discountCode;
+      const codeButton = document.createElement("button");
+      codeButton.type = "button";
+      codeButton.className = "btn-pill admin__btn admin-offer-card__copy";
+      codeButton.dataset.adminOfferCopy = offer.slug;
+      codeButton.textContent = "Copy code";
+      codeWrap.appendChild(codeLabel);
+      codeWrap.appendChild(codeButton);
+    } else {
+      const codeEmpty = document.createElement("span");
+      codeEmpty.className = "admin-offer-card__code-empty";
+      codeEmpty.textContent = "No code configured";
+      codeWrap.appendChild(codeEmpty);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "admin-offer-card__actions";
+    const messageButton = document.createElement("button");
+    messageButton.type = "button";
+    messageButton.className = "btn-ghost admin__btn";
+    messageButton.dataset.adminOfferMessage = offer.slug;
+    messageButton.textContent = "Copy promo blurb";
+    actions.appendChild(messageButton);
+
+    const previewLink = document.createElement("a");
+    previewLink.className = "btn-ghost admin__btn";
+    previewLink.href = offer.ctaUrl || "products.html";
+    previewLink.textContent = offer.ctaLabel || "Preview offer";
+    if (/^https?:/i.test(offer.ctaUrl || "")) {
+      previewLink.target = "_blank";
+      previewLink.rel = "noopener noreferrer";
+    }
+    actions.appendChild(previewLink);
+
+    footer.appendChild(codeWrap);
+    footer.appendChild(actions);
+
+    card.appendChild(header);
+    card.appendChild(body);
+    card.appendChild(footer);
+    return card;
+  }
+
+  function renderOffersList() {
+    if (!offersEls.list) return;
+    const empty = offersEls.empty || null;
+    offersEls.list.innerHTML = "";
+    const offers = offersState.offers;
+    if (!Array.isArray(offers) || !offers.length) {
+      if (empty) {
+        empty.hidden = false;
+        offersEls.list.appendChild(empty);
+      }
+      return;
+    }
+    offers.forEach((offer) => {
+      const card = buildAdminOfferCard(offer);
+      offersEls.list.appendChild(card);
+    });
+    if (empty) {
+      empty.hidden = true;
+      offersEls.list.appendChild(empty);
+    }
+  }
+
+  function persistOffers() {
+    if (!window.localStorage) return;
+    try {
+      const payload = { offers: offersState.offers };
+      window.localStorage.setItem(OFFERS_STORAGE_KEY, JSON.stringify(payload));
+    } catch (error) {
+      console.warn("[admin] Failed to store offer overrides", error);
+    }
+  }
+
+  function loadOffersOverrides() {
+    if (!window.localStorage) return null;
+    try {
+      const raw = window.localStorage.getItem(OFFERS_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return null;
+      const list = Array.isArray(parsed.offers) ? parsed.offers : [];
+      return list
+        .map((entry, index) => normalizeOffer(entry, index + 1))
+        .filter(Boolean);
+    } catch (error) {
+      console.warn("[admin] Failed to parse stored offers", error);
+      return null;
+    }
+  }
+
+  function mergeOffers(baseline, overrides) {
+    const normalizedBaseline = Array.isArray(baseline)
+      ? baseline.map((entry, index) => normalizeOffer(entry, index + 1)).filter(Boolean)
+      : [];
+    if (!Array.isArray(overrides) || !overrides.length) {
+      return normalizedBaseline.map((entry) => ({ ...entry }));
+    }
+    const overrideMap = new Map();
+    overrides.forEach((entry, index) => {
+      const normalized = normalizeOffer(entry, index + 1);
+      if (!normalized) return;
+      overrideMap.set(slugifyOffer(normalized.slug), normalized);
+    });
+    return normalizedBaseline.map((entry) => {
+      const slug = slugifyOffer(entry.slug);
+      if (slug && overrideMap.has(slug)) {
+        const override = overrideMap.get(slug);
+        return { ...entry, ...override, slug };
+      }
+      return { ...entry };
+    });
+  }
+
+  function resetOffersToBaseline() {
+    if (!offersState.baseline.length) {
+      setOffersStatus("Default offers are still loading. Try again in a moment.", "warning");
+      return;
+    }
+    offersState.offers = offersState.baseline.map((offer) => ({ ...offer }));
+    try {
+      window.localStorage.removeItem(OFFERS_STORAGE_KEY);
+    } catch (error) {
+      console.warn("[admin] Failed to clear offer overrides", error);
+    }
+    updateOffersSummary();
+    renderOffersList();
+    setOffersStatus("Restored the My Offers lineup to the default dataset.", "success");
+  }
+
+  function exportOffers() {
+    if (!offersState.offers.length) {
+      setOffersStatus("There are no offers to export yet.", "warning");
+      return;
+    }
+    const payload = {
+      updated: new Date().toISOString(),
+      offers: offersState.offers.map((offer) => ({ ...offer }))
+    };
+    try {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `offers-${Date.now()}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+      setOffersStatus("Downloaded an offers.json file. Upload it to publish your updates.", "success");
+    } catch (error) {
+      console.error("[admin] Failed to export offers", error);
+      setOffersStatus("Unable to download offers.json. Please try again.", "danger");
+    }
+  }
+
+  function updateOffer(slug, updates = {}) {
+    const targetSlug = slugifyOffer(slug);
+    if (!targetSlug) return;
+    let changed = false;
+    offersState.offers = offersState.offers.map((offer) => {
+      if (slugifyOffer(offer?.slug) !== targetSlug) return offer;
+      const next = { ...offer, ...updates };
+      changed = true;
+      return next;
+    });
+    if (!changed) return;
+    persistOffers();
+    updateOffersSummary();
+    renderOffersList();
+    setOffersStatus("Updated the My Offers lineup. Remember to export when you're ready to publish.", "success");
+  }
+
+  async function handleCopyOfferCode(button) {
+    if (!button) return;
+    const slug = button.dataset.adminOfferCopy;
+    const offer = getOfferBySlug(slug);
+    if (!offer || !offer.discountCode) {
+      setOffersStatus("This offer doesn't have a code yet.", "warning");
+      return;
+    }
+    try {
+      await copyOffersText(offer.discountCode);
+      const original = button.textContent;
+      button.textContent = "Copied!";
+      button.disabled = true;
+      setOffersStatus(`Copied ${offer.discountCode} to your clipboard.`, "success");
+      window.setTimeout(() => {
+        button.textContent = original || "Copy code";
+        button.disabled = false;
+      }, 1600);
+    } catch (error) {
+      console.warn("[admin] Failed to copy offer code", error);
+      setOffersStatus("We couldn't copy that code. Copy it manually instead.", "danger");
+    }
+  }
+
+  async function handleCopyOfferMessage(button) {
+    if (!button) return;
+    const slug = button.dataset.adminOfferMessage;
+    const offer = getOfferBySlug(slug);
+    if (!offer) return;
+    const savings = describeOfferSavings(offer);
+    const codePart = offer.discountCode
+      ? `Use code ${offer.discountCode}${savings ? " to" : " for"} ${savings.toLowerCase()}.`
+      : savings
+      ? `Enjoy ${savings}.`
+      : "Enjoy this offer.";
+    const url = offer.ctaUrl ? new URL(offer.ctaUrl, window.location.origin).href : window.location.href;
+    const expiry = offer.validThrough ? `Valid through ${formatOfferDate(offer.validThrough).display}.` : "";
+    const headline = offer.name;
+    const detail = offer.tagline || offer.description || "Unlock exclusive savings from Harmony Sheets.";
+    const message = `${headline}: ${detail} ${codePart} Redeem at ${url}. ${expiry}`.trim();
+    try {
+      await copyOffersText(message);
+      const original = button.textContent;
+      button.textContent = "Promo copied!";
+      button.disabled = true;
+      setOffersStatus("Promo copy saved to your clipboard. Paste it into your next campaign.", "success");
+      window.setTimeout(() => {
+        button.textContent = original || "Copy promo blurb";
+        button.disabled = false;
+      }, 1800);
+    } catch (error) {
+      console.warn("[admin] Failed to copy offer message", error);
+      setOffersStatus("We couldn't copy the promo text. Copy it manually instead.", "danger");
+    }
+  }
+
+  function handleOffersListChange(event) {
+    const target = event.target;
+    if (!target || target.disabled) return;
+    if (target.dataset.adminOfferToggle) {
+      updateOffer(target.dataset.adminOfferToggle, { active: target.checked });
+    }
+  }
+
+  function handleOffersListClick(event) {
+    const target = event.target;
+    if (!target) return;
+    const copyButton = target.closest("[data-admin-offer-copy]");
+    if (copyButton) {
+      event.preventDefault();
+      handleCopyOfferCode(copyButton);
+      return;
+    }
+    const messageButton = target.closest("[data-admin-offer-message]");
+    if (messageButton) {
+      event.preventDefault();
+      handleCopyOfferMessage(messageButton);
+    }
+  }
+
+  async function loadOffersDataset({ force = false } = {}) {
+    if (!offersEls.panel) return;
+    offersState.loading = true;
+    setOffersStatus("Loading offers…", "muted");
+    try {
+      const response = await fetch("offers.json", { cache: force ? "reload" : "no-store" });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const payload = await response.json();
+      const baseline = Array.isArray(payload?.offers) ? payload.offers : [];
+      offersState.baseline = baseline
+        .map((entry, index) => normalizeOffer(entry, index + 1))
+        .filter(Boolean);
+      offersState.updated = payload?.updated || null;
+      const overrides = loadOffersOverrides();
+      offersState.offers = mergeOffers(offersState.baseline, overrides || []);
+      offersState.loading = false;
+      updateOffersSummary();
+      renderOffersList();
+      const total = offersState.offers.length;
+      const message = total
+        ? `Loaded ${total} offer${total === 1 ? "" : "s"}. Toggle them on to surface the right deals on the My Offers page.`
+        : "No offers are defined yet. Add entries to offers.json to populate this dashboard.";
+      setOffersStatus(message, total ? "success" : "warning");
+    } catch (error) {
+      offersState.loading = false;
+      console.error("[admin] Failed to load offers", error);
+      offersState.offers = [];
+      updateOffersSummary();
+      renderOffersList();
+      setOffersStatus(`Unable to load offers: ${formatError(error)}`, "danger");
+    }
+  }
+
+  function initializeOffersWorkspace() {
+    if (offersInitialized) return;
+    if (!offersEls.panel) return;
+    offersInitialized = true;
+    if (offersEls.list) {
+      offersEls.list.addEventListener("change", handleOffersListChange);
+      offersEls.list.addEventListener("click", handleOffersListClick);
+    }
+    if (offersEls.reset) {
+      offersEls.reset.addEventListener("click", (event) => {
+        event.preventDefault();
+        resetOffersToBaseline();
+      });
+    }
+    if (offersEls.export) {
+      offersEls.export.addEventListener("click", (event) => {
+        event.preventDefault();
+        exportOffers();
+      });
+    }
+    if (offersEls.refresh) {
+      offersEls.refresh.addEventListener("click", (event) => {
+        event.preventDefault();
+        loadOffersDataset({ force: true });
+      });
+    }
+    updateOffersSummary();
+    renderOffersList();
+    loadOffersDataset();
   }
 
   function populateStatusPopover(payload) {
@@ -3218,6 +3775,7 @@ if (!rootHook) {
     showSection("content");
     updateSalesSnapshot(salesSnapshot);
     initializeSupabaseDebugModal();
+    initializeOffersWorkspace();
     initializeKpiAsk();
   }
 
