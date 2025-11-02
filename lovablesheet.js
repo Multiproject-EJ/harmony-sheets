@@ -654,7 +654,7 @@ function closeIdeaModal(options = {}) {
 }
 
 function updateStepTwoAvailability() {
-  const { stepTwo, container, clearButton, lock, successIndicator, connector } = ideaStageElements;
+  const { stepTwo, container, clearButton, lock, successIndicator, connector, hint } = ideaStageElements;
   const hasSelection = ideaStageState.selectedProduct.trim().length > 0;
 
   if (stepTwo) {
@@ -672,8 +672,13 @@ function updateStepTwoAvailability() {
   }
 
   if (container) {
+    container.hidden = !hasSelection;
     container.classList.toggle("lovablesheet-idea__selection--active", hasSelection);
     container.dataset.ideaSelected = hasSelection ? "true" : "false";
+  }
+
+  if (hint) {
+    hint.hidden = !hasSelection;
   }
 
   if (clearButton) {

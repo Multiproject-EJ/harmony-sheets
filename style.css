@@ -235,6 +235,9 @@ nav,nav *{pointer-events:auto;}
 .lovablesheet-main{display:flex;flex-direction:column;gap:clamp(36px,7vw,80px)}
 .lovablesheet-stage{display:grid;gap:clamp(24px,5vw,40px);position:relative}
 .lovablesheet-stage__header{display:grid;gap:12px}
+.lovablesheet-stage--idea .lovablesheet-stage__header{justify-items:center;text-align:center;margin-inline:auto;max-width:min(520px,92vw)}
+.lovablesheet-stage--idea .lovablesheet-stage__header>div{display:grid;gap:8px}
+.lovablesheet-stage--idea .lovablesheet-stage__description{max-width:unset}
 .lovablesheet-stage__eyebrow{margin:0;font-size:.74rem;letter-spacing:.26em;text-transform:uppercase;font-weight:700;color:#64748b}
 .lovablesheet-stage__description{margin:0;color:#475569;font-size:1rem;line-height:1.6;max-width:640px}
 .lovablesheet-stage__panels{display:grid;gap:clamp(24px,5vw,36px)}
@@ -277,7 +280,7 @@ nav,nav *{pointer-events:auto;}
 .lovablesheet-idea__modal-close:is(:hover,:focus-visible){outline:none;transform:translateY(-1px);box-shadow:0 18px 42px rgba(148,163,184,.32);border-color:rgba(148,163,184,.55)}
 .lovablesheet-idea__modal-body{position:relative;flex:1;padding:0 clamp(20px,4vw,32px) clamp(24px,5vw,40px);overflow:auto}
 .lovablesheet-idea__modal-body .lovablesheet-stage__panels{gap:clamp(24px,4vw,36px)}
-.lovablesheet-idea__selection{border-radius:28px;border:1px dashed rgba(148,163,184,.35);background:rgba(248,250,252,.88);padding:clamp(20px,4vw,28px);display:grid;gap:12px;color:#1f2937}
+.lovablesheet-idea__selection{border-radius:28px;border:1px dashed rgba(148,163,184,.35);background:rgba(248,250,252,.88);padding:clamp(20px,4vw,28px);display:grid;gap:12px;color:#1f2937;width:100%;max-width:min(520px,92vw);margin:0 auto}
 .lovablesheet-idea__selection-title{display:flex;align-items:center;gap:12px}
 .lovablesheet-idea__success{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(34,197,94,.16);border:1px solid rgba(34,197,94,.32);color:#15803d;font-size:1.1rem;opacity:0;transform:scale(.6);transition:opacity .24s ease,transform .28s ease,filter .28s ease}
 .lovablesheet-idea__success-icon{display:block;filter:drop-shadow(0 0 6px rgba(56,189,248,.4))}
