@@ -128,9 +128,13 @@ if (!rootHook) {
     });
     panels.forEach(({ key, panel }) => {
       const isVisible = key === tabKey;
-      panel.hidden = !isVisible;
+      panel.classList.toggle("is-active", isVisible);
+      panel.toggleAttribute("hidden", !isVisible);
       panel.setAttribute("aria-hidden", isVisible ? "false" : "true");
     });
+    if (root instanceof HTMLElement) {
+      root.dataset.adminTabActive = tabKey;
+    }
   }
 
   function initAdminTabs(root) {
