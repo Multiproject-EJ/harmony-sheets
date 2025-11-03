@@ -2970,6 +2970,164 @@ App.initNavDropdown = function() {
     });
   };
 
+  let previewLayer = null;
+  let previewImageEl = null;
+  let previewCardEl = null;
+  let previewCloseEl = null;
+  let previewIsVisible = false;
+  let previewTriggerEl = null;
+  let previewHideTimer = null;
+
+  const ensurePreviewLayer = () => {
+    if (previewLayer) return previewLayer;
+
+    previewLayer = document.createElement("div");
+    previewLayer.className = "nav-mega__preview-layer";
+    previewLayer.setAttribute("data-nav-preview-layer", "");
+    previewLayer.setAttribute("aria-hidden", "true");
+    previewLayer.hidden = true;
+    previewLayer.innerHTML = `
+      <div class="nav-mega__preview-backdrop" data-nav-preview-close></div>
+      <figure class="nav-mega__preview-card" data-nav-preview-card>
+        <button type="button" class="nav-mega__preview-close" data-nav-preview-close aria-label="Close preview"></button>
+        <img class="nav-mega__preview-image" data-nav-preview-img alt="">
+      </figure>
+    `;
+    document.body.appendChild(previewLayer);
+
+    previewImageEl = previewLayer.querySelector("[data-nav-preview-img]");
+    previewCardEl = previewLayer.querySelector("[data-nav-preview-card]");
+    previewCloseEl = previewLayer.querySelector(".nav-mega__preview-close");
+
+    const closeTargets = previewLayer.querySelectorAll("[data-nav-preview-close]");
+    closeTargets.forEach(el => {
+      el.addEventListener("click", () => {
+        hideLargePreview();
+      });
+    });
+
+    previewLayer.addEventListener("mousedown", event => {
+      if (event.target === previewLayer) {
+        hideLargePreview();
+      }
+    });
+
+    return previewLayer;
+  };
+
+  const setPreviewPosition = trigger => {
+    if (!previewCardEl) return;
+    let rect = null;
+    if (trigger && document.documentElement.contains(trigger)) {
+      rect = trigger.getBoundingClientRect();
+    }
+    if (!rect) {
+      const megaRect = mega?.getBoundingClientRect();
+      if (megaRect) {
+        previewCardEl.style.setProperty("--nav-preview-x", `${megaRect.left + megaRect.width / 2}px`);
+        previewCardEl.style.setProperty("--nav-preview-y", `${megaRect.top + megaRect.height / 2}px`);
+      }
+      return;
+    }
+
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height / 2;
+    previewCardEl.style.setProperty("--nav-preview-x", `${originX}px`);
+    previewCardEl.style.setProperty("--nav-preview-y", `${originY}px`);
+  };
+
+  const finalizeHide = () => {
+    if (!previewLayer) return;
+    previewLayer.hidden = true;
+    previewLayer.setAttribute("aria-hidden", "true");
+    if (previewImageEl) {
+      previewImageEl.removeAttribute("src");
+      previewImageEl.removeAttribute("alt");
+    }
+  };
+
+  const hideLargePreview = (options = {}) => {
+    if (!previewLayer || !previewIsVisible) return;
+    const { returnFocus = true } = options;
+
+    previewLayer.classList.remove("is-visible");
+    previewIsVisible = false;
+
+    if (previewHideTimer) {
+      clearTimeout(previewHideTimer);
+      previewHideTimer = null;
+    }
+
+    const complete = () => {
+      finalizeHide();
+    };
+
+    const onTransitionEnd = () => {
+      if (previewHideTimer) {
+        clearTimeout(previewHideTimer);
+        previewHideTimer = null;
+      }
+      complete();
+    };
+
+    previewLayer.addEventListener("transitionend", onTransitionEnd, { once: true });
+
+    previewHideTimer = window.setTimeout(() => {
+      previewHideTimer = null;
+      complete();
+    }, 220);
+
+    if (returnFocus && previewTriggerEl && typeof previewTriggerEl.focus === "function") {
+      previewTriggerEl.focus({ preventScroll: true });
+    }
+    previewTriggerEl = null;
+  };
+
+  const showLargePreview = (src, trigger) => {
+    if (!src) return;
+    const layer = ensurePreviewLayer();
+    if (!layer || !previewImageEl || !previewCardEl) return;
+
+    previewTriggerEl = trigger || null;
+    layer.hidden = false;
+    layer.setAttribute("aria-hidden", "false");
+    previewImageEl.setAttribute("src", src);
+
+    const label = trigger?.getAttribute("aria-label") || trigger?.dataset?.thumbLabel || "Product preview image";
+    previewImageEl.setAttribute("alt", label);
+
+    setPreviewPosition(trigger);
+
+    if (previewHideTimer) {
+      clearTimeout(previewHideTimer);
+      previewHideTimer = null;
+    }
+
+    previewIsVisible = true;
+    requestAnimationFrame(() => {
+      layer.classList.add("is-visible");
+      if (previewCloseEl) {
+        previewCloseEl.focus({ preventScroll: true });
+      }
+    });
+  };
+
+  const handlePreviewReposition = () => {
+    if (!previewIsVisible) return;
+    setPreviewPosition(previewTriggerEl);
+  };
+
+  const handlePreviewKeydown = event => {
+    if (event.key === "Escape" && previewIsVisible) {
+      event.preventDefault();
+      hideLargePreview();
+    }
+  };
+
+  window.addEventListener("resize", handlePreviewReposition);
+  window.addEventListener("scroll", handlePreviewReposition, { passive: true });
+  window.addEventListener("keydown", handlePreviewKeydown);
+
   const setOpen = open => {
     if (isMobile()) {
       open = false;
@@ -2983,7 +3141,10 @@ App.initNavDropdown = function() {
     browseLink.setAttribute("aria-expanded", open ? "true" : "false");
     App.setLayerVisibility(mega, open);
   };
-  const close = () => setOpen(false);
+  const close = () => {
+    hideLargePreview({ returnFocus: false });
+    setOpen(false);
+  };
   App.closeBrowseMenu = close;
   close();
 
@@ -3222,7 +3383,6 @@ App.initNavDropdown = function() {
   let tableEl = null;
   let activePreviewRow = null;
   let hasRowListeners = false;
-
   const applyRowImage = (row, src) => {
     if (!row) return;
     if (!src) {
@@ -3448,7 +3608,7 @@ App.initNavDropdown = function() {
           thumbs.forEach(thumb => {
             const updatePreview = () => {
               const src = thumb.getAttribute("data-thumb-src") || "";
-              if (!src) return;
+              if (!src) return "";
               row.setAttribute("data-preview-image", src);
               if (activePreviewRow === row) {
                 applyRowImage(row, src);
@@ -3460,6 +3620,7 @@ App.initNavDropdown = function() {
                   btn.classList.remove("is-active");
                 }
               });
+              return src;
             };
             thumb.addEventListener("mouseenter", () => {
               updatePreview();
@@ -3471,8 +3632,11 @@ App.initNavDropdown = function() {
             });
             thumb.addEventListener("click", event => {
               event.preventDefault();
-              updatePreview();
+              const src = updatePreview();
               setActiveRow(row);
+              if (src) {
+                showLargePreview(src, thumb);
+              }
             });
           });
         });
