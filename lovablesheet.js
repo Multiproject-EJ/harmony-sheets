@@ -5083,6 +5083,177 @@ initializeIdeaStage();
 initializeStepThree();
 initializeThinkingTools();
 
+// Step navigation and celebration screen
+const stepNavigationState = {
+  currentStep: 1,
+  totalSteps: 3,
+  celebrationShown: false,
+  elements: {
+    progressDots: Array.from(document.querySelectorAll('[data-progress-step]')),
+    celebrationScreen: document.querySelector('[data-celebration-screen]'),
+    celebrationMessage: document.querySelector('[data-celebration-message]'),
+    celebrationNextButton: document.querySelector('[data-celebration-next]'),
+    stages: [
+      document.querySelector('[data-idea-stage]'),
+      document.querySelector('[data-step-two]'),
+      document.querySelector('[data-step-three]')
+    ]
+  }
+};
+
+function updateProgressDots() {
+  const { progressDots } = stepNavigationState.elements;
+  const { currentStep } = stepNavigationState;
+
+  progressDots.forEach((dot, index) => {
+    const stepNumber = index + 1;
+    if (stepNumber < currentStep) {
+      dot.setAttribute('data-status', 'completed');
+    } else if (stepNumber === currentStep) {
+      dot.setAttribute('data-status', 'active');
+    } else {
+      dot.removeAttribute('data-status');
+    }
+  });
+}
+
+function showStep(stepNumber, withTransition = true) {
+  const { stages } = stepNavigationState.elements;
+
+  stages.forEach((stage, index) => {
+    if (!stage) return;
+
+    const stageStepNumber = index + 1;
+    if (stageStepNumber === stepNumber) {
+      if (withTransition) {
+        stage.setAttribute('data-step-visible', 'false');
+        setTimeout(() => {
+          stage.setAttribute('data-step-visible', 'true');
+        }, 50);
+      } else {
+        stage.setAttribute('data-step-visible', 'true');
+      }
+    } else {
+      stage.setAttribute('data-step-visible', 'false');
+    }
+  });
+
+  stepNavigationState.currentStep = stepNumber;
+  updateProgressDots();
+}
+
+function showCelebrationScreen(completedStep) {
+  const { celebrationScreen, celebrationMessage } = stepNavigationState.elements;
+
+  if (!celebrationScreen) return;
+
+  const messages = {
+    1: "You've completed Step 1: Idea generation!",
+    2: "You've completed Step 2: Next Gen brief!",
+    3: "You've completed all steps! Great work!"
+  };
+
+  if (celebrationMessage) {
+    celebrationMessage.textContent = messages[completedStep] || `You've completed Step ${completedStep}!`;
+  }
+
+  celebrationScreen.hidden = false;
+  stepNavigationState.celebrationShown = true;
+}
+
+function hideCelebrationScreen() {
+  const { celebrationScreen } = stepNavigationState.elements;
+
+  if (!celebrationScreen) return;
+
+  celebrationScreen.hidden = true;
+  stepNavigationState.celebrationShown = false;
+}
+
+function goToNextStep() {
+  const { currentStep, totalSteps } = stepNavigationState;
+
+  hideCelebrationScreen();
+
+  if (currentStep < totalSteps) {
+    showStep(currentStep + 1);
+  }
+}
+
+function initializeStepNavigation() {
+  const { celebrationNextButton, celebrationScreen } = stepNavigationState.elements;
+
+  // Initialize with step 1 visible
+  showStep(1, false);
+
+  // Set up celebration screen button
+  if (celebrationNextButton) {
+    celebrationNextButton.addEventListener('click', goToNextStep);
+  }
+
+  // Close celebration on overlay click
+  if (celebrationScreen) {
+    const overlay = celebrationScreen.querySelector('.lovablesheet-celebration__overlay');
+    if (overlay) {
+      overlay.addEventListener('click', goToNextStep);
+    }
+  }
+
+  // Monitor step 1 completion (when a product is selected)
+  const originalUpdateIdeaStageUI = window.updateIdeaStageUI || updateIdeaStageUI;
+  let step1CompletionDetected = false;
+
+  const checkStep1Completion = () => {
+    const hasSelection = ideaStageState.selectedProduct.trim().length > 0;
+    if (hasSelection && !step1CompletionDetected && stepNavigationState.currentStep === 1) {
+      step1CompletionDetected = true;
+      setTimeout(() => {
+        showCelebrationScreen(1);
+      }, 800);
+    } else if (!hasSelection) {
+      step1CompletionDetected = false;
+    }
+  };
+
+  // Wrap the updateIdeaStageUI function to detect completion
+  if (typeof updateIdeaStageUI === 'function') {
+    const originalFunc = updateIdeaStageUI;
+    window.updateIdeaStageUI = function(...args) {
+      const result = originalFunc.apply(this, args);
+      checkStep1Completion();
+      return result;
+    };
+  }
+
+  // Monitor step 2 completion (when a Next Gen brief is created)
+  let step2CompletionDetected = false;
+
+  const checkStep2Completion = () => {
+    const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
+    const hasBriefs = briefs.length > 0;
+
+    if (hasBriefs && !step2CompletionDetected && stepNavigationState.currentStep === 2) {
+      step2CompletionDetected = true;
+      setTimeout(() => {
+        showCelebrationScreen(2);
+      }, 800);
+    } else if (!hasBriefs) {
+      step2CompletionDetected = false;
+    }
+  };
+
+  // Set up a mutation observer to watch for Next Gen brief changes
+  const nextGenListEl = document.querySelector('[data-nextgen-list]');
+  if (nextGenListEl) {
+    const observer = new MutationObserver(() => {
+      checkStep2Completion();
+    });
+    observer.observe(nextGenListEl, { childList: true, subtree: true });
+  }
+}
+
+initializeStepNavigation();
+
 async function init() {
   showSection("loading");
 
