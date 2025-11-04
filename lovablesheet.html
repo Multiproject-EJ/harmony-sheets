@@ -689,7 +689,7 @@
 
 
         <section
-          class="lovablesheet-stage lovablesheet-stage--nextgen"
+          class="lovablesheet-stage lovablesheet-stage--nextgen lovablesheet-stage--hidden"
           aria-labelledby="lovablesheet-nextgen-stage"
           data-step-two
           data-stage-locked="true"
@@ -821,7 +821,7 @@
     </div>
 
         <section
-          class="lovablesheet-stage lovablesheet-stage--codex"
+          class="lovablesheet-stage lovablesheet-stage--codex lovablesheet-stage--hidden"
           aria-labelledby="lovablesheet-codex-stage"
           data-step-three
           data-stage-locked="true"
@@ -889,6 +889,18 @@
       </div>
     </div>
   </section>
+
+<!-- Celebration Overlay -->
+<div class="lovablesheet-celebration" data-celebration-overlay>
+  <div class="lovablesheet-celebration__content">
+    <div class="lovablesheet-celebration__icon" data-celebration-icon>🎉</div>
+    <h2 class="lovablesheet-celebration__title" data-celebration-title>Step Complete!</h2>
+    <p class="lovablesheet-celebration__message" data-celebration-message>Great work! Ready to move to the next step?</p>
+    <button class="lovablesheet-celebration__button" data-celebration-next type="button">
+      Next →
+    </button>
+  </div>
+</div>
 
     <div class="nextgen-modal-layer" data-nextgen-layer hidden>
       <div class="nextgen-modal-overlay" data-nextgen-overlay></div>

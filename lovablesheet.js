@@ -670,6 +670,9 @@ function updateStepTwoAvailability() {
   const { stepTwo, container, clearButton, lock, successIndicator, connector, hint } = ideaStageElements;
   const hasSelection = ideaStageState.selectedProduct.trim().length > 0;
 
+  // Track if step was previously locked
+  const wasLocked = stepTwo && stepTwo.dataset.stageLocked === "true";
+
   if (stepTwo) {
     if (hasSelection) {
       stepTwo.dataset.stageLocked = "false";
@@ -708,6 +711,13 @@ function updateStepTwoAvailability() {
   }
 
   updateNextGenSummaryCard(hasSelection);
+
+  // Show celebration when step 2 unlocks
+  if (hasSelection && wasLocked && typeof showCelebration === "function") {
+    setTimeout(() => {
+      showCelebration(1, 2);
+    }, 800);
+  }
 }
 
 function updateNextGenSummaryCard(hasSelection) {
@@ -845,6 +855,9 @@ function updateStepThreeAvailability() {
   const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
   const hasBriefs = briefs.length > 0;
 
+  // Track if step was previously locked
+  const wasLocked = stage && stage.dataset.stageLocked === "true";
+
   if (stage) {
     stage.dataset.stageLocked = hasBriefs ? "false" : "true";
     if (hasBriefs) {
@@ -899,6 +912,13 @@ function updateStepThreeAvailability() {
       setStepThreeStatus("Latest brief updated. Generate a fresh Codex prompt to reflect the new details.", "info");
     }
     setStepThreeOutput("");
+  }
+
+  // Show celebration when step 3 unlocks
+  if (hasBriefs && wasLocked && typeof showCelebration === "function") {
+    setTimeout(() => {
+      showCelebration(2, 3);
+    }, 800);
   }
 }
 
@@ -5079,9 +5099,183 @@ async function handleSaveBoard() {
   }
 }
 
+// ===========================
+// Step Transitions & Celebrations
+// ===========================
+
+const celebrationState = {
+  currentStep: 1,
+  pendingStep: null,
+  isTransitioning: false
+};
+
+const celebrationElements = {
+  overlay: document.querySelector("[data-celebration-overlay]"),
+  icon: document.querySelector("[data-celebration-icon]"),
+  title: document.querySelector("[data-celebration-title]"),
+  message: document.querySelector("[data-celebration-message]"),
+  nextButton: document.querySelector("[data-celebration-next]"),
+  step1: document.querySelector("[data-idea-stage]"),
+  step2: document.querySelector("[data-step-two]"),
+  step3: document.querySelector("[data-step-three]")
+};
+
+function showCelebration(completedStep, nextStep) {
+  const { overlay, icon, title, message } = celebrationElements;
+
+  if (!overlay) return;
+
+  celebrationState.pendingStep = nextStep;
+
+  // Set celebration content based on step
+  const celebrationData = {
+    1: {
+      title: "Step 1 Complete! 🎯",
+      icon: "✨",
+      message: "Great! You've selected a product. Ready to create the Next Gen brief?"
+    },
+    2: {
+      title: "Step 2 Complete! ⚡",
+      icon: "🚀",
+      message: "Excellent! Your Next Gen brief is ready. Let's create the Codex prompt!"
+    }
+  };
+
+  const data = celebrationData[completedStep] || {
+    title: "Step Complete!",
+    icon: "🎉",
+    message: "Great work! Ready to move forward?"
+  };
+
+  if (icon) icon.textContent = data.icon;
+  if (title) title.textContent = data.title;
+  if (message) message.textContent = data.message;
+
+  // Show celebration
+  overlay.classList.add("lovablesheet-celebration--active");
+
+  // Generate confetti
+  generateConfetti();
+}
+
+function hideCelebration() {
+  const { overlay } = celebrationElements;
+  if (overlay) {
+    overlay.classList.remove("lovablesheet-celebration--active");
+  }
+}
+
+function generateConfetti() {
+  const container = celebrationElements.overlay;
+  if (!container) return;
+
+  const colors = [
+    "linear-gradient(135deg,#3b82f6,#ec4899)",
+    "linear-gradient(135deg,#fbbf24,#f59e0b)",
+    "linear-gradient(135deg,#10b981,#3b82f6)",
+    "linear-gradient(135deg,#ec4899,#fbbf24)"
+  ];
+
+  const confettiCount = 40;
+
+  for (let i = 0; i < confettiCount; i++) {
+    const confetti = document.createElement("div");
+    confetti.className = "lovablesheet-confetti";
+    confetti.style.left = `${Math.random() * 100}%`;
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = `${Math.random() * 0.4}s`;
+    confetti.style.animationDuration = `${2.5 + Math.random() * 1}s`;
+
+    container.appendChild(confetti);
+
+    setTimeout(() => {
+      confetti.classList.add("lovablesheet-confetti--active");
+    }, 10);
+
+    setTimeout(() => {
+      confetti.remove();
+    }, 4000);
+  }
+}
+
+function transitionToStep(nextStep) {
+  if (celebrationState.isTransitioning) return;
+
+  celebrationState.isTransitioning = true;
+
+  const currentStepEl = getCurrentStepElement();
+  const nextStepEl = getStepElement(nextStep);
+
+  if (!currentStepEl || !nextStepEl) {
+    celebrationState.isTransitioning = false;
+    return;
+  }
+
+  // Fade out current step
+  currentStepEl.classList.add("lovablesheet-stage--fading-out");
+
+  setTimeout(() => {
+    // Hide current step
+    currentStepEl.classList.add("lovablesheet-stage--hidden");
+    currentStepEl.classList.remove("lovablesheet-stage--fading-out");
+
+    // Show next step with fade in
+    nextStepEl.classList.remove("lovablesheet-stage--hidden");
+    nextStepEl.classList.add("lovablesheet-stage--fading-in");
+
+    setTimeout(() => {
+      nextStepEl.classList.remove("lovablesheet-stage--fading-in");
+      celebrationState.currentStep = nextStep;
+      celebrationState.isTransitioning = false;
+    }, 500);
+  }, 500);
+}
+
+function getCurrentStepElement() {
+  const { step1, step2, step3 } = celebrationElements;
+
+  switch (celebrationState.currentStep) {
+    case 1: return step1;
+    case 2: return step2;
+    case 3: return step3;
+    default: return step1;
+  }
+}
+
+function getStepElement(stepNumber) {
+  const { step1, step2, step3 } = celebrationElements;
+
+  switch (stepNumber) {
+    case 1: return step1;
+    case 2: return step2;
+    case 3: return step3;
+    default: return null;
+  }
+}
+
+function handleNextButtonClick() {
+  if (celebrationState.pendingStep === null) return;
+
+  hideCelebration();
+
+  setTimeout(() => {
+    transitionToStep(celebrationState.pendingStep);
+    celebrationState.pendingStep = null;
+  }, 300);
+}
+
+function initializeCelebrations() {
+  const { nextButton } = celebrationElements;
+
+  if (nextButton) {
+    nextButton.addEventListener("click", handleNextButtonClick);
+  }
+}
+
 initializeIdeaStage();
 initializeStepThree();
 initializeThinkingTools();
+initializeCelebrations();
 
 async function init() {
   showSection("loading");

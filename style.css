@@ -309,10 +309,39 @@ nav,nav *{pointer-events:auto;}
 .lovablesheet-stage__connector--active .lovablesheet-stage__connector-signal span:nth-child(3){animation-delay:.6s}
 @keyframes idea-success-pulse{0%{filter:drop-shadow(0 0 0 rgba(56,189,248,0));transform:scale(0.75);opacity:0}35%{opacity:1;transform:scale(1.1);filter:drop-shadow(0 0 12px rgba(56,189,248,.5))}65%{transform:scale(.95);filter:drop-shadow(0 0 6px rgba(56,189,248,.3))}100%{opacity:1;transform:scale(1);filter:drop-shadow(0 0 10px rgba(56,189,248,.45))}}
 @keyframes idea-connector-spark{0%{opacity:0;transform:translateY(-18px) scale(.3)}30%{opacity:.9;transform:translateY(-4px) scale(.9)}60%{opacity:.6;transform:translateY(16px) scale(.6)}100%{opacity:0;transform:translateY(32px) scale(.2)}}
+
+/* Step Fade Transitions */
+.lovablesheet-stage--hidden{display:none}
+.lovablesheet-stage--fading-out{animation:stage-fade-out .5s ease-out forwards}
+.lovablesheet-stage--fading-in{animation:stage-fade-in .5s ease-in forwards}
+@keyframes stage-fade-out{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-20px)}}
+@keyframes stage-fade-in{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+
+/* Celebration Overlay */
+.lovablesheet-celebration{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.85);backdrop-filter:blur(12px);opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}
+.lovablesheet-celebration--active{opacity:1;visibility:visible}
+.lovablesheet-celebration__content{text-align:center;padding:clamp(32px,6vw,64px);max-width:min(600px,90vw);background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(241,245,249,.95));border-radius:32px;box-shadow:0 40px 100px rgba(15,23,42,.4);transform:scale(.8);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+.lovablesheet-celebration--active .lovablesheet-celebration__content{transform:scale(1);opacity:1}
+.lovablesheet-celebration__icon{font-size:clamp(4rem,10vw,6rem);line-height:1;display:block;margin:0 auto 24px;animation:celebration-icon-bounce 1s ease-out}
+.lovablesheet-celebration__title{font-size:clamp(2rem,5vw,3rem);font-weight:900;margin:0 0 16px;background:linear-gradient(135deg,#3b82f6,#ec4899,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:celebration-title-appear .6s ease-out}
+.lovablesheet-celebration__message{margin:0 0 32px;font-size:clamp(1rem,2vw,1.2rem);color:#475569;line-height:1.6}
+.lovablesheet-celebration__button{display:inline-flex;align-items:center;gap:10px;padding:16px 32px;border-radius:999px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#ffffff;font-size:1.1rem;font-weight:700;cursor:pointer;box-shadow:0 12px 32px rgba(59,130,246,.4);transition:all .3s ease}
+.lovablesheet-celebration__button:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(59,130,246,.5)}
+.lovablesheet-celebration__button:active{transform:translateY(0);box-shadow:0 8px 24px rgba(59,130,246,.4)}
+@keyframes celebration-icon-bounce{0%{transform:scale(.3) rotate(-180deg);opacity:0}60%{transform:scale(1.15) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes celebration-title-appear{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+
+/* Confetti */
+.lovablesheet-confetti{position:absolute;width:10px;height:10px;background:linear-gradient(135deg,#3b82f6,#ec4899);opacity:0;pointer-events:none}
+.lovablesheet-confetti--active{animation:confetti-fall 3s ease-out forwards}
+@keyframes confetti-fall{0%{opacity:1;transform:translateY(-100vh) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
+
 @media (prefers-reduced-motion:reduce){
   .idea-summary-card:is(:hover,:focus-within){transform:none}
   .lovablesheet-idea__success--active{animation:none;filter:none}
   .lovablesheet-stage__connector--active .lovablesheet-stage__connector-signal span{animation:none;opacity:.6;transform:none}
+  .lovablesheet-stage--fading-out,.lovablesheet-stage--fading-in{animation:none;opacity:1;transform:none}
+  .lovablesheet-celebration__icon,.lovablesheet-celebration__title,.lovablesheet-confetti--active{animation:none}
 }
 .lovablesheet-idea__selection--active{border-style:solid;background:linear-gradient(140deg,rgba(226,232,240,.9),rgba(241,245,249,.96))}
 .lovablesheet-idea__selection-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
