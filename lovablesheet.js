@@ -670,26 +670,13 @@ function updateStepTwoAvailability() {
   const { stepTwo, container, clearButton, lock, successIndicator, connector, hint } = ideaStageElements;
   const hasSelection = ideaStageState.selectedProduct.trim().length > 0;
 
-  // Track if step was previously locked
-  const wasLocked = stepTwo && stepTwo.dataset.stageLocked === "true";
-
   if (stepTwo) {
     if (hasSelection) {
       stepTwo.dataset.stageLocked = "false";
       stepTwo.removeAttribute("aria-disabled");
-
-      // Add unlocking animation class
-      if (wasLocked) {
-        stepTwo.classList.add("lovablesheet-stage--unlocking");
-        stepTwo.classList.add("lovablesheet-stage--unlocked");
-        setTimeout(() => {
-          stepTwo.classList.remove("lovablesheet-stage--unlocking");
-        }, 1000);
-      }
     } else {
       stepTwo.dataset.stageLocked = "true";
       stepTwo.setAttribute("aria-disabled", "true");
-      stepTwo.classList.remove("lovablesheet-stage--unlocked");
     }
   }
 
@@ -721,13 +708,6 @@ function updateStepTwoAvailability() {
   }
 
   updateNextGenSummaryCard(hasSelection);
-
-  // Trigger celebration and slide to step 2 when unlocking
-  if (hasSelection && wasLocked && typeof slideToStep === "function") {
-    setTimeout(() => {
-      slideToStep(1, { celebrate: true });
-    }, 1200);
-  }
 }
 
 function updateNextGenSummaryCard(hasSelection) {
@@ -865,25 +845,12 @@ function updateStepThreeAvailability() {
   const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
   const hasBriefs = briefs.length > 0;
 
-  // Track if step was previously locked
-  const wasLocked = stage && stage.dataset.stageLocked === "true";
-
   if (stage) {
     stage.dataset.stageLocked = hasBriefs ? "false" : "true";
     if (hasBriefs) {
       stage.removeAttribute("aria-disabled");
-
-      // Add unlocking animation class
-      if (wasLocked) {
-        stage.classList.add("lovablesheet-stage--unlocking");
-        stage.classList.add("lovablesheet-stage--unlocked");
-        setTimeout(() => {
-          stage.classList.remove("lovablesheet-stage--unlocking");
-        }, 1000);
-      }
     } else {
       stage.setAttribute("aria-disabled", "true");
-      stage.classList.remove("lovablesheet-stage--unlocked");
     }
   }
 
@@ -932,13 +899,6 @@ function updateStepThreeAvailability() {
       setStepThreeStatus("Latest brief updated. Generate a fresh Codex prompt to reflect the new details.", "info");
     }
     setStepThreeOutput("");
-  }
-
-  // Trigger celebration and slide to step 3 when unlocking
-  if (hasBriefs && wasLocked && typeof slideToStep === "function") {
-    setTimeout(() => {
-      slideToStep(2, { celebrate: true });
-    }, 1200);
   }
 }
 
@@ -5119,163 +5079,9 @@ async function handleSaveBoard() {
   }
 }
 
-// ===========================
-// Game-like Slider & Celebrations
-// ===========================
-
-const sliderState = {
-  currentStep: 0,
-  isAnimating: false
-};
-
-const sliderElements = {
-  slider: document.querySelector("[data-stages-slider]"),
-  progressDots: document.querySelectorAll("[data-progress-dot]"),
-  celebrationOverlay: document.querySelector("[data-celebration-overlay]"),
-  celebrationTitle: document.querySelector("[data-celebration-title]"),
-  celebrationIcon: document.querySelector("[data-celebration-icon]"),
-  stages: document.querySelectorAll(".lovablesheet-stage[data-stage-index]")
-};
-
-function slideToStep(stepIndex, options = {}) {
-  const { celebrate = false, unlocking = false } = options;
-
-  if (sliderState.isAnimating || !sliderElements.slider) {
-    return;
-  }
-
-  const maxStep = 2;
-  const targetStep = Math.max(0, Math.min(stepIndex, maxStep));
-
-  if (targetStep === sliderState.currentStep && !unlocking) {
-    return;
-  }
-
-  sliderState.isAnimating = true;
-  sliderState.currentStep = targetStep;
-
-  // Update slider transform
-  const slidePercent = -targetStep * 100;
-  if (sliderElements.slider) {
-    sliderElements.slider.style.transform = `translateX(${slidePercent}%)`;
-  }
-
-  // Update progress dots
-  sliderElements.progressDots.forEach((dot, index) => {
-    dot.classList.remove("lovablesheet-progress__dot--active");
-    if (index < targetStep) {
-      dot.classList.add("lovablesheet-progress__dot--completed");
-    }
-    if (index === targetStep) {
-      dot.classList.add("lovablesheet-progress__dot--active");
-    }
-  });
-
-  // Update stage active states
-  sliderElements.stages.forEach((stage) => {
-    const stageIndex = parseInt(stage.dataset.stageIndex, 10);
-    if (stageIndex === targetStep) {
-      stage.classList.add("lovablesheet-stage--active");
-    } else {
-      stage.classList.remove("lovablesheet-stage--active");
-    }
-  });
-
-  // Show celebration if requested
-  if (celebrate && targetStep > 0) {
-    setTimeout(() => {
-      showCelebration(targetStep);
-    }, 400);
-  }
-
-  setTimeout(() => {
-    sliderState.isAnimating = false;
-  }, 800);
-}
-
-function showCelebration(stepIndex) {
-  const { celebrationOverlay, celebrationTitle, celebrationIcon } = sliderElements;
-
-  if (!celebrationOverlay || !celebrationTitle || !celebrationIcon) {
-    return;
-  }
-
-  // Set celebration content based on step
-  const celebrationData = {
-    1: { title: "Level 1 Complete! 🎯", icon: "⚡" },
-    2: { title: "Level 2 Complete! ⚡", icon: "🚀" }
-  };
-
-  const data = celebrationData[stepIndex] || { title: "Level Complete!", icon: "🎉" };
-  celebrationTitle.textContent = data.title;
-  celebrationIcon.textContent = data.icon;
-
-  // Show celebration
-  celebrationOverlay.classList.add("lovablesheet-celebration--active");
-
-  // Generate confetti
-  generateConfetti();
-
-  // Hide celebration after delay
-  setTimeout(() => {
-    celebrationOverlay.classList.remove("lovablesheet-celebration--active");
-  }, 2500);
-}
-
-function generateConfetti() {
-  const container = sliderElements.celebrationOverlay;
-  if (!container) return;
-
-  const colors = [
-    "linear-gradient(135deg,#3b82f6,#ec4899)",
-    "linear-gradient(135deg,#fbbf24,#f59e0b)",
-    "linear-gradient(135deg,#10b981,#3b82f6)",
-    "linear-gradient(135deg,#ec4899,#fbbf24)"
-  ];
-
-  const confettiCount = 50;
-
-  for (let i = 0; i < confettiCount; i++) {
-    const confetti = document.createElement("div");
-    confetti.className = "lovablesheet-confetti";
-    confetti.style.left = `${Math.random() * 100}%`;
-    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-    confetti.style.animationDelay = `${Math.random() * 0.5}s`;
-    confetti.style.animationDuration = `${2 + Math.random() * 1}s`;
-
-    container.appendChild(confetti);
-
-    // Trigger animation
-    setTimeout(() => {
-      confetti.classList.add("lovablesheet-confetti--active");
-    }, 10);
-
-    // Remove after animation
-    setTimeout(() => {
-      confetti.remove();
-    }, 3500);
-  }
-}
-
-function initializeSlider() {
-  // Add click handlers to progress dots
-  sliderElements.progressDots.forEach((dot) => {
-    dot.addEventListener("click", () => {
-      const stepIndex = parseInt(dot.dataset.progressDot, 10);
-      if (!isNaN(stepIndex)) {
-        slideToStep(stepIndex);
-      }
-    });
-  });
-
-  // Initialize at step 0
-  slideToStep(0);
-}
-
 initializeIdeaStage();
 initializeStepThree();
 initializeThinkingTools();
-initializeSlider();
 
 async function init() {
   showSection("loading");
