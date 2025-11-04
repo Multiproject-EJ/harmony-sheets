@@ -265,6 +265,13 @@
         <h1 id="lovablesheet-workflow-title">Bring clarity to every planning sprint</h1>
       </header>
 
+      <!-- Progress Indicator -->
+      <div class="lovablesheet-progress" data-progress-indicator aria-label="Workflow progress">
+        <div class="lovablesheet-progress__dot" data-progress-step="1" aria-label="Step 1: Idea generation"></div>
+        <div class="lovablesheet-progress__dot" data-progress-step="2" aria-label="Step 2: Next Gen brief"></div>
+        <div class="lovablesheet-progress__dot" data-progress-step="3" aria-label="Step 3: Codex handoff"></div>
+      </div>
+
     </article>
 
 
@@ -1749,6 +1756,24 @@
     </div>
 
   </section>
+
+  <!-- Celebration Screen -->
+  <div class="lovablesheet-celebration" data-celebration-screen hidden>
+    <div class="lovablesheet-celebration__overlay"></div>
+    <div class="lovablesheet-celebration__content" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
+      <div class="lovablesheet-celebration__animation">
+        <span class="lovablesheet-celebration__emoji">🎉</span>
+        <span class="lovablesheet-celebration__emoji">✨</span>
+        <span class="lovablesheet-celebration__emoji">🎊</span>
+      </div>
+      <h2 id="celebration-title" class="lovablesheet-celebration__title">Great Job!</h2>
+      <p class="lovablesheet-celebration__message" data-celebration-message>You've completed Step 1!</p>
+      <button class="btn primary lovablesheet-celebration__button" type="button" data-celebration-next>
+        Next Step
+      </button>
+    </div>
+  </div>
+
 </main>
 
 <footer class="site-footer">
