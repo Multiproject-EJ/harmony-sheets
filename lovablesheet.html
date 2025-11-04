@@ -267,12 +267,25 @@
 
     </article>
 
+<!-- Progress indicator dots -->
+<div class="lovablesheet-progress" data-lovable-progress>
+  <button class="lovablesheet-progress__dot lovablesheet-progress__dot--active" data-progress-dot="0" aria-label="Go to Step 1"></button>
+  <button class="lovablesheet-progress__dot" data-progress-dot="1" aria-label="Go to Step 2"></button>
+  <button class="lovablesheet-progress__dot" data-progress-dot="2" aria-label="Go to Step 3"></button>
+</div>
 
+<!-- Horizontal stages slider -->
+<div class="lovablesheet-stages-slider" data-stages-slider>
         <section
-          class="lovablesheet-stage lovablesheet-stage--idea"
+          class="lovablesheet-stage lovablesheet-stage--idea lovablesheet-stage--level lovablesheet-stage--active"
           aria-labelledby="lovablesheet-idea-title"
           data-idea-stage
+          data-stage-index="0"
         >
+          <div class="lovablesheet-stage__level-badge">
+            <span class="lovablesheet-stage__level-badge-icon">🎯</span>
+            <span>Level 1</span>
+          </div>
           <header class="lovablesheet-stage__header">
             <p class="lovablesheet-stage__eyebrow">Step 1</p>
             <div>
@@ -689,12 +702,18 @@
 
 
         <section
-          class="lovablesheet-stage lovablesheet-stage--nextgen"
+          class="lovablesheet-stage lovablesheet-stage--nextgen lovablesheet-stage--level"
           aria-labelledby="lovablesheet-nextgen-stage"
           data-step-two
           data-stage-locked="true"
           aria-disabled="true"
+          data-stage-index="1"
         >
+          <div class="lovablesheet-stage__completion" aria-hidden="true">✓</div>
+          <div class="lovablesheet-stage__level-badge">
+            <span class="lovablesheet-stage__level-badge-icon">⚡</span>
+            <span>Level 2</span>
+          </div>
           <header class="lovablesheet-stage__header">
             <p class="lovablesheet-stage__eyebrow">Step 2</p>
             <div>
@@ -821,12 +840,18 @@
     </div>
 
         <section
-          class="lovablesheet-stage lovablesheet-stage--codex"
+          class="lovablesheet-stage lovablesheet-stage--codex lovablesheet-stage--level"
           aria-labelledby="lovablesheet-codex-stage"
           data-step-three
           data-stage-locked="true"
           aria-disabled="true"
+          data-stage-index="2"
         >
+          <div class="lovablesheet-stage__completion" aria-hidden="true">✓</div>
+          <div class="lovablesheet-stage__level-badge">
+            <span class="lovablesheet-stage__level-badge-icon">🚀</span>
+            <span>Level 3</span>
+          </div>
           <header class="lovablesheet-stage__header">
             <p class="lovablesheet-stage__eyebrow">Step 3</p>
             <div>
@@ -885,6 +910,16 @@
             </section>
           </div>
         </section>
+</div>
+<!-- End of stages slider -->
+
+<!-- Celebration overlay -->
+<div class="lovablesheet-celebration" data-celebration-overlay>
+  <div class="lovablesheet-celebration__content">
+    <div class="lovablesheet-celebration__icon" data-celebration-icon>🎉</div>
+    <h2 class="lovablesheet-celebration__title" data-celebration-title>Level Complete!</h2>
+  </div>
+</div>
 
       </div>
     </div>
