@@ -5282,29 +5282,35 @@ async function init() {
       console.log("LovableSheet: no session from getSession(); waiting up to 2000ms for onAuthStateChange...");
       user = await new Promise((resolve) => {
         let resolved = false;
+        let listener = null;
+        
+        const cleanup = () => {
+          if (listener?.subscription?.unsubscribe) {
+            try {
+              listener.subscription.unsubscribe();
+            } catch (_) {}
+          }
+        };
+
         const timeout = setTimeout(() => {
           if (resolved) return;
           resolved = true;
+          cleanup();
           console.log("LovableSheet: auth state wait timed out (no session).");
           resolve(null);
         }, 2000);
 
         // Subscribe to auth state changes and resolve early if a session arrives.
-        const { data: listener } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-          if (resolved) {
-            try {
-              listener?.subscription?.unsubscribe?.();
-            } catch (_) {}
-            return;
-          }
+        const { data: listenerData } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+          if (resolved) return;
           resolved = true;
           clearTimeout(timeout);
-          try {
-            listener?.subscription?.unsubscribe?.();
-          } catch (_) {}
+          cleanup();
           console.log("LovableSheet: onAuthStateChange delivered session:", session);
           resolve(session?.user ?? null);
         });
+        
+        listener = listenerData;
       });
     } else {
       console.log("LovableSheet: session found from getSession()", user);

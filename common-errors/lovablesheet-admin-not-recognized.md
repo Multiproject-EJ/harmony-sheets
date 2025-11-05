@@ -1,7 +1,7 @@
 # Common error: LovableSheet page doesn't recognise logged-in admin
 
 ## Symptom
-- Visiting https://www.harmony-sheets.com/lovablesheet.html shows the "Access restricted" or "You need an admin account" message even when the same browser is signed in as an admin and other admin pages (e.g., admin_dashboard.html) work.
+- Visiting lovablesheet.html shows the "Access restricted" or "You need an admin account" message even when the same browser is signed in as an admin and other admin pages (e.g., admin_dashboard.html) work.
 
 ## Root causes
 - Race condition: the page checks session immediately after load; getSession() is null because auth state hasn't been rehydrated yet.
