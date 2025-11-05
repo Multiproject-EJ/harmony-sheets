@@ -5200,7 +5200,11 @@ function initializeStepNavigation() {
   }
 
   // Monitor step 1 completion (when a product is selected)
-  const originalUpdateIdeaStageUI = window.updateIdeaStageUI || updateIdeaStageUI;
+  const existingUpdateIdeaStageUI =
+    (typeof window !== "undefined" && typeof window.updateIdeaStageUI === "function"
+      ? window.updateIdeaStageUI
+      : null) ||
+    (typeof updateIdeaStageUI === "function" ? updateIdeaStageUI : null);
   let step1CompletionDetected = false;
 
   const checkStep1Completion = () => {
@@ -5216,8 +5220,8 @@ function initializeStepNavigation() {
   };
 
   // Wrap the updateIdeaStageUI function to detect completion
-  if (typeof updateIdeaStageUI === 'function') {
-    const originalFunc = updateIdeaStageUI;
+  if (existingUpdateIdeaStageUI) {
+    const originalFunc = existingUpdateIdeaStageUI;
     window.updateIdeaStageUI = function(...args) {
       const result = originalFunc.apply(this, args);
       checkStep1Completion();
