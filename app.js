@@ -2316,7 +2316,7 @@ App.init = function() {
 
   // Auto-detect page
   if (App.qs("body.page-products")) {
-    App.initProductsFilterTable();
+    App.initProductsBrowser();
     App.initProducts();
   }
   if (App.qs("body.page-product")) App.initProduct();
@@ -4268,18 +4268,18 @@ App.initOffers = function() {
 };
 
 /*****************************************************
- * Products Filter Table (products.html)
+ * Products Browser (products.html)
  *****************************************************/
-App.initProductsFilterTable = async function() {
-  const tableContainer = App.qs("#products-filter-table");
-  if (!tableContainer) return;
+App.initProductsBrowser = async function() {
+  const browser = App.qs("#products-browser");
+  if (!browser) return;
 
-  const tbody = App.qs("[data-products-tbody]");
-  const searchInput = App.qs("[data-products-search]");
-  const sortSelect = App.qs("[data-products-sort]");
-  const infoText = App.qs("[data-products-info]");
+  const searchInput = App.qs("[data-browser-search]");
+  const sortSelect = App.qs("[data-browser-sort]");
+  const listContainer = App.qs("[data-browser-list]");
+  const countEl = App.qs("[data-browser-count]");
 
-  if (!tbody || !searchInput || !sortSelect || !infoText) return;
+  if (!searchInput || !sortSelect || !listContainer || !countEl) return;
 
   const params = new URLSearchParams(window.location.search);
   const areaSlug = params.get("area");
@@ -4288,16 +4288,6 @@ App.initProductsFilterTable = async function() {
   let filteredProducts = [];
   let searchQuery = "";
   let sortBy = "badge";
-
-  const formatPriceDisplay = value => {
-    if (typeof value === "string") {
-      const trimmed = value.trim();
-      return trimmed ? (trimmed.startsWith("$") ? trimmed : `$${trimmed}`) : "";
-    }
-    const number = Number(value);
-    if (!Number.isFinite(number)) return "";
-    return number % 1 === 0 ? `$${number.toFixed(0)}` : `$${number.toFixed(2)}`;
-  };
 
   const badgeWeight = badge => {
     const value = String(badge || "").toLowerCase();
@@ -4317,77 +4307,28 @@ App.initProductsFilterTable = async function() {
     return "";
   };
 
-  const applyRowImage = (row, src) => {
-    if (!row) return;
-    if (!src) {
-      row.style.removeProperty("--products-row-image");
-      return;
-    }
-    const safe = String(src).replace(/["\\\n\r]/g, match => {
-      if (match === "\n" || match === "\r") return "";
-      return `\\${match}`;
-    });
-    row.style.setProperty("--products-row-image", `url("${safe}")`);
-  };
-
-  let activePreviewRow = null;
-
-  const setActiveRow = row => {
-    if (activePreviewRow === row) return;
-    if (activePreviewRow) {
-      activePreviewRow.classList.remove("is-active");
-      applyRowImage(activePreviewRow, "");
-    }
-    activePreviewRow = row || null;
-    if (activePreviewRow) {
-      activePreviewRow.classList.add("is-active");
-      const previewSrc = activePreviewRow.getAttribute("data-preview-image") || "";
-      applyRowImage(activePreviewRow, previewSrc);
-    }
-  };
-
-  const renderTable = () => {
+  const renderList = () => {
     if (!filteredProducts.length) {
-      tbody.innerHTML = `
-        <tr class="products-filter-table__empty-row">
-          <td colspan="5">${searchQuery ? `No matches for "${searchQuery}".` : "No products available."}</td>
-        </tr>
+      listContainer.innerHTML = `
+        <div class="products-browser__empty">${searchQuery ? `No products match "${searchQuery}".` : "No products available."}</div>
       `;
-      setActiveRow(null);
+      countEl.textContent = "0 products";
       return;
     }
 
-    const rows = filteredProducts.map((product, index) => {
-      const name = App.escapeHtml(product.name || "Harmony Sheets tool");
+    const items = filteredProducts.map(product => {
+      const name = App.escapeHtml(product.name || "Product");
       const url = App.escapeHtml(product.url || `product.html?id=${encodeURIComponent(product.id)}`);
-      const priceText = product.priceDisplay ? App.escapeHtml(product.priceDisplay) : "—";
+      const price = product.priceDisplay ? App.escapeHtml(product.priceDisplay) : "—";
       
       const badge = product.badges && product.badges.length > 0 ? product.badges[0] : "";
       const badgeType = getBadgeType(badge);
       const badgeMarkup = badge
-        ? `<span class="products-filter-table__tbadge"${badgeType ? ` data-type="${badgeType}"` : ""}>${App.escapeHtml(badge)}</span>`
-        : "";
+        ? `<span class="products-browser__badge"${badgeType ? ` data-type="${badgeType}"` : ""}>${App.escapeHtml(badge)}</span>`
+        : '<span class="products-browser__badge">—</span>';
 
       const type = App.escapeHtml(product.format || "Template");
-      const navId = String(product.id || `product-${index}`);
-
-      const previewSources = Array.isArray(product.gallery) && product.gallery.length
-        ? product.gallery.map(g => g.src).filter(Boolean)
-        : product.colorImage
-        ? [product.colorImage]
-        : [];
-
-      const previewThumbs = previewSources
-        .slice(0, 6)
-        .map(src => (typeof src === "string" ? src.trim() : ""))
-        .filter(Boolean);
-
-      const hasPreviews = previewThumbs.length > 0;
-      const defaultPreview = hasPreviews ? App.escapeHtml(previewThumbs[0]) : "";
-      const rowClasses = ["products-filter-table__row"];
-      if (hasPreviews) rowClasses.push("has-preview");
-      const previewAttr = hasPreviews ? ` data-preview-image="${defaultPreview}"` : "";
-
+      
       const lifeAreas = Array.isArray(product.lifeAreas) ? product.lifeAreas : [];
       const areaLabels = lifeAreas
         .map(area => App.LIFE_AREAS[area]?.short || area)
@@ -4395,96 +4336,38 @@ App.initProductsFilterTable = async function() {
         .join(" • ");
       const areaColor = lifeAreas.length > 0 && App.LIFE_AREAS[lifeAreas[0]]?.color
         ? App.LIFE_AREAS[lifeAreas[0]].color
-        : "#0ea5e9";
+        : "#3b82f6";
 
-      const dotMarkup = `<span class="products-filter-table__dot" style="--dot-color:${areaColor}" aria-hidden="true"></span>`;
-
-      const thumbsMarkup = hasPreviews
-        ? `<div class="products-filter-table__thumbs">${previewThumbs
-            .map((src, thumbIndex) => {
-              const safeSrc = App.escapeHtml(src);
-              const label = App.escapeHtml(`Preview image ${thumbIndex + 1} for ${product.name}`);
-              const thumbClass = `products-filter-table__thumb${thumbIndex === 0 ? " is-active" : ""}`;
-              return `<button type="button" class="${thumbClass}" data-products-thumb data-thumb-src="${safeSrc}" aria-label="${label}"><img src="${safeSrc}" alt=""></button>`;
-            })
-            .join("")}</div>`
-        : `<span class="products-filter-table__no-images">—</span>`;
+      const thumbnail = product.colorImage || product.gallery?.[0]?.src || "";
 
       return `
-        <tr class="${rowClasses.join(" ")}"${previewAttr} data-products-item="${App.escapeHtml(navId)}">
-          <td class="products-filter-table__product-cell">
-            ${dotMarkup}
-            <a class="products-filter-table__product-link" href="${url}">${name}</a>
-            ${areaLabels ? `<div style="font-size:0.72rem;color:#64748b;margin-top:2px">${App.escapeHtml(areaLabels)}</div>` : ""}
-          </td>
-          <td class="products-filter-table__images-cell">${thumbsMarkup}</td>
-          <td>${type}</td>
-          <td>${badgeMarkup}</td>
-          <td class="products-filter-table__price">${priceText}</td>
-        </tr>
+        <div class="products-browser__item" data-browser-item>
+          <div class="products-browser__product">
+            <span class="products-browser__dot" style="--dot-color:${areaColor}"></span>
+            <div class="products-browser__product-info">
+              <a href="${url}" class="products-browser__product-name">${name}</a>
+              ${areaLabels ? `<div class="products-browser__product-areas">${App.escapeHtml(areaLabels)}</div>` : ""}
+            </div>
+          </div>
+          ${thumbnail ? `<img src="${App.escapeHtml(thumbnail)}" alt="" class="products-browser__thumbnail">` : '<div class="products-browser__thumbnail"></div>'}
+          <div class="products-browser__type">${type}</div>
+          <div class="products-browser__badge-cell">${badgeMarkup}</div>
+          <div class="products-browser__price">${price}</div>
+        </div>
       `;
     }).join("");
 
-    tbody.innerHTML = rows;
+    listContainer.innerHTML = items;
 
-    // Attach thumbnail hover handlers
-    tbody.querySelectorAll("[data-products-item]").forEach(row => {
-      const thumbs = row.querySelectorAll("[data-products-thumb]");
-      if (!thumbs.length) return;
-
-      thumbs.forEach(thumb => {
-        const updatePreview = () => {
-          const src = thumb.getAttribute("data-thumb-src") || "";
-          if (!src) return "";
-          row.setAttribute("data-preview-image", src);
-          if (activePreviewRow === row) {
-            applyRowImage(row, src);
-          }
-          thumbs.forEach(btn => {
-            if (btn === thumb) {
-              btn.classList.add("is-active");
-            } else {
-              btn.classList.remove("is-active");
-            }
-          });
-          return src;
-        };
-
-        thumb.addEventListener("mouseenter", () => {
-          updatePreview();
-          setActiveRow(row);
-        });
-
-        thumb.addEventListener("focus", () => {
-          updatePreview();
-          setActiveRow(row);
-        });
-
-        thumb.addEventListener("click", event => {
-          event.preventDefault();
-          updatePreview();
-          setActiveRow(row);
-        });
-      });
-
-      row.addEventListener("mouseenter", () => setActiveRow(row));
-      row.addEventListener("focus", () => setActiveRow(row));
-    });
-
-    tbody.addEventListener("mouseleave", () => setActiveRow(null));
-    tbody.addEventListener("focusout", event => {
-      if (!tbody.contains(event.relatedTarget)) {
-        setActiveRow(null);
-      }
-    });
-
-    setActiveRow(null);
+    // Update count
+    const count = filteredProducts.length;
+    countEl.textContent = `${count} ${count === 1 ? "product" : "products"}`;
   };
 
   const filterAndSort = () => {
     const query = searchQuery.toLowerCase();
 
-    // Filter by search query
+    // Filter
     let filtered = allProducts;
     if (query) {
       filtered = allProducts.filter(product => {
@@ -4513,20 +4396,7 @@ App.initProductsFilterTable = async function() {
     });
 
     filteredProducts = filtered;
-
-    // Update info text
-    const totalItems = filteredProducts.length;
-    if (!totalItems) {
-      infoText.textContent = query ? `No matches for "${searchQuery}"` : "No products available";
-    } else {
-      if (query) {
-        infoText.textContent = `${totalItems} ${totalItems === 1 ? "tool matches" : "tools match"} "${searchQuery}"`;
-      } else {
-        infoText.textContent = `${totalItems} ${totalItems === 1 ? "tool" : "tools"} available`;
-      }
-    }
-
-    renderTable();
+    renderList();
   };
 
   // Event listeners
@@ -4559,7 +4429,7 @@ App.initProductsFilterTable = async function() {
 
       return {
         ...product,
-        priceDisplay: formatPriceDisplay(priceDisplay),
+        priceDisplay: priceDisplay,
         priceValue,
         url: `product.html?id=${encodeURIComponent(product.id)}`,
         format: product.format || "Template"
@@ -4569,11 +4439,9 @@ App.initProductsFilterTable = async function() {
     filteredProducts = allProducts;
     filterAndSort();
   } catch (err) {
-    console.error("Error loading products for filter table:", err);
-    tbody.innerHTML = `
-      <tr class="products-filter-table__empty-row">
-        <td colspan="5">Unable to load products. Please refresh the page.</td>
-      </tr>
+    console.error("Error loading products for browser:", err);
+    listContainer.innerHTML = `
+      <div class="products-browser__empty">Unable to load products. Please refresh the page.</div>
     `;
   }
 };
