@@ -2315,7 +2315,10 @@ App.init = function() {
   if (App.qs("[data-questionnaire-modal]")) App.initQuestionnaire();
 
   // Auto-detect page
-  if (App.qs("body.page-products")) App.initProducts();
+  if (App.qs("body.page-products")) {
+    App.initProductsBrowser();
+    App.initProducts();
+  }
   if (App.qs("body.page-product")) App.initProduct();
   if (App.qs("#life-wheel")) App.initHome();
   if (App.qs("#bundles-grid")) App.initBundles();
@@ -4293,6 +4296,185 @@ App.initOffers = function() {
   };
 
   loadOffers();
+};
+
+/*****************************************************
+ * Products Browser (products.html)
+ *****************************************************/
+App.initProductsBrowser = async function() {
+  const browser = App.qs("#products-browser");
+  if (!browser) return;
+
+  const searchInput = App.qs("[data-browser-search]");
+  const sortSelect = App.qs("[data-browser-sort]");
+  const listContainer = App.qs("[data-browser-list]");
+  const countEl = App.qs("[data-browser-count]");
+
+  if (!searchInput || !sortSelect || !listContainer || !countEl) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const areaSlug = params.get("area");
+
+  let allProducts = [];
+  let filteredProducts = [];
+  let searchQuery = "";
+  let sortBy = "badge";
+
+  const badgeWeight = badge => {
+    const value = String(badge || "").toLowerCase();
+    if (!value) return 0;
+    if (value.includes("best")) return 3;
+    if (value.includes("popular")) return 2;
+    if (value.includes("new")) return 1;
+    return 0;
+  };
+
+  const getBadgeType = badge => {
+    const value = String(badge || "").toLowerCase();
+    if (!value) return "";
+    if (value.includes("best")) return "bestseller";
+    if (value.includes("popular")) return "popular";
+    if (value.includes("new")) return "new";
+    return "";
+  };
+
+  const renderList = () => {
+    if (!filteredProducts.length) {
+      listContainer.innerHTML = `
+        <div class="products-browser__empty">${searchQuery ? `No products match "${searchQuery}".` : "No products available."}</div>
+      `;
+      countEl.textContent = "0 products";
+      return;
+    }
+
+    const items = filteredProducts.map(product => {
+      const name = App.escapeHtml(product.name || "Product");
+      const url = App.escapeHtml(product.url || `product.html?id=${encodeURIComponent(product.id)}`);
+      const price = product.priceDisplay ? App.escapeHtml(product.priceDisplay) : "—";
+      
+      const badge = product.badges && product.badges.length > 0 ? product.badges[0] : "";
+      const badgeType = getBadgeType(badge);
+      const badgeMarkup = badge
+        ? `<span class="products-browser__badge"${badgeType ? ` data-type="${badgeType}"` : ""}>${App.escapeHtml(badge)}</span>`
+        : '<span class="products-browser__badge">—</span>';
+
+      const type = App.escapeHtml(product.format || "Template");
+      
+      const lifeAreas = Array.isArray(product.lifeAreas) ? product.lifeAreas : [];
+      const areaLabels = lifeAreas
+        .map(area => App.LIFE_AREAS[area]?.short || area)
+        .filter(Boolean)
+        .join(" • ");
+      const areaColor = lifeAreas.length > 0 && App.LIFE_AREAS[lifeAreas[0]]?.color
+        ? App.LIFE_AREAS[lifeAreas[0]].color
+        : "#3b82f6";
+
+      const thumbnail = product.colorImage || product.gallery?.[0]?.src || "";
+
+      return `
+        <div class="products-browser__item" data-browser-item>
+          <div class="products-browser__product">
+            <span class="products-browser__dot" style="--dot-color:${areaColor}"></span>
+            <div class="products-browser__product-info">
+              <a href="${url}" class="products-browser__product-name">${name}</a>
+              ${areaLabels ? `<div class="products-browser__product-areas">${App.escapeHtml(areaLabels)}</div>` : ""}
+            </div>
+          </div>
+          ${thumbnail ? `<img src="${App.escapeHtml(thumbnail)}" alt="" class="products-browser__thumbnail">` : '<div class="products-browser__thumbnail"></div>'}
+          <div class="products-browser__type">${type}</div>
+          <div class="products-browser__badge-cell">${badgeMarkup}</div>
+          <div class="products-browser__price">${price}</div>
+        </div>
+      `;
+    }).join("");
+
+    listContainer.innerHTML = items;
+
+    // Update count
+    const count = filteredProducts.length;
+    countEl.textContent = `${count} ${count === 1 ? "product" : "products"}`;
+  };
+
+  const filterAndSort = () => {
+    const query = searchQuery.toLowerCase();
+
+    // Filter
+    let filtered = allProducts;
+    if (query) {
+      filtered = allProducts.filter(product => {
+        return [
+          product.name,
+          product.tagline,
+          product.description,
+          ...(product.badges || []),
+          ...(product.lifeAreas || []).map(area => App.LIFE_AREAS[area]?.title || "")
+        ].some(value => String(value || "").toLowerCase().includes(query));
+      });
+    }
+
+    // Sort
+    filtered = filtered.slice().sort((a, b) => {
+      if (sortBy === "price") {
+        return a.priceValue - b.priceValue;
+      }
+      if (sortBy === "badge") {
+        const aBadge = a.badges && a.badges.length > 0 ? a.badges[0] : "";
+        const bBadge = b.badges && b.badges.length > 0 ? b.badges[0] : "";
+        const diff = badgeWeight(bBadge) - badgeWeight(aBadge);
+        return diff !== 0 ? diff : a.name.localeCompare(b.name);
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    filteredProducts = filtered;
+    renderList();
+  };
+
+  // Event listeners
+  searchInput.addEventListener("input", event => {
+    searchQuery = event.target.value.trim();
+    filterAndSort();
+  });
+
+  sortSelect.addEventListener("change", event => {
+    sortBy = event.target.value;
+    filterAndSort();
+  });
+
+  // Load products
+  try {
+    const products = await App.loadProducts();
+    let activeProducts = App.filterActiveProducts(products);
+
+    // Filter by area if specified
+    if (areaSlug) {
+      activeProducts = activeProducts.filter(p =>
+        Array.isArray(p.lifeAreas) && p.lifeAreas.includes(areaSlug)
+      );
+    }
+
+    // Prepare products data
+    allProducts = activeProducts.map(product => {
+      const priceDisplay = product.price || "";
+      const priceValue = App.parsePrice(priceDisplay);
+
+      return {
+        ...product,
+        priceDisplay: priceDisplay,
+        priceValue,
+        url: `product.html?id=${encodeURIComponent(product.id)}`,
+        format: product.format || "Template"
+      };
+    });
+
+    filteredProducts = allProducts;
+    filterAndSort();
+  } catch (err) {
+    console.error("Error loading products for browser:", err);
+    listContainer.innerHTML = `
+      <div class="products-browser__empty">Unable to load products. Please refresh the page.</div>
+    `;
+  }
 };
 
 /*****************************************************

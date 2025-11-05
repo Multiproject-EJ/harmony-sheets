@@ -102,6 +102,25 @@
   <main class="container">
     <h1 id="products-heading">Our Products</h1>
     <p id="products-intro" class="muted">Browse calm, app-like templates that help you build rhythm in every area of life.</p>
+    
+    <!-- Products Browser -->
+    <div class="products-browser" id="products-browser">
+      <div class="products-browser__controls">
+        <input type="search" class="products-browser__search" placeholder="Search products..." data-browser-search>
+        <select class="products-browser__sort" data-browser-sort>
+          <option value="badge">Sort by Featured</option>
+          <option value="name">Sort by Name</option>
+          <option value="price">Sort by Price</option>
+        </select>
+      </div>
+      <div class="products-browser__list" data-browser-list>
+        <div class="products-browser__item" data-browser-item>
+          <div class="products-browser__loading">Loading products...</div>
+        </div>
+      </div>
+      <div class="products-browser__count" data-browser-count>0 products</div>
+    </div>
+    
     <div id="products-list" class="products-grid"></div>
   </main>
 
