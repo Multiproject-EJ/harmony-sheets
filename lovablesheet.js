@@ -5157,6 +5157,31 @@ function showCelebrationScreen(completedStep) {
     celebrationMessage.textContent = messages[completedStep] || `You've completed Step ${completedStep}!`;
   }
 
+  // Create confetti particles
+  const confettiContainer = celebrationScreen.querySelector('.lovablesheet-celebration__confetti');
+  if (confettiContainer) {
+    confettiContainer.innerHTML = ''; // Clear existing confetti
+    const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'];
+    const confettiCount = 50;
+
+    for (let i = 0; i < confettiCount; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'lovablesheet-celebration__confetti-piece';
+      confetti.style.cssText = `
+        position: absolute;
+        width: ${Math.random() * 10 + 5}px;
+        height: ${Math.random() * 10 + 5}px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        left: ${Math.random() * 100}%;
+        top: -20px;
+        opacity: ${Math.random() * 0.5 + 0.5};
+        animation: confetti-fall ${Math.random() * 3 + 2}s ease-in-out ${Math.random() * 0.5}s forwards;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+      `;
+      confettiContainer.appendChild(confetti);
+    }
+  }
+
   celebrationScreen.hidden = false;
   stepNavigationState.celebrationShown = true;
 }
