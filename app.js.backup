@@ -3532,45 +3532,166 @@ App.initNavDropdown = function() {
 
   const updateActive = () => {
     if (!panelEl) return;
-    
-    // Populate the cards in the nav dropdown
-    const cardsContainer = content.querySelector("[data-nav-cards]");
-    if (cardsContainer && areaProducts) {
-      const allProducts = Object.values(areaProducts).flat();
-      if (!allProducts.length) {
-        cardsContainer.innerHTML = "<p class=\"muted\">New templates are on the way. Check back soon!</p>";
+    if (!areaOrder.includes(navState.cat)) {
+      navState.cat = areaOrder[0];
+    }
+
+    const info = getCategoryInfo(navState.cat) || {};
+    const accent = navAccentMap[navState.cat] || info.color || navAccentMap.all;
+    panelEl.dataset.area = navState.cat;
+    panelEl.style.setProperty("--nav-mega-acc", accent);
+
+    if (tableEl) {
+      const labelBase = info.title || info.short || "Life Harmony tools";
+      tableEl.setAttribute("aria-label", `${labelBase} list`);
+    }
+
+    if (searchInput && searchInput.value !== navState.q) {
+      searchInput.value = navState.q;
+    }
+
+    if (sortSelect && sortSelect.value !== navState.sort) {
+      sortSelect.value = navState.sort;
+    }
+
+    const query = (navState.q || "").trim().toLowerCase();
+
+    const baseItems = query ? collectSearchableItems() : Array.isArray(areaProducts[navState.cat]) ? areaProducts[navState.cat] : [];
+
+    let filtered = baseItems;
+    if (query) {
+      filtered = baseItems.filter(item => {
+        return [item.name, item.type, item.format, item.badge, item.tagline, item.priceDisplay]
+          .some(value => String(value || "").toLowerCase().includes(query));
+      });
+    }
+
+    const sorted = filtered.slice().sort((a, b) => {
+      if (navState.sort === "price") {
+        return a.priceValue - b.priceValue;
+      }
+      if (navState.sort === "badge") {
+        const diff = badgeWeight(b.badge) - badgeWeight(a.badge);
+        return diff !== 0 ? diff : a.name.localeCompare(b.name);
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    const totalItems = sorted.length;
+
+    if (rowsEl) {
+      if (!totalItems) {
+        const message = query
+          ? `No matches for “${navState.q}”.`
+          : info.empty || "Fresh tools coming soon.";
+        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="5">${App.escapeHtml(message)}</td></tr>`;
+        setActiveRow(null);
       } else {
-        const cards = allProducts
-          .map(product => {
-            const productId = product && product.id ? String(product.id) : "";
-            const link = productId ? `product.html?id=${encodeURIComponent(productId)}` : "products.html";
-            const href = App.escapeHtml(link);
-            const image = App.escapeHtml(product.image || "assets/placeholder.png");
-            const name = App.escapeHtml(product.name || "Harmony Sheets template");
-            const tagline = App.escapeHtml(product.tagline || "");
-            const price = App.escapeHtml(product.priceDisplay || "");
-            
-            return `
-              <div class="product-card">
-                <a href="${href}">
-                  <div class="thumb">
-                    <img src="${image}" alt="">
-                  </div>
-                  <h3>${name}</h3>
-                  <p class="muted">${tagline}</p>
-                  <p class="price">${price}</p>
-                </a>
-              </div>
-            `;
+        const rows = sorted
+          .map((item, index) => {
+            const badgeType = getBadgeType(item.badge);
+            const badgeMarkup = item.badge
+              ? `<span class="nav-mega__tbadge"${badgeType ? ` data-type="${badgeType}"` : ""}>${App.escapeHtml(item.badge)}</span>`
+              : "";
+            const priceText = item.priceDisplay ? App.escapeHtml(item.priceDisplay) : "—";
+            const url = App.escapeHtml(item.url || `products.html?area=${encodeURIComponent(navState.cat)}`);
+            const rawName = item.name || "Harmony Sheets tool";
+            const name = App.escapeHtml(rawName);
+            const type = App.escapeHtml(item.type || "Template");
+            const navId = String(item.id || `${navState.cat}-item-${index}`);
+            const accentColor = item.accentColor ? App.escapeHtml(item.accentColor) : "";
+            const dotStyle = accentColor ? ` style="--nav-dot:${accentColor}"` : "";
+            const areaInfo =
+              item.lifeAreaLabel ||
+              getCategoryInfo(navState.cat)?.short ||
+              getCategoryInfo(navState.cat)?.title ||
+              "Life area";
+            const areaLabelText = `Life area: ${areaInfo}`;
+            const areaLabel = App.escapeHtml(areaLabelText);
+            const previewSources = Array.isArray(item.previewImages) && item.previewImages.length
+              ? item.previewImages
+              : item.image
+              ? [item.image]
+              : [];
+            const previewThumbs = previewSources
+              .slice(0, 6)
+              .map(src => (typeof src === "string" ? src.trim() : ""))
+              .filter(Boolean);
+            const hasPreviews = previewThumbs.length > 0;
+            const defaultPreview = hasPreviews ? App.escapeHtml(previewThumbs[0]) : "";
+            const rowClasses = ["nav-mega__row"];
+            if (hasPreviews) rowClasses.push("has-preview");
+            const previewAttr = hasPreviews ? ` data-preview-image="${defaultPreview}"` : "";
+            const thumbsMarkup = hasPreviews
+              ? `<div class="nav-mega__thumbs">${previewThumbs
+                  .map((src, thumbIndex) => {
+                    const safeSrc = App.escapeHtml(src);
+                    const label = App.escapeHtml(`Preview image ${thumbIndex + 1} for ${rawName}`);
+                    const thumbClass = `nav-mega__thumb${thumbIndex === 0 ? " is-active" : ""}`;
+                    return `<button type="button" class="${thumbClass}" data-nav-thumb data-thumb-src="${safeSrc}" aria-label="${label}"><img src="${safeSrc}" alt=""></button>`;
+                  })
+                  .join("")}</div>`
+              : `<span class="nav-mega__no-images">0</span>`;
+            return `<tr class="${rowClasses.join(" ")}"${previewAttr} data-nav-item="${App.escapeHtml(navId)}"><td class="nav-mega__product-cell"><span class="nav-mega__dot nav-mega__dot--row"${dotStyle} aria-hidden="true"></span><span class="sr-only">${areaLabel}</span><a class="nav-mega__product-link" href="${url}">${name}</a></td><td class="nav-mega__images-cell">${thumbsMarkup}</td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
           })
           .join("");
-        cardsContainer.innerHTML = cards;
+        rowsEl.innerHTML = rows;
+        rowsEl.querySelectorAll("[data-nav-item]").forEach(row => {
+          const thumbs = row.querySelectorAll("[data-nav-thumb]");
+          if (!thumbs.length) return;
+          thumbs.forEach(thumb => {
+            const updatePreview = () => {
+              const src = thumb.getAttribute("data-thumb-src") || "";
+              if (!src) return "";
+              row.setAttribute("data-preview-image", src);
+              if (activePreviewRow === row) {
+                applyRowImage(row, src);
+              }
+              thumbs.forEach(btn => {
+                if (btn === thumb) {
+                  btn.classList.add("is-active");
+                } else {
+                  btn.classList.remove("is-active");
+                }
+              });
+              return src;
+            };
+            thumb.addEventListener("mouseenter", () => {
+              updatePreview();
+              setActiveRow(row);
+            });
+            thumb.addEventListener("focus", () => {
+              updatePreview();
+              setActiveRow(row);
+            });
+            thumb.addEventListener("click", event => {
+              event.preventDefault();
+              const src = updatePreview();
+              setActiveRow(row);
+              if (src) {
+                showLargePreview(src, thumb);
+              }
+            });
+          });
+        });
+        setActiveRow(null);
+      }
+    }
+
+    if (infoTextEl) {
+      if (!totalItems) {
+        infoTextEl.textContent = query ? `No matches for “${navState.q}”` : "More tools coming soon";
+      } else {
+        if (query) {
+          infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool matches" : "tools match"} “${navState.q}” across Life Harmony`;
+        } else {
+          infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool" : "tools"} available`;
+        }
       }
     }
 
     scheduleReposition();
   };
-
 
   const renderShell = () => {
     content.innerHTML = `
