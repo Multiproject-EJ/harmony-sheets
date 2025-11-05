@@ -5264,37 +5264,94 @@ async function init() {
 
   supabaseClient = getSupabaseClient();
 
-  const { data, error } = await supabaseClient.auth.getSession();
-  if (error) {
-    console.error("Unable to load session for LovableSheet", error);
-    handleUnauthorized("We couldn't verify your admin access. Please try signing in again.");
-    return;
-  }
+  try {
+    console.log("LovableSheet: init - checking session");
 
-  const user = data.session?.user;
-  if (!requireAdmin(user)) {
-    return;
-  }
-
-  initializeStickyBoards();
-  await fetchBoards();
-
-  const { data: listener } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-    const currentUser = session?.user;
-    if (!requireAdmin(currentUser)) {
-      if (!currentUser) {
-        const redirectUrl = `login.html?redirect=${encodeURIComponent(PAGE_PATH)}`;
-        redirectTo(redirectUrl);
-      } else {
-        redirectTo(ACCOUNT_PAGE_PATH);
-      }
+    // Try to get session synchronously first
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) {
+      console.error("Unable to load session for LovableSheet", error);
+      handleUnauthorized("We couldn't verify your admin access. Please try signing in again.");
       return;
     }
 
+    // If getSession() returns a session, use it. Otherwise wait briefly for auth rehydration.
+    let user = data?.session?.user ?? null;
+
+    if (!user) {
+      console.log("LovableSheet: no session from getSession(); waiting up to 2000ms for onAuthStateChange...");
+      user = await new Promise((resolve) => {
+        let resolved = false;
+        let listener = null;
+        
+        const cleanup = () => {
+          if (listener?.subscription?.unsubscribe) {
+            try {
+              listener.subscription.unsubscribe();
+            } catch (_) {}
+          }
+        };
+
+        const timeout = setTimeout(() => {
+          if (resolved) return;
+          resolved = true;
+          cleanup();
+          console.log("LovableSheet: auth state wait timed out (no session).");
+          resolve(null);
+        }, 2000);
+
+        // Subscribe to auth state changes and resolve early if a session arrives.
+        const { data: listenerData } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(timeout);
+          cleanup();
+          console.log("LovableSheet: onAuthStateChange delivered session:", session);
+          resolve(session?.user ?? null);
+        });
+        
+        listener = listenerData;
+      });
+    } else {
+      console.log("LovableSheet: session found from getSession()", user);
+    }
+
+    // requireAdmin will show content or handle unauthorized state.
+    // If the user is null we intentionally return so the page doesn't force a redirect
+    // before the onAuthStateChange handler below can act on later changes.
+    if (!requireAdmin(user)) {
+      return;
+    }
+
+    // Initialize boards and load saved boards (admin-only features)
     initializeStickyBoards();
-    fetchBoards();
-  });
-  authSubscription = listener?.subscription || null;
+    await fetchBoards();
+
+    // Subscribe to auth state changes to handle sign-out or role changes.
+    const { data: listener } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user;
+
+      // If requireAdmin fails for the current user, redirect appropriately.
+      if (!requireAdmin(currentUser)) {
+        if (!currentUser) {
+          const redirectUrl = `login.html?redirect=${encodeURIComponent(PAGE_PATH)}`;
+          redirectTo(redirectUrl);
+        } else {
+          redirectTo(ACCOUNT_PAGE_PATH);
+        }
+        return;
+      }
+
+      // Re-initialize admin UI bits if necessary.
+      initializeStickyBoards();
+      fetchBoards();
+    });
+
+    authSubscription = listener?.subscription || null;
+  } catch (err) {
+    console.error("LovableSheet initialization failed:", err);
+    handleUnauthorized("We couldn't verify your admin access. Please try signing in again.");
+  }
 }
 
 init();
