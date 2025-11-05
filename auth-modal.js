@@ -2,7 +2,6 @@ import { isSupabaseConfigured } from "./supabase-config.js";
 import {
   ACCOUNT_PAGE_PATH,
   ADMIN_DASHBOARD_PATH,
-  ADMIN_WORKSPACE_PATH,
   getPostSignInRedirect,
   isAdminUser
 } from "./auth-helpers.js";
@@ -22,8 +21,14 @@ const labelEl = toggle?.querySelector("[data-account-label]");
 let accountLinkEl = dropdown?.querySelector("[data-account-link='account']");
 let adminLinkEl = dropdown?.querySelector("[data-account-link='admin']");
 let lovableSheetLinkEl = dropdown?.querySelector("[data-account-link='lovablesheet']");
-let adminWorkspaceLinkEl = dropdown?.querySelector("[data-account-link='admin-workspace']");
 let offersLinkEl = dropdown?.querySelector("[data-account-link='offers']");
+const customerViewGroup = dropdown?.querySelector("[data-account-customer-view]");
+const customerViewToggle = dropdown?.querySelector(
+  "[data-account-customer-view-toggle]"
+);
+const customerViewPanel = dropdown?.querySelector(
+  "[data-account-customer-view-panel]"
+);
 const skipModal = document.body.classList.contains("page-auth");
 const hasSupabaseConfig = isSupabaseConfigured();
 
@@ -87,6 +92,24 @@ function setAccountState(user) {
   }
 }
 
+function collapseCustomerView() {
+  if (customerViewToggle) {
+    customerViewToggle.setAttribute("aria-expanded", "false");
+  }
+  if (customerViewPanel) {
+    customerViewPanel.hidden = true;
+  }
+}
+
+function setCustomerViewVisibility(isVisible) {
+  if (!customerViewGroup) return;
+  customerViewGroup.hidden = !isVisible;
+  customerViewGroup.setAttribute("aria-hidden", isVisible ? "false" : "true");
+  if (!isVisible) {
+    collapseCustomerView();
+  }
+}
+
 function ensureLovableSheetLink() {
   if (!dropdown) return null;
 
@@ -106,52 +129,14 @@ function ensureLovableSheetLink() {
   link.hidden = true;
   link.setAttribute("aria-hidden", "true");
 
-  const productsLink = dropdown.querySelector("[data-account-link='products']");
-  if (productsLink) {
-    dropdown.insertBefore(link, productsLink);
+  if (customerViewGroup && dropdown.contains(customerViewGroup)) {
+    dropdown.insertBefore(link, customerViewGroup);
   } else {
     dropdown.appendChild(link);
   }
 
   lovableSheetLinkEl = link;
   return lovableSheetLinkEl;
-}
-
-function ensureAdminWorkspaceLink() {
-  if (!dropdown) return null;
-
-  if (!adminWorkspaceLinkEl || !dropdown.contains(adminWorkspaceLinkEl)) {
-    adminWorkspaceLinkEl = dropdown.querySelector(
-      "[data-account-link='admin-workspace']"
-    );
-  }
-
-  if (adminWorkspaceLinkEl) {
-    return adminWorkspaceLinkEl;
-  }
-
-  const link = document.createElement("a");
-  link.className = "nav-dropdown__link";
-  link.textContent = "Admin Customer Service";
-  link.href = ADMIN_WORKSPACE_PATH || "admin_customer_service.html";
-  link.dataset.accountLink = "admin-workspace";
-  link.hidden = true;
-  link.setAttribute("aria-hidden", "true");
-
-  const lovableLink = ensureLovableSheetLink();
-  if (lovableLink?.parentElement) {
-    lovableLink.insertAdjacentElement("afterend", link);
-  } else {
-    const productsLink = dropdown.querySelector("[data-account-link='products']");
-    if (productsLink) {
-      dropdown.insertBefore(link, productsLink);
-    } else {
-      dropdown.appendChild(link);
-    }
-  }
-
-  adminWorkspaceLinkEl = link;
-  return adminWorkspaceLinkEl;
 }
 
 function updateAccountLink(user) {
@@ -166,7 +151,6 @@ function updateAccountLink(user) {
     offersLinkEl = dropdown.querySelector("[data-account-link='offers']");
   }
   const lovableLink = ensureLovableSheetLink();
-  const adminWorkspaceLink = ensureAdminWorkspaceLink();
   if (!accountLinkEl) return;
 
   if (!user) {
@@ -189,10 +173,7 @@ function updateAccountLink(user) {
       lovableLink.hidden = true;
       lovableLink.setAttribute("aria-hidden", "true");
     }
-    if (adminWorkspaceLink) {
-      adminWorkspaceLink.hidden = true;
-      adminWorkspaceLink.setAttribute("aria-hidden", "true");
-    }
+    setCustomerViewVisibility(false);
     return;
   }
 
@@ -223,13 +204,7 @@ function updateAccountLink(user) {
     }
   }
 
-  if (adminWorkspaceLink) {
-    adminWorkspaceLink.hidden = !isAdmin;
-    adminWorkspaceLink.setAttribute("aria-hidden", isAdmin ? "false" : "true");
-    if (isAdmin) {
-      adminWorkspaceLink.href = ADMIN_WORKSPACE_PATH || "admin_customer_service.html";
-    }
-  }
+  setCustomerViewVisibility(true);
 }
 
 function isAdminAutoRedirectPath(pathname) {

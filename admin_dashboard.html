@@ -49,10 +49,24 @@
         </button>
         <div class="nav-dropdown" data-account-dropdown role="menu" aria-label="Account options" hidden>
           <a class="nav-dropdown__link" href="account.html" data-account-link="account">My account</a>
-          <a class="nav-dropdown__link" href="offers.html" data-account-link="offers" hidden aria-hidden="true">My offers</a>
           <a class="nav-dropdown__link" href="admin_dashboard.html" data-account-link="admin" hidden aria-hidden="true">Admin dashboard</a>
           <a class="nav-dropdown__link" href="lovablesheet.html" data-account-link="lovablesheet" hidden aria-hidden="true">LovableSheet</a>
-          <a class="nav-dropdown__link" href="products.html#my-products" data-account-link="products">My products</a>
+          <div class="nav-dropdown__group" data-account-customer-view hidden aria-hidden="true">
+            <button
+              class="nav-dropdown__link nav-dropdown__link--submenu"
+              type="button"
+              data-account-customer-view-toggle
+              aria-expanded="false"
+              aria-controls="account-customer-view-links"
+            >
+              <span>Customer view</span>
+              <span class="nav-dropdown__chevron" aria-hidden="true"></span>
+            </button>
+            <div class="nav-dropdown__submenu" id="account-customer-view-links" data-account-customer-view-panel hidden>
+              <a class="nav-dropdown__sublink" href="offers.html" data-account-link="offers" hidden aria-hidden="true">My offers</a>
+              <a class="nav-dropdown__sublink" href="products.html#my-products" data-account-link="products">My products</a>
+            </div>
+          </div>
           <button class="nav-dropdown__link nav-dropdown__link--action" type="button" data-account-cart>Shopping cart</button>
         </div>
       </div>
@@ -196,6 +210,18 @@
               tabindex="-1"
             >
               Dashboard/
+            </button>
+            <button
+              type="button"
+              class="admin-tabs__tab"
+              role="tab"
+              id="admin-primary-customer-service-trigger"
+              aria-selected="false"
+              aria-controls="admin-primary-customer-service"
+              data-admin-tab="customer-service"
+              tabindex="-1"
+            >
+              Customer Service
             </button>
           </div>
         </nav>
@@ -1197,6 +1223,82 @@
               </div>
             </section>
           </div>
+          <div
+            class="admin-tabs__panel"
+            id="admin-primary-customer-service"
+            role="tabpanel"
+            aria-labelledby="admin-primary-customer-service-trigger"
+            data-admin-tab-panel="customer-service"
+            hidden
+            aria-hidden="true"
+          >
+            <section class="admin-customer-service" aria-labelledby="admin-customer-service-title">
+              <section class="admin-workspace-state" data-admin-workspace-loading>
+                <div class="account-card">
+                  <h2>Loading customer service workspace</h2>
+                  <p>Verifying your admin access…</p>
+                </div>
+              </section>
+              <section class="admin-workspace-state" data-admin-workspace-unauthorized hidden>
+                <div class="account-card">
+                  <h2>Access restricted</h2>
+                  <p data-admin-workspace-message>
+                    You need an admin account to view the customer service workspace.
+                  </p>
+                  <a class="btn secondary" href="login.html">Go to sign in</a>
+                </div>
+              </section>
+              <section class="admin-workspace-content" data-admin-workspace-content hidden>
+                <div class="admin-customer-service__grid">
+                  <div class="account-card admin-customer-service__intro">
+                    <h2 id="admin-customer-service-title">Customer service workspace</h2>
+                    <p>
+                      This private workspace centralizes Harmony Sheets customer support updates and live dashboards.
+                    </p>
+                    <p class="muted">
+                      Only authorized team members can view embedded Google Sheet reports and respond to customer inquiries.
+                    </p>
+                  </div>
+                  <section
+                    class="account-card admin-customer-service__integration"
+                    aria-labelledby="customer-service-integration"
+                  >
+                    <h3 id="customer-service-integration">Google Sheets integration</h3>
+                    <p>
+                      Connect a published Google Sheets web app to stream live customer service data into this dashboard. Paste the
+                      shareable web app URL below to load the embedded view.
+                    </p>
+                    <form class="admin-customer-service__form" data-admin-customer-service-form>
+                      <label class="admin-customer-service__label" for="google-web-app-url">Google Sheets web app URL</label>
+                      <input
+                        class="admin-customer-service__input"
+                        type="url"
+                        id="google-web-app-url"
+                        name="google-web-app-url"
+                        placeholder="https://script.google.com/..."
+                        autocomplete="off"
+                        required
+                      >
+                      <button class="btn primary admin-customer-service__button" type="submit">Load dashboard</button>
+                    </form>
+                    <p class="muted">
+                      The URL is stored locally in your browser for quick reloading. Replace it anytime to update the embedded data
+                      source.
+                    </p>
+                  </section>
+                  <section class="admin-customer-service__embed" data-admin-customer-service-embed aria-live="polite">
+                    <div class="admin-customer-service__placeholder" data-admin-customer-service-placeholder>
+                      <p>No Google Sheets dashboard loaded yet.</p>
+                      <p class="muted">
+                        Enter a valid Google Sheets web app link above to preview customer service metrics directly in this
+                        workspace.
+                      </p>
+                    </div>
+                  </section>
+                </div>
+              </section>
+            </section>
+          </div>
         </div>
       </div>
     </section>
@@ -1473,5 +1575,6 @@
 <script src="app.js" type="module"></script>
 <script type="module" src="auth-modal.js"></script>
 <script type="module" src="admin-dashboard.js"></script>
+<script type="module" src="admin-workspace.js"></script>
 </body>
 </html>
