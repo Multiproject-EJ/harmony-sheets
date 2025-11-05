@@ -1,4 +1,4 @@
-# Common error: LovableSheet page doesn't recognise logged-in admin
+# Common error: LovableSheet page doesn't recognize logged-in admin
 
 ## Symptom
 - Visiting lovablesheet.html shows the "Access restricted" or "You need an admin account" message even when the same browser is signed in as an admin and other admin pages (e.g., admin_dashboard.html) work.
