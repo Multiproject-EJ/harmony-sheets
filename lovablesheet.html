@@ -103,17 +103,88 @@
     </div>
   </section>
   <section class="lovablesheet-content" data-lovablesheet-content hidden>
-    <button
-      class="thinking-tools-toggle"
-      type="button"
-      data-thinking-tools-toggle
-      aria-expanded="false"
-      aria-controls="thinking-tools-panel"
-    >
-      <span class="thinking-tools-toggle__icon" aria-hidden="true">🧠</span>
-      <span class="thinking-tools-toggle__label" aria-hidden="true">Tools</span>
-      <span class="sr-only">Toggle Thinking Tools</span>
-    </button>
+    <div class="brain-tools-container">
+      <button
+        class="brain-tools-toggle"
+        type="button"
+        data-brain-tools-toggle
+        aria-expanded="false"
+        aria-label="Toggle Brain Tools"
+      >
+        <span class="brain-tools-toggle__text">BRAIN<br>TOOLS</span>
+      </button>
+      <div class="brain-tools-actions" data-brain-tools-actions hidden>
+        <button
+          class="brain-tool-button brain-tool-button--sticky"
+          type="button"
+          data-brain-tool-open="sticky"
+          aria-label="Open Sticky Board"
+        >
+          <span aria-hidden="true">📝</span>
+        </button>
+        <button
+          class="brain-tool-button brain-tool-button--flowchart"
+          type="button"
+          data-brain-tool-open="flowchart"
+          aria-label="Open Flowchart"
+        >
+          <span aria-hidden="true">🗺️</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Sticky Board Dialog -->
+    <div class="brain-tool-dialog-layer" data-brain-tool-dialog-layer hidden>
+      <div class="brain-tool-dialog-overlay" data-brain-tool-dialog-overlay></div>
+      <div class="brain-tool-dialog" data-brain-tool-dialog="sticky" role="dialog" aria-modal="true" aria-labelledby="sticky-board-dialog-title" hidden>
+        <button class="brain-tool-dialog__close" type="button" data-brain-tool-dialog-close aria-label="Close dialog">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="brain-tool-dialog__content">
+          <h2 id="sticky-board-dialog-title">STICKY BOARD</h2>
+          <h3>Brain board</h3>
+          <p>A massive digital post-it wall for sketching flows and organizing thoughts in seconds.</p>
+          <p>Use the brain board to rough out initiatives, quick wins, and backlog ideas. Drag notes anywhere, recolor them, and rally similar ideas with a single move.</p>
+          <ul>
+            <li>Drag, recolor, and cluster quick ideas in real time.</li>
+            <li>Switch between saved Supabase boards in a click.</li>
+            <li>Rally similar notes with grouped color moves.</li>
+          </ul>
+          <h4>BRAIN BOARD SETUP</h4>
+          <h5>Board library</h5>
+          <p>Choose which Supabase board to load before launching the brain board, then save new sticky note sessions without leaving this page.</p>
+          <div class="brain-tool-dialog__actions">
+            <label for="sticky-board-select">Boards</label>
+            <select id="sticky-board-select" class="brain-tool-dialog__select" data-board-select-dialog>
+              <option value="default">Default Board (Demo)</option>
+            </select>
+            <button class="btn primary" type="button" data-board-launch="brain">Launch brain board</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Flowchart Dialog -->
+      <div class="brain-tool-dialog" data-brain-tool-dialog="flowchart" role="dialog" aria-modal="true" aria-labelledby="flowchart-dialog-title" hidden>
+        <button class="brain-tool-dialog__close" type="button" data-brain-tool-dialog-close aria-label="Close dialog">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="brain-tool-dialog__content">
+          <h2 id="flowchart-dialog-title">FLOWCHART</h2>
+          <h3>Flowchart board</h3>
+          <p>Sketch branching journeys and implementation checkpoints side-by-side with the sticky note toolkit.</p>
+          <ul>
+            <li>Map kickoff triggers, decisions, and wrap-up steps.</li>
+            <li>Compile every note into a ready-to-share AI prompt.</li>
+            <li>Stay zoomed-in on swimlanes with precision controls.</li>
+          </ul>
+          <h4>Prompt compiler</h4>
+          <p>Stitch every flowchart note into an AI-ready brief. Generate, tweak, and copy the compiled prompt right beside the launcher.</p>
+          <div class="brain-tool-dialog__actions">
+            <button class="btn primary" type="button" data-board-launch="flowchart">Launch flowchart board</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="lovablesheet-layout">
       <aside
         class="thinking-tools thinking-tools--floating"
