@@ -2144,6 +2144,26 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-tabs--primary .admin-tabs__tab:is(:hover,:focus-visible){background:rgba(221,214,254,.6);color:#4c1d95}
 .admin-tabs--primary .admin-tabs__tab.is-active{background:#5b21b6;color:#fff;box-shadow:0 16px 36px rgba(91,33,182,.28)}
 .admin-tabs--primary .admin-tabs__tab.is-active:is(:hover,:focus-visible){background:#4c1d95}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="marketing"]{color:#2563eb}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="marketing"]:is(:hover,:focus-visible){background:rgba(191,219,254,.6);color:#1e40af}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="marketing"].is-active{background:#2563eb;color:#fff;box-shadow:0 16px 36px rgba(37,99,235,.28)}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="marketing"].is-active:is(:hover,:focus-visible){background:#1e40af}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="sales"]{color:#059669}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="sales"]:is(:hover,:focus-visible){background:rgba(167,243,208,.6);color:#047857}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="sales"].is-active{background:#059669;color:#fff;box-shadow:0 16px 36px rgba(5,150,105,.28)}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="sales"].is-active:is(:hover,:focus-visible){background:#047857}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="offers"]{color:#dc2626}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="offers"]:is(:hover,:focus-visible){background:rgba(254,202,202,.6);color:#b91c1c}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="offers"].is-active{background:#dc2626;color:#fff;box-shadow:0 16px 36px rgba(220,38,38,.28)}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="offers"].is-active:is(:hover,:focus-visible){background:#b91c1c}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="dashboard"]{color:#d97706}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="dashboard"]:is(:hover,:focus-visible){background:rgba(253,230,138,.6);color:#b45309}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="dashboard"].is-active{background:#d97706;color:#fff;box-shadow:0 16px 36px rgba(217,119,6,.28)}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="dashboard"].is-active:is(:hover,:focus-visible){background:#b45309}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="customer-service"]{color:#7c3aed}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="customer-service"]:is(:hover,:focus-visible){background:rgba(221,214,254,.6);color:#6d28d9}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="customer-service"].is-active{background:#7c3aed;color:#fff;box-shadow:0 16px 36px rgba(124,58,237,.28)}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="customer-service"].is-active:is(:hover,:focus-visible){background:#6d28d9}
 .admin-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 .admin-tabs__list{display:inline-flex;align-items:center;gap:10px;padding:6px;border-radius:999px;background:rgba(148,163,184,.16);border:1px solid rgba(148,163,184,.26)}
 .admin-tabs__tab{border:none;background:transparent;padding:10px 18px;border-radius:999px;font:600 .92rem/1 "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#475569;cursor:pointer;transition:background .2s ease,color .2s ease,transform .2s ease}
