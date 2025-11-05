@@ -2423,6 +2423,25 @@ function handleNextGenFormSubmit(event) {
   renderNextGenSavedBriefs();
   setNextGenStatus(`Saved “${brief.productName}” to your Next Gen briefs.`, "success");
   closeNextGenModal({ reset: true, focusTrigger: true });
+
+  if (typeof showStep === "function") {
+    showStep(2);
+  } else {
+    const stepOneStage = document.querySelector("[data-idea-stage]");
+    const stepTwoStage = document.querySelector("[data-step-two]");
+    if (stepOneStage) {
+      stepOneStage.setAttribute("data-step-visible", "false");
+    }
+    if (stepTwoStage) {
+      stepTwoStage.setAttribute("data-step-visible", "true");
+    }
+    if (typeof stepNavigationState !== "undefined" && stepNavigationState !== null) {
+      stepNavigationState.currentStep = 2;
+      if (typeof updateProgressDots === "function") {
+        updateProgressDots();
+      }
+    }
+  }
 }
 
 function initNextGenEngineBriefs() {
@@ -5206,10 +5225,26 @@ function goToNextStep() {
 }
 
 function initializeStepNavigation() {
-  const { celebrationNextButton, celebrationScreen } = stepNavigationState.elements;
+  const { celebrationNextButton, celebrationScreen, stages } = stepNavigationState.elements;
 
-  // Initialize with step 1 visible
-  showStep(1, false);
+  stepNavigationState.currentStep = 1;
+
+  if (Array.isArray(stages)) {
+    stages.forEach((stage, index) => {
+      if (!stage) {
+        return;
+      }
+
+      const stepNumber = index + 1;
+      if (stepNumber === stepNavigationState.totalSteps) {
+        stage.setAttribute('data-step-visible', 'false');
+      } else if (!stage.hasAttribute('data-step-visible')) {
+        stage.setAttribute('data-step-visible', 'true');
+      }
+    });
+  }
+
+  updateProgressDots();
 
   // Set up celebration screen button
   if (celebrationNextButton) {
