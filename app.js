@@ -3532,250 +3532,191 @@ App.initNavDropdown = function() {
 
   const updateActive = () => {
     if (!panelEl) return;
-    if (!areaOrder.includes(navState.cat)) {
-      navState.cat = areaOrder[0];
-    }
-
-    const info = getCategoryInfo(navState.cat) || {};
-    const accent = navAccentMap[navState.cat] || info.color || navAccentMap.all;
-    panelEl.dataset.area = navState.cat;
-    panelEl.style.setProperty("--nav-mega-acc", accent);
-
-    if (tableEl) {
-      const labelBase = info.title || info.short || "Life Harmony tools";
-      tableEl.setAttribute("aria-label", `${labelBase} list`);
-    }
-
-    if (searchInput && searchInput.value !== navState.q) {
-      searchInput.value = navState.q;
-    }
-
-    if (sortSelect && sortSelect.value !== navState.sort) {
-      sortSelect.value = navState.sort;
-    }
-
-    const query = (navState.q || "").trim().toLowerCase();
-
-    const baseItems = query ? collectSearchableItems() : Array.isArray(areaProducts[navState.cat]) ? areaProducts[navState.cat] : [];
-
-    let filtered = baseItems;
-    if (query) {
-      filtered = baseItems.filter(item => {
-        return [item.name, item.type, item.format, item.badge, item.tagline, item.priceDisplay]
-          .some(value => String(value || "").toLowerCase().includes(query));
-      });
-    }
-
-    const sorted = filtered.slice().sort((a, b) => {
-      if (navState.sort === "price") {
-        return a.priceValue - b.priceValue;
-      }
-      if (navState.sort === "badge") {
-        const diff = badgeWeight(b.badge) - badgeWeight(a.badge);
-        return diff !== 0 ? diff : a.name.localeCompare(b.name);
-      }
-      return a.name.localeCompare(b.name);
-    });
-
-    const totalItems = sorted.length;
-
-    if (rowsEl) {
-      if (!totalItems) {
-        const message = query
-          ? `No matches for “${navState.q}”.`
-          : info.empty || "Fresh tools coming soon.";
-        rowsEl.innerHTML = `<tr class="nav-mega__empty-row"><td colspan="5">${App.escapeHtml(message)}</td></tr>`;
-        setActiveRow(null);
+    
+    // Populate the cards in the nav dropdown
+    const cardsContainer = content.querySelector("[data-nav-cards]");
+    if (cardsContainer && areaProducts) {
+      const allProducts = Object.values(areaProducts).flat();
+      if (!allProducts.length) {
+        cardsContainer.innerHTML = "<p class=\"muted\">New templates are on the way. Check back soon!</p>";
       } else {
-        const rows = sorted
-          .map((item, index) => {
-            const badgeType = getBadgeType(item.badge);
-            const badgeMarkup = item.badge
-              ? `<span class="nav-mega__tbadge"${badgeType ? ` data-type="${badgeType}"` : ""}>${App.escapeHtml(item.badge)}</span>`
-              : "";
-            const priceText = item.priceDisplay ? App.escapeHtml(item.priceDisplay) : "—";
-            const url = App.escapeHtml(item.url || `products.html?area=${encodeURIComponent(navState.cat)}`);
-            const rawName = item.name || "Harmony Sheets tool";
-            const name = App.escapeHtml(rawName);
-            const type = App.escapeHtml(item.type || "Template");
-            const navId = String(item.id || `${navState.cat}-item-${index}`);
-            const accentColor = item.accentColor ? App.escapeHtml(item.accentColor) : "";
-            const dotStyle = accentColor ? ` style="--nav-dot:${accentColor}"` : "";
-            const areaInfo =
-              item.lifeAreaLabel ||
-              getCategoryInfo(navState.cat)?.short ||
-              getCategoryInfo(navState.cat)?.title ||
-              "Life area";
-            const areaLabelText = `Life area: ${areaInfo}`;
-            const areaLabel = App.escapeHtml(areaLabelText);
-            const previewSources = Array.isArray(item.previewImages) && item.previewImages.length
-              ? item.previewImages
-              : item.image
-              ? [item.image]
-              : [];
-            const previewThumbs = previewSources
-              .slice(0, 6)
-              .map(src => (typeof src === "string" ? src.trim() : ""))
-              .filter(Boolean);
-            const hasPreviews = previewThumbs.length > 0;
-            const defaultPreview = hasPreviews ? App.escapeHtml(previewThumbs[0]) : "";
-            const rowClasses = ["nav-mega__row"];
-            if (hasPreviews) rowClasses.push("has-preview");
-            const previewAttr = hasPreviews ? ` data-preview-image="${defaultPreview}"` : "";
-            const thumbsMarkup = hasPreviews
-              ? `<div class="nav-mega__thumbs">${previewThumbs
-                  .map((src, thumbIndex) => {
-                    const safeSrc = App.escapeHtml(src);
-                    const label = App.escapeHtml(`Preview image ${thumbIndex + 1} for ${rawName}`);
-                    const thumbClass = `nav-mega__thumb${thumbIndex === 0 ? " is-active" : ""}`;
-                    return `<button type="button" class="${thumbClass}" data-nav-thumb data-thumb-src="${safeSrc}" aria-label="${label}"><img src="${safeSrc}" alt=""></button>`;
-                  })
-                  .join("")}</div>`
-              : `<span class="nav-mega__no-images">0</span>`;
-            return `<tr class="${rowClasses.join(" ")}"${previewAttr} data-nav-item="${App.escapeHtml(navId)}"><td class="nav-mega__product-cell"><span class="nav-mega__dot nav-mega__dot--row"${dotStyle} aria-hidden="true"></span><span class="sr-only">${areaLabel}</span><a class="nav-mega__product-link" href="${url}">${name}</a></td><td class="nav-mega__images-cell">${thumbsMarkup}</td><td>${type}</td><td>${badgeMarkup}</td><td class="nav-mega__price">${priceText}</td></tr>`;
+        const cards = allProducts
+          .map(product => {
+            const productId = product && product.id ? String(product.id) : "";
+            const link = productId ? `product.html?id=${encodeURIComponent(productId)}` : "products.html";
+            const href = App.escapeHtml(link);
+            const image = App.escapeHtml(product.image || "assets/placeholder.png");
+            const name = App.escapeHtml(product.name || "Harmony Sheets template");
+            const tagline = App.escapeHtml(product.tagline || "");
+            const price = App.escapeHtml(product.priceDisplay || "");
+            
+            return `
+              <div class="product-card">
+                <a href="${href}">
+                  <div class="thumb">
+                    <img src="${image}" alt="">
+                  </div>
+                  <h3>${name}</h3>
+                  <p class="muted">${tagline}</p>
+                  <p class="price">${price}</p>
+                </a>
+              </div>
+            `;
           })
           .join("");
-        rowsEl.innerHTML = rows;
-        rowsEl.querySelectorAll("[data-nav-item]").forEach(row => {
-          const thumbs = row.querySelectorAll("[data-nav-thumb]");
-          if (!thumbs.length) return;
-          thumbs.forEach(thumb => {
-            const updatePreview = () => {
-              const src = thumb.getAttribute("data-thumb-src") || "";
-              if (!src) return "";
-              row.setAttribute("data-preview-image", src);
-              if (activePreviewRow === row) {
-                applyRowImage(row, src);
-              }
-              thumbs.forEach(btn => {
-                if (btn === thumb) {
-                  btn.classList.add("is-active");
-                } else {
-                  btn.classList.remove("is-active");
-                }
-              });
-              return src;
-            };
-            thumb.addEventListener("mouseenter", () => {
-              updatePreview();
-              setActiveRow(row);
-            });
-            thumb.addEventListener("focus", () => {
-              updatePreview();
-              setActiveRow(row);
-            });
-            thumb.addEventListener("click", event => {
-              event.preventDefault();
-              const src = updatePreview();
-              setActiveRow(row);
-              if (src) {
-                showLargePreview(src, thumb);
-              }
-            });
-          });
-        });
-        setActiveRow(null);
-      }
-    }
-
-    if (infoTextEl) {
-      if (!totalItems) {
-        infoTextEl.textContent = query ? `No matches for “${navState.q}”` : "More tools coming soon";
-      } else {
-        if (query) {
-          infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool matches" : "tools match"} “${navState.q}” across Life Harmony`;
-        } else {
-          infoTextEl.textContent = `${totalItems} ${totalItems === 1 ? "tool" : "tools"} available`;
-        }
+        cardsContainer.innerHTML = cards;
       }
     }
 
     scheduleReposition();
   };
 
-  const renderShell = () => {
-    const currentInfo = getCategoryInfo(navState.cat) || {};
-    const initialLabel = App.escapeHtml(currentInfo.title || currentInfo.short || "Life Harmony tools");
 
+  const renderShell = () => {
     content.innerHTML = `
-      <div class="nav-mega__panel" data-nav-panel data-area="${App.escapeHtml(navState.cat)}">
-        <div class="nav-mega__pane">
-          <div class="nav-mega__prod">
-            <div class="nav-mega__prod-head">
-              <div class="nav-mega__tools">
-                <label class="nav-mega__search">
-                  <span class="sr-only">Search Life Harmony tools</span>
-                  <input type="search" placeholder="Search tools…" value="${App.escapeHtml(navState.q)}" data-nav-search>
-                </label>
-              </div>
-              <div class="nav-mega__sort">
-                <select class="nav-mega__select" data-nav-sort>
-                  <option value="badge"${navState.sort === "badge" ? " selected" : ""}>Sort: Badge</option>
-                  <option value="name"${navState.sort === "name" ? " selected" : ""}>Sort: Name</option>
-                  <option value="price"${navState.sort === "price" ? " selected" : ""}>Sort: Price</option>
-                </select>
-              </div>
+      <div class="nav-mega__panel" data-nav-panel>
+        <section id="nav-life-wheel" class="life-wheel">
+          <div class="life-wheel__layout">
+            <div class="life-wheel__graphic">
+              <svg viewBox="0 0 360 360" role="img" aria-labelledby="nav-life-wheel-title">
+                <title id="nav-life-wheel-title">Life Harmony Wheel categories</title>
+                <defs>
+                  <linearGradient id="nav-life-wheel-gradient-love" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FF9AC8"/>
+                    <stop offset="100%" stop-color="#FF4D8D"/>
+                  </linearGradient>
+                  <linearGradient id="nav-life-wheel-gradient-career" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#D1B8FF"/>
+                    <stop offset="100%" stop-color="#7B3FF2"/>
+                  </linearGradient>
+                  <linearGradient id="nav-life-wheel-gradient-health" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#6CFCC5"/>
+                    <stop offset="100%" stop-color="#00B46E"/>
+                  </linearGradient>
+                  <linearGradient id="nav-life-wheel-gradient-finances" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FFE176"/>
+                    <stop offset="100%" stop-color="#FFB800"/>
+                  </linearGradient>
+                  <linearGradient id="nav-life-wheel-gradient-fun" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#FFC08D"/>
+                    <stop offset="100%" stop-color="#FF6B2C"/>
+                  </linearGradient>
+                  <linearGradient id="nav-life-wheel-gradient-family" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#8AC9FF"/>
+                    <stop offset="100%" stop-color="#1A7CFF"/>
+                  </linearGradient>
+                  <linearGradient id="nav-life-wheel-gradient-environment" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#7FF1D7"/>
+                    <stop offset="100%" stop-color="#00B8A0"/>
+                  </linearGradient>
+                  <linearGradient id="nav-life-wheel-gradient-spirituality" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#B7C0FF"/>
+                    <stop offset="100%" stop-color="#4554FF"/>
+                  </linearGradient>
+                </defs>
+                <g class="life-wheel__segments" transform="rotate(-22.5 180 180)">
+                  <a class="life-wheel__slice-link" data-area="love" href="products.html?area=love">
+                    <title>Love &amp; Romantic Relationships</title>
+                    <path class="life-wheel__slice" fill="url(#nav-life-wheel-gradient-love)" d="M 180 180 L 180.0 20.0 A 160 160 0 0 1 293.137 66.863 Z"/>
+                  </a>
+                  <a class="life-wheel__slice-link" data-area="career" href="products.html?area=career">
+                    <title>Career, Growth &amp; Learning</title>
+                    <path class="life-wheel__slice" fill="url(#nav-life-wheel-gradient-career)" d="M 180 180 L 293.137 66.863 A 160 160 0 0 1 340.0 180.0 Z"/>
+                  </a>
+                  <a class="life-wheel__slice-link" data-area="health" href="products.html?area=health">
+                    <title>Health &amp; Fitness</title>
+                    <path class="life-wheel__slice" fill="url(#nav-life-wheel-gradient-health)" d="M 180 180 L 340.0 180.0 A 160 160 0 0 1 293.137 293.137 Z"/>
+                  </a>
+                  <a class="life-wheel__slice-link" data-area="finances" href="products.html?area=finances">
+                    <title>Finances</title>
+                    <path class="life-wheel__slice" fill="url(#nav-life-wheel-gradient-finances)" d="M 180 180 L 293.137 293.137 A 160 160 0 0 1 180.0 340.0 Z"/>
+                  </a>
+                  <a class="life-wheel__slice-link" data-area="fun" href="products.html?area=fun">
+                    <title>Fun &amp; Recreation</title>
+                    <path class="life-wheel__slice" fill="url(#nav-life-wheel-gradient-fun)" d="M 180 180 L 180.0 340.0 A 160 160 0 0 1 66.863 293.137 Z"/>
+                  </a>
+                  <a class="life-wheel__slice-link" data-area="family" href="products.html?area=family">
+                    <title>Family &amp; Friends</title>
+                    <path class="life-wheel__slice" fill="url(#nav-life-wheel-gradient-family)" d="M 180 180 L 66.863 293.137 A 160 160 0 0 1 20.0 180.0 Z"/>
+                  </a>
+                  <a class="life-wheel__slice-link" data-area="environment" href="products.html?area=environment">
+                    <title>Living Space</title>
+                    <path class="life-wheel__slice" fill="url(#nav-life-wheel-gradient-environment)" d="M 180 180 L 20.0 180.0 A 160 160 0 0 1 66.863 66.863 Z"/>
+                  </a>
+                  <a class="life-wheel__slice-link" data-area="spirituality" href="products.html?area=spirituality">
+                    <title>Spirituality &amp; Community</title>
+                    <path class="life-wheel__slice" fill="url(#nav-life-wheel-gradient-spirituality)" d="M 180 180 L 66.863 66.863 A 160 160 0 0 1 180.0 20.0 Z"/>
+                  </a>
+                </g>
+                <circle class="life-wheel__center" cx="180" cy="180" r="72"></circle>
+                <text class="life-wheel__center-text" x="180" y="168">Life</text>
+                <text class="life-wheel__center-text" x="180" y="194">Harmony</text>
+                <text class="life-wheel__center-sub" x="180" y="222">Wheel</text>
+              </svg>
+              <div class="life-wheel__icons" aria-hidden="true"></div>
             </div>
-            <div class="nav-mega__scroll">
-              <div class="nav-mega__table-shell">
-                <table class="nav-mega__table" data-nav-table aria-label="${initialLabel} list">
-                  <thead>
-                    <tr>
-                      <th scope="col" class="nav-mega__product-header" style="width:42%">
-                        <span class="nav-mega__product-header-icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                              <circle cx="12" cy="12" r="8"/>
-                              <circle cx="12" cy="12" r="2.8"/>
-                              <path d="M12 3.5V8M20.5 12H16M12 20.5V16M3.5 12H8"/>
-                            </g>
-                          </svg>
-                        </span>
-                        <span>Product</span>
-                      </th>
-                      <th scope="col" style="width:20%">Images</th>
-                      <th scope="col" style="width:16%">Type</th>
-                      <th scope="col" style="width:12%">Badge</th>
-                      <th scope="col" style="width:10%">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody data-nav-rows>
-                    <tr class="nav-mega__empty-row"><td colspan="5">Loading Life Harmony tools…</td></tr>
-                  </tbody>
-                </table>
+            <div class="life-wheel__details" id="nav-life-wheel-details">
+              <div class="life-wheel__detail-copy life-wheel__detail-copy--hero">
+                <h3 class="hero-heading">
+                  <span class="hero-heading__dynamic">
+                    <span class="hero-heading__lead">Create Harmony in</span>
+                    <span class="hero-heading__accent">Your Life</span>
+                  </span>
+                </h3>
+                <p class="life-wheel__detail-hero-text">Clarity-first dashboards, trackers, and planners across every area of life.</p>
+                <div class="life-wheel__hero-actions">
+                  <a class="life-wheel__cta life-wheel__cta--primary" href="products.html">
+                    <span>Browse all Life Harmony tools</span>
+                    <svg class="life-wheel__cta-icon" viewBox="0 0 20 20" role="img" aria-hidden="true" focusable="false">
+                      <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 10h10M11 6l4 4-4 4"/>
+                    </svg>
+                  </a>
+                  <a class="life-wheel__cta life-wheel__cta--secondary" href="about.html#how-it-works">How it works</a>
+                </div>
+                <p class="life-wheel__hero-rating">
+                  <span class="life-wheel__hero-rating-icon" aria-hidden="true">★</span>
+                  <span>4.9/5 from 1,200+ users</span>
+                  <span class="life-wheel__hero-divider" aria-hidden="true"></span>
+                  <span>No account required to preview</span>
+                </p>
               </div>
-            </div>
-            <div class="nav-mega__pager">
-              <span class="nav-mega__pager-info" data-nav-info>Loading…</span>
-              <a class="nav-mega__pager-link" href="products.html">Browse all Harmony tools</a>
             </div>
           </div>
-        </div>
+        </section>
+        <section class="hero hero--parallax hero--parallax-home" data-home-parallax data-featured-product="pomodoro" data-nav-hero>
+          <div class="hero-parallax__media" data-parallax-speed="0.18" aria-hidden="true"></div>
+          <div class="hero__inner container">
+            <div class="info">
+              <p class="hero-featured-label">Featured Template</p>
+              <p class="hero-eyebrow">Tools for Ambitious Doers</p>
+              <h2 data-home-name>Pomodoro — Productivity &amp; Study Timer</h2>
+              <p class="tagline" data-home-tagline>Focus faster with structured 25–5 cycles. Calm visuals, zero clutter.</p>
+              <div class="badges" data-home-badges>
+                <span class="badge">One-time purchase</span>
+                <span class="badge">No login</span>
+                <span class="badge">Instant download</span>
+              </div>
+              <ul class="features" data-home-features>
+                <li>Auto-start Pomodoros and breaks</li>
+                <li>10+ color themes</li>
+                <li>Optional session logging</li>
+              </ul>
+              <p class="price" data-home-price>$9</p>
+              <div class="actions">
+                <a class="btn primary" data-home-link href="product.html?id=pomodoro">Explore this template</a>
+                <a class="btn ghost" href="products.html">Browse all templates</a>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section class="grid grid--carousel grid--full">
+          <h2>Bestsellers</h2>
+          <div id="nav-home-grid" class="cards cards--carousel" data-nav-cards></div>
+        </section>
       </div>
     `;
 
     panelEl = content.querySelector("[data-nav-panel]");
-    rowsEl = content.querySelector("[data-nav-rows]");
-    infoTextEl = content.querySelector("[data-nav-info]");
-    searchInput = content.querySelector("[data-nav-search]");
-    sortSelect = content.querySelector("[data-nav-sort]");
-    tableEl = content.querySelector("[data-nav-table]");
-
-    if (searchInput) {
-      searchInput.addEventListener("input", event => {
-        navState.q = event.target.value || "";
-        updateActive();
-      });
-    }
-
-    if (sortSelect) {
-      sortSelect.addEventListener("change", event => {
-        navState.sort = event.target.value || "badge";
-        updateActive();
-      });
-    }
-
-    attachRowListeners();
 
     scheduleReposition();
   };
