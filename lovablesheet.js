@@ -5283,6 +5283,138 @@ function initializeStepNavigation() {
 
 initializeStepNavigation();
 
+// Brain Tools UI
+const brainToolsState = {
+  isOpen: false,
+  activeDialog: null,
+  elements: {
+    toggle: document.querySelector('[data-brain-tools-toggle]'),
+    actions: document.querySelector('[data-brain-tools-actions]'),
+    dialogLayer: document.querySelector('[data-brain-tool-dialog-layer]'),
+    dialogOverlay: document.querySelector('[data-brain-tool-dialog-overlay]'),
+    dialogs: {
+      sticky: document.querySelector('[data-brain-tool-dialog="sticky"]'),
+      flowchart: document.querySelector('[data-brain-tool-dialog="flowchart"]')
+    }
+  }
+};
+
+function toggleBrainTools() {
+  brainToolsState.isOpen = !brainToolsState.isOpen;
+  const { toggle, actions } = brainToolsState.elements;
+  
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', brainToolsState.isOpen ? 'true' : 'false');
+  }
+  
+  if (actions) {
+    actions.hidden = !brainToolsState.isOpen;
+  }
+}
+
+function openBrainToolDialog(dialogType) {
+  const { dialogLayer, dialogs } = brainToolsState.elements;
+  
+  if (!dialogLayer || !dialogs[dialogType]) {
+    return;
+  }
+  
+  // Close any open dialog first
+  closeBrainToolDialog();
+  
+  brainToolsState.activeDialog = dialogType;
+  dialogLayer.hidden = false;
+  dialogs[dialogType].hidden = false;
+  document.body.classList.add('lovablesheet-modal-open');
+  
+  // Focus the dialog
+  window.requestAnimationFrame(() => {
+    dialogs[dialogType].focus();
+  });
+}
+
+function closeBrainToolDialog() {
+  const { dialogLayer, dialogs } = brainToolsState.elements;
+  
+  if (!dialogLayer) {
+    return;
+  }
+  
+  dialogLayer.hidden = true;
+  
+  if (brainToolsState.activeDialog && dialogs[brainToolsState.activeDialog]) {
+    dialogs[brainToolsState.activeDialog].hidden = true;
+  }
+  
+  brainToolsState.activeDialog = null;
+  document.body.classList.remove('lovablesheet-modal-open');
+}
+
+function initializeBrainTools() {
+  const { toggle, dialogOverlay } = brainToolsState.elements;
+  
+  // Toggle button
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      toggleBrainTools();
+    });
+  }
+  
+  // Tool buttons
+  document.querySelectorAll('[data-brain-tool-open]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const dialogType = button.dataset.brainToolOpen;
+      openBrainToolDialog(dialogType);
+    });
+  });
+  
+  // Close buttons
+  document.querySelectorAll('[data-brain-tool-dialog-close]').forEach((button) => {
+    button.addEventListener('click', () => {
+      closeBrainToolDialog();
+    });
+  });
+  
+  // Overlay click
+  if (dialogOverlay) {
+    dialogOverlay.addEventListener('click', () => {
+      closeBrainToolDialog();
+    });
+  }
+  
+  // Escape key
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && brainToolsState.activeDialog) {
+      event.preventDefault();
+      closeBrainToolDialog();
+    }
+  });
+  
+  // Click outside to close actions
+  document.addEventListener('click', (event) => {
+    const { toggle, actions } = brainToolsState.elements;
+    
+    if (!brainToolsState.isOpen) {
+      return;
+    }
+    
+    const target = event.target;
+    const container = target.closest('.brain-tools-container');
+    
+    if (!container) {
+      brainToolsState.isOpen = false;
+      if (toggle) {
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+      if (actions) {
+        actions.hidden = true;
+      }
+    }
+  });
+}
+
+initializeBrainTools();
+
 async function init() {
   showSection("loading");
 
