@@ -246,6 +246,7 @@ nav,nav *{pointer-events:auto;}
 .lovablesheet-layout{display:flex;flex-direction:column;gap:clamp(32px,7vw,72px);align-items:stretch}
 .lovablesheet-main{display:flex;flex-direction:column;gap:clamp(36px,7vw,80px);width:100%;align-items:center}
 .lovablesheet-stage{display:grid;gap:clamp(24px,5vw,40px);position:relative}
+.lovablesheet-stage__content{display:grid;gap:clamp(24px,5vw,40px)}
 .lovablesheet-stage__header{display:grid;gap:12px}
 .lovablesheet-stage--idea .lovablesheet-stage__header{justify-items:center;text-align:center;margin-inline:auto;max-width:min(520px,92vw)}
 .lovablesheet-stage--idea .lovablesheet-stage__header>div{display:grid;gap:8px}

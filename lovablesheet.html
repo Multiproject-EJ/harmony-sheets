@@ -425,6 +425,7 @@
           class="lovablesheet-stage lovablesheet-stage--idea"
           aria-labelledby="lovablesheet-idea-title"
           data-idea-stage
+          data-step-visible="true"
         >
           <header class="lovablesheet-stage__header">
             <p class="lovablesheet-stage__eyebrow">Step 1</p>
@@ -436,35 +437,36 @@
             </div>
           </header>
 
-<div class="lovablesheet-idea__overview">
-  <article class="idea-summary-card" data-idea-summary-card data-summary-state="empty">
-    <header class="idea-summary-card__header">
-      <span class="idea-summary-card__status" data-idea-summary-status>Empty slot</span>
-      <span class="idea-summary-card__state" data-idea-summary-state>Awaiting concept</span>
-    </header>
-    <div class="idea-summary-card__body">
-      <h3 class="idea-summary-card__title" data-idea-summary-title>No concept selected</h3>
-      <p class="idea-summary-card__description" data-idea-summary-description>
-        Tap to explore the Todo do pipeline and draft models.
-      </p>
-    </div>
-    <footer class="idea-summary-card__footer">
-      <button class="idea-summary-card__button" type="button" data-idea-open-modal>
-        Open idea workspace
-      </button>
-    </footer>
-  </article>
-</div>
-<div class="lovablesheet-idea__modal" data-idea-modal-layer hidden>
-  <div class="lovablesheet-idea__modal-overlay" data-idea-modal-overlay></div>
-  <div
-    class="lovablesheet-idea__modal-dialog"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="idea-modal-title"
-    data-idea-modal-dialog
-    tabindex="-1"
-  >
+          <div class="lovablesheet-stage__content">
+            <div class="lovablesheet-idea__overview">
+              <article class="idea-summary-card" data-idea-summary-card data-summary-state="empty">
+                <header class="idea-summary-card__header">
+                  <span class="idea-summary-card__status" data-idea-summary-status>Empty slot</span>
+                  <span class="idea-summary-card__state" data-idea-summary-state>Awaiting concept</span>
+                </header>
+                <div class="idea-summary-card__body">
+                  <h3 class="idea-summary-card__title" data-idea-summary-title>No concept selected</h3>
+                  <p class="idea-summary-card__description" data-idea-summary-description>
+                    Tap to explore the Todo do pipeline and draft models.
+                  </p>
+                </div>
+                <footer class="idea-summary-card__footer">
+                  <button class="idea-summary-card__button" type="button" data-idea-open-modal>
+                    Open idea workspace
+                  </button>
+                </footer>
+              </article>
+            </div>
+            <div class="lovablesheet-idea__modal" data-idea-modal-layer hidden>
+              <div class="lovablesheet-idea__modal-overlay" data-idea-modal-overlay></div>
+              <div
+                class="lovablesheet-idea__modal-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="idea-modal-title"
+                data-idea-modal-dialog
+                tabindex="-1"
+              >
     <header class="lovablesheet-idea__modal-header">
       <div>
         <p class="lovablesheet-idea__modal-eyebrow">Step 1 workspace</p>
@@ -1253,27 +1255,33 @@
     </div>
   </div>
 </div>
-<div class="lovablesheet-idea__selection" data-idea-output-container hidden>
-  <div class="lovablesheet-idea__selection-head">
-    <div class="lovablesheet-idea__selection-title">
-      <h3 id="idea-output-title">The product selected is…</h3>
-      <span class="lovablesheet-idea__success" data-idea-success aria-hidden="true">
-        <span class="lovablesheet-idea__success-icon">✨</span>
-      </span>
-    </div>
-    <button class="btn ghost lovablesheet-idea__clear" type="button" data-idea-clear hidden>Clear selection</button>
-  </div>
-  <p class="lovablesheet-idea__hint" data-step-two-hint>Select a product from the tables to unlock Step 2.</p>
-  <output class="lovablesheet-idea__output" data-idea-output aria-live="polite" aria-describedby="idea-output-title">No product selected yet.</output>
-</div>
-<div class="lovablesheet-stage__connector" data-idea-connector aria-hidden="true">
-  <div class="lovablesheet-stage__connector-line"></div>
-  <div class="lovablesheet-stage__connector-signal" aria-hidden="true">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-</div>
+            <div class="lovablesheet-idea__selection" data-idea-output-container hidden>
+              <div class="lovablesheet-idea__selection-head">
+                <div class="lovablesheet-idea__selection-title">
+                  <h3 id="idea-output-title">The product selected is…</h3>
+                  <span class="lovablesheet-idea__success" data-idea-success aria-hidden="true">
+                    <span class="lovablesheet-idea__success-icon">✨</span>
+                  </span>
+                </div>
+                <button class="btn ghost lovablesheet-idea__clear" type="button" data-idea-clear hidden>Clear selection</button>
+              </div>
+              <p class="lovablesheet-idea__hint" data-step-two-hint>Select a product from the tables to unlock Step 2.</p>
+              <output
+                class="lovablesheet-idea__output"
+                data-idea-output
+                aria-live="polite"
+                aria-describedby="idea-output-title"
+              >No product selected yet.</output>
+            </div>
+            <div class="lovablesheet-stage__connector" data-idea-connector aria-hidden="true">
+              <div class="lovablesheet-stage__connector-line"></div>
+              <div class="lovablesheet-stage__connector-signal" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
         </section>
 
 
@@ -1287,6 +1295,7 @@
           data-step-two
           data-stage-locked="true"
           aria-disabled="true"
+          data-step-visible="true"
         >
           <header class="lovablesheet-stage__header">
             <p class="lovablesheet-stage__eyebrow">Step 2</p>
@@ -1419,6 +1428,7 @@
           data-step-three
           data-stage-locked="true"
           aria-disabled="true"
+          data-step-visible="false"
         >
           <header class="lovablesheet-stage__header">
             <p class="lovablesheet-stage__eyebrow">Step 3</p>
