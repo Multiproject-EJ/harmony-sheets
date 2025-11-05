@@ -16,7 +16,7 @@ if (!rootHook) {
     return;
   })();
 } else {
-  const PAGE_PATH = ADMIN_WORKSPACE_PATH || "admin_customer_service.html";
+  const PAGE_PATH = ADMIN_WORKSPACE_PATH || "admin_dashboard.html#customer-service";
 
   const sections = {
     loading: document.querySelector("[data-admin-workspace-loading]"),

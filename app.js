@@ -2401,6 +2401,12 @@ App.initAuthLink = function() {
   const accountItem = App.qs("[data-account-menu]");
   const toggle = accountItem?.querySelector("[data-account-toggle]");
   const dropdown = accountItem?.querySelector("[data-account-dropdown]");
+  const customerViewToggle = dropdown?.querySelector(
+    "[data-account-customer-view-toggle]"
+  );
+  const customerViewPanel = dropdown?.querySelector(
+    "[data-account-customer-view-panel]"
+  );
 
   if (!accountItem || !toggle || !dropdown) {
     App.closeAccountMenu = null;
@@ -2420,16 +2426,26 @@ App.initAuthLink = function() {
   const isMobile = () => window.matchMedia("(max-width: 720px)").matches;
   const isAuthenticated = () => accountItem.dataset.authState === "signed-in";
 
+  const setCustomerViewOpen = open => {
+    if (!customerViewToggle || !customerViewPanel) return;
+    customerViewToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    customerViewPanel.hidden = !open;
+  };
+
   const setOpen = open => {
     if (!isAuthenticated()) {
       accountItem.classList.remove("is-open");
       toggle.setAttribute("aria-expanded", "false");
       App.hideLayer(dropdown);
+      setCustomerViewOpen(false);
       return;
     }
     accountItem.classList.toggle("is-open", open);
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
     App.setLayerVisibility(dropdown, open);
+    if (!open) {
+      setCustomerViewOpen(false);
+    }
   };
 
   const closeMenu = () => setOpen(false);
@@ -2492,14 +2508,29 @@ App.initAuthLink = function() {
   });
 
   dropdown.addEventListener("click", event => {
-    const actionLink = event.target?.closest(".nav-dropdown__link");
+    const actionLink = event.target?.closest(
+      ".nav-dropdown__link, .nav-dropdown__sublink"
+    );
     if (!actionLink) return;
+    if (customerViewToggle && actionLink === customerViewToggle) {
+      return;
+    }
     if (actionLink.matches("[data-account-cart]")) {
       event.preventDefault();
       if (typeof App.openCart === "function") App.openCart();
     }
     closeMenu();
   });
+
+  if (customerViewToggle && customerViewPanel) {
+    setCustomerViewOpen(false);
+    customerViewToggle.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      const expanded = customerViewToggle.getAttribute("aria-expanded") === "true";
+      setCustomerViewOpen(!expanded);
+    });
+  }
 
   window.addEventListener("resize", () => closeMenu());
 
