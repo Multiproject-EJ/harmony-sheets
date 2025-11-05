@@ -475,22 +475,11 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .brain-tool-dialog-layer{position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .brain-tool-dialog-layer:not([hidden]){pointer-events:auto}
 .brain-tool-dialog-overlay{position:absolute;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px)}
-.brain-tool-dialog{position:relative;z-index:1;background:#fff;border-radius:24px;max-width:560px;width:calc(100% - 32px);max-height:calc(100vh - 64px);overflow-y:auto;box-shadow:0 32px 64px rgba(15,23,42,.3);animation:brain-tool-dialog-in .3s ease}
+.brain-tool-dialog{position:relative;z-index:1;background:#fff;border-radius:24px;max-width:min(920px,calc(100vw - 48px));width:100%;max-height:calc(100vh - 64px);overflow-y:auto;box-shadow:0 32px 64px rgba(15,23,42,.3);animation:brain-tool-dialog-in .3s ease}
 @keyframes brain-tool-dialog-in{0%{opacity:0;transform:scale(.95) translateY(12px)}100%{opacity:1;transform:scale(1) translateY(0)}}
-.brain-tool-dialog__close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(15,23,42,.08);color:#0f172a;font-size:1.5rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s ease}
+.brain-tool-dialog__close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(15,23,42,.08);color:#0f172a;font-size:1.5rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s ease;z-index:10}
 .brain-tool-dialog__close:hover,.brain-tool-dialog__close:focus-visible{outline:none;background:rgba(15,23,42,.14);transform:rotate(90deg)}
-.brain-tool-dialog__content{padding:32px 40px 40px}
-.brain-tool-dialog__content h2{margin:0 0 8px;font-size:1.8rem;font-weight:700;color:#0f172a;letter-spacing:.02em}
-.brain-tool-dialog__content h3{margin:12px 0 8px;font-size:1.3rem;font-weight:600;color:#1e293b}
-.brain-tool-dialog__content h4{margin:24px 0 8px;font-size:1.1rem;font-weight:700;color:#0f172a;letter-spacing:.06em;text-transform:uppercase}
-.brain-tool-dialog__content h5{margin:12px 0 6px;font-size:.95rem;font-weight:600;color:#475569}
-.brain-tool-dialog__content p{margin:8px 0;color:#475569;font-size:1rem;line-height:1.6}
-.brain-tool-dialog__content ul{margin:12px 0;padding-left:24px;color:#475569;line-height:1.7}
-.brain-tool-dialog__content li{margin:6px 0}
-.brain-tool-dialog__actions{margin-top:24px;display:flex;flex-direction:column;gap:12px}
-.brain-tool-dialog__select{width:100%;padding:10px 14px;border:1px solid rgba(148,163,184,.3);border-radius:8px;font-size:1rem;color:#0f172a;background:#fff;cursor:pointer;transition:all .2s ease}
-.brain-tool-dialog__select:hover,.brain-tool-dialog__select:focus{outline:none;border-color:rgba(59,130,246,.5);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
-.brain-tool-dialog__actions label{display:block;margin-bottom:6px;font-size:.9rem;font-weight:600;color:#475569}
+.brain-tool-dialog__content{padding:24px;overflow:visible}
 @media (max-width:640px){.brain-tools-container{bottom:16px;right:16px}.brain-tools-toggle{width:68px;height:68px;font-size:10px}.brain-tool-button{width:48px;height:48px;font-size:1.3rem}.brain-tool-dialog{border-radius:16px}.brain-tool-dialog__content{padding:24px 28px 32px}}
 
 .lovablesheet-controls{position:relative;overflow:hidden;border-radius:32px;padding:clamp(24px,4vw,32px);display:grid;gap:clamp(16px,3vw,24px);background:linear-gradient(135deg,rgba(255,255,255,.94),rgba(241,245,249,.86));border:1px solid rgba(148,163,184,.24);box-shadow:0 24px 48px rgba(15,23,42,.14);color:#0f172a}
