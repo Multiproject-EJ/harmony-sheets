@@ -472,7 +472,8 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .brain-tool-button:nth-child(2){animation-delay:.1s;background:linear-gradient(135deg,rgba(59,130,246,.95),rgba(37,99,235,.88))}
 .brain-tool-button:hover,.brain-tool-button:focus-visible{outline:none;transform:translateY(-2px) scale(1.05);box-shadow:0 16px 32px rgba(15,23,42,.28)}
 @keyframes brain-tool-slide-in{0%{opacity:0;transform:translateY(8px) scale(.9)}100%{opacity:1;transform:translateY(0) scale(1)}}
-.brain-tool-dialog-layer{position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center}
+.brain-tool-dialog-layer{position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.brain-tool-dialog-layer:not([hidden]){pointer-events:auto}
 .brain-tool-dialog-overlay{position:absolute;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px)}
 .brain-tool-dialog{position:relative;z-index:1;background:#fff;border-radius:24px;max-width:560px;width:calc(100% - 32px);max-height:calc(100vh - 64px);overflow-y:auto;box-shadow:0 32px 64px rgba(15,23,42,.3);animation:brain-tool-dialog-in .3s ease}
 @keyframes brain-tool-dialog-in{0%{opacity:0;transform:scale(.95) translateY(12px)}100%{opacity:1;transform:scale(1) translateY(0)}}
