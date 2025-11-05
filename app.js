@@ -3182,20 +3182,7 @@ App.initNavDropdown = function() {
   App.closeBrowseMenu = close;
   close();
 
-  // Disable hover dropdown behavior since we're using the questionnaire modal
-  // browseItem.addEventListener("mouseenter", () => {
-  //   if (!isMobile()) setOpen(true);
-  // });
-
-  // browseItem.addEventListener("mouseleave", () => {
-  //   if (!isMobile()) close();
-  // });
-
-  // browseLink.addEventListener("focus", () => setOpen(true));
-
-  // browseItem.addEventListener("focusout", event => {
-  //   if (!browseItem.contains(event.relatedTarget)) close();
-  // });
+  // Note: Hover and focus dropdown behaviors disabled since we're using the questionnaire modal
 
   browseItem.addEventListener("keydown", event => {
     if (event.key === "Escape") {
