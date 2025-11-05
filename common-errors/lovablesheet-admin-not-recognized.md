@@ -9,10 +9,11 @@
 - Stale HTML/JS served (duplicate files in repo: lovablesheet.html vs lovables_sheet.html).
 - isAdminUser() expecting admin metadata not present in the session this page sees.
 - CDN/browser cache serving an old copy of lovablesheet.js.
+- **March 2025 regression:** `initializeStepNavigation()` assumed a global `updateIdeaStageUI` existed and referenced it directly. On browsers where that function isn't defined, the page threw `ReferenceError: updateIdeaStageUI is not defined`, leaving the UI stuck on "Loading LovableSheet" forever.
 
 ## Quick diagnosis (do these in order)
 1. Open devtools Console and Network on lovablesheet.html.
-   - Look for console errors, especially around "Unable to load session" or custom logs from lovablesheet.js.
+   - Look for console errors, especially `updateIdeaStageUI is not defined` or "Unable to load session" messages from lovablesheet.js.
 2. Confirm lovablesheet.js being served is the expected version (check Network -> lovablesheet.js -> response).
 3. From console, check current session:
    - `window.supabaseClient?.auth?.getSession()?.then(console.log)`
@@ -20,28 +21,34 @@
 5. Check the live page source to ensure the correct HTML (lovablesheet.html) is being served (View Page Source).
 6. Hard-refresh (Ctrl/Cmd + Shift + R) or clear cache and retry.
 
-## Quick (low-risk) fix
-- Prevent immediate redirect when session==null. Wait briefly for auth state change.
+## Quick (low-risk) fixes
 
-Example snippet to add to `lovablesheet.js` init():
+### 1. Guard step-navigation hook against missing globals
+
+**Symptom:** Console shows `ReferenceError: updateIdeaStageUI is not defined`, and the page never leaves the loading card.
+
+**Resolution:** Update `initializeStepNavigation()` so it only hooks into `updateIdeaStageUI` when that function exists. Example (now in production):
 
 ```javascript
-// Debug and small wait so a recently rehydrated session is caught
-const { data, error } = await supabaseClient.auth.getSession();
-let user = data?.session?.user;
-if (!user) {
-  // wait up to 2s for onAuthStateChange to deliver a session
-  user = await new Promise(resolve => {
-    const timeout = setTimeout(() => resolve(null), 2000);
-    const { data: listener } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-      clearTimeout(timeout);
-      listener?.subscription?.unsubscribe?.();
-      resolve(session?.user ?? null);
-    });
-  });
+const existingUpdateIdeaStageUI =
+  (typeof window !== "undefined" && typeof window.updateIdeaStageUI === "function"
+    ? window.updateIdeaStageUI
+    : null) ||
+  (typeof updateIdeaStageUI === "function" ? updateIdeaStageUI : null);
+
+if (existingUpdateIdeaStageUI) {
+  const originalFunc = existingUpdateIdeaStageUI;
+  window.updateIdeaStageUI = function (...args) {
+    const result = originalFunc.apply(this, args);
+    checkStep1Completion();
+    return result;
+  };
 }
-if (!requireAdmin(user)) return;
 ```
+
+### 2. Prevent immediate redirect when session === null
+
+- Wait briefly for `onAuthStateChange` to deliver a session before redirecting non-admins (see `lovablesheet.js:init()` for the current pattern).
 
 ## Permanent recommendations
 - Centralize auth checks into a shared helper used by all admin pages.
