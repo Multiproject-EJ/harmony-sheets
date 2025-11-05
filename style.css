@@ -1392,8 +1392,8 @@ body[class*="theme-midnight"]{
 .questionnaire-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;z-index:1200}
 .questionnaire-modal.is-open{display:flex}
 .questionnaire-modal[hidden]{display:none}
-.questionnaire-modal__backdrop{position:absolute;inset:0;background:rgba(15,23,42,.58);backdrop-filter:blur(7px)}
-.questionnaire-modal__dialog{position:relative;z-index:1;width:min(760px,100%);max-height:calc(100vh - 48px);overflow:auto;background:#fff;border-radius:30px;box-shadow:0 28px 72px rgba(15,23,42,.28);padding:clamp(28px,5vw,46px);outline:none;display:block}
+.questionnaire-modal__backdrop{position:absolute;inset:0;background:rgba(15,23,42,.65);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.questionnaire-modal__dialog{position:relative;z-index:1;width:min(900px,100%);max-height:calc(100vh - 48px);overflow:auto;background:#fff;border-radius:30px;box-shadow:0 28px 72px rgba(15,23,42,.28);padding:clamp(28px,5vw,46px);outline:none;display:block}
 .questionnaire-modal__close{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:50%;border:none;background:rgba(148,163,184,.18);color:#0f172a;font-size:1.6rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s ease,transform .2s ease}
 .questionnaire-modal__close:hover,.questionnaire-modal__close:focus-visible{background:rgba(148,163,184,.32);transform:scale(1.05);outline:none}
 .questionnaire-modal__body{display:grid;gap:28px;width:100%}

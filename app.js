@@ -3182,19 +3182,20 @@ App.initNavDropdown = function() {
   App.closeBrowseMenu = close;
   close();
 
-  browseItem.addEventListener("mouseenter", () => {
-    if (!isMobile()) setOpen(true);
-  });
+  // Disable hover dropdown behavior since we're using the questionnaire modal
+  // browseItem.addEventListener("mouseenter", () => {
+  //   if (!isMobile()) setOpen(true);
+  // });
 
-  browseItem.addEventListener("mouseleave", () => {
-    if (!isMobile()) close();
-  });
+  // browseItem.addEventListener("mouseleave", () => {
+  //   if (!isMobile()) close();
+  // });
 
-  browseLink.addEventListener("focus", () => setOpen(true));
+  // browseLink.addEventListener("focus", () => setOpen(true));
 
-  browseItem.addEventListener("focusout", event => {
-    if (!browseItem.contains(event.relatedTarget)) close();
-  });
+  // browseItem.addEventListener("focusout", event => {
+  //   if (!browseItem.contains(event.relatedTarget)) close();
+  // });
 
   browseItem.addEventListener("keydown", event => {
     if (event.key === "Escape") {
@@ -3203,8 +3204,13 @@ App.initNavDropdown = function() {
     }
   });
 
-  browseLink.addEventListener("click", () => {
-    if (isMobile()) setOpen(false);
+  browseLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    // Open the questionnaire modal instead of the dropdown
+    const questionnaireOpener = App.qs("[data-questionnaire-open]");
+    if (questionnaireOpener) {
+      questionnaireOpener.click();
+    }
   });
 
   window.addEventListener("resize", () => {
