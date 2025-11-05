@@ -3205,12 +3205,13 @@ App.initNavDropdown = function() {
   });
 
   browseLink.addEventListener("click", (event) => {
-    event.preventDefault();
-    // Open the questionnaire modal instead of the dropdown
+    // Open the questionnaire modal instead of the dropdown (if available)
     const questionnaireOpener = App.qs("[data-questionnaire-open]");
     if (questionnaireOpener) {
+      event.preventDefault();
       questionnaireOpener.click();
     }
+    // If no questionnaire modal exists, allow default navigation to products.html
   });
 
   window.addEventListener("resize", () => {
