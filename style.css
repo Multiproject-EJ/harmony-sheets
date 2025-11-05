@@ -235,7 +235,7 @@ nav,nav *{pointer-events:auto;}
 .nav-mega__pager{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-top:10px;flex-wrap:wrap}
 .nav-mega__pager-info{color:var(--nav-mega-muted);font-size:.82rem;display:inline-flex;align-items:center;gap:8px}
 .nav-mega__pager-link{color:var(--nav-mega-acc);font-weight:600;text-decoration:none}
-.lovablesheet-content{padding:clamp(28px,6vw,72px) clamp(20px,6vw,72px) 132px;background:linear-gradient(180deg,#ffffff 0%,#f8fafc 35%,#f1f5f9 100%);min-height:calc(100vh - var(--header-height));margin-inline:auto}
+.lovablesheet-content{padding:clamp(28px,6vw,72px) clamp(20px,6vw,72px) 132px;background:linear-gradient(180deg,#ffffff 0%,#f8fafc 35%,#f1f5f9 100%);min-height:calc(100vh - var(--header-height));margin-inline:auto;max-width:1400px;display:flex;flex-direction:column;align-items:center}
 .thinking-tools-toggle{position:fixed;z-index:110;bottom:clamp(16px,5vw,32px);right:clamp(16px,5vw,32px);width:64px;height:64px;border-radius:999px;border:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(145deg,rgba(15,23,42,.96),rgba(30,41,59,.88));color:#f8fafc;font-weight:700;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;box-shadow:0 24px 40px rgba(15,23,42,.25);transition:transform .24s ease,box-shadow .24s ease;background-size:180% 180%;padding:0}
 .thinking-tools-toggle:hover,.thinking-tools-toggle:focus-visible{outline:none;transform:translateY(-2px);box-shadow:0 28px 56px rgba(15,23,42,.3)}
 .thinking-tools-toggle[aria-expanded="true"]{background:linear-gradient(140deg,rgba(59,130,246,.95),rgba(236,72,153,.88));box-shadow:0 28px 60px rgba(59,130,246,.35)}
@@ -244,7 +244,7 @@ nav,nav *{pointer-events:auto;}
 .thinking-tools-toggle--spinning{animation:thinking-tools-toggle-spin .6s ease}
 @keyframes thinking-tools-toggle-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 .lovablesheet-layout{display:flex;flex-direction:column;gap:clamp(32px,7vw,72px);align-items:stretch}
-.lovablesheet-main{display:flex;flex-direction:column;gap:clamp(36px,7vw,80px)}
+.lovablesheet-main{display:flex;flex-direction:column;gap:clamp(36px,7vw,80px);width:100%;align-items:center}
 .lovablesheet-stage{display:grid;gap:clamp(24px,5vw,40px);position:relative}
 .lovablesheet-stage__header{display:grid;gap:12px}
 .lovablesheet-stage--idea .lovablesheet-stage__header{justify-items:center;text-align:center;margin-inline:auto;max-width:min(520px,92vw)}
@@ -460,18 +460,18 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .thinking-tools--floating .thinking-panel:not([hidden]){display:block}
 
 /* Brain Tools */
-.brain-tools-container{position:fixed;z-index:110;bottom:clamp(16px,5vw,32px);right:clamp(16px,5vw,32px);display:flex;flex-direction:column;align-items:center;gap:12px}
+.brain-tools-container{position:fixed;z-index:110;bottom:clamp(16px,5vw,32px);right:clamp(16px,5vw,32px);display:flex;flex-direction:column-reverse;align-items:center;gap:12px}
 .brain-tools-toggle{width:80px;height:80px;border-radius:999px;border:none;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(145deg,rgba(15,23,42,.96),rgba(30,41,59,.88));color:#f8fafc;font-weight:700;font-size:11px;line-height:1.3;letter-spacing:.08em;text-align:center;cursor:pointer;box-shadow:0 24px 40px rgba(15,23,42,.25);transition:all .24s ease;padding:12px}
 .brain-tools-toggle:hover,.brain-tools-toggle:focus-visible{outline:none;transform:translateY(-2px);box-shadow:0 28px 56px rgba(15,23,42,.3)}
 .brain-tools-toggle[aria-expanded="true"]{background:linear-gradient(140deg,rgba(59,130,246,.95),rgba(236,72,153,.88));box-shadow:0 28px 60px rgba(59,130,246,.35);transform:rotate(360deg)}
 .brain-tools-toggle__text{display:block;white-space:nowrap}
-.brain-tools-actions{display:flex;flex-direction:column;gap:10px;opacity:0;transform:translateY(10px);transition:all .3s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none}
+.brain-tools-actions{display:flex;flex-direction:column;gap:10px;opacity:0;transform:translateY(-10px);transition:all .3s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none}
 .brain-tools-actions:not([hidden]){opacity:1;transform:translateY(0);pointer-events:auto}
 .brain-tool-button{width:56px;height:56px;border-radius:999px;border:none;display:inline-flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;box-shadow:0 12px 24px rgba(15,23,42,.2);transition:all .2s ease;animation:brain-tool-slide-in .3s ease backwards}
 .brain-tool-button:nth-child(1){animation-delay:.05s;background:linear-gradient(135deg,rgba(251,191,36,.95),rgba(245,158,11,.88))}
 .brain-tool-button:nth-child(2){animation-delay:.1s;background:linear-gradient(135deg,rgba(59,130,246,.95),rgba(37,99,235,.88))}
 .brain-tool-button:hover,.brain-tool-button:focus-visible{outline:none;transform:translateY(-2px) scale(1.05);box-shadow:0 16px 32px rgba(15,23,42,.28)}
-@keyframes brain-tool-slide-in{0%{opacity:0;transform:translateY(8px) scale(.9)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes brain-tool-slide-in{0%{opacity:0;transform:translateY(-8px) scale(.9)}100%{opacity:1;transform:translateY(0) scale(1)}}
 .brain-tool-dialog-layer{position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .brain-tool-dialog-layer:not([hidden]){pointer-events:auto}
 .brain-tool-dialog-overlay{position:absolute;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px)}
