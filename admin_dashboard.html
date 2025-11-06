@@ -134,6 +134,30 @@
       <div class="admin-tabs-group" data-admin-tabs-root="primary">
         <nav class="admin-tabs admin-tabs--primary" data-admin-tabs aria-label="Admin dashboard sections">
           <div class="admin-tabs__list" role="tablist">
+            <button
+              type="button"
+              class="admin-tabs__tab is-active"
+              role="tab"
+              id="admin-primary-dashboard-overview-trigger"
+              aria-selected="true"
+              aria-controls="admin-primary-dashboard-overview"
+              data-admin-tab="dashboard-overview"
+              tabindex="0"
+            >
+              Dashboard
+            </button>
+            <button
+              type="button"
+              class="admin-tabs__tab"
+              role="tab"
+              id="admin-primary-marketing-trigger"
+              aria-selected="false"
+              aria-controls="admin-primary-marketing"
+              data-admin-tab="marketing"
+              tabindex="-1"
+            >
+              Marketing
+            </button>
             <div
               class="admin-tabs admin-tabs--catalog"
               data-admin-catalog-toggle
@@ -166,23 +190,24 @@
             </div>
             <button
               type="button"
-              class="admin-tabs__tab is-active"
+              class="admin-tabs__tab"
               role="tab"
-              id="admin-primary-marketing-trigger"
-              aria-selected="true"
-              aria-controls="admin-primary-marketing"
-              data-admin-tab="marketing"
+              id="admin-primary-etsy-trigger"
+              aria-selected="false"
+              aria-controls="admin-primary-etsy"
+              data-admin-tab="etsy"
+              tabindex="-1"
             >
-              Marketing
+              Etsy
             </button>
             <button
               type="button"
               class="admin-tabs__tab"
               role="tab"
-              id="admin-primary-dashboard-trigger"
+              id="admin-primary-control-panel-trigger"
               aria-selected="false"
-              aria-controls="admin-primary-dashboard"
-              data-admin-tab="dashboard"
+              aria-controls="admin-primary-control-panel"
+              data-admin-tab="control-panel"
               tabindex="-1"
             >
               Control Panel
@@ -226,12 +251,14 @@
           </div>
         </nav>
             <div class="admin-tabs__panels" data-admin-tab-panels>
-              <div
+          <div
             class="admin-tabs__panel"
             id="admin-primary-marketing"
             role="tabpanel"
             aria-labelledby="admin-primary-marketing-trigger"
             data-admin-tab-panel="marketing"
+            hidden
+            aria-hidden="true"
           >
     <section class="admin__grid">
       <section
@@ -808,61 +835,58 @@
     </section>
           </div>
           <div
-            class="admin-tabs__panel"
-            id="admin-primary-offers"
+            class="admin-tabs__panel is-active"
+            id="admin-primary-dashboard-overview"
             role="tabpanel"
-            aria-labelledby="admin-primary-offers-trigger"
-            data-admin-tab-panel="offers"
-            hidden
-            aria-hidden="true"
+            aria-labelledby="admin-primary-dashboard-overview-trigger"
+            data-admin-tab-panel="dashboard-overview"
+            aria-hidden="false"
           >
             <section class="admin__grid">
-              <section class="admin-offers" data-admin-offers>
-                <div class="admin__panel admin__panel--stacked">
-                  <div class="admin__panel-head">
-                    <div>
-                      <span class="admin__eyebrow">Marketing Offers</span>
-                      <h2 id="admin-offers-title">My Offers lineup</h2>
-                      <p class="admin__panel-sub">Toggle campaign templates to feature on the My Offers page, copy discount codes, and prepare ready-to-send promos in seconds.</p>
-                    </div>
-                    <div class="admin__panel-actions admin-offers__actions">
-                      <button class="btn-ghost admin__btn" type="button" data-admin-offers-refresh>
-                        <span aria-hidden="true">⟳</span>
-                        <span>Refresh data</span>
-                      </button>
-                      <button class="btn-ghost admin__btn" type="button" data-admin-offers-reset>
-                        <span aria-hidden="true">⟲</span>
-                        <span>Reset to defaults</span>
-                      </button>
-                      <button class="btn-ghost admin__btn" type="button" data-admin-offers-export>
-                        <span aria-hidden="true">⇩</span>
-                        <span>Download JSON</span>
-                      </button>
-                    </div>
+              <section class="admin__panel" aria-labelledby="admin-dashboard-overview-title">
+                <div class="admin__panel-head">
+                  <div>
+                    <span class="admin__eyebrow">Dashboard</span>
+                    <h2 class="admin__title" id="admin-dashboard-overview-title">Operations dashboard</h2>
+                    <p class="admin__panel-sub">Stay on top of recent changes, monitor checklist progress, and review quick stats across the Harmony Sheets catalog.</p>
                   </div>
-                  <div class="admin-offers__summary" aria-live="polite">
-                    <p class="admin-offers__counts">
-                      <strong data-admin-offers-active>0</strong>
-                      <span>active offers</span>
-                      <span aria-hidden="true">•</span>
-                      <span><span data-admin-offers-total>0</span> total templates</span>
-                    </p>
-                    <p class="admin-offers__updated">Updated <time data-admin-offers-updated datetime=""></time></p>
-                    <p class="admin-offers__status" data-admin-offers-status>Loading offers…</p>
-                  </div>
-                  <div class="admin-offers__list" data-admin-offers-list aria-labelledby="admin-offers-title">
-                    <p class="admin-offers__empty" data-admin-offers-empty>Offers will appear here once loaded.</p>
-                  </div>
+                </div>
+                <div class="admin__panel-body">
+                  <p class="muted">Dashboard widgets are coming soon. Use the Control Panel to manage detailed catalog data in the meantime.</p>
                 </div>
               </section>
             </section>
           </div>
           <div
             class="admin-tabs__panel"
-            id="admin-primary-dashboard"
+            id="admin-primary-etsy"
             role="tabpanel"
-            aria-labelledby="admin-primary-dashboard-trigger"
-            data-admin-tab-panel="dashboard"
+            aria-labelledby="admin-primary-etsy-trigger"
+            data-admin-tab-panel="etsy"
+            hidden
+            aria-hidden="true"
+          >
+            <section class="admin__grid">
+              <section class="admin__panel" aria-labelledby="admin-etsy-title">
+                <div class="admin__panel-head">
+                  <div>
+                    <span class="admin__eyebrow">Etsy</span>
+                    <h2 class="admin__title" id="admin-etsy-title">Etsy channel</h2>
+                    <p class="admin__panel-sub">Centralize Etsy launch prep, keep product listings in sync, and plan marketplace promotions.</p>
+                  </div>
+                </div>
+                <div class="admin__panel-body">
+                  <p class="muted">The Etsy workflow will live here. Track catalog readiness in the Control Panel or Marketing tabs for now.</p>
+                </div>
+              </section>
+            </section>
+          </div>
+          <div
+            class="admin-tabs__panel"
+            id="admin-primary-control-panel"
+            role="tabpanel"
+            aria-labelledby="admin-primary-control-panel-trigger"
+            data-admin-tab-panel="control-panel"
             hidden
             aria-hidden="true"
           >
@@ -1115,6 +1139,56 @@
                   </ul>
                 </div>
               </div>
+            </section>
+          </div>
+          <div
+            class="admin-tabs__panel"
+            id="admin-primary-offers"
+            role="tabpanel"
+            aria-labelledby="admin-primary-offers-trigger"
+            data-admin-tab-panel="offers"
+            hidden
+            aria-hidden="true"
+          >
+            <section class="admin__grid">
+              <section class="admin-offers" data-admin-offers>
+                <div class="admin__panel admin__panel--stacked">
+                  <div class="admin__panel-head">
+                    <div>
+                      <span class="admin__eyebrow">Marketing Offers</span>
+                      <h2 id="admin-offers-title">My Offers lineup</h2>
+                      <p class="admin__panel-sub">Toggle campaign templates to feature on the My Offers page, copy discount codes, and prepare ready-to-send promos in seconds.</p>
+                    </div>
+                    <div class="admin__panel-actions admin-offers__actions">
+                      <button class="btn-ghost admin__btn" type="button" data-admin-offers-refresh>
+                        <span aria-hidden="true">⟳</span>
+                        <span>Refresh data</span>
+                      </button>
+                      <button class="btn-ghost admin__btn" type="button" data-admin-offers-reset>
+                        <span aria-hidden="true">⟲</span>
+                        <span>Reset to defaults</span>
+                      </button>
+                      <button class="btn-ghost admin__btn" type="button" data-admin-offers-export>
+                        <span aria-hidden="true">⇩</span>
+                        <span>Download JSON</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="admin-offers__summary" aria-live="polite">
+                    <p class="admin-offers__counts">
+                      <strong data-admin-offers-active>0</strong>
+                      <span>active offers</span>
+                      <span aria-hidden="true">•</span>
+                      <span><span data-admin-offers-total>0</span> total templates</span>
+                    </p>
+                    <p class="admin-offers__updated">Updated <time data-admin-offers-updated datetime=""></time></p>
+                    <p class="admin-offers__status" data-admin-offers-status>Loading offers…</p>
+                  </div>
+                  <div class="admin-offers__list" data-admin-offers-list aria-labelledby="admin-offers-title">
+                    <p class="admin-offers__empty" data-admin-offers-empty>Offers will appear here once loaded.</p>
+                  </div>
+                </div>
+              </section>
             </section>
           </div>
           <div
