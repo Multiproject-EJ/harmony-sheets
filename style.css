@@ -1487,6 +1487,12 @@ body.questionnaire-open{overflow:hidden}
 .life-wheel__hero-rating-icon{color:#fbbf24;font-size:1rem;filter:drop-shadow(0 4px 10px rgba(251,191,36,.45))}
 .life-wheel__hero-divider{width:4px;height:4px;border-radius:50%;background:rgba(148,163,184,.9)}
 
+.placeholder-tiles{margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:0;background:linear-gradient(180deg,#0f172a 0%,#1f2a44 100%)}
+.placeholder-tiles__item{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:clamp(1.4rem,3vw,2.2rem);color:#f8fafc;text-transform:uppercase;letter-spacing:.08em}
+.placeholder-tiles__item:nth-child(odd){background:rgba(30,41,59,.6)}
+.placeholder-tiles__item:nth-child(even){background:rgba(30,41,59,.45)}
+
+
 .product-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .product-tags span{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:#f1f5f9;color:#475569;font-size:.75rem;font-weight:600;letter-spacing:.01em}
 
