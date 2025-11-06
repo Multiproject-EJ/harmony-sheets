@@ -138,10 +138,23 @@
               type="button"
               class="admin-tabs__tab is-active"
               role="tab"
-              id="admin-primary-marketing-trigger"
+              id="admin-primary-dashboard-overview-trigger"
               aria-selected="true"
+              aria-controls="admin-primary-dashboard-overview"
+              data-admin-tab="dashboard-overview"
+              tabindex="0"
+            >
+              Dashboard
+            </button>
+            <button
+              type="button"
+              class="admin-tabs__tab"
+              role="tab"
+              id="admin-primary-marketing-trigger"
+              aria-selected="false"
               aria-controls="admin-primary-marketing"
               data-admin-tab="marketing"
+              tabindex="-1"
             >
               Marketing
             </button>
@@ -175,18 +188,6 @@
                 </button>
               </div>
             </div>
-            <button
-              type="button"
-              class="admin-tabs__tab"
-              role="tab"
-              id="admin-primary-dashboard-overview-trigger"
-              aria-selected="false"
-              aria-controls="admin-primary-dashboard-overview"
-              data-admin-tab="dashboard-overview"
-              tabindex="-1"
-            >
-              Dashboard
-            </button>
             <button
               type="button"
               class="admin-tabs__tab"
@@ -250,12 +251,14 @@
           </div>
         </nav>
             <div class="admin-tabs__panels" data-admin-tab-panels>
-              <div
+          <div
             class="admin-tabs__panel"
             id="admin-primary-marketing"
             role="tabpanel"
             aria-labelledby="admin-primary-marketing-trigger"
             data-admin-tab-panel="marketing"
+            hidden
+            aria-hidden="true"
           >
     <section class="admin__grid">
       <section
@@ -832,13 +835,12 @@
     </section>
           </div>
           <div
-            class="admin-tabs__panel"
+            class="admin-tabs__panel is-active"
             id="admin-primary-dashboard-overview"
             role="tabpanel"
             aria-labelledby="admin-primary-dashboard-overview-trigger"
             data-admin-tab-panel="dashboard-overview"
-            hidden
-            aria-hidden="true"
+            aria-hidden="false"
           >
             <section class="admin__grid">
               <section class="admin__panel" aria-labelledby="admin-dashboard-overview-title">
