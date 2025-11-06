@@ -7,6 +7,8 @@ const forms = Array.from(document.querySelectorAll("[data-auth-form]"));
 const tabs = Array.from(document.querySelectorAll("[data-auth-tab]"));
 const redirectParam = new URLSearchParams(window.location.search).get("redirect");
 const redirect = sanitizeRedirect(redirectParam, "account.html");
+const googleButtons = Array.from(document.querySelectorAll("[data-auth-google]"));
+const GOOGLE_REDIRECT_URL = "https://www.harmony-sheets.com/auth/callback";
 
 const resetForm = document.querySelector("[data-auth-form='reset']");
 const resetEmailField = resetForm?.querySelector("[data-reset-field='email']");
@@ -54,7 +56,16 @@ function disableAllForms(message) {
     tab.disabled = true;
     tab.setAttribute("aria-disabled", "true");
   });
+  googleButtons.forEach((button) => {
+    button.disabled = true;
+  });
   setStatus("error", message);
+}
+
+function setButtonLoading(button, isLoading) {
+  if (!button) return;
+  button.disabled = isLoading;
+  button.dataset.loading = isLoading ? "true" : "false";
 }
 
 function toggleTab(target) {
@@ -288,6 +299,43 @@ async function handleReset(event) {
   }
 }
 
+async function handleGoogleSignIn(event) {
+  event.preventDefault();
+  clearStatus();
+
+  const button = event.currentTarget;
+  setButtonLoading(button, true);
+  setStatus("info", "Redirecting to Google for secure sign in…");
+
+  try {
+    if (!supabaseClient) {
+      throw new Error("Authentication is unavailable. Try again in a moment.");
+    }
+
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: GOOGLE_REDIRECT_URL },
+    });
+
+    if (error) {
+      setButtonLoading(button, false);
+      setStatus("error", error.message);
+      return;
+    }
+
+    if (data?.url) {
+      window.location.href = data.url;
+      return;
+    }
+
+    setButtonLoading(button, false);
+    setStatus("error", "Google sign in did not return a redirect URL. Try again.");
+  } catch (error) {
+    setButtonLoading(button, false);
+    setStatus("error", error.message || "Google sign in is unavailable right now. Try again soon.");
+  }
+}
+
 function bindFormHandlers() {
   const loginForm = document.querySelector("[data-auth-form='login']");
   const signupForm = document.querySelector("[data-auth-form='signup']");
@@ -295,6 +343,12 @@ function bindFormHandlers() {
   loginForm?.addEventListener("submit", handleLogin);
   signupForm?.addEventListener("submit", handleSignup);
   resetForm?.addEventListener("submit", handleReset);
+}
+
+function bindGoogleButtons() {
+  googleButtons.forEach((button) => {
+    button.addEventListener("click", handleGoogleSignIn);
+  });
 }
 
 function detectRecoveryFlow() {
@@ -325,6 +379,7 @@ function init() {
   configureResetForm("request");
   detectRecoveryFlow();
   bindFormHandlers();
+  bindGoogleButtons();
 }
 
 document.addEventListener("DOMContentLoaded", init);

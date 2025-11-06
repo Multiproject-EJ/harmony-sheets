@@ -123,6 +123,14 @@
             <input id="login-password" name="password" type="password" autocomplete="current-password" minlength="6" required>
           </div>
           <button class="btn primary auth-submit" type="submit">Sign in</button>
+          <div class="auth-alt">
+            <div class="auth-divider" role="presentation"><span>Or continue with</span></div>
+            <button class="btn auth-oauth auth-oauth--google" type="button" data-auth-google>
+              <span class="auth-oauth__icon" aria-hidden="true">G</span>
+              <span>Continue with Google</span>
+            </button>
+            <p class="auth-note auth-note--center">We'll redirect you to Google to finish signing in.</p>
+          </div>
         </form>
         <form class="auth-form" id="auth-signup-form" data-auth-form="signup" role="tabpanel" aria-labelledby="auth-tab-signup" hidden>
           <div class="form-field">
@@ -135,6 +143,14 @@
             <p class="form-hint">Minimum 8 characters. You'll receive freemium access instantly.</p>
           </div>
           <button class="btn primary auth-submit" type="submit">Create freemium account</button>
+          <div class="auth-alt">
+            <div class="auth-divider" role="presentation"><span>Or continue with</span></div>
+            <button class="btn auth-oauth auth-oauth--google" type="button" data-auth-google>
+              <span class="auth-oauth__icon" aria-hidden="true">G</span>
+              <span>Sign up with Google</span>
+            </button>
+            <p class="auth-note auth-note--center">Use your Google account to create or access your Harmony Sheets account.</p>
+          </div>
         </form>
         <form class="auth-form" id="auth-reset-form" data-auth-form="reset" role="tabpanel" aria-labelledby="auth-tab-reset" hidden>
           <div class="form-field" data-reset-field="email">
