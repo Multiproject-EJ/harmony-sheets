@@ -3178,6 +3178,9 @@ App.initNavDropdown = function() {
   const close = () => {
     hideLargePreview({ returnFocus: false });
     setOpen(false);
+    if (navWheelControl && typeof navWheelControl.reset === "function") {
+      navWheelControl.reset();
+    }
   };
   App.closeBrowseMenu = close;
   close();
@@ -3410,6 +3413,7 @@ App.initNavDropdown = function() {
 
   let areaProducts = buildAreaProducts([]);
   let panelEl = null;
+  let navWheelControl = null;
   let rowsEl = null;
   let infoTextEl = null;
   let searchInput = null;
@@ -3717,6 +3721,14 @@ App.initNavDropdown = function() {
     `;
 
     panelEl = content.querySelector("[data-nav-panel]");
+
+    const navWheel = panelEl?.querySelector("#nav-life-wheel");
+    if (navWheel) {
+      const control = App.enhanceLifeWheel(navWheel);
+      if (control) {
+        navWheelControl = control;
+      }
+    }
 
     scheduleReposition();
   };
@@ -4490,68 +4502,24 @@ App.initProducts = async function() {
 };
 
 /*****************************************************
- * Home page life wheel (index.html)
+ * Shared life wheel interactions
  *****************************************************/
-App.initHome = function() {
-  const bestsellersGrid = App.qs("#home-grid");
-  if (bestsellersGrid) {
-    App.loadProducts()
-      .then(products => {
-        const activeProducts = App.filterActiveProducts(products);
-        if (!activeProducts.length) {
-          bestsellersGrid.innerHTML = "<p class=\"muted\">New templates are on the way. Check back soon!</p>";
-          return;
-        }
-
-        const cards = activeProducts
-          .map(product => {
-            const productId = product && product.id ? String(product.id) : "";
-            const link = productId ? `product.html?id=${encodeURIComponent(productId)}` : "products.html";
-            const href = App.escapeHtml(link);
-            const image = App.escapeHtml(product.colorImage || "assets/placeholder.png");
-            const name = App.escapeHtml(product.name || "Harmony Sheets template");
-            const tagline = App.escapeHtml(product.tagline || "");
-            const price = App.escapeHtml(product.price || "");
-            const tags = Array.isArray(product.lifeAreas)
-              ? product.lifeAreas
-                  .map(area => App.LIFE_AREAS[area]?.short)
-                  .filter(Boolean)
-                  .map(label => `<span>${App.escapeHtml(label)}</span>`)
-                  .join("")
-              : "";
-
-            return `
-              <div class="product-card">
-                <a href="${href}">
-                  <div class="thumb">
-                    <img src="${image}" alt="">
-                  </div>
-                  <h3>${name}</h3>
-                  <p class="muted">${tagline}</p>
-                  <p class="price">${price}</p>
-                  ${tags ? `<div class="product-tags">${tags}</div>` : ""}
-                </a>
-              </div>
-            `;
-          })
-          .join("");
-
-        bestsellersGrid.innerHTML = cards;
-      })
-      .catch(err => {
-        console.error("Failed to load products for home bestsellers", err);
-        bestsellersGrid.innerHTML = "<p class=\"muted\">We couldn't load featured templates right now. Please refresh.</p>";
-      });
+App.enhanceLifeWheel = function(root) {
+  if (!root) return null;
+  if (root.dataset.lifeWheelInitialized === "true" && root.__lifeWheelControl) {
+    return root.__lifeWheelControl;
   }
 
-  const details = App.qs("#life-wheel-details");
-  const slices = App.qsa(".life-wheel__slice-link");
+  const details = root.querySelector(".life-wheel__details");
+  const slices = root.querySelectorAll(".life-wheel__slice-link");
   if (!details || !slices.length) return;
+
+  root.dataset.lifeWheelInitialized = "true";
 
   const defaultMarkup = details.innerHTML.trim();
 
-  const iconLayer = App.qs(".life-wheel__icons");
-  const graphic = iconLayer ? iconLayer.closest(".life-wheel__graphic") : App.qs(".life-wheel__graphic");
+  const iconLayer = root.querySelector(".life-wheel__icons");
+  const graphic = iconLayer ? iconLayer.closest(".life-wheel__graphic") : root.querySelector(".life-wheel__graphic");
 
   const iconData = [];
   const labelData = [];
@@ -4632,7 +4600,7 @@ App.initHome = function() {
       }
     });
   } else {
-    App.qsa(".life-wheel__icon").forEach(icon => {
+    root.querySelectorAll(".life-wheel__icon").forEach(icon => {
       const area = icon.dataset.area;
       if (!area) return;
       const info = App.LIFE_AREAS[area];
@@ -4681,7 +4649,7 @@ App.initHome = function() {
 
   const updateIconPositions = () => {
     if (!iconData.length && !labelData.length) return;
-    const boundsSource = graphic || iconLayer || App.qs(".life-wheel__graphic");
+    const boundsSource = graphic || iconLayer || root.querySelector(".life-wheel__graphic");
     if (!boundsSource) return;
     const size = boundsSource.getBoundingClientRect().width;
     if (!size) return;
@@ -4729,7 +4697,6 @@ App.initHome = function() {
   };
 
   window.addEventListener("resize", handleResize);
-
 
   const defaultState = {
     title: details.dataset.defaultTitle || "Explore the Life Harmony Wheel",
@@ -4919,6 +4886,66 @@ App.initHome = function() {
   });
 
   render(defaultState, false);
+  const control = { reset, setActive };
+  root.__lifeWheelControl = control;
+  return control;
+};
+
+/*****************************************************
+ * Home page life wheel (index.html)
+ *****************************************************/
+App.initHome = function() {
+  const bestsellersGrid = App.qs("#home-grid");
+  if (bestsellersGrid) {
+    App.loadProducts()
+      .then(products => {
+        const activeProducts = App.filterActiveProducts(products);
+        if (!activeProducts.length) {
+          bestsellersGrid.innerHTML = "<p class=\"muted\">New templates are on the way. Check back soon!</p>";
+          return;
+        }
+
+        const cards = activeProducts
+          .map(product => {
+            const productId = product && product.id ? String(product.id) : "";
+            const link = productId ? `product.html?id=${encodeURIComponent(productId)}` : "products.html";
+            const href = App.escapeHtml(link);
+            const image = App.escapeHtml(product.colorImage || "assets/placeholder.png");
+            const name = App.escapeHtml(product.name || "Harmony Sheets template");
+            const tagline = App.escapeHtml(product.tagline || "");
+            const price = App.escapeHtml(product.price || "");
+            const tags = Array.isArray(product.lifeAreas)
+              ? product.lifeAreas
+                  .map(area => App.LIFE_AREAS[area]?.short)
+                  .filter(Boolean)
+                  .map(label => `<span>${App.escapeHtml(label)}</span>`)
+                  .join("")
+              : "";
+
+            return `
+              <div class="product-card">
+                <a href="${href}">
+                  <div class="thumb">
+                    <img src="${image}" alt="">
+                  </div>
+                  <h3>${name}</h3>
+                  <p class="muted">${tagline}</p>
+                  <p class="price">${price}</p>
+                  ${tags ? `<div class="product-tags">${tags}</div>` : ""}
+                </a>
+              </div>
+            `;
+          })
+          .join("");
+
+        bestsellersGrid.innerHTML = cards;
+      })
+      .catch(err => {
+        console.error("Failed to load products for home bestsellers", err);
+        bestsellersGrid.innerHTML = "<p class=\"muted\">We couldn't load featured templates right now. Please refresh.</p>";
+      });
+  }
+  App.enhanceLifeWheel(App.qs("#life-wheel"));
 };
 
 /*****************************************************

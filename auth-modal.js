@@ -60,7 +60,7 @@ function setAccountState(user) {
   accountItem.dataset.authState = isSignedIn ? "signed-in" : "signed-out";
 
   if (labelEl) {
-    labelEl.textContent = isSignedIn ? "My Account" : "Log In/Sign Up";
+    labelEl.textContent = isSignedIn ? "My Account" : "Sign In/Up";
   }
 
   if (dropdown) {
