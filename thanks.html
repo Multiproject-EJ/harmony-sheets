@@ -4,7 +4,6 @@
   <meta charset="utf-8"/>
   <title>Thanks! Check your email</title>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <link rel="stylesheet" href="assets/auth.css"/>
   <style>
     body{margin:0;background:#f6f7fb;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#1a1f36}
     .wrap{max-width:720px;margin:8vh auto;padding:24px}
@@ -34,20 +33,5 @@
       <a class="btn" href="/">Back to Harmony Sheets</a>
     </div>
   </div>
-  <div id="authModal" class="auth-modal">
-    <div class="auth-card">
-      <button id="authClose">×</button>
-      <h2>Welcome</h2>
-      <button id="googleSignIn" class="btn btn-google">Continue with Google</button>
-      <div class="auth-divider"><span>or</span></div>
-      <form id="emailForm">
-        <input id="authEmail" type="email" placeholder="you@example.com" required>
-        <button id="emailMagic" class="btn btn-primary">Send magic link</button>
-      </form>
-      <p id="authMsg"></p>
-    </div>
-    <div class="auth-backdrop"></div>
-  </div>
-  <script type="module" src="assets/auth.js"></script>
 </body>
 </html>

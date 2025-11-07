@@ -7,7 +7,6 @@
   <meta name="description" content="Sign in to your Harmony Sheets account or create a free freemium account powered by Supabase authentication.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="assets/auth.css">
 </head>
 <body class="theme-neutral page-auth">
 <header class="site-header">
@@ -41,7 +40,7 @@
       </div>
       <a class="nav-link" href="faq.html" data-community-open>Community</a>
       <div class="nav-item nav-item--account" data-account-menu>
-        <button id="btnSignIn" class="nav-link nav-link--account nav-link--menu" type="button" data-account-toggle aria-haspopup="true" aria-expanded="false">
+        <button class="nav-link nav-link--account nav-link--menu" type="button" data-account-toggle aria-haspopup="true" aria-expanded="false">
           <span class="nav-link__label" data-account-label>Sign In/Up</span>
           <span class="nav-link__chevron" aria-hidden="true"></span>
         </button>
@@ -263,20 +262,5 @@
 <script src="app.js"></script>
 <script type="module" src="auth-modal.js"></script>
 <script type="module" src="auth.js"></script>
-  <div id="authModal" class="auth-modal">
-    <div class="auth-card">
-      <button id="authClose">×</button>
-      <h2>Welcome</h2>
-      <button id="googleSignIn" class="btn btn-google">Continue with Google</button>
-      <div class="auth-divider"><span>or</span></div>
-      <form id="emailForm">
-        <input id="authEmail" type="email" placeholder="you@example.com" required>
-        <button id="emailMagic" class="btn btn-primary">Send magic link</button>
-      </form>
-      <p id="authMsg"></p>
-    </div>
-    <div class="auth-backdrop"></div>
-  </div>
-  <script type="module" src="assets/auth.js"></script>
 </body>
 </html>
