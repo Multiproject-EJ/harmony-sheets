@@ -2163,6 +2163,10 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-tabs--primary .admin-tabs__tab[data-admin-tab="offers"]:is(:hover,:focus-visible){background:rgba(254,202,202,.6);color:#b91c1c}
 .admin-tabs--primary .admin-tabs__tab[data-admin-tab="offers"].is-active{background:#dc2626;color:#fff;box-shadow:0 16px 36px rgba(220,38,38,.28)}
 .admin-tabs--primary .admin-tabs__tab[data-admin-tab="offers"].is-active:is(:hover,:focus-visible){background:#b91c1c}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="ai-microsaas"]{color:#0ea5e9}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="ai-microsaas"]:is(:hover,:focus-visible){background:rgba(125,211,252,.6);color:#0369a1}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="ai-microsaas"].is-active{background:#0ea5e9;color:#fff;box-shadow:0 16px 36px rgba(14,165,233,.28)}
+.admin-tabs--primary .admin-tabs__tab[data-admin-tab="ai-microsaas"].is-active:is(:hover,:focus-visible){background:#0284c7}
 .admin-tabs--primary .admin-tabs__tab[data-admin-tab="dashboard"]{color:#d97706}
 .admin-tabs--primary .admin-tabs__tab[data-admin-tab="dashboard"]:is(:hover,:focus-visible){background:rgba(253,230,138,.6);color:#b45309}
 .admin-tabs--primary .admin-tabs__tab[data-admin-tab="dashboard"].is-active{background:#d97706;color:#fff;box-shadow:0 16px 36px rgba(217,119,6,.28)}
@@ -2198,6 +2202,31 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin__pipeline-toggle[aria-expanded="true"] .admin__pipeline-toggle-icon{background:rgba(15,23,42,.08);color:#1f2937;transform:rotate(180deg)}
 .admin__btn{display:inline-flex;align-items:center;gap:8px;font-size:.92rem;font-weight:600}
 .admin__toolbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.admin-microsaas{width:min(1100px,100%);margin:0 auto;display:grid;gap:24px}
+.admin-microsaas__intro{gap:16px}
+.admin-microsaas__title{margin:0;font-size:2rem;color:#0f172a}
+.admin-microsaas__intro p{margin:0;font-size:1.05rem;color:#475569;line-height:1.6}
+.admin-microsaas__goal{gap:24px}
+.admin-microsaas__goal-header{display:grid;gap:10px}
+.admin-microsaas__goal-header h3{margin:0;font-size:1.4rem;color:#0f172a}
+.admin-microsaas__goal-sub{margin:0;font-size:1rem;color:#475569;line-height:1.5}
+.admin-microsaas h4{margin:0;font-size:1.05rem;color:#1f2937}
+.admin-microsaas__domains{margin:0;padding:0;display:grid;gap:12px;list-style:none}
+.admin-microsaas__domains li{display:grid;gap:6px;padding:12px 16px;border-radius:18px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.16);color:#0f172a}
+.admin-microsaas__domains span{color:#0369a1;font-size:.9rem}
+.admin-microsaas__steps{margin:0;padding-left:20px;display:grid;gap:12px;font-size:.98rem;color:#1f2937;line-height:1.55}
+.admin-microsaas__steps li{list-style:decimal}
+.admin-microsaas__steps strong{display:block;font-weight:700;color:#0f172a}
+.admin-microsaas__notes{margin:8px 0 0;font-size:.9rem;color:#64748b;line-height:1.5}
+@media (max-width:820px){
+  .admin-microsaas{gap:20px}
+  .admin-microsaas__title{font-size:1.8rem}
+  .admin-microsaas__goal{gap:20px}
+}
+@media (max-width:600px){
+  .admin-microsaas__domains li{padding:12px 14px}
+  .admin-microsaas__steps{gap:10px}
+}
 .admin__search input{min-width:220px;border-radius:12px;border:1px solid rgba(148,163,184,.5);padding:10px 14px;font:inherit}
 .admin__filter select{border-radius:12px;border:1px solid rgba(148,163,184,.5);padding:10px 12px;font:inherit;min-width:180px}
 .admin__table-wrap{border:1px solid rgba(148,163,184,.3);border-radius:18px;overflow:hidden;background:#f8fafc;max-height:520px;display:flex;flex-direction:column}
