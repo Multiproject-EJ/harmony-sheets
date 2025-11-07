@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <body>Signing you in…</body>
+  <script type="module">
+    import { supabase } from "/assets/supaClient.js";
+    const { data } = await supabase.auth.getSession();
+    if (data?.session) location.replace('/dashboard');
+    supabase.auth.onAuthStateChange((_e, session) => {
+      if (session) location.replace('/dashboard');
+    });
+  </script>
+</html>
