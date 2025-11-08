@@ -151,6 +151,64 @@
     ]
   },
   {
+    "id": "ultimate-fitness-health",
+    "name": "Ultimate Fitness & Health Command Center",
+    "tagline": "Train smarter with one dashboard for readiness, workouts, and fueling.",
+    "draft": true,
+    "price": "$59",
+    "heroImage": "assets/ultimate-fitness-hero.svg",
+    "colorImage": "assets/ultimate-fitness-hero.svg",
+    "colorCaption": "Concept art for the Ultimate Fitness & Health dashboard panels.",
+    "lifeAreas": ["health", "fun", "career"],
+    "badges": [
+      "Pipeline concept",
+      "Google Sheets + Sidebar demo",
+      "All-in-one fitness rituals"
+    ],
+    "features": [
+      "Morning readiness rollup with HRV, resting HR, and recovery notes",
+      "Weekly training planner that balances strength, cardio, and mobility",
+      "Nutrition + macros tracker with protein highlights and daily targets",
+      "Habit rituals board to keep sleep, recovery, and mindset on track"
+    ],
+    "description": "<p><strong>Ultimate Fitness &amp; Health Command Center</strong> keeps every training and wellness ritual inside one guided spreadsheet. Sync wearable metrics for a morning readiness snapshot, log workouts in seconds, and keep fueling + recovery goals visible so you know exactly how to adjust the day.</p>",
+    "gallery": [
+      { "src": "assets/ultimate-fitness-hero.svg", "alt": "Ultimate Fitness & Health dashboard mockup" }
+    ],
+    "virtualDemo": "Google sheets products/Ultimate Fitness Health/ultimate-fitness-health.html",
+    "included": [
+      "Ultimate Fitness & Health Google Sheet",
+      "Apps Script sidebar dashboard",
+      "Workout + recovery quick add forms",
+      "Draft launch messaging and automation notes"
+    ],
+    "faqs": [
+      {
+        "q": "Is the Ultimate Fitness & Health Command Center available for purchase?",
+        "a": "Not yet. This is a draft concept intended for internal review while we shape the launch."
+      },
+      {
+        "q": "Can I test the interactive dashboard?",
+        "a": "Yes. Use the linked sidebar demo to explore the readiness cards, workout log, and recovery forms in your browser."
+      },
+      {
+        "q": "Does it connect to wearables automatically?",
+        "a": "Automation research is in progress. The current draft focuses on guided manual entry with import placeholders for future integrations."
+      }
+    ],
+    "pricingTitle": "Preview the Ultimate Fitness & Health Command Center",
+    "pricingSub": "Draft concept for internal review — not yet for sale.",
+    "socialProof": {
+      "stars": "",
+      "quote": "Draft preview available for Harmony Sheets reviewers."
+    },
+    "benefits": [
+      { "title": "Balance every training block", "desc": "See strength, conditioning, and recovery plans side-by-side to keep volume aligned with your goals." },
+      { "title": "Trust your readiness", "desc": "Daily HRV and resting HR snapshots highlight when to push or pivot." },
+      { "title": "Fuel with confidence", "desc": "Protein and macro cues make it easy to adapt meals to the day's training load." }
+    ]
+  },
+  {
     "id": "budget-dashboard",
     "name": "Budget Dashboard — Personal Finance Tracker",
     "tagline": "Take control of your money with clarity and confidence.",
