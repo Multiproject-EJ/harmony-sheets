@@ -138,25 +138,13 @@
               type="button"
               class="admin-tabs__tab is-active"
               role="tab"
-              id="admin-primary-dashboard-overview-trigger"
-              aria-selected="true"
-              aria-controls="admin-primary-dashboard-overview"
-              data-admin-tab="dashboard-overview"
-              tabindex="0"
-            >
-              Dashboard
-            </button>
-            <button
-              type="button"
-              class="admin-tabs__tab"
-              role="tab"
               id="admin-primary-marketing-trigger"
-              aria-selected="false"
+              aria-selected="true"
               aria-controls="admin-primary-marketing"
               data-admin-tab="marketing"
-              tabindex="-1"
+              tabindex="0"
             >
-              Marketing
+              Dashboard/MATRIX
             </button>
             <div
               class="admin-tabs admin-tabs--catalog"
@@ -264,13 +252,12 @@
         </nav>
             <div class="admin-tabs__panels" data-admin-tab-panels>
           <div
-            class="admin-tabs__panel"
+            class="admin-tabs__panel is-active"
             id="admin-primary-marketing"
             role="tabpanel"
             aria-labelledby="admin-primary-marketing-trigger"
             data-admin-tab-panel="marketing"
-            hidden
-            aria-hidden="true"
+            aria-hidden="false"
           >
     <section class="admin__grid">
       <section
@@ -845,29 +832,6 @@
         </div>
       </section>
     </section>
-          </div>
-          <div
-            class="admin-tabs__panel is-active"
-            id="admin-primary-dashboard-overview"
-            role="tabpanel"
-            aria-labelledby="admin-primary-dashboard-overview-trigger"
-            data-admin-tab-panel="dashboard-overview"
-            aria-hidden="false"
-          >
-            <section class="admin__grid">
-              <section class="admin__panel" aria-labelledby="admin-dashboard-overview-title">
-                <div class="admin__panel-head">
-                  <div>
-                    <span class="admin__eyebrow">Dashboard</span>
-                    <h2 class="admin__title" id="admin-dashboard-overview-title">Operations dashboard</h2>
-                    <p class="admin__panel-sub">Stay on top of recent changes, monitor checklist progress, and review quick stats across the Harmony Sheets catalog.</p>
-                  </div>
-                </div>
-                <div class="admin__panel-body">
-                  <p class="muted">Dashboard widgets are coming soon. Use the Control Panel to manage detailed catalog data in the meantime.</p>
-                </div>
-              </section>
-            </section>
           </div>
           <div
             class="admin-tabs__panel"
