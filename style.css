@@ -2348,17 +2348,17 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin-editor-modal[hidden]{display:none}
 .admin-editor-modal__backdrop{position:absolute;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(6px);cursor:pointer}
 .admin-editor-modal__dialog{position:relative;z-index:1;width:min(920px,100%);max-height:calc(100vh - 48px);overflow:auto;background:#fff;border-radius:32px;box-shadow:0 36px 90px rgba(15,23,42,.18);padding:clamp(28px,5vw,44px);outline:none}
-.admin-level-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;z-index:1300}
-.admin-level-modal.is-open{display:flex}
-.admin-level-modal[hidden]{display:none}
-.admin-level-modal__backdrop{position:absolute;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px)}
-.admin-level-modal__dialog{position:relative;z-index:1;width:min(1040px,100%);max-height:calc(100vh - 48px);overflow:auto;background:#fff;border-radius:28px;box-shadow:0 32px 80px rgba(15,23,42,.16);padding:clamp(24px,4vw,40px);outline:none}
-.admin-level-modal__close{position:absolute;top:16px;right:16px;width:42px;height:42px;border-radius:50%;border:none;background:rgba(148,163,184,.18);color:#0f172a;font-size:1.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s ease,transform .2s ease}
-.admin-level-modal__close:hover,.admin-level-modal__close:focus-visible{background:rgba(148,163,184,.32);transform:scale(1.05);outline:none}
-.admin-level-modal__header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:20px}
-.admin-level-modal__title{margin:0;font-size:1.58rem;color:#0f172a}
-.admin-level-modal__subtitle{margin:0;font-size:.95rem;color:#475569;max-width:32ch}
-.admin-level-modal__body{display:flex;flex-direction:column;gap:18px}
+.admin-dashboard-content .admin-level-modal{position:fixed;inset:0;display:none;align-items:stretch;justify-content:stretch;padding:0;z-index:1300}
+.admin-dashboard-content .admin-level-modal.is-open{display:flex}
+.admin-dashboard-content .admin-level-modal[hidden]{display:none}
+.admin-dashboard-content .admin-level-modal__backdrop{position:absolute;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(4px)}
+.admin-dashboard-content .admin-level-modal__dialog{position:relative;z-index:1;width:100%;height:100%;overflow:auto;background:#fff;border-radius:0;box-shadow:none;padding:clamp(24px,4vw,40px);outline:none}
+.admin-dashboard-content .admin-level-modal__close{position:absolute;top:16px;right:16px;width:42px;height:42px;border-radius:50%;border:none;background:rgba(148,163,184,.18);color:#0f172a;font-size:1.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s ease,transform .2s ease}
+.admin-dashboard-content .admin-level-modal__close:hover,.admin-dashboard-content .admin-level-modal__close:focus-visible{background:rgba(148,163,184,.32);transform:scale(1.05);outline:none}
+.admin-dashboard-content .admin-level-modal__header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:20px}
+.admin-dashboard-content .admin-level-modal__title{margin:0;font-size:1.58rem;color:#0f172a}
+.admin-dashboard-content .admin-level-modal__subtitle{margin:0;font-size:.95rem;color:#475569;max-width:32ch}
+.admin-dashboard-content .admin-level-modal__body{display:flex;flex-direction:column;gap:18px}
 .admin-level-table__row.is-target{background:rgba(99,102,241,.08);box-shadow:0 0 0 2px rgba(99,102,241,.22)}
 .admin-level-table__draft{display:inline-flex;align-items:center;justify-content:center;padding:4px 10px;border-radius:999px;background:rgba(148,163,184,.16);color:#475569;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .level-checklist{margin-top:12px;padding:14px;border-radius:16px;background:#f8fafc;border:1px solid rgba(148,163,184,.32);box-shadow:0 16px 36px rgba(15,23,42,.12)}
