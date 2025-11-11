@@ -154,6 +154,7 @@ let flowchartBoardInitialized = false;
 let brainBoard = null;
 let flowchartBoard = null;
 let boardSelectEl = null;
+let boardTableBodies = [];
 let boardSaveButton = null;
 let boardStatusEl = null;
 let currentBoardId = DEFAULT_BOARD_ID;
@@ -4749,6 +4750,7 @@ function setupBrainBoard() {
   }
 
   boardSelectEl = document.querySelector("[data-board-select]");
+  boardTableBodies = Array.from(document.querySelectorAll("[data-board-table-body]"));
   boardSaveButton = document.querySelector("[data-board-save]");
   boardStatusEl = document.querySelector("[data-board-status]");
   boardSwitcherEl = board.querySelector("[data-board-switcher]") ?? null;
@@ -4801,6 +4803,29 @@ function setupBrainBoard() {
     });
   }
 
+  // Setup table row click handlers
+  document.addEventListener("click", (event) => {
+    const row = event.target.closest("[data-board-row]");
+    if (!row) return;
+    const boardId = row.dataset.boardId;
+    if (!boardId) return;
+    selectBoard(boardId);
+    openBoardModal("brain", row);
+  });
+
+  // Setup table keyboard navigation
+  document.addEventListener("keydown", (event) => {
+    const row = event.target.closest("[data-board-row]");
+    if (!row) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      const boardId = row.dataset.boardId;
+      if (!boardId) return;
+      selectBoard(boardId);
+      openBoardModal("brain", row);
+    }
+  });
+
   defaultBoardSnapshot = brainBoard.captureSnapshot();
   boardsCache.set(DEFAULT_BOARD_ID, {
     id: DEFAULT_BOARD_ID,
@@ -4813,11 +4838,9 @@ function setupBrainBoard() {
     boardSelectEl.addEventListener("change", (event) => {
       selectBoard(event.target.value);
     });
-    updateBoardOptions(DEFAULT_BOARD_ID);
-    boardSelectEl.value = DEFAULT_BOARD_ID;
-  } else if (boardSwitcherSelect) {
-    updateBoardOptions(DEFAULT_BOARD_ID);
   }
+  
+  updateBoardOptions(DEFAULT_BOARD_ID);
 
   registerBoardSaveTrigger(boardSaveButton);
 
@@ -4871,11 +4894,47 @@ function setBoardStatus(message, tone = "neutral") {
   }
 }
 
+function formatBoardTimestamp(dateString) {
+  if (!dateString) return "—";
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    const options = { month: 'short', day: 'numeric' };
+    if (date.getFullYear() !== now.getFullYear()) {
+      options.year = 'numeric';
+    }
+    return date.toLocaleDateString('en-US', options);
+  } catch (error) {
+    return "—";
+  }
+}
+
+function getStickyCount(board) {
+  if (!board || !board.notes) return 0;
+  try {
+    if (Array.isArray(board.notes)) {
+      return board.notes.length;
+    }
+    return 0;
+  } catch (error) {
+    return 0;
+  }
+}
+
 function updateBoardOptions(targetSelection = currentBoardId) {
   const selects = [];
   if (boardSelectEl) selects.push(boardSelectEl);
   if (boardSwitcherSelect) selects.push(boardSwitcherSelect);
-  if (!selects.length) return;
 
   const sortedBoards = [...supabaseBoards].sort((a, b) => {
     const nameA = a.name.toLocaleLowerCase();
@@ -4884,27 +4943,74 @@ function updateBoardOptions(targetSelection = currentBoardId) {
     return nameA < nameB ? -1 : 1;
   });
 
-  const options = [
-    { value: DEFAULT_BOARD_ID, label: "Default Board (Demo)" },
-    ...sortedBoards.map((board) => ({ value: board.id, label: board.name }))
+  const defaultBoard = boardsCache.get(DEFAULT_BOARD_ID);
+  const boards = [
+    { 
+      id: DEFAULT_BOARD_ID, 
+      name: "Default Board (Demo)", 
+      sticky_count: getStickyCount(defaultBoard),
+      last_save: null
+    },
+    ...sortedBoards.map((board) => ({ 
+      id: board.id, 
+      name: board.name,
+      sticky_count: getStickyCount(board),
+      last_save: board.updated_at || board.created_at
+    }))
   ];
 
-  const fallback = options.some((option) => option.value === targetSelection)
+  const fallback = boards.some((board) => board.id === targetSelection)
     ? targetSelection
-    : options.some((option) => option.value === currentBoardId)
+    : boards.some((board) => board.id === currentBoardId)
       ? currentBoardId
       : DEFAULT_BOARD_ID;
 
+  // Update select dropdowns if they exist (for board switcher)
   selects.forEach((select) => {
     select.innerHTML = "";
-    options.forEach((option) => {
+    boards.forEach((board) => {
       const element = document.createElement("option");
-      element.value = option.value;
-      element.textContent = option.label;
+      element.value = board.id;
+      element.textContent = board.name;
       select.appendChild(element);
     });
-    const targetValue = options.some((option) => option.value === fallback) ? fallback : DEFAULT_BOARD_ID;
+    const targetValue = boards.some((board) => board.id === fallback) ? fallback : DEFAULT_BOARD_ID;
     select.value = targetValue;
+  });
+
+  // Update table views
+  boardTableBodies.forEach((tbody) => {
+    tbody.innerHTML = "";
+    boards.forEach((board) => {
+      const row = document.createElement("tr");
+      row.className = "brain-board-library__row";
+      row.dataset.boardId = board.id;
+      row.dataset.boardRow = "";
+      row.setAttribute("tabindex", "0");
+      row.setAttribute("role", "button");
+      
+      if (board.id === currentBoardId) {
+        row.setAttribute("aria-selected", "true");
+      }
+
+      const titleCell = document.createElement("td");
+      titleCell.dataset.label = "Title";
+      titleCell.textContent = board.name;
+
+      const stickyCell = document.createElement("td");
+      stickyCell.dataset.label = "# Sticky's";
+      stickyCell.textContent = board.sticky_count.toString();
+
+      const saveCell = document.createElement("td");
+      saveCell.dataset.label = "Last Save";
+      saveCell.textContent = formatBoardTimestamp(board.last_save);
+
+      row.appendChild(titleCell);
+      row.appendChild(stickyCell);
+      row.appendChild(saveCell);
+
+      tbody.appendChild(row);
+    });
   });
 }
 
@@ -4920,6 +5026,15 @@ function selectBoard(boardId, { announce = true } = {}) {
   if (boardSwitcherSelect && boardSwitcherSelect.value !== targetId) {
     boardSwitcherSelect.value = targetId;
   }
+
+  // Update table row selection
+  document.querySelectorAll("[data-board-row]").forEach((row) => {
+    if (row.dataset.boardId === targetId) {
+      row.setAttribute("aria-selected", "true");
+    } else {
+      row.removeAttribute("aria-selected");
+    }
+  });
 
   if (brainBoard) {
     brainBoard.renderNotes(board.notes);

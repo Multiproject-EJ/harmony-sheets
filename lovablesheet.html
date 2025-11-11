@@ -178,16 +178,25 @@
                       <p class="brain-board-library__eyebrow">Brain board setup</p>
                       <h4 class="brain-board-library__title">Board library</h4>
                       <p class="brain-board-library__description">
-                        Choose which Supabase board to load before launching the brain board, then save new sticky note sessions without leaving this page.
+                        Click on a board to open it. Each board displays the title, number of sticky notes, and the last saved date.
                       </p>
-                      <div class="brain-board-library__form">
-                        <label class="brain-board-library__label" for="brain-board-select-dialog">Boards</label>
-                        <select class="brain-board__select" id="brain-board-select-dialog" data-board-select>
-                          <option value="default">Default Board (Demo)</option>
-                        </select>
-                        <button class="btn primary brain-board__launch" type="button" data-board-launch="brain">
-                          Launch brain board
-                        </button>
+                      <div class="brain-board-library__table-wrapper">
+                        <table class="brain-board-library__table" data-board-table>
+                          <thead>
+                            <tr>
+                              <th scope="col">Title</th>
+                              <th scope="col"># Sticky's</th>
+                              <th scope="col">Last Save</th>
+                            </tr>
+                          </thead>
+                          <tbody data-board-table-body>
+                            <tr class="brain-board-library__row" data-board-id="default" data-board-row tabindex="0" role="button">
+                              <td data-label="Title">Default Board (Demo)</td>
+                              <td data-label="# Sticky's">4</td>
+                              <td data-label="Last Save">—</td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
                       <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
                     </div>
@@ -329,16 +338,25 @@
                         <p class="brain-board-library__eyebrow">Brain board setup</p>
                         <h4 class="brain-board-library__title">Board library</h4>
                         <p class="brain-board-library__description">
-                          Choose which Supabase board to load before launching the brain board, then save new sticky note sessions without leaving this page.
+                          Click on a board to open it. Each board displays the title, number of sticky notes, and the last saved date.
                         </p>
-                        <div class="brain-board-library__form">
-                          <label class="brain-board-library__label" for="brain-board-select">Boards</label>
-                          <select class="brain-board__select" id="brain-board-select" data-board-select>
-                            <option value="default">Default Board (Demo)</option>
-                          </select>
-                          <button class="btn primary brain-board__launch" type="button" data-board-launch="brain">
-                            Launch brain board
-                          </button>
+                        <div class="brain-board-library__table-wrapper">
+                          <table class="brain-board-library__table" data-board-table>
+                            <thead>
+                              <tr>
+                                <th scope="col">Title</th>
+                                <th scope="col"># Sticky's</th>
+                                <th scope="col">Last Save</th>
+                              </tr>
+                            </thead>
+                            <tbody data-board-table-body>
+                              <tr class="brain-board-library__row" data-board-id="default" data-board-row tabindex="0" role="button">
+                                <td data-label="Title">Default Board (Demo)</td>
+                                <td data-label="# Sticky's">4</td>
+                                <td data-label="Last Save">—</td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </div>
                         <span class="brain-board__status" data-board-status role="status" aria-live="polite"></span>
                       </div>
