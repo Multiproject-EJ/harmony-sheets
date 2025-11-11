@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sticky Note 3-Circle Menu Demo</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      background: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .demo-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .demo-header {
+      margin-bottom: 40px;
+    }
+    .demo-header h1 {
+      font-size: 2rem;
+      margin: 0 0 10px 0;
+      color: #0f172a;
+    }
+    .demo-header p {
+      color: #64748b;
+      margin: 0;
+    }
+    .brain-board__workspace {
+      background: white;
+      border-radius: 20px;
+      padding: 60px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      min-height: 600px;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1>Sticky Note 3-Circle Menu Demo</h1>
+      <p>Demonstrating the new 3-circle control menu: Color • Move Group • Shape</p>
+    </div>
+    
+    <div class="brain-board">
+      <div class="brain-board__workspace" data-board-workspace role="list">
+        <!-- Sticky Note 1 -->
+        <div class="brain-board__note" role="listitem" data-note data-color="sunshine" data-shape="classic" style="position: absolute; left: 50px; top: 50px;">
+          <div class="brain-board__handle" data-note-handle>
+            <button class="brain-board__label-button" type="button">
+              <span class="brain-board__label" data-note-label>3-Circle Menu</span>
+            </button>
+            <div class="brain-board__actions">
+              <div class="brain-board__color-control" data-note-color-control>
+                <button class="brain-board__color-button" type="button" data-note-color-toggle aria-haspopup="true" aria-expanded="false">
+                  <span class="sr-only">Change note color</span>
+                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                </button>
+                <div class="brain-board__color-menu" data-note-color-menu hidden>
+                  <div class="brain-board__swatches" role="group" aria-label="Choose a preset color">
+                    <button class="brain-board__swatch" type="button" data-note-color="sunshine" aria-label="Sunshine yellow"></button>
+                    <button class="brain-board__swatch" type="button" data-note-color="meadow" aria-label="Meadow green"></button>
+                    <button class="brain-board__swatch" type="button" data-note-color="ocean" aria-label="Ocean blue"></button>
+                    <button class="brain-board__swatch" type="button" data-note-color="blossom" aria-label="Blossom pink"></button>
+                  </div>
+                  <div class="brain-board__menu-divider" role="presentation"></div>
+                  <div class="brain-board__menu-section brain-board__menu-section--actions" role="group" aria-label="Sticky note actions">
+                    <button class="brain-board__menu-button brain-board__menu-button--danger" type="button">Delete sticky note</button>
+                  </div>
+                </div>
+              </div>
+              <div class="brain-board__group-control" data-note-group-control>
+                <button class="brain-board__group-button" type="button" data-note-group aria-pressed="false" aria-label="Move color group">
+                  <span class="sr-only">Move color group</span>
+                  <span class="brain-board__group-icon" aria-hidden="true">⇄</span>
+                </button>
+              </div>
+              <div class="brain-board__shape-control" data-note-shape-control>
+                <button class="brain-board__shape-toggle" type="button" data-note-shape-toggle aria-haspopup="true" aria-expanded="false">
+                  <span class="sr-only">Change note shape</span>
+                  <span class="brain-board__shape-preview-dot" data-note-shape-preview-dot data-shape="classic"></span>
+                </button>
+                <div class="brain-board__shape-menu" data-note-shape-menu hidden>
+                  <div class="brain-board__menu-section">
+                    <p class="brain-board__menu-heading">Note shape</p>
+                    <div class="brain-board__menu-options brain-board__menu-options--shapes">
+                      <button class="brain-board__shape-button" type="button">
+                        <span class="brain-board__shape-preview" data-shape-preview="classic"></span>
+                        <span class="sr-only">Rounded classic</span>
+                      </button>
+                      <button class="brain-board__shape-button" type="button">
+                        <span class="brain-board__shape-preview" data-shape-preview="square"></span>
+                        <span class="sr-only">Square</span>
+                      </button>
+                      <button class="brain-board__shape-button" type="button">
+                        <span class="brain-board__shape-preview" data-shape-preview="diamond"></span>
+                        <span class="sr-only">Diamond</span>
+                      </button>
+                      <button class="brain-board__shape-button" type="button">
+                        <span class="brain-board__shape-preview" data-shape-preview="heart"></span>
+                        <span class="sr-only">Heart</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="brain-board__body" contenteditable="false">
+            Click the 3 circles above: Color (left), Move Group (middle), Shape (right)
+          </div>
+        </div>
+
+        <!-- Sticky Note 2 -->
+        <div class="brain-board__note" role="listitem" data-note data-color="meadow" data-shape="square" style="position: absolute; left: 350px; top: 50px;">
+          <div class="brain-board__handle" data-note-handle>
+            <button class="brain-board__label-button" type="button">
+              <span class="brain-board__label" data-note-label>Square Shape</span>
+            </button>
+            <div class="brain-board__actions">
+              <div class="brain-board__color-control">
+                <button class="brain-board__color-button" type="button">
+                  <span class="sr-only">Change note color</span>
+                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                </button>
+              </div>
+              <div class="brain-board__group-control">
+                <button class="brain-board__group-button" type="button" aria-pressed="false">
+                  <span class="sr-only">Move color group</span>
+                  <span class="brain-board__group-icon">⇄</span>
+                </button>
+              </div>
+              <div class="brain-board__shape-control">
+                <button class="brain-board__shape-toggle" type="button">
+                  <span class="sr-only">Change note shape</span>
+                  <span class="brain-board__shape-preview-dot" data-shape="square"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="brain-board__body" contenteditable="false">
+            This note uses a square shape
+          </div>
+        </div>
+
+        <!-- Sticky Note 3 -->
+        <div class="brain-board__note" role="listitem" data-note data-color="ocean" data-shape="diamond" style="position: absolute; left: 650px; top: 50px;">
+          <div class="brain-board__handle" data-note-handle>
+            <button class="brain-board__label-button" type="button">
+              <span class="brain-board__label" data-note-label>Diamond Shape</span>
+            </button>
+            <div class="brain-board__actions">
+              <div class="brain-board__color-control">
+                <button class="brain-board__color-button" type="button">
+                  <span class="sr-only">Change note color</span>
+                  <span class="brain-board__color-preview" data-note-color-preview></span>
+                </button>
+              </div>
+              <div class="brain-board__group-control">
+                <button class="brain-board__group-button" type="button" aria-pressed="true" class="is-active">
+                  <span class="sr-only">Move color group</span>
+                  <span class="brain-board__group-icon">⇄</span>
+                </button>
+              </div>
+              <div class="brain-board__shape-control">
+                <button class="brain-board__shape-toggle" type="button">
+                  <span class="sr-only">Change note shape</span>
+                  <span class="brain-board__shape-preview-dot" data-shape="diamond"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="brain-board__body" contenteditable="false">
+            Diamond shape with active group mode
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple demo interactions
+    document.querySelectorAll('[data-note-color-toggle]').forEach(button => {
+      button.addEventListener('click', function() {
+        const menu = this.parentElement.querySelector('[data-note-color-menu]');
+        const isOpen = this.getAttribute('aria-expanded') === 'true';
+        
+        // Close all menus
+        document.querySelectorAll('[data-note-color-menu], [data-note-shape-menu]').forEach(m => {
+          m.hidden = true;
+          m.classList.remove('is-open');
+        });
+        document.querySelectorAll('[data-note-color-toggle], [data-note-shape-toggle]').forEach(b => {
+          b.setAttribute('aria-expanded', 'false');
+        });
+        
+        if (!isOpen) {
+          menu.hidden = false;
+          setTimeout(() => menu.classList.add('is-open'), 10);
+          this.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-note-shape-toggle]').forEach(button => {
+      button.addEventListener('click', function() {
+        const menu = this.parentElement.querySelector('[data-note-shape-menu]');
+        const isOpen = this.getAttribute('aria-expanded') === 'true';
+        
+        // Close all menus
+        document.querySelectorAll('[data-note-color-menu], [data-note-shape-menu]').forEach(m => {
+          m.hidden = true;
+          m.classList.remove('is-open');
+        });
+        document.querySelectorAll('[data-note-color-toggle], [data-note-shape-toggle]').forEach(b => {
+          b.setAttribute('aria-expanded', 'false');
+        });
+        
+        if (!isOpen) {
+          menu.hidden = false;
+          setTimeout(() => menu.classList.add('is-open'), 10);
+          this.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-note-group]').forEach(button => {
+      button.addEventListener('click', function() {
+        const isActive = this.getAttribute('aria-pressed') === 'true';
+        this.setAttribute('aria-pressed', !isActive ? 'true' : 'false');
+        this.classList.toggle('is-active');
+      });
+    });
+  </script>
+</body>
+</html>
