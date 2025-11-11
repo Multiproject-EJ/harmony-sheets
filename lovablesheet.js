@@ -3046,21 +3046,39 @@ class StickyBoard {
 
     this.controlsBound = false;
     this.activeColorMenu = null;
+    this.activeShapeMenu = null;
     this.handleDocumentPointerDown = (event) => {
-      if (!this.activeColorMenu) return;
-      const { menu, toggle } = this.activeColorMenu;
-      if (menu.contains(event.target) || toggle.contains(event.target)) {
-        return;
+      if (this.activeColorMenu) {
+        const { menu, toggle } = this.activeColorMenu;
+        if (menu.contains(event.target) || toggle.contains(event.target)) {
+          // Don't close if clicking inside
+        } else {
+          this.closeColorMenu();
+        }
       }
-      this.closeColorMenu();
+      if (this.activeShapeMenu) {
+        const { menu, toggle } = this.activeShapeMenu;
+        if (menu.contains(event.target) || toggle.contains(event.target)) {
+          // Don't close if clicking inside
+        } else {
+          this.closeShapeMenu();
+        }
+      }
     };
     this.handleDocumentKeyDown = (event) => {
-      if (!this.activeColorMenu) return;
       if (event.key === "Escape") {
-        event.preventDefault();
-        const { toggle } = this.activeColorMenu;
-        this.closeColorMenu();
-        toggle?.focus?.();
+        if (this.activeColorMenu) {
+          event.preventDefault();
+          const { toggle } = this.activeColorMenu;
+          this.closeColorMenu();
+          toggle?.focus?.();
+        }
+        if (this.activeShapeMenu) {
+          event.preventDefault();
+          const { toggle } = this.activeShapeMenu;
+          this.closeShapeMenu();
+          toggle?.focus?.();
+        }
       }
     };
     this.handleMenuKeydown = (event) => {
@@ -3428,6 +3446,10 @@ class StickyBoard {
       this.closeColorMenu();
     }
 
+    if (this.activeShapeMenu?.note === note) {
+      this.closeShapeMenu();
+    }
+
     if (this.labelEditor.note === note) {
       this.closeLabelEditor();
     }
@@ -3604,10 +3626,10 @@ class StickyBoard {
   ensureShapeControls(note) {
     if (!note) return;
 
-    const colorMenu = note.querySelector("[data-note-color-menu]");
-    if (!colorMenu) return;
+    const shapeMenu = note.querySelector("[data-note-shape-menu]");
+    if (!shapeMenu) return;
 
-    let optionsContainer = colorMenu.querySelector("[data-note-shape-options]");
+    let optionsContainer = shapeMenu.querySelector("[data-note-shape-options]");
     if (!optionsContainer) {
       const section = document.createElement("div");
       section.className = "brain-board__menu-section";
@@ -3625,12 +3647,7 @@ class StickyBoard {
       optionsContainer.dataset.noteShapeOptions = "true";
       section.appendChild(optionsContainer);
 
-      const divider = colorMenu.querySelector(".brain-board__menu-divider");
-      if (divider) {
-        colorMenu.insertBefore(section, divider);
-      } else {
-        colorMenu.appendChild(section);
-      }
+      shapeMenu.appendChild(section);
     }
 
     if (!optionsContainer) return;
@@ -3670,18 +3687,21 @@ class StickyBoard {
         }
         event.preventDefault();
         this.setNoteShape(note, button.dataset.noteShape);
-        this.closeColorMenu(colorMenu);
+        this.closeShapeMenu(shapeMenu);
       });
       optionsContainer.dataset.shapeOptionsBound = "true";
     }
+
+    // Update the shape preview dot
+    this.updateShapePreviewDot(note);
   }
 
   updateShapeControls(note) {
     if (!note) return;
     const activeShape = this.ensureNoteShape(note);
-    const colorMenu = note.querySelector("[data-note-color-menu]");
-    if (!colorMenu) return;
-    const optionsContainer = colorMenu.querySelector("[data-note-shape-options]");
+    const shapeMenu = note.querySelector("[data-note-shape-menu]");
+    if (!shapeMenu) return;
+    const optionsContainer = shapeMenu.querySelector("[data-note-shape-options]");
     if (!optionsContainer) return;
 
     optionsContainer.querySelectorAll("[data-note-shape]").forEach((button) => {
@@ -3689,6 +3709,18 @@ class StickyBoard {
       button.classList.toggle("is-active", isActive);
       button.setAttribute("aria-pressed", isActive ? "true" : "false");
     });
+
+    // Update the shape preview dot
+    this.updateShapePreviewDot(note);
+  }
+
+  updateShapePreviewDot(note) {
+    if (!note) return;
+    const activeShape = note.dataset.shape || "classic";
+    const previewDot = note.querySelector("[data-note-shape-preview-dot]");
+    if (previewDot) {
+      previewDot.setAttribute("data-shape", activeShape);
+    }
   }
 
   setNoteShape(note, shapeId) {
@@ -3743,12 +3775,53 @@ class StickyBoard {
     this.activeColorMenu = null;
   }
 
+  openShapeMenu(note, toggle, menu) {
+    if (!toggle || !menu) return;
+    const alreadyOpen = this.activeShapeMenu?.menu === menu;
+    if (alreadyOpen) return;
+
+    this.closeShapeMenu();
+
+    toggle.setAttribute("aria-expanded", "true");
+    menu.hidden = false;
+    window.requestAnimationFrame(() => {
+      menu.classList.add("is-open");
+    });
+
+    this.activeShapeMenu = { note, toggle, menu };
+    document.addEventListener("pointerdown", this.handleDocumentPointerDown);
+    document.addEventListener("keydown", this.handleDocumentKeyDown);
+  }
+
+  closeShapeMenu(targetMenu) {
+    if (!this.activeShapeMenu) return;
+    if (targetMenu && this.activeShapeMenu.menu !== targetMenu) {
+      return;
+    }
+
+    const { menu, toggle } = this.activeShapeMenu;
+    toggle.setAttribute("aria-expanded", "false");
+    menu.classList.remove("is-open");
+
+    const hideMenu = () => {
+      menu.hidden = true;
+      menu.removeEventListener("transitionend", hideMenu);
+    };
+    menu.addEventListener("transitionend", hideMenu, { once: true });
+    window.setTimeout(() => {
+      if (!menu.classList.contains("is-open")) {
+        menu.hidden = true;
+      }
+    }, 180);
+
+    this.activeShapeMenu = null;
+  }
+
   updateGroupButtonState(note, isActive) {
     const button = note.querySelector("[data-note-group]");
     if (!button) return;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", isActive ? "true" : "false");
-    button.textContent = isActive ? "Moving color group…" : "Move color group";
   }
 
   disableGroupMove(note) {
@@ -4426,6 +4499,31 @@ class StickyBoard {
     });
 
     this.ensureShapeControls(note);
+
+    const shapeToggle = note.querySelector("[data-note-shape-toggle]");
+    const shapeMenu = note.querySelector("[data-note-shape-menu]");
+
+    if (shapeToggle && shapeMenu) {
+      shapeToggle.addEventListener("click", (event) => {
+        event.preventDefault();
+        const isOpen = this.activeShapeMenu?.menu === shapeMenu;
+        if (isOpen) {
+          this.closeShapeMenu(shapeMenu);
+        } else {
+          this.openShapeMenu(note, shapeToggle, shapeMenu);
+        }
+      });
+    }
+
+    if (shapeMenu) {
+      shapeMenu.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          this.closeShapeMenu(shapeMenu);
+          shapeToggle?.focus?.();
+        }
+      });
+    }
 
     if (colorPicker) {
       colorPicker.addEventListener("input", () => {
