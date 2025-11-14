@@ -165,6 +165,48 @@
       </button>
     </div>
 
+    <div class="mobile-quick-actions" data-quick-actions>
+      <div
+        class="mobile-quick-actions__menu"
+        id="mobile-quick-actions-menu"
+        data-quick-actions-menu
+        hidden
+      >
+        <p class="mobile-quick-actions__label">Quick actions</p>
+        <button
+          class="mobile-quick-actions__action"
+          type="button"
+          data-quick-action="start-new"
+        >
+          Start new brief
+        </button>
+        <button
+          class="mobile-quick-actions__action"
+          type="button"
+          data-quick-action="go-step-three"
+        >
+          Jump to Codex
+        </button>
+        <button
+          class="mobile-quick-actions__action"
+          type="button"
+          data-quick-action="focus-chat"
+        >
+          Focus chat
+        </button>
+      </div>
+      <button
+        class="mobile-quick-actions__toggle"
+        type="button"
+        data-quick-actions-toggle
+        aria-expanded="false"
+        aria-controls="mobile-quick-actions-menu"
+        aria-label="Open quick actions menu"
+      >
+        <span aria-hidden="true">⚡</span>
+      </button>
+    </div>
+
     <div
       class="prompt-chat-panel"
       data-prompt-chat-panel
