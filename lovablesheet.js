@@ -1264,7 +1264,6 @@ const promptChatLayoutQueries = {
   mobile: hasMatchMedia ? window.matchMedia("(max-width: 640px)") : null
 };
 const promptChatMessageTargets = {
-  system: "[data-step-three]",
   product: "[data-idea-stage]",
   prompt: "[data-step-three]"
 };
@@ -1310,6 +1309,23 @@ const promptCompanionEditorState = {
     scopeLegend: null
   },
   keydownHandler: null
+};
+const fixedInfoDialogState = {
+  initialized: false,
+  isOpen: false,
+  dialogTrigger: null,
+  keydownHandler: null,
+  elements: {
+    trigger: document.querySelector("[data-fixed-info-open]") ?? null,
+    layer: null,
+    overlay: null,
+    dialog: null,
+    closeButton: null,
+    systemText: null,
+    standardText: null,
+    focusTarget: null,
+    editButtons: []
+  }
 };
 const quickActionElements = {
   container: document.querySelector("[data-quick-actions]"),
@@ -1448,6 +1464,158 @@ function getActiveStandardText() {
     return override.standardText;
   }
   return nextGenState.standardText || NEXTGEN_DEFAULT_STANDARD_TEXT;
+}
+
+function renderFixedInfoDialogContent() {
+  const { systemText, standardText } = fixedInfoDialogState.elements;
+  const systemIntro = getActiveSystemIntro();
+  const standardCopy = getActiveStandardText();
+  if (systemText) {
+    systemText.textContent = systemIntro || "No system intro configured yet.";
+  }
+  if (standardText) {
+    standardText.textContent = standardCopy || "No standard text configured yet.";
+  }
+}
+
+function setFixedInfoTriggerState(isPressed) {
+  const trigger = fixedInfoDialogState.elements.trigger;
+  if (trigger) {
+    trigger.setAttribute("aria-pressed", isPressed ? "true" : "false");
+  }
+}
+
+function openFixedInfoDialog(trigger) {
+  if (!fixedInfoDialogState.initialized) {
+    initializeFixedInfoDialog();
+  }
+  if (fixedInfoDialogState.isOpen) {
+    return;
+  }
+
+  const { layer, dialog, focusTarget } = fixedInfoDialogState.elements;
+  if (!layer || !dialog) {
+    return;
+  }
+
+  fixedInfoDialogState.isOpen = true;
+  fixedInfoDialogState.dialogTrigger = trigger || fixedInfoDialogState.elements.trigger || null;
+  renderFixedInfoDialogContent();
+
+  layer.hidden = false;
+  dialog.hidden = false;
+  dialog.setAttribute("aria-hidden", "false");
+  document.body.classList.add("lovablesheet-modal-open");
+  setFixedInfoTriggerState(true);
+
+  window.requestAnimationFrame(() => {
+    const target = focusTarget || dialog;
+    try {
+      target.focus();
+    } catch (_error) {
+      /* ignore */
+    }
+  });
+
+  if (!fixedInfoDialogState.keydownHandler) {
+    fixedInfoDialogState.keydownHandler = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeFixedInfoDialog();
+      }
+    };
+  }
+
+  document.addEventListener("keydown", fixedInfoDialogState.keydownHandler);
+}
+
+function closeFixedInfoDialog(options = {}) {
+  if (!fixedInfoDialogState.isOpen) {
+    return;
+  }
+
+  const { layer, dialog } = fixedInfoDialogState.elements;
+
+  if (layer) {
+    layer.hidden = true;
+  }
+  if (dialog) {
+    dialog.hidden = true;
+    dialog.setAttribute("aria-hidden", "true");
+  }
+
+  fixedInfoDialogState.isOpen = false;
+  setFixedInfoTriggerState(false);
+  document.body.classList.remove("lovablesheet-modal-open");
+
+  if (fixedInfoDialogState.keydownHandler) {
+    document.removeEventListener("keydown", fixedInfoDialogState.keydownHandler);
+    fixedInfoDialogState.keydownHandler = null;
+  }
+
+  const shouldFocusTrigger = options.focusTrigger !== false;
+  if (shouldFocusTrigger) {
+    const trigger = fixedInfoDialogState.dialogTrigger || fixedInfoDialogState.elements.trigger;
+    if (trigger) {
+      window.requestAnimationFrame(() => {
+        try {
+          trigger.focus();
+        } catch (_error) {
+          /* noop */
+        }
+      });
+    }
+  }
+
+  fixedInfoDialogState.dialogTrigger = null;
+}
+
+function initializeFixedInfoDialog() {
+  if (fixedInfoDialogState.initialized) {
+    return;
+  }
+
+  const elements = fixedInfoDialogState.elements;
+  elements.layer = document.querySelector("[data-fixed-info-layer]") ?? null;
+  elements.overlay = elements.layer?.querySelector("[data-fixed-info-overlay]") ?? null;
+  elements.dialog = elements.layer?.querySelector("[data-fixed-info-dialog]") ?? null;
+  elements.closeButton = elements.layer?.querySelector("[data-fixed-info-close]") ?? null;
+  elements.systemText = elements.layer?.querySelector("[data-fixed-info-system]") ?? null;
+  elements.standardText = elements.layer?.querySelector("[data-fixed-info-standard]") ?? null;
+  elements.focusTarget = elements.layer?.querySelector("[data-fixed-info-focus]") ?? null;
+  elements.editButtons = Array.from(document.querySelectorAll("[data-fixed-info-edit]"));
+
+  const { trigger, overlay, closeButton, editButtons } = elements;
+
+  if (trigger) {
+    trigger.addEventListener("click", () => {
+      openFixedInfoDialog(trigger);
+    });
+  }
+
+  if (overlay) {
+    overlay.addEventListener("click", () => {
+      closeFixedInfoDialog();
+    });
+  }
+
+  if (closeButton) {
+    closeButton.addEventListener("click", () => {
+      closeFixedInfoDialog();
+    });
+  }
+
+  editButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const type = button.dataset.fixedInfoEdit === "standard" ? "standard" : "system";
+      closeFixedInfoDialog({ focusTrigger: false });
+      openPromptCompanionDialog(type, button);
+    });
+  });
+
+  fixedInfoDialogState.initialized = true;
+  setFixedInfoTriggerState(false);
+  renderFixedInfoDialogContent();
 }
 
 function showSection(target) {
@@ -2187,24 +2355,6 @@ async function handlePromptCompanionDialogSave() {
 function buildPromptChatMessages() {
   const messages = [];
 
-  const systemIntro = getActiveSystemIntro();
-  messages.push({
-    id: "system",
-    tone: "system",
-    heading: "System",
-    text: systemIntro,
-    editable: "system"
-  });
-
-  const standardText = getActiveStandardText();
-  messages.push({
-    id: "standard",
-    tone: "system",
-    heading: "Fixed standard text",
-    text: standardText,
-    editable: "standard"
-  });
-
   const selectedProduct = ideaStageState.selectedProduct?.trim();
   messages.push({
     id: "product",
@@ -2356,6 +2506,7 @@ function renderPromptChatMessages() {
     container.appendChild(item);
   });
 
+  renderFixedInfoDialogContent();
   container.scrollTop = container.scrollHeight;
 }
 
@@ -3103,6 +3254,7 @@ function applyPromptSystemIntro(value) {
   const normalized = typeof value === "string" && value.trim() ? value.trim() : PROMPT_CHAT_INTRO;
   promptCompanionEditorState.systemIntro = normalized;
   renderPromptChatMessages();
+  renderFixedInfoDialogContent();
 }
 
 function applyNextGenStandardText(value) {
@@ -3117,6 +3269,7 @@ function applyNextGenStandardText(value) {
     }
   }
   renderPromptChatMessages();
+  renderFixedInfoDialogContent();
 }
 
 function setNextGenStandardEditing(enabled) {
@@ -8546,6 +8699,7 @@ function initializeBrainTools() {
 
 initializeDemoLab();
 initializePromptCompanionEditor();
+initializeFixedInfoDialog();
 initializePromptChat();
 initializeQuickActionsMenu();
 initializeBrainTools();

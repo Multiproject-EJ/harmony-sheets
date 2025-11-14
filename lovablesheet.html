@@ -137,8 +137,16 @@
         </button>
       </div>
       <div class="brain-tools-shortcuts" aria-label="Brain tool shortcuts">
-        <button class="brain-tool-placeholder" type="button" aria-label="Placeholder shortcut 1" disabled>
-          <span aria-hidden="true">◎</span>
+        <button
+          class="fixed-info-launcher"
+          type="button"
+          data-fixed-info-open
+          aria-haspopup="dialog"
+          aria-pressed="false"
+          aria-label="Open fixed prompt info"
+        >
+          <span class="fixed-info-launcher__eyebrow">Prompt data</span>
+          <span class="fixed-info-launcher__title">Fixed info</span>
         </button>
         <button class="brain-tool-placeholder" type="button" aria-label="Placeholder shortcut 2" disabled>
           <span aria-hidden="true">◎</span>
@@ -151,10 +159,10 @@
           type="button"
           data-prompt-chat-toggle
           aria-pressed="false"
-          aria-label="Toggle prompt chat column"
+          aria-label="Toggle PromptChat column"
         >
-          <span class="prompt-chat-launcher__eyebrow">Prompt companion</span>
-          <span class="prompt-chat-launcher__title">Chat transcript</span>
+          <span class="prompt-chat-launcher__eyebrow">PromptChat</span>
+          <span class="prompt-chat-launcher__title">Transcript</span>
         </button>
       </div>
       <button
@@ -203,7 +211,7 @@
           type="button"
           data-quick-action="focus-chat"
         >
-          Focus chat
+          Focus PromptChat
         </button>
       </div>
       <button
@@ -226,13 +234,13 @@
     >
       <div class="prompt-chat-panel__header">
         <div>
-          <p class="prompt-chat-panel__eyebrow">Prompt companion</p>
-          <h2 class="prompt-chat-panel__title">Chat transcript</h2>
+          <p class="prompt-chat-panel__eyebrow">PromptChat</p>
+          <h2 class="prompt-chat-panel__title">Transcript</h2>
         </div>
-        <button class="prompt-chat-panel__close" type="button" data-prompt-chat-close aria-label="Hide prompt chat">×</button>
+        <button class="prompt-chat-panel__close" type="button" data-prompt-chat-close aria-label="Hide PromptChat">×</button>
       </div>
       <div class="prompt-chat-panel__messages" data-prompt-chat-messages>
-        <p class="prompt-chat-panel__placeholder">Toggle the chat button to pin the latest prompt breakdown here.</p>
+        <p class="prompt-chat-panel__placeholder">Toggle the PromptChat button to pin the latest prompt breakdown here.</p>
       </div>
     </div>
 
@@ -249,7 +257,7 @@
         <button class="prompt-editor__close" type="button" data-prompt-editor-close aria-label="Close prompt editor">
           <span aria-hidden="true">×</span>
         </button>
-        <p class="prompt-editor__eyebrow">Prompt companion</p>
+        <p class="prompt-editor__eyebrow">PromptChat</p>
         <h3 class="prompt-editor__title" id="prompt-editor-title" data-prompt-editor-title>Edit instructions</h3>
         <p class="prompt-editor__description" data-prompt-editor-description>
           Adjust the fixed chat instructions so the Codex prompt matches your current review session.
@@ -278,6 +286,50 @@
         <div class="prompt-editor__actions">
           <button class="btn ghost prompt-editor__button" type="button" data-prompt-editor-cancel>Cancel</button>
           <button class="btn primary prompt-editor__button" type="button" data-prompt-editor-save>Save changes</button>
+        </div>
+      </article>
+    </div>
+
+    <div class="fixed-info-layer" data-fixed-info-layer hidden>
+      <div class="fixed-info-layer__overlay" data-fixed-info-overlay></div>
+      <article
+        class="fixed-info-dialog"
+        data-fixed-info-dialog
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="fixed-info-title"
+        hidden
+        tabindex="-1"
+      >
+        <button class="fixed-info-dialog__close" type="button" data-fixed-info-close aria-label="Close fixed info dialog">
+          <span aria-hidden="true">×</span>
+        </button>
+        <header class="fixed-info-dialog__header">
+          <p class="fixed-info-dialog__eyebrow">PromptChat</p>
+          <h3 class="fixed-info-dialog__title" id="fixed-info-title" data-fixed-info-focus>Fixed prompt info</h3>
+          <p class="fixed-info-dialog__description">
+            Review and edit the reusable text that’s appended to every Codex prompt.
+          </p>
+        </header>
+        <div class="fixed-info-dialog__sections">
+          <section class="fixed-info-dialog__section">
+            <div class="fixed-info-dialog__section-head">
+              <h4>System instructions</h4>
+              <button class="fixed-info-dialog__action" type="button" data-fixed-info-edit="system">
+                Edit system intro
+              </button>
+            </div>
+            <div class="fixed-info-dialog__text" data-fixed-info-system></div>
+          </section>
+          <section class="fixed-info-dialog__section">
+            <div class="fixed-info-dialog__section-head">
+              <h4>Fixed standard text</h4>
+              <button class="fixed-info-dialog__action" type="button" data-fixed-info-edit="standard">
+                Edit standard text
+              </button>
+            </div>
+            <div class="fixed-info-dialog__text" data-fixed-info-standard></div>
+          </section>
         </div>
       </article>
     </div>
