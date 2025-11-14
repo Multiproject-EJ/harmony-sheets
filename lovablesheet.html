@@ -135,16 +135,17 @@
         >
           <span aria-hidden="true">➡️</span>
         </button>
-        <button
-          class="brain-tool-button brain-tool-button--chat"
-          type="button"
-          data-prompt-chat-toggle
-          aria-pressed="false"
-          aria-label="Toggle prompt chat column"
-        >
-          <span aria-hidden="true">💬</span>
-        </button>
       </div>
+      <button
+        class="prompt-chat-launcher"
+        type="button"
+        data-prompt-chat-toggle
+        aria-pressed="false"
+        aria-label="Toggle prompt chat column"
+      >
+        <span class="prompt-chat-launcher__eyebrow">Prompt companion</span>
+        <span class="prompt-chat-launcher__title">Chat transcript</span>
+      </button>
       <button
         class="ipad-preview-button"
         type="button"
@@ -1362,20 +1363,6 @@
                       <p class="nextgen-form__empty" data-nextgen-design-empty>No design references selected yet.</p>
                     </div>
 
-                    <div class="design-theme-gallery" aria-label="Preset design system previews">
-                      <article class="design-theme" data-design-theme="light" style="--theme-bg:linear-gradient(135deg,#f8fafc,#e2e8f0);--theme-border:rgba(148,163,184,.35);--theme-text:#0f172a;--theme-button-bg:#0f172a;--theme-button-hover:#1e293b;--theme-accent:#0284c7;--theme-shadow:0 24px 40px rgba(15,23,42,.12);">
-                        <header class="design-theme__header">
-                          <h4 class="design-theme__title">Light Color</h4>
-                          <p class="design-theme__subtitle">Airy gradients and bright neutrals with soft drop shadows for productivity dashboards.</p>
-                        </header>
-                        <div class="design-theme__grid">
-                          <div>
-                            <p class="design-theme__label">Palette</p>
-                            <div class="design-theme__swatches">
-                              <span class="design-theme__swatch" style="--swatch-color:#F8FAFC">#F8FAFC</span>
-                              <span class="design-theme__swatch" style="--swatch-color:#E2E8F0">#E2E8F0</span>
-                              <span class="design-theme__swatch" style="--swatch-color:#94A3B8">#94A3B8</span>
-                            </div>
                           </div>
                           <div>
                             <p class="design-theme__label">Typography</p>
@@ -1857,22 +1844,47 @@
                       Use the most recent Next Gen brief to draft a Codex-ready prompt and kick off the marketing workflow.
                     </p>
                   </div>
-                  <div class="admin__panel-actions admin__panel-actions--codex">
-                    <button class="flowchart-prompt__action flowchart-prompt__action--primary" type="button" data-step-three-generate>
-                      <span class="flowchart-prompt__action-icon" aria-hidden="true">⚡</span>
-                      <span class="flowchart-prompt__action-label">Create Codex prompt</span>
-                    </button>
-                    <button class="flowchart-prompt__action flowchart-prompt__action--ghost" type="button" data-step-three-send>
-                      <span class="flowchart-prompt__action-icon" aria-hidden="true">📤</span>
-                      <span class="flowchart-prompt__action-label">Send to marketing</span>
-                    </button>
-                  </div>
                 </div>
                 <div class="admin__panel-body lovablesheet-codex__body">
                   <p class="lovablesheet-codex__hint" data-step-three-hint>
                     Create a Next Gen brief to unlock Step 3.
                   </p>
                   <p class="lovablesheet-codex__latest" data-step-three-latest hidden></p>
+                  <div class="lovablesheet-codex__options">
+                    <article class="codex-option" aria-live="polite">
+                      <div class="codex-option__icon" aria-hidden="true">📋</div>
+                      <div>
+                        <p class="codex-option__eyebrow">Option 1</p>
+                        <h3 class="codex-option__title">Copy prompt</h3>
+                        <p class="codex-option__description">Paste the Codex brief into Copilot, GPT, or any other AI co-pilot.</p>
+                      </div>
+                      <button class="codex-option__button" type="button" data-step-three-copy disabled>
+                        Copy to clipboard
+                      </button>
+                    </article>
+                    <article class="codex-option" aria-live="polite">
+                      <div class="codex-option__icon" aria-hidden="true">⚡</div>
+                      <div>
+                        <p class="codex-option__eyebrow">Option 2</p>
+                        <h3 class="codex-option__title">Run with Codex API now</h3>
+                        <p class="codex-option__description">Generate a Codex-ready prompt from the latest Next Gen brief.</p>
+                      </div>
+                      <button class="codex-option__button codex-option__button--primary" type="button" data-step-three-generate>
+                        Run &amp; refresh
+                      </button>
+                    </article>
+                    <article class="codex-option" aria-live="polite">
+                      <div class="codex-option__icon" aria-hidden="true">📤</div>
+                      <div>
+                        <p class="codex-option__eyebrow">Option 3</p>
+                        <h3 class="codex-option__title">Save for later &amp; activate marketing</h3>
+                        <p class="codex-option__description">Share the generated brief with the marketing queue for follow-up.</p>
+                      </div>
+                      <button class="codex-option__button codex-option__button--ghost" type="button" data-step-three-send>
+                        Save &amp; notify
+                      </button>
+                    </article>
+                  </div>
                   <label class="flowchart-prompt__output">
                     <span class="flowchart-prompt__eyebrow">Codex prompt</span>
                     <textarea

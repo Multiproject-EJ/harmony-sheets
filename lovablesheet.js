@@ -248,6 +248,100 @@ const NEXTGEN_DESIGN_LIBRARY_DEFAULTS = [
     cssNotes: "Background #0f172a, lime green #a3e635 accents, IBM Plex Mono, and inset 1px #1e293b borders."
   }
 ];
+const NEXTGEN_DESIGN_THEME_PREVIEWS = {
+  "light-color": {
+    style:
+      "--theme-bg:linear-gradient(135deg,#f8fafc,#e2e8f0);--theme-border:rgba(148,163,184,.35);--theme-text:#0f172a;--theme-button-bg:#0f172a;--theme-shadow:0 24px 40px rgba(15,23,42,.12);",
+    palette: ["#F8FAFC", "#E2E8F0", "#94A3B8"],
+    fontSample: "Inter / Medium 18px",
+    buttonLabel: "Primary action",
+    notes: "Use #F8FAFC/#E2E8F0 surfaces, 28px radii, and airy drop shadows."
+  },
+  "dark-glass": {
+    style:
+      "--theme-bg:linear-gradient(120deg,rgba(15,23,42,.8),rgba(15,23,42,.92));--theme-border:rgba(148,163,184,.32);--theme-text:#e2e8f0;--theme-button-bg:linear-gradient(135deg,#475569,#0f172a);--theme-shadow:0 18px 40px rgba(2,6,23,.65);",
+    palette: ["#0F172A", "rgba(15,23,42,.8)", "#94A3B8"],
+    fontSample: "Space Grotesk / Bold 20px",
+    buttonLabel: "Frosted CTA",
+    notes: "Layer frosted glass panels, neon accents, and blur/backdrop filters for depth."
+  },
+  "blue-electro": {
+    style:
+      "--theme-bg:linear-gradient(135deg,#38bdf8,#6366f1);--theme-border:rgba(59,130,246,.45);--theme-text:#0f172a;--theme-button-bg:linear-gradient(135deg,#1d4ed8,#22d3ee);--theme-shadow:0 28px 60px rgba(15,23,42,.35);",
+    palette: ["#38BDF8", "#6366F1", "#0EA5E9"],
+    fontSample: "JetBrains Mono / SemiBold",
+    fontClass: "design-theme-mini__font--mono",
+    buttonLabel: "Glow button",
+    notes: "Primary gradient: linear-gradient(135deg,#38BDF8,#6366F1) with glowing outlines."
+  },
+  "natural-harmony": {
+    style:
+      "--theme-bg:linear-gradient(120deg,#ecfdf5,#d1fae5);--theme-border:rgba(16,185,129,.4);--theme-text:#065f46;--theme-button-bg:#047857;--theme-shadow:0 18px 36px rgba(5,150,105,.25);",
+    palette: ["#065F46", "#ECFDF5", "#F4F1DE"],
+    fontSample: "Playfair Display / Semibold",
+    fontClass: "design-theme-mini__font--serif",
+    buttonLabel: "Botanical CTA",
+    notes: "Pair deep greens with botanical double borders and organic gradients."
+  },
+  "bright-flow": {
+    style:
+      "--theme-bg:linear-gradient(160deg,#f0abfc,#38bdf8);--theme-border:rgba(14,165,233,.35);--theme-text:#0f172a;--theme-button-bg:linear-gradient(120deg,#f472b6,#22d3ee);--theme-shadow:0 20px 48px rgba(244,114,182,.35);",
+    palette: ["#F472B6", "#FB7185", "#38BDF8"],
+    fontSample: "Poppins / SemiBold",
+    buttonLabel: "Gradient CTA",
+    notes: "Apply flowing ribbon gradients and oversized blur glows to hero cards."
+  },
+  "bold-pink": {
+    style:
+      "--theme-bg:linear-gradient(160deg,#fce7f3,#ffe4e6);--theme-border:rgba(244,114,182,.4);--theme-text:#9d174d;--theme-button-bg:linear-gradient(120deg,#f472b6,#fb7185);--theme-shadow:0 18px 40px rgba(190,24,93,.25);",
+    palette: ["#F472B6", "#FB7185", "#BE185D"],
+    fontSample: "Montserrat / Bold Caps",
+    buttonLabel: "Statement CTA",
+    notes: "Use saturated gradients, pill buttons, and confident caps for launches."
+  },
+  "bold-color": {
+    style:
+      "--theme-bg:linear-gradient(140deg,#fde047,#f97316);--theme-border:rgba(249,115,22,.45);--theme-text:#0f172a;--theme-button-bg:#0f172a;--theme-shadow:0 22px 44px rgba(249,115,22,.25);",
+    palette: ["#FACC15", "#2563EB", "#F97316"],
+    fontSample: "Sohne / Bold 20px",
+    buttonLabel: "Block CTA",
+    notes: "Mix FACC15, 2563EB, and F97316 in equal blocks with crisp gutters."
+  },
+  "green-pocket": {
+    style:
+      "--theme-bg:linear-gradient(135deg,#bbf7d0,#ecfccb);--theme-border:rgba(34,197,94,.35);--theme-text:#065f46;--theme-button-bg:#047857;--theme-shadow:0 18px 36px rgba(16,185,129,.25);",
+    palette: ["#047857", "#10B981", "#BBF7D0"],
+    fontSample: "Inter / SemiBold",
+    buttonLabel: "Ledger CTA",
+    notes: "Combine emerald headers with ledger grid lines and subtle dollar iconography."
+  },
+  "green-wallet-habit": {
+    style:
+      "--theme-bg:linear-gradient(140deg,#1d5c4d,#3f8b72);--theme-border:rgba(63,139,114,.5);--theme-text:#f6fbf8;--theme-button-bg:#1d5c4d;--theme-shadow:0 20px 40px rgba(29,92,77,.35);",
+    palette: ["#1D5C4D", "#3F8B72", "#8FE1A2"],
+    fontSample: "Space Grotesk / Bold",
+    buttonLabel: "Habit CTA",
+    notes: "Use evergreen gradients, botanical motifs, and supportive coaching tone."
+  },
+  "solar-dawn": {
+    style:
+      "--theme-bg:linear-gradient(135deg,#fcd34d,#f472b6);--theme-border:rgba(251,191,36,.45);--theme-text:#7c2d12;--theme-button-bg:#f97316;--theme-shadow:0 18px 38px rgba(249,115,22,.35);",
+    palette: ["#FCD34D", "#F472B6", "#F97316"],
+    fontSample: "Playfair Display / Medium",
+    fontClass: "design-theme-mini__font--serif",
+    buttonLabel: "Sunrise CTA",
+    notes: "Gradient from #FCD34D to #F472B6 with 36px radii and serif headings."
+  },
+  "noir-terminal": {
+    style:
+      "--theme-bg:linear-gradient(145deg,#0f172a,#1e293b);--theme-border:rgba(15,23,42,.7);--theme-text:#e2e8f0;--theme-button-bg:#0f172a;--theme-shadow:0 24px 44px rgba(15,23,42,.6);",
+    palette: ["#0F172A", "#1E293B", "#A3E635"],
+    fontSample: "IBM Plex Mono / Medium",
+    fontClass: "design-theme-mini__font--mono",
+    buttonLabel: "Terminal CTA",
+    notes: "Background #0F172A, lime #A3E635 accents, and inset borders for terminal vibes."
+  }
+};
 const NEXTGEN_DEFAULT_STANDARD_TEXT = [
   "Produce a google sheets product by completing the following:",
   "1) Make the product page JSON with the stats.",
@@ -837,7 +931,8 @@ const stepThreeElements = {
   output: document.querySelector("[data-step-three-output]"),
   status: document.querySelector("[data-step-three-status]"),
   generateButton: document.querySelector("[data-step-three-generate]"),
-  sendButton: document.querySelector("[data-step-three-send]")
+  sendButton: document.querySelector("[data-step-three-send]"),
+  copyButton: document.querySelector("[data-step-three-copy]")
 };
 const ideaStageState = {
   selectedProduct: "",
@@ -1354,6 +1449,32 @@ function setStepThreeOutput(value) {
   }
   stepThreeState.latestPrompt = nextValue;
   renderPromptChatMessages();
+  updateStepThreeOptionStates();
+}
+
+function stepThreeHasBriefs() {
+  const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
+  return briefs.length > 0;
+}
+
+function updateStepThreeOptionStates(hasBriefsOverride) {
+  const { copyButton, sendButton } = stepThreeElements;
+  const stageUnlocked = typeof hasBriefsOverride === "boolean" ? hasBriefsOverride : stepThreeHasBriefs();
+  const hasPrompt = Boolean(stepThreeState.latestPrompt);
+  const disableOptions = !stageUnlocked || !hasPrompt;
+
+  if (copyButton) {
+    copyButton.disabled = disableOptions;
+  }
+
+  if (sendButton) {
+    sendButton.disabled = disableOptions;
+    if (disableOptions) {
+      sendButton.setAttribute("aria-disabled", "true");
+    } else {
+      sendButton.removeAttribute("aria-disabled");
+    }
+  }
 }
 
 function buildPromptChatMessages() {
@@ -1591,7 +1712,7 @@ function buildStepThreePrompt(brief) {
 }
 
 function updateStepThreeAvailability() {
-  const { stage, lock, generateButton, sendButton } = stepThreeElements;
+  const { stage, lock, generateButton } = stepThreeElements;
   const briefs = Array.isArray(nextGenState.savedBriefs) ? nextGenState.savedBriefs : [];
   const hasBriefs = briefs.length > 0;
 
@@ -1621,14 +1742,7 @@ function updateStepThreeAvailability() {
     }
   }
 
-  if (sendButton) {
-    sendButton.disabled = !hasBriefs;
-    if (!hasBriefs) {
-      sendButton.setAttribute("aria-disabled", "true");
-    } else {
-      sendButton.removeAttribute("aria-disabled");
-    }
-  }
+  updateStepThreeOptionStates(hasBriefs);
 
   const latestBrief = hasBriefs ? briefs[0] : null;
   updateStepThreeLatestBriefLabel(latestBrief);
@@ -1683,6 +1797,56 @@ function handleStepThreeSend() {
   setStepThreeStatus(`${productName} is ready for marketing handoff. (Sending workflow coming soon.)`, "info");
 }
 
+async function copyTextToClipboard(text) {
+  if (typeof text !== "string" || !text) {
+    return false;
+  }
+
+  if (navigator?.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (error) {
+      console.warn("[lovablesheet] Clipboard API copy failed", error);
+    }
+  }
+
+  if (typeof document === "undefined") {
+    return false;
+  }
+
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "true");
+    textarea.style.position = "fixed";
+    textarea.style.top = "-9999px";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const success = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    return success;
+  } catch (error) {
+    console.warn("[lovablesheet] execCommand copy failed", error);
+    return false;
+  }
+}
+
+async function handleStepThreeCopy() {
+  if (!stepThreeState.latestPrompt) {
+    setStepThreeStatus("Generate a Codex prompt before copying it to your clipboard.", "error");
+    return;
+  }
+
+  const copied = await copyTextToClipboard(stepThreeState.latestPrompt);
+  if (copied) {
+    setStepThreeStatus("Codex prompt copied to your clipboard.", "success");
+  } else {
+    setStepThreeStatus("We couldn't copy the prompt. Select the text manually as a fallback.", "error");
+  }
+}
+
 function initializeStepThree() {
   if (stepThreeState.initialized) {
     return;
@@ -1693,7 +1857,7 @@ function initializeStepThree() {
   setStepThreeStatus("");
   updateStepThreeAvailability();
 
-  const { generateButton, sendButton } = stepThreeElements;
+  const { generateButton, sendButton, copyButton } = stepThreeElements;
 
   if (generateButton) {
     generateButton.addEventListener("click", () => {
@@ -1705,6 +1869,12 @@ function initializeStepThree() {
   if (sendButton) {
     sendButton.addEventListener("click", () => {
       handleStepThreeSend();
+    });
+  }
+
+  if (copyButton) {
+    copyButton.addEventListener("click", () => {
+      handleStepThreeCopy();
     });
   }
 }
@@ -2177,6 +2347,59 @@ function renderNextGenFeatureLibrary() {
   updateNextGenFeatureSummary();
 }
 
+function buildDesignThemePreview(design) {
+  if (!design) return null;
+  const previewData = NEXTGEN_DESIGN_THEME_PREVIEWS[design.id];
+  if (!previewData) {
+    return null;
+  }
+
+  const preview = document.createElement("div");
+  preview.className = "design-theme-mini";
+  preview.dataset.designTheme = design.id;
+  if (previewData.style) {
+    preview.style.cssText = previewData.style;
+  }
+
+  if (Array.isArray(previewData.palette) && previewData.palette.length) {
+    const swatches = document.createElement("div");
+    swatches.className = "design-theme-mini__swatches";
+    previewData.palette.forEach((color) => {
+      const swatch = document.createElement("span");
+      swatch.className = "design-theme-mini__swatch";
+      swatch.style.setProperty("--swatch-color", color);
+      swatch.textContent = color;
+      swatches.appendChild(swatch);
+    });
+    preview.appendChild(swatches);
+  }
+
+  if (previewData.fontSample) {
+    const font = document.createElement("p");
+    font.className = "design-theme-mini__font";
+    if (previewData.fontClass) {
+      font.classList.add(previewData.fontClass);
+    }
+    font.textContent = previewData.fontSample;
+    preview.appendChild(font);
+  }
+
+  const cta = document.createElement("span");
+  cta.className = "design-theme-mini__cta";
+  cta.textContent = previewData.buttonLabel || "Primary CTA";
+  preview.appendChild(cta);
+
+  const notesText = previewData.notes || design.cssNotes;
+  if (notesText) {
+    const notes = document.createElement("p");
+    notes.className = "design-theme-mini__notes";
+    notes.textContent = notesText;
+    preview.appendChild(notes);
+  }
+
+  return preview;
+}
+
 function renderNextGenDesignLibrary() {
   const grid = nextGenState.elements.designGrid;
   const loading = nextGenState.elements.designLoading;
@@ -2203,7 +2426,7 @@ function renderNextGenDesignLibrary() {
     if (!design) return;
     const optionId = `nextgen-design-${sanitizeNextGenId(design.id, String(index))}`;
     const card = document.createElement("label");
-    card.className = "nextgen-form__feature-card";
+    card.className = "nextgen-form__feature-card nextgen-form__feature-card--design";
     card.setAttribute("for", optionId);
 
     const checkbox = document.createElement("input");
@@ -2231,6 +2454,11 @@ function renderNextGenDesignLibrary() {
       meta.className = "nextgen-form__feature-meta";
       meta.textContent = design.cssNotes;
       card.appendChild(meta);
+    }
+
+    const preview = buildDesignThemePreview(design);
+    if (preview) {
+      card.appendChild(preview);
     }
 
     fragment.appendChild(card);
