@@ -361,35 +361,230 @@ const DEMO_LAB_DEFAULT_HTML = `<!doctype html>
   <title>Harmony Sheets demo lab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    :root { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    body { margin: 0; background: #f1f5f9; color: #0f172a; padding: 28px; }
-    .demo-shell { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 28px; padding: 32px; box-shadow: 0 30px 60px rgba(15, 23, 42, .15); display: grid; gap: 18px; }
-    .demo-shell h1 { margin: 0; font-size: 1.8rem; }
-    .demo-shell p { margin: 0; line-height: 1.6; color: #475569; }
-    .demo-shell button { justify-self: start; background: #2563eb; color: #fff; border: none; padding: 12px 22px; border-radius: 999px; font-weight: 600; cursor: pointer; box-shadow: 0 14px 30px rgba(37, 99, 235, .35); }
-    .demo-shell button:focus { outline: 3px solid rgba(59, 130, 246, .4); outline-offset: 2px; }
-    .demo-shell .eyebrow { text-transform: uppercase; letter-spacing: .24em; font-size: .74rem; color: #94a3b8; }
-    .demo-log { font-size: .95rem; color: #0f172a; font-weight: 600; }
+    :root { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #0f172a; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: radial-gradient(circle at top,#f8fafc,#e2e8f0); padding: 28px; }
+    .demo-shell { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 32px; padding: clamp(24px,4vw,40px); box-shadow: 0 32px 80px rgba(15,23,42,.16); display: grid; gap: clamp(18px,4vw,28px); }
+    .demo-header { display: grid; gap: 18px; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .24em; font-size: .72rem; color: #94a3b8; margin: 0 0 6px; }
+    h1 { margin: 0; font-size: clamp(1.8rem,4vw,2.4rem); }
+    p { margin: 0; line-height: 1.6; color: #475569; }
+    .demo-search { display: grid; gap: 6px; font-weight: 600; color: #0f172a; }
+    .demo-search input { border-radius: 999px; border: 1px solid rgba(148,163,184,.4); padding: 12px 18px; font-size: 1rem; font-family: inherit; background: rgba(248,250,252,.9); box-shadow: inset 0 1px 1px rgba(255,255,255,.8); }
+    .demo-search input:focus { outline: 3px solid rgba(59,130,246,.25); outline-offset: 2px; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+    .demo-card { border: 1px solid rgba(148,163,184,.4); border-radius: 24px; padding: 18px; background: linear-gradient(145deg,rgba(248,250,252,.95),rgba(226,232,240,.9)); box-shadow: 0 14px 30px rgba(15,23,42,.08); display: grid; gap: 10px; text-align: left; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
+    .demo-card:hover, .demo-card:focus-visible { transform: translateY(-3px); box-shadow: 0 24px 45px rgba(15,23,42,.18); outline: none; }
+    .demo-card__tag { font-size: .8rem; font-weight: 600; color: #0f172a; background: rgba(15,23,42,.08); padding: 4px 10px; border-radius: 999px; width: fit-content; }
+    .demo-card__tag--live { background: rgba(34,197,94,.18); color: #166534; }
+    .demo-card__tag--draft { background: rgba(251,191,36,.2); color: #92400e; }
+    .demo-card__title { font-size: 1.2rem; color: #0f172a; }
+    .demo-card__meta { font-size: .95rem; color: #475569; }
+    .demo-footer { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; border-top: 1px solid rgba(148,163,184,.25); padding-top: 18px; }
+    .demo-sync { border: none; background: #0f172a; color: #fff; font-weight: 600; border-radius: 999px; padding: 10px 20px; cursor: pointer; box-shadow: 0 16px 40px rgba(15,23,42,.28); }
+    .demo-sync:focus-visible { outline: 3px solid rgba(59,130,246,.35); outline-offset: 2px; }
+    .demo-log { font-size: .95rem; font-weight: 600; color: #0f172a; }
+    .demo-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.6); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: clamp(16px,6vw,40px); }
+    .demo-overlay[hidden] { display: none; }
+    .demo-overlay__panel { background: #fff; width: min(640px, 96vw); border-radius: 36px; padding: clamp(24px,5vw,40px); box-shadow: 0 40px 110px rgba(15,23,42,.32); display: grid; gap: 16px; position: relative; }
+    .demo-overlay__close { position: absolute; top: 18px; right: 18px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(148,163,184,.4); background: rgba(248,250,252,.95); font-size: 1.6rem; cursor: pointer; }
+    .demo-overlay__close:focus-visible { outline: 3px solid rgba(59,130,246,.35); outline-offset: 2px; }
+    .demo-overlay__eyebrow { margin: 0; font-size: .8rem; letter-spacing: .22em; text-transform: uppercase; color: #94a3b8; }
+    .demo-overlay__title { margin: 0; font-size: clamp(1.8rem,4vw,2.4rem); }
+    .demo-overlay__tagline { margin: 0; color: #475569; }
+    .demo-overlay__meta { display: flex; flex-wrap: wrap; gap: 12px; font-weight: 600; color: #0f172a; }
+    .demo-overlay__checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    .demo-overlay__checklist li { padding: 10px 14px; border-radius: 18px; background: rgba(248,250,252,.9); border: 1px solid rgba(148,163,184,.35); font-size: .95rem; color: #0f172a; }
+    .demo-overlay__action { border: none; background: #2563eb; color: #fff; font-weight: 600; padding: 12px 22px; border-radius: 999px; cursor: pointer; box-shadow: 0 18px 45px rgba(37,99,235,.35); justify-self: start; }
+    .demo-overlay__action:focus-visible { outline: 3px solid rgba(59,130,246,.35); outline-offset: 2px; }
   </style>
 </head>
 <body>
   <main class="demo-shell">
-    <p class="eyebrow">Apps Script UI</p>
-    <h1>Inventory dialog playground</h1>
-    <p>Design the HTML interface that will open from your Google Sheets Apps Script project. Keep everything self-contained.</p>
-    <button type="button" data-demo-cta>Simulate sync</button>
-    <p class="demo-log" data-demo-log>Waiting for a test run…</p>
+    <header class="demo-header">
+      <div>
+        <p class="eyebrow">Prototype inventory</p>
+        <h1>Apps Script window preview</h1>
+        <p>Tap any tile to open a fullscreen dialog. The layout matches the HTML Service window that launches from Google Sheets, so every interaction feels production ready.</p>
+      </div>
+      <label class="demo-search">
+        <span>Quick filter</span>
+        <input type="search" placeholder="Search rituals, areas, or tags" data-demo-search>
+      </label>
+    </header>
+    <section class="demo-grid">
+      <button type="button" class="demo-card" data-demo-product="focus-kit" data-keywords="focus kit live energy rituals">
+        <span class="demo-card__tag demo-card__tag--live">Live</span>
+        <strong class="demo-card__title">Focus Kit HQ</strong>
+        <span class="demo-card__meta">Energy + flow rituals</span>
+      </button>
+      <button type="button" class="demo-card" data-demo-product="weekender" data-keywords="weekend planner live adventure">
+        <span class="demo-card__tag demo-card__tag--live">Live</span>
+        <strong class="demo-card__title">Weekender Console</strong>
+        <span class="demo-card__meta">Adventure + calendar sync</span>
+      </button>
+      <button type="button" class="demo-card" data-demo-product="rituals" data-keywords="draft rituals automation love">
+        <span class="demo-card__tag demo-card__tag--draft">Draft</span>
+        <strong class="demo-card__title">Connection Rituals Lab</strong>
+        <span class="demo-card__meta">Draft • Love &amp; relationships</span>
+      </button>
+    </section>
+    <footer class="demo-footer">
+      <button type="button" class="demo-sync" data-demo-sync>Simulate sync</button>
+      <p class="demo-log" data-demo-log>Waiting for a test run…</p>
+    </footer>
   </main>
+  <div class="demo-overlay" data-demo-overlay hidden>
+    <article class="demo-overlay__panel" data-demo-panel tabindex="-1" aria-live="polite">
+      <button class="demo-overlay__close" type="button" data-demo-close aria-label="Close preview">×</button>
+      <p class="demo-overlay__eyebrow" data-demo-collection>Collection</p>
+      <h2 class="demo-overlay__title" data-demo-title>Product</h2>
+      <p class="demo-overlay__tagline" data-demo-tagline></p>
+      <div class="demo-overlay__meta">
+        <span class="demo-overlay__status" data-demo-status></span>
+        <span class="demo-overlay__updated" data-demo-updated></span>
+      </div>
+      <ul class="demo-overlay__checklist" data-demo-checklist></ul>
+      <button type="button" class="demo-overlay__action" data-demo-panel-sync>Run Sheet sync</button>
+    </article>
+  </div>
 </body>
 </html>`;
 const DEMO_LAB_DEFAULT_SCRIPT = `(() => {
-  const button = document.querySelector('[data-demo-cta]');
-  const log = document.querySelector('[data-demo-log]');
-  if (!button || !log) return;
+  const DEMO_PRODUCTS = {
+    'focus-kit': {
+      title: 'Focus Kit HQ',
+      collection: 'Energy rituals • Live',
+      tagline: 'Inventory dialog that keeps energy + flow rituals synced between teammates.',
+      status: 'Live storefront',
+      updated: 'Updated 2 minutes ago',
+      checklist: [
+        '✅ Personal ritual templates synced from the Sheet tabs.',
+        '✅ Send-to-Slack automation wired to Apps Script.',
+        '↻ Queue new rituals for review before publishing live.'
+      ]
+    },
+    weekender: {
+      title: 'Weekender Console',
+      collection: 'Fun & travel • Live',
+      tagline: 'Plot multi-day adventures and push the plan straight into Google Calendar.',
+      status: 'Live storefront',
+      updated: 'Updated 8 minutes ago',
+      checklist: [
+        '✅ Shared itinerary synced from the Trips tab.',
+        '✅ Calendar push ready for review.',
+        '↻ Trail weather and packing list refresh nightly.'
+      ]
+    },
+    rituals: {
+      title: 'Connection Rituals Lab',
+      collection: 'Love & relationships • Draft',
+      tagline: 'Draft automation that rotates intimacy prompts and gratitude check-ins.',
+      status: 'Draft in studio',
+      updated: 'Synced 1 hour ago',
+      checklist: [
+        '✅ Prompt library saved to the Sheet for copy/paste.',
+        '↻ Automations staged for QA.',
+        '☐ Voice + tone sample still needs approval.'
+      ]
+    }
+  };
 
-  button.addEventListener('click', () => {
+  const overlay = document.querySelector('[data-demo-overlay]');
+  const panel = overlay?.querySelector('[data-demo-panel]');
+  const collectionEl = panel?.querySelector('[data-demo-collection]');
+  const titleEl = panel?.querySelector('[data-demo-title]');
+  const taglineEl = panel?.querySelector('[data-demo-tagline]');
+  const statusEl = panel?.querySelector('[data-demo-status]');
+  const updatedEl = panel?.querySelector('[data-demo-updated]');
+  const checklistEl = panel?.querySelector('[data-demo-checklist]');
+  const panelSyncButton = panel?.querySelector('[data-demo-panel-sync]');
+  const closeButton = panel?.querySelector('[data-demo-close]');
+  const log = document.querySelector('[data-demo-log]');
+  const syncButton = document.querySelector('[data-demo-sync]');
+  const searchInput = document.querySelector('[data-demo-search]');
+
+  function renderOverlay(product) {
+    if (!panel || !product) return;
+    if (collectionEl) collectionEl.textContent = product.collection;
+    if (titleEl) titleEl.textContent = product.title;
+    if (taglineEl) taglineEl.textContent = product.tagline;
+    if (statusEl) statusEl.textContent = product.status;
+    if (updatedEl) updatedEl.textContent = product.updated;
+    if (checklistEl) {
+      checklistEl.innerHTML = '';
+      product.checklist.forEach((item) => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        checklistEl.appendChild(li);
+      });
+    }
+  }
+
+  function openProduct(productId) {
+    const product = DEMO_PRODUCTS[productId];
+    if (!overlay || !product) return;
+    overlay.hidden = false;
+    overlay.dataset.activeProduct = productId;
+    renderOverlay(product);
+    window.requestAnimationFrame(() => {
+      panel?.focus();
+    });
+  }
+
+  function closeProduct() {
+    if (!overlay) return;
+    overlay.hidden = true;
+    overlay.dataset.activeProduct = '';
+  }
+
+  document.querySelectorAll('[data-demo-product]').forEach((card) => {
+    card.addEventListener('click', () => {
+      const id = card.getAttribute('data-demo-product');
+      if (id) {
+        openProduct(id);
+      }
+    });
+  });
+
+  overlay?.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      closeProduct();
+    }
+  });
+  closeButton?.addEventListener('click', closeProduct);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && overlay && !overlay.hidden) {
+      closeProduct();
+    }
+  });
+
+  function handleSync() {
+    const activeId = overlay?.dataset.activeProduct;
+    const activeProduct = activeId ? DEMO_PRODUCTS[activeId] : null;
     const stamp = new Date().toLocaleTimeString();
-    log.textContent = 'Synced demo data at ' + stamp + '.';
+    if (log) {
+      log.textContent = activeProduct
+        ? 'Synced ' + activeProduct.title + ' at ' + stamp + '.'
+        : 'Synced inventory queue at ' + stamp + '.';
+    }
+    if (statusEl && activeProduct) {
+      statusEl.textContent = activeProduct.status + ' • Synced just now';
+    }
+  }
+
+  syncButton?.addEventListener('click', handleSync);
+  panelSyncButton?.addEventListener('click', () => {
+    handleSync();
+    closeProduct();
+  });
+
+  searchInput?.addEventListener('input', (event) => {
+    const value = event.target.value.trim().toLowerCase();
+    document.querySelectorAll('[data-demo-product]').forEach((card) => {
+      const keywords = card.dataset.keywords?.toLowerCase() ?? '';
+      card.hidden = Boolean(value) && !keywords.includes(value);
+    });
   });
 })();`;
 const DEMO_DOCS_TABLE = "lovablesheet_demo_lab_docs";
@@ -525,6 +720,7 @@ const demoLabState = {
     resetButton: null,
     status: null,
     iframe: null,
+    productSelect: null,
     docsButton: null,
     docsLayer: null,
     docsOverlay: null,
@@ -670,6 +866,9 @@ function handleDemoLabReset() {
   if (urlInput) {
     urlInput.value = "";
   }
+  if (demoLabState.elements.productSelect) {
+    demoLabState.elements.productSelect.value = "";
+  }
   setDemoLabStatus("Restored the sample bundle. Run the preview to see it in action.");
   handleDemoLabRun();
 }
@@ -681,6 +880,116 @@ function handleDemoLabUrlInput() {
     return;
   }
   setDemoLabStatus("Inline HTML mode active. Click Run preview after editing the fields above.");
+}
+
+function normalizeDemoUrl(url) {
+  if (typeof url !== "string") {
+    return "";
+  }
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return "";
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  try {
+    return encodeURI(trimmed);
+  } catch {
+    return trimmed.replace(/\s/g, "%20");
+  }
+}
+
+function updateDemoLabProductPicker(products = []) {
+  const select = demoLabState.elements.productSelect;
+  if (!select) {
+    return;
+  }
+
+  const previousValue = select.value;
+  select.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Select a product demo…";
+  select.appendChild(placeholder);
+
+  const live = [];
+  const drafts = [];
+  products.forEach((product) => {
+    if (!product || !product.id) {
+      return;
+    }
+    if (product.draft) {
+      drafts.push(product);
+    } else {
+      live.push(product);
+    }
+  });
+
+  const appendGroup = (label, list) => {
+    if (!list.length) {
+      return;
+    }
+    const group = document.createElement("optgroup");
+    group.label = label;
+    list.forEach((product) => {
+      const option = document.createElement("option");
+      option.value = product.id;
+      const name = product.name || product.displayName || product.id;
+      option.textContent = product.draft && !label.toLowerCase().includes("draft") ? `${name} (Draft)` : name;
+      if (product.demoUrl) {
+        option.dataset.demoUrl = product.demoUrl;
+      } else {
+        option.textContent = `${option.textContent} — Demo coming soon`;
+      }
+      group.appendChild(option);
+    });
+    select.appendChild(group);
+  };
+
+  appendGroup("Live products", live);
+  appendGroup("Draft concepts", drafts);
+
+  const restored = Array.from(select.options).some((option) => {
+    if (previousValue && option.value === previousValue) {
+      select.value = previousValue;
+      return true;
+    }
+    return false;
+  });
+  if (!restored) {
+    select.value = "";
+  }
+}
+
+function handleDemoLabProductChange(event) {
+  const select = event?.currentTarget;
+  if (!select) {
+    return;
+  }
+  const selectedOption = select.options[select.selectedIndex];
+  const urlInput = demoLabState.elements.urlInput;
+
+  if (!selectedOption || !selectedOption.value) {
+    if (urlInput) {
+      urlInput.value = "";
+    }
+    setDemoLabStatus("Inline HTML mode active. Click Run preview after editing the fields above.");
+    handleDemoLabRun();
+    return;
+  }
+
+  const demoUrl = selectedOption.dataset.demoUrl;
+  if (!demoUrl) {
+    setDemoLabStatus("That product doesn't have a linked demo yet.", "error");
+    return;
+  }
+
+  if (urlInput) {
+    urlInput.value = demoUrl;
+  }
+  handleDemoLabRun();
 }
 
 function applyDemoDocsText() {
@@ -857,6 +1166,7 @@ function initializeDemoLab() {
   elements.resetButton = section.querySelector("[data-demo-reset]") ?? null;
   elements.status = section.querySelector("[data-demo-status]") ?? null;
   elements.iframe = section.querySelector("[data-demo-preview]") ?? null;
+  elements.productSelect = section.querySelector("[data-demo-product-picker]") ?? null;
   elements.docsButton = section.querySelector("[data-demo-docs-open]") ?? null;
   elements.docsLayer = document.querySelector("[data-demo-docs-layer]") ?? null;
   elements.docsOverlay = elements.docsLayer?.querySelector("[data-demo-docs-overlay]") ?? null;
@@ -879,6 +1189,7 @@ function initializeDemoLab() {
   elements.runButton?.addEventListener("click", handleDemoLabRun);
   elements.resetButton?.addEventListener("click", handleDemoLabReset);
   elements.urlInput?.addEventListener("input", handleDemoLabUrlInput);
+  elements.productSelect?.addEventListener("change", handleDemoLabProductChange);
 
   elements.docsButton?.addEventListener("click", () => openDemoDocsModal(elements.docsButton));
   elements.docsOverlay?.addEventListener("click", closeDemoDocsModal);
@@ -3555,8 +3866,10 @@ async function fetchNextGenProducts() {
           ? item.lifeAreas.map((area) => String(area ?? "").trim()).filter(Boolean)
           : [];
         const tagline = typeof item.tagline === "string" ? item.tagline.trim() : "";
+        const rawDemoUrl = typeof item.virtualDemo === "string" ? item.virtualDemo : "";
+        const demoUrl = normalizeDemoUrl(rawDemoUrl);
 
-        return { id, name, displayName, draft, price, lifeAreas, tagline };
+        return { id, name, displayName, draft, price, lifeAreas, tagline, demoUrl };
       })
       .filter(Boolean)
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
@@ -3569,12 +3882,14 @@ async function fetchNextGenProducts() {
 
     renderNextGenProductOptions(normalized);
     renderDraftModelsTable(normalized);
+    updateDemoLabProductPicker(normalized);
   } catch (error) {
     console.error("[lovablesheet] Unable to load products for Next Gen brief", error);
     if (productsError) {
       productsError.hidden = false;
     }
     renderDraftModelsTable([]);
+    updateDemoLabProductPicker([]);
     if (ideaStageElements.draftTable) {
       ideaStageElements.draftTable.hidden = true;
     }
