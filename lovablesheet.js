@@ -1256,15 +1256,41 @@ const stepThreeState = {
   latestBriefId: "",
   latestPrompt: ""
 };
+const hasMatchMedia = typeof window !== "undefined" && typeof window.matchMedia === "function";
+const promptChatLayoutQueries = {
+  desktop: hasMatchMedia ? window.matchMedia("(min-width: 1024px)") : null,
+  mobile: hasMatchMedia ? window.matchMedia("(max-width: 640px)") : null
+};
+const promptChatMessageTargets = {
+  system: "[data-step-three]",
+  product: "[data-idea-stage]",
+  prompt: "[data-step-three]"
+};
 const promptChatState = {
   initialized: false,
   isOpen: false,
+  hasOpenedOnMobile: false,
+  layoutListenersRegistered: false,
+  layout: {
+    isDesktop: false,
+    isMobile: false
+  },
   elements: {
     panel: document.querySelector("[data-prompt-chat-panel]"),
     messages: document.querySelector("[data-prompt-chat-messages]"),
     toggle: document.querySelector("[data-prompt-chat-toggle]"),
     closeButton: document.querySelector("[data-prompt-chat-close]")
   }
+};
+const quickActionElements = {
+  container: document.querySelector("[data-quick-actions]"),
+  toggle: document.querySelector("[data-quick-actions-toggle]"),
+  menu: document.querySelector("[data-quick-actions-menu]")
+};
+const quickActionState = {
+  initialized: false,
+  isOpen: false,
+  documentClickHandler: null
 };
 
 let supabaseClient = null;
@@ -1797,7 +1823,9 @@ function buildPromptChatMessages() {
     id: "system",
     tone: "system",
     heading: "System",
-    text: systemText
+    text: systemText,
+    targetSelector: promptChatMessageTargets.system,
+    targetLabel: "Codex builder"
   });
 
   const selectedProduct = ideaStageState.selectedProduct?.trim();
@@ -1805,7 +1833,9 @@ function buildPromptChatMessages() {
     id: "product",
     tone: "product",
     heading: "Product focus",
-    text: selectedProduct ? selectedProduct : "Select a product in Step 1 to personalize this prompt."
+    text: selectedProduct ? selectedProduct : "Select a product in Step 1 to personalize this prompt.",
+    targetSelector: promptChatMessageTargets.product,
+    targetLabel: "Product selection stage"
   });
 
   const latestPrompt = (stepThreeState.latestPrompt || "").trim();
@@ -1817,7 +1847,9 @@ function buildPromptChatMessages() {
           id: `prompt-${index}`,
           tone: "prompt",
           heading: index === 0 ? "Codex prompt" : "Prompt detail",
-          text: segment
+          text: segment,
+          targetSelector: promptChatMessageTargets.prompt,
+          targetLabel: "Codex builder"
         });
       });
     } else {
@@ -1825,7 +1857,9 @@ function buildPromptChatMessages() {
         id: "prompt-single",
         tone: "prompt",
         heading: "Codex prompt",
-        text: latestPrompt
+        text: latestPrompt,
+        targetSelector: promptChatMessageTargets.prompt,
+        targetLabel: "Codex builder"
       });
     }
   } else {
@@ -1833,11 +1867,57 @@ function buildPromptChatMessages() {
       id: "prompt-empty",
       tone: "prompt",
       heading: "Codex prompt",
-      text: "Generate a Codex prompt in Step 3 to preview it in chat form."
+      text: "Generate a Codex prompt in Step 3 to preview it in chat form.",
+      targetSelector: promptChatMessageTargets.prompt,
+      targetLabel: "Codex builder"
     });
   }
 
   return messages;
+}
+
+function handlePromptChatMessageNavigation(targetSelector) {
+  if (!targetSelector) return;
+
+  const target = document.querySelector(targetSelector);
+  if (!target) {
+    return;
+  }
+
+  scrollElementIntoView(target);
+
+  if (promptChatState.layout?.isMobile) {
+    window.requestAnimationFrame(() => {
+      setPromptChatOpen(false);
+    });
+  }
+}
+
+function applyPromptChatMessageTarget(element, message) {
+  if (!element || !message?.targetSelector) {
+    return;
+  }
+
+  const label = message.targetLabel || "Jump to LovableSheet stage";
+  const heading = message.heading || "Prompt detail";
+  const targetSelector = message.targetSelector;
+
+  const activate = () => {
+    handlePromptChatMessageNavigation(targetSelector);
+  };
+
+  element.classList.add("prompt-chat-panel__message--interactive");
+  element.dataset.promptChatTarget = targetSelector;
+  element.setAttribute("role", "button");
+  element.tabIndex = 0;
+  element.setAttribute("aria-label", `${heading} — ${label}`);
+  element.addEventListener("click", activate);
+  element.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      activate();
+    }
+  });
 }
 
 function renderPromptChatMessages() {
@@ -1866,14 +1946,189 @@ function renderPromptChatMessages() {
 
     item.appendChild(heading);
     item.appendChild(text);
+
+    applyPromptChatMessageTarget(item, message);
+
     container.appendChild(item);
   });
 
   container.scrollTop = container.scrollHeight;
 }
 
-function setPromptChatOpen(isOpen) {
-  promptChatState.isOpen = Boolean(isOpen);
+function updatePromptChatControls() {
+  const { toggle, closeButton } = promptChatState.elements;
+  const isDesktop = Boolean(promptChatState.layout?.isDesktop);
+
+  if (toggle) {
+    toggle.hidden = isDesktop;
+    if (isDesktop) {
+      toggle.setAttribute("aria-hidden", "true");
+    } else {
+      toggle.removeAttribute("aria-hidden");
+    }
+  }
+
+  if (closeButton) {
+    closeButton.hidden = isDesktop;
+  }
+}
+
+function syncPromptChatVisibility() {
+  updatePromptChatControls();
+
+  if (promptChatState.layout?.isDesktop) {
+    setPromptChatOpen(true, { force: true });
+    return;
+  }
+
+  if (promptChatState.layout?.isMobile && !promptChatState.hasOpenedOnMobile) {
+    setPromptChatOpen(true);
+    promptChatState.hasOpenedOnMobile = true;
+  }
+}
+
+function updatePromptChatLayoutState() {
+  const body = document.body;
+  const isDesktop = Boolean(promptChatLayoutQueries.desktop?.matches);
+  const isMobile = Boolean(promptChatLayoutQueries.mobile?.matches);
+
+  promptChatState.layout = { isDesktop, isMobile };
+
+  if (body) {
+    body.classList.toggle("lovablesheet-chat-desktop", isDesktop);
+    body.classList.toggle("lovablesheet-chat-mobile", isMobile);
+  }
+
+  if (!isMobile) {
+    promptChatState.hasOpenedOnMobile = false;
+    setQuickActionsOpen(false);
+  }
+
+  syncPromptChatVisibility();
+}
+
+function registerPromptChatLayoutListeners() {
+  if (promptChatState.layoutListenersRegistered) {
+    return;
+  }
+
+  promptChatState.layoutListenersRegistered = true;
+
+  const handleChange = () => {
+    updatePromptChatLayoutState();
+  };
+
+  Object.values(promptChatLayoutQueries).forEach((query) => {
+    if (!query) return;
+    if (typeof query.addEventListener === "function") {
+      query.addEventListener("change", handleChange);
+    } else if (typeof query.addListener === "function") {
+      query.addListener(handleChange);
+    }
+  });
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("resize", handleChange);
+  }
+}
+
+function setQuickActionsOpen(isOpen) {
+  if (!quickActionElements.container) {
+    quickActionState.isOpen = false;
+    return;
+  }
+
+  quickActionState.isOpen = Boolean(isOpen);
+  const { menu, toggle } = quickActionElements;
+
+  if (menu) {
+    menu.hidden = !quickActionState.isOpen;
+  }
+
+  if (toggle) {
+    toggle.setAttribute("aria-expanded", quickActionState.isOpen ? "true" : "false");
+  }
+}
+
+function toggleQuickActionsMenu() {
+  setQuickActionsOpen(!quickActionState.isOpen);
+}
+
+function handleQuickActionSelection(action) {
+  switch (action) {
+    case "start-new": {
+      if (ideaStageElements.clearButton && !ideaStageElements.clearButton.hidden) {
+        ideaStageElements.clearButton.click();
+      }
+      if (ideaStageElements.stage) {
+        scrollElementIntoView(ideaStageElements.stage);
+      }
+      break;
+    }
+    case "go-step-three": {
+      if (stepThreeElements.stage) {
+        scrollElementIntoView(stepThreeElements.stage);
+      }
+      break;
+    }
+    case "focus-chat": {
+      setPromptChatOpen(true);
+      if (!promptChatState.layout?.isDesktop && promptChatState.elements.panel) {
+        scrollElementIntoView(promptChatState.elements.panel);
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+  setQuickActionsOpen(false);
+}
+
+function initializeQuickActionsMenu() {
+  if (quickActionState.initialized) {
+    return;
+  }
+
+  const { container, toggle } = quickActionElements;
+  if (!container || !toggle) {
+    return;
+  }
+
+  quickActionState.initialized = true;
+
+  toggle.addEventListener("click", () => {
+    toggleQuickActionsMenu();
+  });
+
+  container.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && quickActionState.isOpen) {
+      event.preventDefault();
+      setQuickActionsOpen(false);
+    }
+  });
+
+  container.addEventListener("click", (event) => {
+    const actionButton = event.target.closest("[data-quick-action]");
+    if (actionButton) {
+      event.preventDefault();
+      handleQuickActionSelection(actionButton.dataset.quickAction);
+    }
+  });
+
+  quickActionState.documentClickHandler = (event) => {
+    if (!quickActionElements.container?.contains(event.target)) {
+      setQuickActionsOpen(false);
+    }
+  };
+
+  document.addEventListener("click", quickActionState.documentClickHandler);
+}
+
+function setPromptChatOpen(isOpen, options = {}) {
+  const shouldForceOpen = options.force || promptChatState.layout?.isDesktop;
+  const nextOpen = shouldForceOpen ? true : Boolean(isOpen);
+  promptChatState.isOpen = nextOpen;
 
   const { panel, toggle } = promptChatState.elements;
 
@@ -1929,7 +2184,12 @@ function initializePromptChat() {
     }
   });
 
-  setPromptChatOpen(false);
+  registerPromptChatLayoutListeners();
+  updatePromptChatLayoutState();
+
+  if (!promptChatState.layout?.isDesktop && !promptChatState.layout?.isMobile) {
+    setPromptChatOpen(false);
+  }
 }
 
 function updateStepThreeLatestBriefLabel(brief) {
@@ -7769,6 +8029,7 @@ function initializeBrainTools() {
 
 initializeDemoLab();
 initializePromptChat();
+initializeQuickActionsMenu();
 initializeBrainTools();
 
 async function init() {
