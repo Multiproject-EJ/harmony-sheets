@@ -2490,6 +2490,22 @@ details.faq summary{cursor:pointer;font-weight:600}
 .admin__panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
 .admin__panel-head h2{margin:0;font-size:1.5rem}
 .admin__panel-sub{margin:6px 0 0;color:#64748b;max-width:440px}
+.admin-progress-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:18px 0 4px}
+.admin-progress-card{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;border-radius:20px;border:1px solid rgba(148,163,184,.26);background:linear-gradient(135deg,rgba(248,250,252,.95),rgba(241,245,249,.88));box-shadow:0 20px 44px rgba(15,23,42,.12);min-height:132px}
+.admin-progress-card__content{display:grid;gap:6px}
+.admin-progress-card__eyebrow{margin:0;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:#94a3b8;font-weight:700}
+.admin-progress-card__title{margin:0;font-size:1.18rem;font-weight:700;color:#0f172a}
+.admin-progress-card__meta{margin:0;font-size:.92rem;color:#475569}
+.admin-progress-graph{--progress:0;--progress-color:#2563eb;width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--progress-color) calc(var(--progress)*360deg),rgba(148,163,184,.18) 0);display:grid;place-items:center;position:relative;box-shadow:0 16px 34px rgba(37,99,235,.18)}
+.admin-progress-graph::after{content:"";position:absolute;inset:12px;background:#fff;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(148,163,184,.18)}
+.admin-progress-graph__value{position:relative;z-index:1;font-size:1.1rem;font-weight:700;color:#0f172a}
+.admin-progress-card:nth-child(3) .admin-progress-graph,.admin-progress-card:nth-child(4) .admin-progress-graph{box-shadow:0 16px 34px rgba(14,165,233,.2)}
+@media (max-width:1100px){
+  .admin-progress-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .admin-progress-grid{grid-template-columns:1fr}
+}
 .admin__panel-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .admin__panel-actions--pipeline{align-items:center}
 .admin__pipeline-toggle{display:inline-flex;align-items:center;gap:12px;padding:10px 18px;border-radius:999px;border:1px solid rgba(99,102,241,.32);background:linear-gradient(140deg,rgba(99,102,241,.16) 0,rgba(129,140,248,.08) 100%);color:#1e1b4b;font-weight:600;font-size:.92rem;letter-spacing:.02em;text-decoration:none;cursor:pointer;box-shadow:0 16px 42px rgba(79,70,229,.16);transition:background .2s ease,border-color .2s ease,box-shadow .2s ease,color .2s ease,transform .2s ease}
