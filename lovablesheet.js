@@ -1225,6 +1225,7 @@ const ideaStageElements = {
   summaryState: document.querySelector("[data-idea-summary-state]"),
   summaryTitle: document.querySelector("[data-idea-summary-title]"),
   summaryDescription: document.querySelector("[data-idea-summary-description]"),
+  manualInput: document.querySelector("[data-idea-manual-input]"),
   successIndicator: document.querySelector("[data-idea-success]"),
   successIcon: document.querySelector("[data-idea-success-icon]"),
   connector: document.querySelector("[data-idea-connector]"),
@@ -2190,10 +2191,29 @@ function initializeStepThree() {
   }
 }
 
+function syncSelectedProductInputs(value, options = {}) {
+  const { skipManual = false, skipNextGen = false } = options;
+  const normalized = typeof value === "string" ? value : "";
+
+  if (!skipManual && ideaStageElements.manualInput) {
+    if (ideaStageElements.manualInput.value !== normalized) {
+      ideaStageElements.manualInput.value = normalized;
+    }
+  }
+
+  if (!skipNextGen && nextGenState.elements?.nameInput) {
+    const { nameInput } = nextGenState.elements;
+    if (nameInput && nameInput.value !== normalized) {
+      nameInput.value = normalized;
+    }
+  }
+}
+
 function setIdeaStageSelection(productName, options = {}) {
   const previousProduct = ideaStageState.selectedProduct;
   const previousSource = ideaStageState.selectionSource;
   const nextValue = typeof productName === "string" ? productName.trim() : "";
+  const origin = typeof options.origin === "string" ? options.origin : "";
 
   let nextSource = "empty";
   if (nextValue) {
@@ -2208,6 +2228,11 @@ function setIdeaStageSelection(productName, options = {}) {
 
   ideaStageState.selectedProduct = nextValue;
   ideaStageState.selectionSource = nextSource;
+
+  syncSelectedProductInputs(nextValue, {
+    skipManual: origin === "manual",
+    skipNextGen: origin === "nextgen"
+  });
 
   const { output, hint } = ideaStageElements;
   if (output) {
@@ -2233,7 +2258,7 @@ function initializeIdeaStage() {
   ideaStageState.initialized = true;
   setIdeaStageSelection("", { source: "reset" });
 
-  const { clearButton, draftTable, draftEmpty } = ideaStageElements;
+  const { clearButton, draftTable, draftEmpty, manualInput } = ideaStageElements;
   if (draftTable) {
     draftTable.hidden = true;
   }
@@ -2244,6 +2269,12 @@ function initializeIdeaStage() {
   if (clearButton) {
     clearButton.addEventListener("click", () => {
       setIdeaStageSelection("", { source: "reset" });
+    });
+  }
+
+  if (manualInput) {
+    manualInput.addEventListener("input", () => {
+      setIdeaStageSelection(manualInput.value || "", { origin: "manual" });
     });
   }
 }
@@ -3594,6 +3625,7 @@ function applyNextGenInspirationSelection() {
 function resetNextGenForm() {
   const {
     form,
+    nameInput,
     descriptionInput,
     notesInput,
     productsContainer,
@@ -3628,6 +3660,10 @@ function resetNextGenForm() {
   setNextGenStandardStatus("");
 
   setNextGenFormStatus("");
+
+  if (nameInput) {
+    syncSelectedProductInputs(ideaStageState.selectedProduct, { skipManual: true });
+  }
 }
 
 function focusNextGenForm(options = {}) {
@@ -3767,15 +3803,15 @@ function launchNextGenBriefFromPipeline(trigger) {
   const productName = extractPipelineProductName(trigger);
   const fromDraftTable = Boolean(trigger.closest("[data-draft-table]"));
 
-  setIdeaStageSelection(productName, { source: fromDraftTable ? "draft" : "ready" });
+  setIdeaStageSelection(productName, {
+    source: fromDraftTable ? "draft" : "ready",
+    origin: "pipeline"
+  });
 
   resetNextGenForm();
   setNextGenFormStatus("");
 
   const { nameInput } = nextGenState.elements;
-  if (nameInput) {
-    nameInput.value = productName;
-  }
 
   focusNextGenForm({ focusField: true });
 
@@ -4514,6 +4550,14 @@ function initNextGenEngineBriefs() {
   updateNextGenFeatureSummary();
   updateNextGenDesignSummary();
   renderNextGenSelectedInspiration();
+
+  if (elements.nameInput) {
+    elements.nameInput.addEventListener("input", () => {
+      setIdeaStageSelection(elements.nameInput.value || "", { origin: "nextgen" });
+    });
+  }
+
+  syncSelectedProductInputs(ideaStageState.selectedProduct, { skipManual: true });
 
   nextGenState.savedBriefs = getNextGenStoredBriefs();
   renderNextGenSavedBriefs();
