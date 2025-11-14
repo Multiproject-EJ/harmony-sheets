@@ -2364,12 +2364,8 @@ function updatePromptChatControls() {
   const isDesktop = Boolean(promptChatState.layout?.isDesktop);
 
   if (toggle) {
-    toggle.hidden = isDesktop;
-    if (isDesktop) {
-      toggle.setAttribute("aria-hidden", "true");
-    } else {
-      toggle.removeAttribute("aria-hidden");
-    }
+    toggle.hidden = false;
+    toggle.removeAttribute("aria-hidden");
   }
 
   if (closeButton) {
