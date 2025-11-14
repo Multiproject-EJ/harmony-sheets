@@ -1,9 +1,10 @@
 # Common error: LovableSheet page doesn't recognize logged-in admin
 
-**Occurrence counter:** 2 (last updated 2025-11-14)
+**Occurrence counter:** 3 (last updated 2025-11-15)
 
 1. **2025-03-08 – Missing `updateIdeaStageUI` guard.** ReferenceError prevented `lovablesheet.js` from running, leaving the loading card on screen.
 2. **2025-11-14 – Auth listener short-circuit.** `lovablesheet.js` returned before subscribing to Supabase auth events whenever the initial `getSession()` call returned `null`, so admins who already had a valid session stayed stuck on the "Verifying your admin access…" card until they hard-refreshed.
+3. **2025-11-15 – Brain board template never closed.** The `<template id="brain-board-note-template">` tag swallowed the rest of the document (including all `<script>` tags), so none of the LovableSheet JavaScript ran and the loading card never advanced.
 
 ## Symptom
 - Visiting lovablesheet.html shows the "Access restricted" or "You need an admin account" message even when the same browser is signed in as an admin and other admin pages (e.g., admin_dashboard.html) work.
@@ -68,6 +69,14 @@ if (existingUpdateIdeaStageUI) {
 - The auth listener now relies on `requireAdmin()` for redirect logic and simply re-initializes the board tools when access is granted.
 
 Increment the counter above any time this checklist is needed again and add a short dated note describing the new root cause + fix.
+
+### 4. Close runaway `<template>` wrappers (Nov 2025)
+
+**Symptom:** The LovableSheet page source looks correct, but viewing it in a browser leaves the UI frozen on "Loading LovableSheet" and `document.scripts` is empty because every `<script>` tag lives inside an accidentally unclosed `<template>`.
+
+**Resolution (Nov 15, 2025):** Added the missing `</template>` after the note template so the rest of the DOM renders normally and `lovablesheet.js` executes again.
+
+**How to check next time:** View Source and verify all `<template>` tags (especially `brain-board-note-template`) have matching closing tags before the script bundle. If `document.scripts` is empty or the browser console never logs `LovableSheet: init - checking session`, inspect the template block before the footer for typos.
 
 ## Permanent recommendations
 - Centralize auth checks into a shared helper used by all admin pages.
