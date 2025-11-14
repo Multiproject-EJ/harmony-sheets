@@ -1,10 +1,11 @@
 # Common error: LovableSheet page doesn't recognize logged-in admin
 
-**Occurrence counter:** 3 (last updated 2025-11-15)
+**Occurrence counter:** 4 (last updated 2025-11-16)
 
 1. **2025-03-08 – Missing `updateIdeaStageUI` guard.** ReferenceError prevented `lovablesheet.js` from running, leaving the loading card on screen.
 2. **2025-11-14 – Auth listener short-circuit.** `lovablesheet.js` returned before subscribing to Supabase auth events whenever the initial `getSession()` call returned `null`, so admins who already had a valid session stayed stuck on the "Verifying your admin access…" card until they hard-refreshed.
 3. **2025-11-15 – Brain board template never closed.** The `<template id="brain-board-note-template">` tag swallowed the rest of the document (including all `<script>` tags), so none of the LovableSheet JavaScript ran and the loading card never advanced.
+4. **2025-11-16 – Cached copy of the broken template.** Even after the fix above landed, the CDN kept serving the old HTML for some editors, so the loading screen persisted until they hard-refreshed. Bust cache (Shift+Reload) or re-upload the corrected `lovablesheet.html` to clear the stale template.
 
 ## Symptom
 - Visiting lovablesheet.html shows the "Access restricted" or "You need an admin account" message even when the same browser is signed in as an admin and other admin pages (e.g., admin_dashboard.html) work.
