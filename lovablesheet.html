@@ -1476,16 +1476,23 @@
                   <fieldset class="nextgen-form__field nextgen-form__field--features">
                     <legend class="nextgen-form__label">Product description</legend>
                     <p class="nextgen-form__hint">
-                      Add feature highlights from the dropdown, then expand on the concept with freeform copy.
+                      Check off the reusable feature patterns that match your concept, then expand on the concept with freeform copy.
                     </p>
                     <div class="nextgen-form__feature-picker">
-                      <label class="nextgen-form__picker-label" for="nextgen-feature-select">Feature highlights</label>
-                      <select class="nextgen-form__select" id="nextgen-feature-select" data-nextgen-feature-select>
-                        <option value="">Choose a feature…</option>
-                      </select>
-                      <p class="nextgen-form__hint">Select a feature to add it to the list below. Repeat as needed.</p>
+                      <div class="nextgen-form__feature-header">
+                        <p class="nextgen-form__picker-label">Feature highlights</p>
+                        <button class="btn ghost nextgen-form__feature-add" type="button" data-nextgen-feature-add>
+                          Add new feature
+                        </button>
+                      </div>
+                      <p class="nextgen-form__hint">
+                        Each feature is stored in Supabase with a longer explanation so prompts stay detailed.
+                      </p>
+                      <div class="nextgen-form__feature-library" data-nextgen-feature-matrix>
+                        <p class="nextgen-form__loading" data-nextgen-feature-loading>Loading feature library…</p>
+                        <div class="nextgen-form__feature-grid" data-nextgen-feature-grid hidden aria-live="polite"></div>
+                      </div>
                       <p class="nextgen-form__empty" data-nextgen-feature-empty>No feature highlights selected yet.</p>
-                      <ul class="nextgen-form__chips" data-nextgen-feature-list aria-live="polite" aria-label="Selected feature highlights"></ul>
                     </div>
                     <label class="nextgen-form__picker-label" for="nextgen-description">Free text field</label>
                     <textarea
@@ -1496,6 +1503,27 @@
                       placeholder="Summarize the problem it solves, the experience, and the wow moments."
                       data-nextgen-description
                     ></textarea>
+                  </fieldset>
+
+                  <fieldset class="nextgen-form__field nextgen-form__field--designs">
+                    <legend class="nextgen-form__label">Design reference</legend>
+                    <div class="nextgen-form__feature-picker">
+                      <div class="nextgen-form__feature-header">
+                        <p class="nextgen-form__picker-label">Design highlights</p>
+                        <button class="btn ghost nextgen-form__feature-add" type="button" data-nextgen-design-add>
+                          Add new design
+                        </button>
+                      </div>
+                      <p class="nextgen-form__hint">
+                        Pick the visual systems that should influence the handoff. Each card includes reusable styling notes.
+                      </p>
+                      <p class="nextgen-form__hint">Store CSS/system notes in Supabase so future briefs can reuse the palette.</p>
+                      <div class="nextgen-form__feature-library" data-nextgen-design-matrix>
+                        <p class="nextgen-form__loading" data-nextgen-design-loading>Loading design library…</p>
+                        <div class="nextgen-form__feature-grid nextgen-form__design-grid" data-nextgen-design-grid hidden aria-live="polite"></div>
+                      </div>
+                      <p class="nextgen-form__empty" data-nextgen-design-empty>No design references selected yet.</p>
+                    </div>
                   </fieldset>
 
                   <fieldset class="nextgen-form__field nextgen-form__field--products">
@@ -1560,6 +1588,74 @@
                       <button class="btn ghost" type="button" data-nextgen-products-cancel>Cancel</button>
                       <button class="btn primary" type="button" data-nextgen-products-apply>Apply selection</button>
                     </footer>
+                  </div>
+                </div>
+
+                <div class="nextgen-feature-dialog" data-nextgen-feature-dialog hidden aria-hidden="true">
+                  <div class="nextgen-feature-dialog__overlay" data-nextgen-feature-dialog-overlay></div>
+                  <div class="nextgen-feature-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="nextgen-feature-dialog-title">
+                    <header class="nextgen-feature-dialog__header">
+                      <div>
+                        <p class="nextgen-feature-dialog__eyebrow">Feature library</p>
+                        <h3 class="nextgen-feature-dialog__title" id="nextgen-feature-dialog-title">Add reusable feature</h3>
+                        <p class="nextgen-feature-dialog__subtitle">
+                          Store a named capability with longer guidance so Codex prompts stay descriptive.
+                        </p>
+                      </div>
+                      <button class="nextgen-feature-dialog__close" type="button" data-nextgen-feature-dialog-close aria-label="Close feature dialog">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </header>
+                    <form class="nextgen-feature-dialog__form" data-nextgen-feature-form>
+                      <div class="nextgen-feature-dialog__body">
+                        <label class="nextgen-form__picker-label" for="nextgen-feature-name">Feature name</label>
+                        <input class="nextgen-form__input" id="nextgen-feature-name" name="feature-name" type="text" data-nextgen-feature-name required placeholder="e.g. Adaptive dashboard" autocomplete="off">
+                        <label class="nextgen-form__picker-label" for="nextgen-feature-id">Feature slug</label>
+                        <input class="nextgen-form__input" id="nextgen-feature-id" name="feature-id" type="text" data-nextgen-feature-id placeholder="auto-generated" autocomplete="off">
+                        <label class="nextgen-form__picker-label" for="nextgen-feature-description">Detailed explanation</label>
+                        <textarea class="nextgen-form__textarea nextgen-form__textarea--condensed" id="nextgen-feature-description" name="feature-description" rows="4" data-nextgen-feature-description required placeholder="Document the sheet layout, automation, or edge cases that make this feature unique."></textarea>
+                        <p class="nextgen-feature-dialog__status" data-nextgen-feature-status></p>
+                      </div>
+                      <footer class="nextgen-feature-dialog__footer">
+                        <button class="btn ghost" type="button" data-nextgen-feature-dialog-cancel>Cancel</button>
+                        <button class="btn primary" type="submit" data-nextgen-feature-dialog-save>Add feature</button>
+                      </footer>
+                    </form>
+                  </div>
+                </div>
+
+                <div class="nextgen-design-dialog" data-nextgen-design-dialog hidden aria-hidden="true">
+                  <div class="nextgen-design-dialog__overlay" data-nextgen-design-dialog-overlay></div>
+                  <div class="nextgen-design-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="nextgen-design-dialog-title">
+                    <header class="nextgen-design-dialog__header">
+                      <div>
+                        <p class="nextgen-design-dialog__eyebrow">Design library</p>
+                        <h3 class="nextgen-design-dialog__title" id="nextgen-design-dialog-title">Add design reference</h3>
+                        <p class="nextgen-design-dialog__subtitle">
+                          Pair each reference name with CSS notes so Codex can reuse the visual system.
+                        </p>
+                      </div>
+                      <button class="nextgen-design-dialog__close" type="button" data-nextgen-design-dialog-close aria-label="Close design dialog">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </header>
+                    <form class="nextgen-design-dialog__form" data-nextgen-design-form>
+                      <div class="nextgen-design-dialog__body">
+                        <label class="nextgen-form__picker-label" for="nextgen-design-name">Design name</label>
+                        <input class="nextgen-form__input" id="nextgen-design-name" name="design-name" type="text" data-nextgen-design-name required placeholder="e.g. Lush botanical" autocomplete="off">
+                        <label class="nextgen-form__picker-label" for="nextgen-design-id">Design slug</label>
+                        <input class="nextgen-form__input" id="nextgen-design-id" name="design-id" type="text" data-nextgen-design-id placeholder="auto-generated" autocomplete="off">
+                        <label class="nextgen-form__picker-label" for="nextgen-design-description">Design description</label>
+                        <textarea class="nextgen-form__textarea nextgen-form__textarea--condensed" id="nextgen-design-description" name="design-description" rows="4" data-nextgen-design-description required placeholder="Explain when to use this palette and the mood it supports."></textarea>
+                        <label class="nextgen-form__picker-label" for="nextgen-design-css">CSS/system notes</label>
+                        <textarea class="nextgen-form__textarea nextgen-form__textarea--condensed" id="nextgen-design-css" name="design-css" rows="3" data-nextgen-design-css required placeholder="List color tokens, borders, shadows, and layout guidance."></textarea>
+                        <p class="nextgen-design-dialog__status" data-nextgen-design-status></p>
+                      </div>
+                      <footer class="nextgen-design-dialog__footer">
+                        <button class="btn ghost" type="button" data-nextgen-design-dialog-cancel>Cancel</button>
+                        <button class="btn primary" type="submit" data-nextgen-design-dialog-save>Add design</button>
+                      </footer>
+                    </form>
                   </div>
                 </div>
 
