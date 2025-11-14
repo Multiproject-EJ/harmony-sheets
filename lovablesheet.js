@@ -81,6 +81,51 @@ const NEXTGEN_DEFAULT_STANDARD_TEXT = [
 const NEXTGEN_STORAGE_KEY = "lovablesheet.nextGenEngineBriefs";
 const NEXTGEN_STANDARD_TABLE = "lovablesheet_nextgen_standard";
 const NEXTGEN_STANDARD_ID = "default";
+const DEMO_LAB_DEFAULT_HTML = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Harmony Sheets demo lab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body { margin: 0; background: #f1f5f9; color: #0f172a; padding: 28px; }
+    .demo-shell { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 28px; padding: 32px; box-shadow: 0 30px 60px rgba(15, 23, 42, .15); display: grid; gap: 18px; }
+    .demo-shell h1 { margin: 0; font-size: 1.8rem; }
+    .demo-shell p { margin: 0; line-height: 1.6; color: #475569; }
+    .demo-shell button { justify-self: start; background: #2563eb; color: #fff; border: none; padding: 12px 22px; border-radius: 999px; font-weight: 600; cursor: pointer; box-shadow: 0 14px 30px rgba(37, 99, 235, .35); }
+    .demo-shell button:focus { outline: 3px solid rgba(59, 130, 246, .4); outline-offset: 2px; }
+    .demo-shell .eyebrow { text-transform: uppercase; letter-spacing: .24em; font-size: .74rem; color: #94a3b8; }
+    .demo-log { font-size: .95rem; color: #0f172a; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main class="demo-shell">
+    <p class="eyebrow">Apps Script UI</p>
+    <h1>Inventory dialog playground</h1>
+    <p>Design the HTML interface that will open from your Google Sheets Apps Script project. Keep everything self-contained.</p>
+    <button type="button" data-demo-cta>Simulate sync</button>
+    <p class="demo-log" data-demo-log>Waiting for a test run…</p>
+  </main>
+</body>
+</html>`;
+const DEMO_LAB_DEFAULT_SCRIPT = `(() => {
+  const button = document.querySelector('[data-demo-cta]');
+  const log = document.querySelector('[data-demo-log]');
+  if (!button || !log) return;
+
+  button.addEventListener('click', () => {
+    const stamp = new Date().toLocaleTimeString();
+    log.textContent = 'Synced demo data at ' + stamp + '.';
+  });
+})();`;
+const DEMO_DOCS_TABLE = "lovablesheet_demo_lab_docs";
+const DEMO_DOCS_ID = "ipad-lab";
+const DEMO_DOCS_DEFAULT_TEXT = [
+  "The iPad preview builder mirrors the 1024×768 dialog that Google Sheets renders when we launch HTML Service from Apps Script. Use it to mock every UI element before copying the files into a real spreadsheet.",
+  "Guidelines:\n- Keep demos to one HTML file and one Apps Script (.gs) file so they can be pasted directly into the Google Sheets project.\n- Treat the spreadsheet tabs as the database layer. Use built-in Services (Sheets, Properties, UrlFetch) for any storage or API calls.\n- Avoid tooling that requires a build step. Vanilla HTML, CSS, and JavaScript ensure copy/paste parity with Google Workspace.",
+  "When the concept is ready, drop the HTML + Apps Script bundle inside the matching folder in 'Google sheets products/' so the marketing site and Supabase listing can reference it."
+].join("\n\n");
 
 const nextGenState = {
   initialized: false,
@@ -149,6 +194,35 @@ const nextGenState = {
   }
 };
 
+const demoLabState = {
+  initialized: false,
+  docsLoaded: false,
+  docsSaving: false,
+  docsOpen: false,
+  docsTrigger: null,
+  docsKeydownHandler: null,
+  docsContent: DEMO_DOCS_DEFAULT_TEXT,
+  elements: {
+    section: null,
+    htmlInput: null,
+    scriptInput: null,
+    urlInput: null,
+    runButton: null,
+    resetButton: null,
+    status: null,
+    iframe: null,
+    docsButton: null,
+    docsLayer: null,
+    docsOverlay: null,
+    docsModal: null,
+    docsClose: null,
+    docsCancel: null,
+    docsSave: null,
+    docsTextarea: null,
+    docsStatus: null
+  }
+};
+
 let brainBoardInitialized = false;
 let flowchartBoardInitialized = false;
 let brainBoard = null;
@@ -198,6 +272,320 @@ const thinkingToolPanels = new Map(
     .filter(([id]) => Boolean(id))
 );
 const thinkingToolsContainer = document.querySelector("[data-thinking-tools]");
+
+function setDemoLabStatus(message = "", tone = "") {
+  const status = demoLabState.elements.status;
+  if (!status) return;
+  status.textContent = message;
+  if (tone) {
+    status.dataset.tone = tone;
+  } else {
+    delete status.dataset.tone;
+  }
+}
+
+function setDemoDocsStatus(message = "", tone = "") {
+  const status = demoLabState.elements.docsStatus;
+  if (!status) return;
+  status.textContent = message;
+  if (tone) {
+    status.dataset.tone = tone;
+  } else {
+    delete status.dataset.tone;
+  }
+}
+
+function buildDemoLabMarkup(html, script) {
+  const baseHtml = html && html.trim() ? html : DEMO_LAB_DEFAULT_HTML;
+  const scriptContent = script && script.trim() ? script : "";
+  if (!scriptContent) {
+    return baseHtml;
+  }
+
+  if (/<\/(body|html)>/i.test(baseHtml)) {
+    return baseHtml.replace(/<\/body>/i, `<script>\n${scriptContent}\n<\/script>\n</body>`);
+  }
+
+  return `${baseHtml}\n<script>\n${scriptContent}\n<\/script>`;
+}
+
+function handleDemoLabRun(event) {
+  if (event) {
+    event.preventDefault();
+  }
+
+  const { iframe, htmlInput, scriptInput, urlInput } = demoLabState.elements;
+  if (!iframe) {
+    return;
+  }
+
+  const externalUrl = urlInput?.value?.trim();
+  if (externalUrl) {
+    if (/^javascript:/i.test(externalUrl)) {
+      setDemoLabStatus("Blocked unsupported URL scheme.", "error");
+      return;
+    }
+    iframe.srcdoc = "";
+    iframe.src = externalUrl;
+    setDemoLabStatus(`Loading ${externalUrl} inside the iPad frame…`);
+    return;
+  }
+
+  const htmlValue = htmlInput?.value ?? "";
+  const scriptValue = scriptInput?.value ?? "";
+  const markup = buildDemoLabMarkup(htmlValue, scriptValue);
+
+  if (!markup.trim()) {
+    setDemoLabStatus("Add HTML or point to a demo URL to render.", "error");
+    return;
+  }
+
+  iframe.removeAttribute("src");
+  iframe.srcdoc = markup;
+  setDemoLabStatus("Rendering inline HTML + Apps Script inside the iPad frame.", "success");
+}
+
+function handleDemoLabReset() {
+  const { htmlInput, scriptInput, urlInput } = demoLabState.elements;
+  if (htmlInput) {
+    htmlInput.value = DEMO_LAB_DEFAULT_HTML.trim();
+  }
+  if (scriptInput) {
+    scriptInput.value = DEMO_LAB_DEFAULT_SCRIPT.trim();
+  }
+  if (urlInput) {
+    urlInput.value = "";
+  }
+  setDemoLabStatus("Restored the sample bundle. Run the preview to see it in action.");
+  handleDemoLabRun();
+}
+
+function handleDemoLabUrlInput() {
+  const urlValue = demoLabState.elements.urlInput?.value?.trim();
+  if (urlValue) {
+    setDemoLabStatus("External demo URL detected. Click Run preview to load it inside the device frame.");
+    return;
+  }
+  setDemoLabStatus("Inline HTML mode active. Click Run preview after editing the fields above.");
+}
+
+function applyDemoDocsText() {
+  const textarea = demoLabState.elements.docsTextarea;
+  if (!textarea) return;
+  textarea.value = demoLabState.docsContent;
+}
+
+async function loadDemoDocsFromSupabase() {
+  if (demoLabState.docsLoaded) {
+    return;
+  }
+  if (!supabaseClient) {
+    setDemoDocsStatus("Connect Supabase to load the shared description.", "error");
+    return;
+  }
+
+  setDemoDocsStatus("Loading saved description…");
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(DEMO_DOCS_TABLE)
+      .select("content")
+      .eq("id", DEMO_DOCS_ID)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data?.content && data.content.trim()) {
+      demoLabState.docsContent = data.content;
+      applyDemoDocsText();
+      setDemoDocsStatus("Loaded saved description.", "success");
+      demoLabState.docsLoaded = true;
+      return;
+    }
+
+    setDemoDocsStatus("No saved description yet. Add details and click save to publish them.");
+    demoLabState.docsLoaded = true;
+  } catch (err) {
+    console.error("[lovablesheet] Unable to load demo lab description", err);
+    setDemoDocsStatus("Unable to load the saved description. Showing the default copy.", "error");
+  }
+}
+
+async function handleDemoDocsSave(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  if (demoLabState.docsSaving) {
+    return;
+  }
+
+  const textarea = demoLabState.elements.docsTextarea;
+  if (!textarea) {
+    return;
+  }
+
+  const value = textarea.value?.trim();
+  if (!value) {
+    setDemoDocsStatus("Description cannot be empty.", "error");
+    textarea.focus();
+    return;
+  }
+
+  if (!supabaseClient) {
+    setDemoDocsStatus("Supabase connection required to save the description.", "error");
+    return;
+  }
+
+  demoLabState.docsSaving = true;
+  if (demoLabState.elements.docsSave) {
+    demoLabState.elements.docsSave.disabled = true;
+  }
+  setDemoDocsStatus("Saving description…");
+
+  try {
+    const payload = { id: DEMO_DOCS_ID, content: value };
+    const { data, error } = await supabaseClient
+      .from(DEMO_DOCS_TABLE)
+      .upsert(payload, { onConflict: "id" })
+      .select("content")
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data?.content) {
+      demoLabState.docsContent = data.content;
+    } else {
+      demoLabState.docsContent = value;
+    }
+
+    demoLabState.docsLoaded = true;
+    setDemoDocsStatus("Description saved to Supabase.", "success");
+  } catch (err) {
+    console.error("[lovablesheet] Unable to save demo lab description", err);
+    setDemoDocsStatus("We couldn't save the description. Try again.", "error");
+  } finally {
+    demoLabState.docsSaving = false;
+    if (demoLabState.elements.docsSave) {
+      demoLabState.elements.docsSave.disabled = false;
+    }
+  }
+}
+
+function closeDemoDocsModal() {
+  const { docsLayer, docsModal } = demoLabState.elements;
+  if (!docsLayer || !docsModal) {
+    return;
+  }
+
+  docsLayer.hidden = true;
+  docsModal.hidden = true;
+  demoLabState.docsOpen = false;
+  document.body.classList.remove("lovablesheet-modal-open");
+  setDemoDocsStatus("");
+  if (demoLabState.docsTrigger) {
+    demoLabState.docsTrigger.focus();
+  }
+  demoLabState.docsTrigger = null;
+}
+
+function handleDemoDocsCancel(event) {
+  if (event) {
+    event.preventDefault();
+  }
+  if (demoLabState.docsSaving) {
+    return;
+  }
+  applyDemoDocsText();
+  closeDemoDocsModal();
+}
+
+function openDemoDocsModal(trigger) {
+  const { docsLayer, docsModal } = demoLabState.elements;
+  if (!docsLayer || !docsModal) {
+    return;
+  }
+
+  demoLabState.docsTrigger = trigger || null;
+  demoLabState.docsOpen = true;
+  docsLayer.hidden = false;
+  docsModal.hidden = false;
+  document.body.classList.add("lovablesheet-modal-open");
+  applyDemoDocsText();
+  setDemoDocsStatus("");
+  loadDemoDocsFromSupabase();
+
+  window.requestAnimationFrame(() => {
+    docsModal.focus();
+  });
+}
+
+function initializeDemoLab() {
+  if (demoLabState.initialized) {
+    return;
+  }
+
+  const section = document.querySelector("[data-demo-lab]");
+  if (!section) {
+    return;
+  }
+
+  demoLabState.initialized = true;
+  const elements = demoLabState.elements;
+  elements.section = section;
+  elements.htmlInput = section.querySelector("[data-demo-html]") ?? null;
+  elements.scriptInput = section.querySelector("[data-demo-script]") ?? null;
+  elements.urlInput = section.querySelector("[data-demo-url]") ?? null;
+  elements.runButton = section.querySelector("[data-demo-run]") ?? null;
+  elements.resetButton = section.querySelector("[data-demo-reset]") ?? null;
+  elements.status = section.querySelector("[data-demo-status]") ?? null;
+  elements.iframe = section.querySelector("[data-demo-preview]") ?? null;
+  elements.docsButton = section.querySelector("[data-demo-docs-open]") ?? null;
+  elements.docsLayer = document.querySelector("[data-demo-docs-layer]") ?? null;
+  elements.docsOverlay = elements.docsLayer?.querySelector("[data-demo-docs-overlay]") ?? null;
+  elements.docsModal = elements.docsLayer?.querySelector("[data-demo-docs-modal]") ?? null;
+  elements.docsClose = elements.docsLayer?.querySelector("[data-demo-docs-close]") ?? null;
+  elements.docsCancel = elements.docsLayer?.querySelector("[data-demo-docs-cancel]") ?? null;
+  elements.docsSave = elements.docsLayer?.querySelector("[data-demo-docs-save]") ?? null;
+  elements.docsTextarea = elements.docsLayer?.querySelector("[data-demo-docs-text]") ?? null;
+  elements.docsStatus = elements.docsLayer?.querySelector("[data-demo-docs-status]") ?? null;
+
+  if (elements.htmlInput && !elements.htmlInput.value.trim()) {
+    elements.htmlInput.value = DEMO_LAB_DEFAULT_HTML.trim();
+  }
+  if (elements.scriptInput && !elements.scriptInput.value.trim()) {
+    elements.scriptInput.value = DEMO_LAB_DEFAULT_SCRIPT.trim();
+  }
+  applyDemoDocsText();
+  setDemoLabStatus("Paste HTML + Apps Script or point to a demo URL to render the preview.");
+
+  elements.runButton?.addEventListener("click", handleDemoLabRun);
+  elements.resetButton?.addEventListener("click", handleDemoLabReset);
+  elements.urlInput?.addEventListener("input", handleDemoLabUrlInput);
+
+  elements.docsButton?.addEventListener("click", () => openDemoDocsModal(elements.docsButton));
+  elements.docsOverlay?.addEventListener("click", closeDemoDocsModal);
+  elements.docsClose?.addEventListener("click", closeDemoDocsModal);
+  elements.docsCancel?.addEventListener("click", handleDemoDocsCancel);
+  elements.docsSave?.addEventListener("click", handleDemoDocsSave);
+
+  if (!demoLabState.docsKeydownHandler) {
+    demoLabState.docsKeydownHandler = (event) => {
+      if (event.key === "Escape" && demoLabState.docsOpen) {
+        event.preventDefault();
+        closeDemoDocsModal();
+      }
+    };
+    document.addEventListener("keydown", demoLabState.docsKeydownHandler);
+  }
+
+  window.requestAnimationFrame(() => {
+    handleDemoLabRun();
+  });
+}
 const thinkingToolsToggleButton = document.querySelector("[data-thinking-tools-toggle]");
 const thinkingToolsCloseButton = document.querySelector("[data-thinking-tools-close]");
 let thinkingToolsDocumentClickListenerAdded = false;
@@ -5661,6 +6049,7 @@ function initializeBrainTools() {
   });
 }
 
+initializeDemoLab();
 initializeBrainTools();
 
 async function init() {
