@@ -1,5 +1,10 @@
 # Common error: LovableSheet page doesn't recognize logged-in admin
 
+**Occurrence counter:** 2 (last updated 2025-11-14)
+
+1. **2025-03-08 – Missing `updateIdeaStageUI` guard.** ReferenceError prevented `lovablesheet.js` from running, leaving the loading card on screen.
+2. **2025-11-14 – Auth listener short-circuit.** `lovablesheet.js` returned before subscribing to Supabase auth events whenever the initial `getSession()` call returned `null`, so admins who already had a valid session stayed stuck on the "Verifying your admin access…" card until they hard-refreshed.
+
 ## Symptom
 - Visiting lovablesheet.html shows the "Access restricted" or "You need an admin account" message even when the same browser is signed in as an admin and other admin pages (e.g., admin_dashboard.html) work.
 
@@ -49,6 +54,20 @@ if (existingUpdateIdeaStageUI) {
 ### 2. Prevent immediate redirect when session === null
 
 - Wait briefly for `onAuthStateChange` to deliver a session before redirecting non-admins (see `lovablesheet.js:init()` for the current pattern).
+
+### 3. Always subscribe to auth changes even when the first session check fails (Nov 2025)
+
+**Symptom:** Console is clean, but the LovableSheet card stays on "Loading LovableSheet / Verifying your admin access…" forever even though the user is already signed in elsewhere as an admin.
+
+**Root cause:** `lovablesheet.js` used to call `requireAdmin(user)` immediately after `getSession()`/`onAuthStateChange` resolved. If that initial call returned `null` (common when Supabase rehydration is slow), the function returned before registering the long-lived `onAuthStateChange` listener, so later session events were ignored.
+
+**Resolution (Nov 14, 2025):**
+
+- Added an optional `redirect` flag to `requireAdmin()` so the first check can show the unauthorized card without forcing a redirect.
+- Updated `init()` to call `requireAdmin(user, { redirect: false })` and, regardless of the outcome, always register the Supabase auth listener so a delayed session will still unlock the page.
+- The auth listener now relies on `requireAdmin()` for redirect logic and simply re-initializes the board tools when access is granted.
+
+Increment the counter above any time this checklist is needed again and add a short dated note describing the new root cause + fix.
 
 ## Permanent recommendations
 - Centralize auth checks into a shared helper used by all admin pages.
