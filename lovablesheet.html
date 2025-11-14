@@ -146,7 +146,7 @@
         </button>
       </div>
     </div>
-    
+
     <!-- Brain Tool Dialogs -->
     <div class="brain-tool-dialog-layer" data-brain-tool-dialog-layer hidden>
       <div class="brain-tool-dialog-overlay" data-brain-tool-dialog-overlay></div>
@@ -269,6 +269,74 @@
         </div>
       </div>
     </div>
+    <section class="lovablesheet-demo-lab" aria-labelledby="demo-lab-title" data-demo-lab>
+      <div class="lovablesheet-demo-lab__content">
+        <p class="lovablesheet-demo-lab__eyebrow">Google Sheets demo lab</p>
+        <h1 class="lovablesheet-demo-lab__title" id="demo-lab-title">iPad preview builder</h1>
+        <p class="lovablesheet-demo-lab__description">
+          Craft the exact HTML + Apps Script interface that will live inside a Google Sheet sidebar or dialog. The live preview mimics
+          a 4:3 iPad viewport so you can pressure test interactions before publishing the files inside Google Workspace.
+        </p>
+        <div class="lovablesheet-demo-lab__actions">
+          <button class="btn primary" type="button" data-demo-run>Run preview</button>
+          <button class="btn secondary" type="button" data-demo-reset>Reset sample</button>
+          <button class="btn ghost" type="button" data-demo-docs-open>View build spec</button>
+        </div>
+        <div class="lovablesheet-demo-lab__status" data-demo-status role="status" aria-live="polite"></div>
+        <div class="lovablesheet-demo-lab__fields">
+          <div class="lovablesheet-demo-lab__field">
+            <label class="lovablesheet-demo-lab__label" for="demo-html-input">Demo HTML</label>
+            <textarea
+              class="lovablesheet-demo-lab__textarea"
+              id="demo-html-input"
+              rows="8"
+              data-demo-html
+              spellcheck="false"
+              placeholder="Paste the single HTML file that will live inside Apps Script."
+            ></textarea>
+          </div>
+          <div class="lovablesheet-demo-lab__field">
+            <label class="lovablesheet-demo-lab__label" for="demo-script-input">Apps Script (.gs)</label>
+            <textarea
+              class="lovablesheet-demo-lab__textarea"
+              id="demo-script-input"
+              rows="6"
+              data-demo-script
+              spellcheck="false"
+              placeholder="Optional: paste the matching Apps Script that powers the Google Sheets database."
+            ></textarea>
+          </div>
+          <div class="lovablesheet-demo-lab__field">
+            <label class="lovablesheet-demo-lab__label" for="demo-url-input">Existing demo URL (optional)</label>
+            <input
+              class="lovablesheet-demo-lab__input"
+              type="url"
+              id="demo-url-input"
+              data-demo-url
+              placeholder="/Google sheets products/demo/pomodoro.html"
+            />
+            <p class="lovablesheet-demo-lab__hint">
+              Point to any HTML file in the repo to preview it instantly, or leave the field empty to render the inline code above.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="lovablesheet-demo-lab__device">
+        <div class="demo-ipad-frame">
+          <div class="demo-ipad-frame__camera" aria-hidden="true"></div>
+          <iframe
+            class="demo-ipad-frame__viewport"
+            title="Google Sheets iPad preview"
+            data-demo-preview
+            sandbox="allow-scripts allow-same-origin allow-forms"
+            loading="lazy"
+          ></iframe>
+        </div>
+        <p class="lovablesheet-demo-lab__device-hint">
+          1024×768 viewport anchored to an iPad body. Drop any Harmony Sheets prototype inside to stress-test layouts and flows.
+        </p>
+      </div>
+    </section>
     <div class="lovablesheet-layout">
       <aside
         class="thinking-tools thinking-tools--floating"
@@ -2323,6 +2391,45 @@
       <button class="btn primary lovablesheet-celebration__button" type="button" data-celebration-next>
         Next Step
       </button>
+    </div>
+  </div>
+
+  <div class="demo-lab-modal-layer" data-demo-docs-layer hidden>
+    <div class="demo-lab-modal-overlay" data-demo-docs-overlay></div>
+    <div
+      class="demo-lab-modal"
+      data-demo-docs-modal
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="demo-docs-title"
+      hidden
+      tabindex="-1"
+    >
+      <header class="demo-lab-modal__header">
+        <div>
+          <p class="demo-lab-modal__eyebrow">Google Sheets demo lab</p>
+          <h2 class="demo-lab-modal__title" id="demo-docs-title">Build spec</h2>
+        </div>
+        <button class="demo-lab-modal__close" type="button" data-demo-docs-close aria-label="Close build spec">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </header>
+      <div class="demo-lab-modal__body">
+        <div class="demo-lab-modal__status" data-demo-docs-status role="status" aria-live="polite"></div>
+        <label class="demo-lab-modal__label" for="demo-docs-text">Description</label>
+        <textarea
+          class="demo-lab-modal__textarea"
+          id="demo-docs-text"
+          data-demo-docs-text
+          rows="12"
+          spellcheck="false"
+        ></textarea>
+        <p class="demo-lab-modal__hint">Saved inside Supabase so every admin can refresh or update the lab's documentation.</p>
+      </div>
+      <footer class="demo-lab-modal__footer">
+        <button class="btn ghost" type="button" data-demo-docs-cancel>Cancel</button>
+        <button class="btn primary" type="button" data-demo-docs-save>Save description</button>
+      </footer>
     </div>
   </div>
 
