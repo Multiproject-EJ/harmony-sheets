@@ -176,6 +176,7 @@ const NEXTGEN_DEFAULT_STANDARD_TEXT = [
   "4) Produce the Google Sheet and HTML (1 file only) and add to a new folder in the ‘Google sheets products and demo’ directory in the repo.",
   "   Link the finished product (the HTML) to the interactive demo section on the product page."
 ].join("\n");
+const PROMPT_CHAT_INTRO = "You are building a Google Sheets product with Harmony Sheets.";
 const NEXTGEN_STORAGE_KEY = "lovablesheet.nextGenEngineBriefs";
 const NEXTGEN_STANDARD_TABLE = "lovablesheet_nextgen_standard";
 const NEXTGEN_STANDARD_ID = "default";
@@ -767,6 +768,16 @@ const stepThreeState = {
   latestBriefId: "",
   latestPrompt: ""
 };
+const promptChatState = {
+  initialized: false,
+  isOpen: false,
+  elements: {
+    panel: document.querySelector("[data-prompt-chat-panel]"),
+    messages: document.querySelector("[data-prompt-chat-messages]"),
+    toggle: document.querySelector("[data-prompt-chat-toggle]"),
+    closeButton: document.querySelector("[data-prompt-chat-close]")
+  }
+};
 
 let supabaseClient = null;
 let authSubscription = null;
@@ -1252,6 +1263,150 @@ function setStepThreeOutput(value) {
     output.value = nextValue;
   }
   stepThreeState.latestPrompt = nextValue;
+  renderPromptChatMessages();
+}
+
+function buildPromptChatMessages() {
+  const messages = [];
+
+  const systemText = [PROMPT_CHAT_INTRO, NEXTGEN_DEFAULT_STANDARD_TEXT].filter(Boolean).join("\n\n");
+  messages.push({
+    id: "system",
+    tone: "system",
+    heading: "System",
+    text: systemText
+  });
+
+  const selectedProduct = ideaStageState.selectedProduct?.trim();
+  messages.push({
+    id: "product",
+    tone: "product",
+    heading: "Product focus",
+    text: selectedProduct ? selectedProduct : "Select a product in Step 1 to personalize this prompt."
+  });
+
+  const latestPrompt = (stepThreeState.latestPrompt || "").trim();
+  if (latestPrompt) {
+    const segments = latestPrompt.split(/\n{2,}/).map((segment) => segment.trim()).filter(Boolean);
+    if (segments.length) {
+      segments.forEach((segment, index) => {
+        messages.push({
+          id: `prompt-${index}`,
+          tone: "prompt",
+          heading: index === 0 ? "Codex prompt" : "Prompt detail",
+          text: segment
+        });
+      });
+    } else {
+      messages.push({
+        id: "prompt-single",
+        tone: "prompt",
+        heading: "Codex prompt",
+        text: latestPrompt
+      });
+    }
+  } else {
+    messages.push({
+      id: "prompt-empty",
+      tone: "prompt",
+      heading: "Codex prompt",
+      text: "Generate a Codex prompt in Step 3 to preview it in chat form."
+    });
+  }
+
+  return messages;
+}
+
+function renderPromptChatMessages() {
+  const container = promptChatState.elements.messages;
+  if (!container) {
+    return;
+  }
+
+  const messages = buildPromptChatMessages();
+  container.innerHTML = "";
+
+  messages.forEach((message) => {
+    const item = document.createElement("article");
+    item.className = "prompt-chat-panel__message";
+    if (message.tone) {
+      item.classList.add(`prompt-chat-panel__message--${message.tone}`);
+    }
+
+    const heading = document.createElement("p");
+    heading.className = "prompt-chat-panel__message-heading";
+    heading.textContent = message.heading || "Prompt detail";
+
+    const text = document.createElement("p");
+    text.className = "prompt-chat-panel__message-text";
+    text.textContent = message.text || "";
+
+    item.appendChild(heading);
+    item.appendChild(text);
+    container.appendChild(item);
+  });
+
+  container.scrollTop = container.scrollHeight;
+}
+
+function setPromptChatOpen(isOpen) {
+  promptChatState.isOpen = Boolean(isOpen);
+
+  const { panel, toggle } = promptChatState.elements;
+
+  if (panel) {
+    if (promptChatState.isOpen) {
+      panel.hidden = false;
+      panel.setAttribute("aria-hidden", "false");
+    } else {
+      panel.hidden = true;
+      panel.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  if (toggle) {
+    toggle.setAttribute("aria-pressed", promptChatState.isOpen ? "true" : "false");
+  }
+}
+
+function togglePromptChat() {
+  setPromptChatOpen(!promptChatState.isOpen);
+}
+
+function initializePromptChat() {
+  if (promptChatState.initialized) {
+    return;
+  }
+
+  promptChatState.initialized = true;
+  renderPromptChatMessages();
+
+  const { toggle, closeButton, panel } = promptChatState.elements;
+
+  if (panel) {
+    panel.hidden = true;
+    panel.setAttribute("aria-hidden", "true");
+  }
+
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      togglePromptChat();
+    });
+  }
+
+  if (closeButton) {
+    closeButton.addEventListener("click", () => {
+      setPromptChatOpen(false);
+    });
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && promptChatState.isOpen) {
+      setPromptChatOpen(false);
+    }
+  });
+
+  setPromptChatOpen(false);
 }
 
 function updateStepThreeLatestBriefLabel(brief) {
@@ -1496,6 +1651,7 @@ function setIdeaStageSelection(productName, options = {}) {
 
   updateIdeaSummary();
   updateStepTwoAvailability();
+  renderPromptChatMessages();
 }
 
 function initializeIdeaStage() {
@@ -6818,6 +6974,9 @@ const brainToolsState = {
 };
 
 function toggleBrainTools() {
+  if (promptChatState.isOpen && brainToolsState.isOpen) {
+    return;
+  }
   brainToolsState.isOpen = !brainToolsState.isOpen;
   const { toggle, actions } = brainToolsState.elements;
   
@@ -6912,7 +7071,7 @@ function initializeBrainTools() {
   document.addEventListener('click', (event) => {
     const { toggle, actions } = brainToolsState.elements;
     
-    if (!brainToolsState.isOpen) {
+    if (!brainToolsState.isOpen || promptChatState.isOpen) {
       return;
     }
     
@@ -6932,6 +7091,7 @@ function initializeBrainTools() {
 }
 
 initializeDemoLab();
+initializePromptChat();
 initializeBrainTools();
 
 async function init() {

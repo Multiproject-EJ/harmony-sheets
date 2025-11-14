@@ -135,6 +135,15 @@
         >
           <span aria-hidden="true">➡️</span>
         </button>
+        <button
+          class="brain-tool-button brain-tool-button--chat"
+          type="button"
+          data-prompt-chat-toggle
+          aria-pressed="false"
+          aria-label="Toggle prompt chat column"
+        >
+          <span aria-hidden="true">💬</span>
+        </button>
       </div>
       <button
         class="ipad-preview-button"
@@ -153,6 +162,24 @@
       >
         <span class="brain-tools-toggle__text">BRAIN<br>TOOLS</span>
       </button>
+    </div>
+
+    <div
+      class="prompt-chat-panel"
+      data-prompt-chat-panel
+      aria-hidden="true"
+      hidden
+    >
+      <div class="prompt-chat-panel__header">
+        <div>
+          <p class="prompt-chat-panel__eyebrow">Prompt companion</p>
+          <h2 class="prompt-chat-panel__title">Chat transcript</h2>
+        </div>
+        <button class="prompt-chat-panel__close" type="button" data-prompt-chat-close aria-label="Hide prompt chat">×</button>
+      </div>
+      <div class="prompt-chat-panel__messages" data-prompt-chat-messages>
+        <p class="prompt-chat-panel__placeholder">Toggle the chat button to pin the latest prompt breakdown here.</p>
+      </div>
     </div>
 
     <!-- Brain Tool Dialogs -->
