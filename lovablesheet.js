@@ -5784,7 +5784,8 @@ const brainToolsState = {
     dialogOverlay: document.querySelector('[data-brain-tool-dialog-overlay]'),
     dialogs: {
       sticky: document.querySelector('[data-brain-tool-dialog="sticky"]'),
-      flowchart: document.querySelector('[data-brain-tool-dialog="flowchart"]')
+      flowchart: document.querySelector('[data-brain-tool-dialog="flowchart"]'),
+      ipad: document.querySelector('[data-brain-tool-dialog="ipad"]')
     }
   }
 };
