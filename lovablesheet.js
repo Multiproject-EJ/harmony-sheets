@@ -60,16 +60,114 @@ const NOTE_MAX_WIDTH = 560;
 const NOTE_MIN_HEIGHT = 210;
 const NOTE_MAX_HEIGHT = 840;
 
-const NEXTGEN_FEATURE_OPTIONS = [
-  { id: "screen-size", label: "Screen size" },
-  { id: "phone-ready", label: "Phone ready" },
-  { id: "themes", label: "Themes" },
-  { id: "menu-x", label: "Menu X" },
-  { id: "database-in-sheet", label: "Database in sheet" },
-  { id: "ai", label: "AI" },
-  { id: "images-storing", label: "Images storing" }
+const NEXTGEN_FEATURE_LIBRARY_TABLE = "lovablesheet_feature_library";
+const NEXTGEN_DESIGN_LIBRARY_TABLE = "lovablesheet_design_library";
+const NEXTGEN_FEATURE_LIBRARY_DEFAULTS = [
+  {
+    id: "screen-size",
+    label: "Screen size",
+    description:
+      "Document each viewport (1024×768 dialog, full browser canvas, and split view) plus the grid, margin, and zoom rules so Apps Script UI stays pixel perfect."
+  },
+  {
+    id: "phone-ready",
+    label: "Phone ready",
+    description:
+      "Explain how the experience collapses into sidebar/phone mode, including stacked layouts, tap targets, and any content that hides or swaps."
+  },
+  {
+    id: "themes",
+    label: "Themes",
+    description:
+      "List every color + typography token and the module behavior when a theme toggles so Codex can reuse the system across templates."
+  },
+  {
+    id: "menu-x",
+    label: "Menu X",
+    description:
+      "Describe the command palette/menu overlay interaction, keyboard shortcuts, and animation timings for opening, filtering, and dismissing."
+  },
+  {
+    id: "database-in-sheet",
+    label: "Database in sheet",
+    description:
+      "Outline the tab-level schema, primary keys, validation rules, and any Apps Script helpers that keep the Sheet-backed database in sync."
+  },
+  {
+    id: "ai",
+    label: "AI",
+    description:
+      "Include the model prompt format, sheet inputs, guardrails, and how AI responses are written back so the workflow is reproducible."
+  },
+  {
+    id: "images-storing",
+    label: "Images storing",
+    description:
+      "Note how media uploads are handled (Drive, Sheets cells, or CDN), file naming, quotas, and the formulas/scripts that reference each asset."
+  }
 ];
-const NEXTGEN_FEATURE_MAP = new Map(NEXTGEN_FEATURE_OPTIONS.map((feature) => [feature.id, feature]));
+const NEXTGEN_DESIGN_LIBRARY_DEFAULTS = [
+  {
+    id: "light-color",
+    label: "Light Color",
+    description: "Airy gradients and bright neutrals with soft drop shadows for productivity dashboards.",
+    cssNotes: "Use #f8fafc/#e2e8f0 surfaces, 28px radii, and 0 24px 40px rgba(15,23,42,.12) shadows."
+  },
+  {
+    id: "dark-glass",
+    label: "Dark Glass",
+    description: "Frosted glass panels with neon accents floating on charcoal backgrounds.",
+    cssNotes: "Layer rgba(15,23,42,.8) backgrounds, 1px rgba(148,163,184,.32) borders, and blur/backdrop-filter for panels."
+  },
+  {
+    id: "blue-electro",
+    label: "Blue Electro",
+    description: "Electric blues with circuit-like dividers for high-tech dashboards.",
+    cssNotes: "Primary gradient: linear-gradient(135deg,#38bdf8,#6366f1); add glowing outline with rgba(59,130,246,.4)."
+  },
+  {
+    id: "natural-harmony",
+    label: "Natural Harmony",
+    description: "Organic greens and earth neutrals referencing wellness/planning kits.",
+    cssNotes: "Pair #065f46 text with #ecfdf5 panels, rounded corners, and thin double borders for botanical vibes."
+  },
+  {
+    id: "bright-flow",
+    label: "Bright Flow",
+    description: "Bold gradient ribbons that sweep across cards to show progression.",
+    cssNotes: "Apply flowing gradient backgrounds with clip-path accents and oversized 48px blur glows."
+  },
+  {
+    id: "bold-pink",
+    label: "Bold Pink",
+    description: "Statement fuchsias and corals for marketing launches and playful planners.",
+    cssNotes: "Use #f472b6 + #fb7185 gradients, strong 1px #be185d borders, and pill buttons."
+  },
+  {
+    id: "bold-color",
+    label: "Bold Color",
+    description: "Primary color blocking with crisp typography for storytelling dashboards.",
+    cssNotes: "Mix #facc15, #2563eb, #f97316 in equal blocks with 12px gutters and sans-serif display fonts."
+  },
+  {
+    id: "green-pocket",
+    label: "Green Pocket",
+    description: "Finance-friendly emerald palette paired with ledger-style grid lines.",
+    cssNotes: "Combine #047857 headers, lined backgrounds, and subtle dollar iconography."
+  },
+  {
+    id: "solar-dawn",
+    label: "Solar Dawn",
+    description: "Golden hour gradient washes with soft serif typography for lifestyle products.",
+    cssNotes: "Gradient from #fcd34d to #f472b6, 36px rounded corners, and serif headings with tracking .08em."
+  },
+  {
+    id: "noir-terminal",
+    label: "Noir Terminal",
+    description: "Monospace, high-contrast panels inspired by developer terminals.",
+    cssNotes: "Background #0f172a, lime green #a3e635 accents, IBM Plex Mono, and inset 1px #1e293b borders."
+  }
+];
 const NEXTGEN_DEFAULT_STANDARD_TEXT = [
   "Produce a google sheets product by completing the following:",
   "1) Make the product page JSON with the stats.",
@@ -130,7 +228,16 @@ const DEMO_DOCS_DEFAULT_TEXT = [
 const nextGenState = {
   initialized: false,
   selectedFeatures: [],
+  selectedDesigns: [],
   selectedInspiration: [],
+  featureLibrary: [...NEXTGEN_FEATURE_LIBRARY_DEFAULTS],
+  featureMap: new Map(NEXTGEN_FEATURE_LIBRARY_DEFAULTS.map((feature) => [feature.id, feature])),
+  featureLibraryLoaded: false,
+  featureLibraryLoading: false,
+  designLibrary: [...NEXTGEN_DESIGN_LIBRARY_DEFAULTS],
+  designMap: new Map(NEXTGEN_DESIGN_LIBRARY_DEFAULTS.map((design) => [design.id, design])),
+  designLibraryLoaded: false,
+  designLibraryLoading: false,
   standardText: NEXTGEN_DEFAULT_STANDARD_TEXT,
   standardEditing: false,
   standardSaving: false,
@@ -143,6 +250,16 @@ const nextGenState = {
   libraryOpen: false,
   libraryTrigger: null,
   libraryKeydownHandler: null,
+  featureDialogOpen: false,
+  featureDialogSaving: false,
+  featureDialogTrigger: null,
+  featureDialogKeydownHandler: null,
+  featureDialogSlugDirty: false,
+  designDialogOpen: false,
+  designDialogSaving: false,
+  designDialogTrigger: null,
+  designDialogKeydownHandler: null,
+  designDialogSlugDirty: false,
   elements: {
     section: null,
     openButton: null,
@@ -152,9 +269,16 @@ const nextGenState = {
     empty: null,
     form: null,
     nameInput: null,
-    featureSelect: null,
-    featureList: null,
+    featureMatrix: null,
+    featureGrid: null,
+    featureLoading: null,
     featureEmpty: null,
+    featureAddButton: null,
+    designAddButton: null,
+    designMatrix: null,
+    designGrid: null,
+    designLoading: null,
+    designEmpty: null,
     descriptionInput: null,
     notesInput: null,
     standardTextarea: null,
@@ -184,7 +308,28 @@ const nextGenState = {
     libraryLayer: null,
     libraryOverlay: null,
     libraryDialog: null,
-    libraryClose: null
+    libraryClose: null,
+    featureDialog: null,
+    featureDialogOverlay: null,
+    featureDialogClose: null,
+    featureDialogCancel: null,
+    featureDialogForm: null,
+    featureDialogStatus: null,
+    featureDialogNameInput: null,
+    featureDialogIdInput: null,
+    featureDialogDescriptionInput: null,
+    featureDialogSave: null,
+    designDialog: null,
+    designDialogOverlay: null,
+    designDialogClose: null,
+    designDialogCancel: null,
+    designDialogForm: null,
+    designDialogStatus: null,
+    designDialogNameInput: null,
+    designDialogIdInput: null,
+    designDialogDescriptionInput: null,
+    designDialogCssInput: null,
+    designDialogSave: null
   }
 };
 
@@ -1132,8 +1277,36 @@ function buildStepThreePrompt(brief) {
   const notes = brief.notes || "None provided.";
 
   const features = Array.isArray(brief.features) && brief.features.length
-    ? brief.features.map((feature) => `- ${feature.label || feature.id || "Feature"}`).join("\n")
+    ? brief.features
+        .map((feature) => {
+          if (!feature) return "";
+          const label = feature.label || feature.id || "Feature";
+          const detail = typeof feature.description === "string" && feature.description.trim()
+            ? feature.description.trim()
+            : "";
+          return detail ? `- ${label}: ${detail}` : `- ${label}`;
+        })
+        .filter(Boolean)
+        .join("\n")
     : "- No feature highlights captured.";
+
+  const designs = Array.isArray(brief.designs) && brief.designs.length
+    ? brief.designs
+        .map((design) => {
+          if (!design) return "";
+          const label = design.label || design.id || "Design";
+          const description = typeof design.description === "string" && design.description.trim()
+            ? design.description.trim()
+            : "";
+          const cssNotes = typeof design.cssNotes === "string" && design.cssNotes.trim() ? design.cssNotes.trim() : "";
+          const detailParts = [];
+          if (description) detailParts.push(description);
+          if (cssNotes) detailParts.push(`CSS: ${cssNotes}`);
+          return detailParts.length ? `- ${label} — ${detailParts.join(" | ")}` : `- ${label}`;
+        })
+        .filter(Boolean)
+        .join("\n")
+    : "- No design references selected.";
 
   const inspiration = Array.isArray(brief.inspiration) && brief.inspiration.length
     ? brief.inspiration.map((item) => {
@@ -1157,6 +1330,9 @@ function buildStepThreePrompt(brief) {
     "",
     "Feature highlights:",
     features,
+    "",
+    "Design references:",
+    designs,
     "",
     "Inspiration references:",
     inspiration,
@@ -1618,83 +1794,737 @@ async function loadNextGenStandardFromSupabase() {
   }
 }
 
-function populateNextGenFeatureOptions() {
-  const select = nextGenState.elements.featureSelect;
-  if (!select) return;
-
-  const existingValues = new Set(Array.from(select.options).map((option) => option.value));
-  NEXTGEN_FEATURE_OPTIONS.forEach((feature) => {
-    if (existingValues.has(feature.id)) return;
-    const option = document.createElement("option");
-    option.value = feature.id;
-    option.textContent = feature.label;
-    select.appendChild(option);
-  });
+function normalizeFeatureLibraryItem(item) {
+  if (!item || typeof item !== "object") return null;
+  const rawId = typeof item.id === "string" && item.id.trim()
+    ? item.id.trim()
+    : typeof item.slug === "string" && item.slug.trim()
+      ? item.slug.trim()
+      : typeof item.label === "string" && item.label.trim()
+        ? item.label.trim()
+        : "";
+  const sanitized = rawId ? sanitizeNextGenId(rawId, rawId).toLowerCase() : "";
+  if (!sanitized) return null;
+  const label = typeof item.label === "string" && item.label.trim() ? item.label.trim() : sanitized;
+  const description = typeof item.description === "string" && item.description.trim() ? item.description.trim() : "";
+  return { id: sanitized, label, description };
 }
 
-function renderNextGenSelectedFeatures() {
-  const list = nextGenState.elements.featureList;
-  const empty = nextGenState.elements.featureEmpty;
-  if (!list) return;
+function normalizeDesignLibraryItem(item) {
+  if (!item || typeof item !== "object") return null;
+  const rawId = typeof item.id === "string" && item.id.trim()
+    ? item.id.trim()
+    : typeof item.slug === "string" && item.slug.trim()
+      ? item.slug.trim()
+      : typeof item.label === "string" && item.label.trim()
+        ? item.label.trim()
+        : "";
+  const id = rawId ? sanitizeNextGenId(rawId, rawId).toLowerCase() : "";
+  if (!id) return null;
+  const label = typeof item.label === "string" && item.label.trim() ? item.label.trim() : id;
+  const description = typeof item.description === "string" && item.description.trim() ? item.description.trim() : "";
+  const cssNotes = typeof item.cssNotes === "string" && item.cssNotes.trim()
+    ? item.cssNotes.trim()
+    : typeof item.css_notes === "string" && item.css_notes.trim()
+      ? item.css_notes.trim()
+      : typeof item.css === "string" && item.css.trim()
+        ? item.css.trim()
+        : typeof item.styles === "string" && item.styles.trim()
+          ? item.styles.trim()
+          : "";
+  return { id, label, description, cssNotes };
+}
 
-  list.innerHTML = "";
-  const features = nextGenState.selectedFeatures;
+function sortLibraryByLabel(list) {
+  return [...list].sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" }));
+}
+
+function setFeatureLibrary(items) {
+  const normalized = Array.isArray(items) ? items.map((item) => normalizeFeatureLibraryItem(item)).filter(Boolean) : [];
+  const library = normalized.length ? sortLibraryByLabel(normalized) : [...NEXTGEN_FEATURE_LIBRARY_DEFAULTS];
+  nextGenState.featureLibrary = library;
+  nextGenState.featureMap = new Map(library.map((feature) => [feature.id, feature]));
+  pruneNextGenFeatureSelection();
+}
+
+function setDesignLibrary(items) {
+  const normalized = Array.isArray(items) ? items.map((item) => normalizeDesignLibraryItem(item)).filter(Boolean) : [];
+  const library = normalized.length ? sortLibraryByLabel(normalized) : [...NEXTGEN_DESIGN_LIBRARY_DEFAULTS];
+  nextGenState.designLibrary = library;
+  nextGenState.designMap = new Map(library.map((design) => [design.id, design]));
+  pruneNextGenDesignSelection();
+}
+
+function pruneNextGenFeatureSelection() {
+  const valid = nextGenState.selectedFeatures.filter((id) => nextGenState.featureMap.has(id));
+  if (valid.length !== nextGenState.selectedFeatures.length) {
+    nextGenState.selectedFeatures = valid;
+    syncNextGenFeatureCheckboxes();
+  }
+  updateNextGenFeatureSummary();
+}
+
+function pruneNextGenDesignSelection() {
+  const valid = nextGenState.selectedDesigns.filter((id) => nextGenState.designMap.has(id));
+  if (valid.length !== nextGenState.selectedDesigns.length) {
+    nextGenState.selectedDesigns = valid;
+    syncNextGenDesignCheckboxes();
+  }
+  updateNextGenDesignSummary();
+}
+
+function renderNextGenFeatureLibrary() {
+  const grid = nextGenState.elements.featureGrid;
+  const loading = nextGenState.elements.featureLoading;
+  if (!grid) return;
+
+  grid.innerHTML = "";
+  const features = nextGenState.featureLibrary;
   if (!features.length) {
-    if (empty) {
-      empty.hidden = false;
+    grid.hidden = true;
+    if (loading) {
+      loading.hidden = false;
+      loading.textContent = "No stored features yet.";
     }
+    updateNextGenFeatureSummary();
     return;
   }
 
-  if (empty) {
-    empty.hidden = true;
+  if (loading) {
+    loading.hidden = true;
   }
 
   const fragment = document.createDocumentFragment();
-  features.forEach((featureId) => {
-    const feature = NEXTGEN_FEATURE_MAP.get(featureId) || { id: featureId, label: featureId };
-    const item = document.createElement("li");
-    item.className = "nextgen-form__chip";
-    item.dataset.nextgenFeature = feature.id;
+  features.forEach((feature, index) => {
+    if (!feature) return;
+    const optionId = `nextgen-feature-${sanitizeNextGenId(feature.id, String(index))}`;
+    const card = document.createElement("label");
+    card.className = "nextgen-form__feature-card";
+    card.setAttribute("for", optionId);
 
-    const labelSpan = document.createElement("span");
-    labelSpan.textContent = feature.label;
-    item.appendChild(labelSpan);
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = optionId;
+    checkbox.value = feature.id;
+    checkbox.dataset.nextgenFeatureCheckbox = "true";
+    checkbox.checked = nextGenState.selectedFeatures.includes(feature.id);
+    card.appendChild(checkbox);
 
-    const removeButton = document.createElement("button");
-    removeButton.type = "button";
-    removeButton.className = "nextgen-form__chip-remove";
-    removeButton.dataset.nextgenFeatureRemove = feature.id;
-    removeButton.setAttribute("aria-label", `Remove ${feature.label}`);
-    removeButton.innerHTML = "&times;";
-    item.appendChild(removeButton);
+    const title = document.createElement("span");
+    title.className = "nextgen-form__feature-card-title";
+    title.textContent = feature.label;
+    card.appendChild(title);
 
-    fragment.appendChild(item);
+    if (feature.description) {
+      const description = document.createElement("p");
+      description.className = "nextgen-form__feature-card-description";
+      description.textContent = feature.description;
+      card.appendChild(description);
+    }
+
+    fragment.appendChild(card);
   });
 
-  list.appendChild(fragment);
+  grid.hidden = false;
+  grid.appendChild(fragment);
+  syncNextGenFeatureCheckboxes();
+  updateNextGenFeatureSummary();
 }
 
-function addNextGenFeature(featureId) {
-  if (!featureId || !NEXTGEN_FEATURE_MAP.has(featureId)) {
-    return false;
+function renderNextGenDesignLibrary() {
+  const grid = nextGenState.elements.designGrid;
+  const loading = nextGenState.elements.designLoading;
+  if (!grid) return;
+
+  grid.innerHTML = "";
+  const designs = nextGenState.designLibrary;
+  if (!designs.length) {
+    grid.hidden = true;
+    if (loading) {
+      loading.hidden = false;
+      loading.textContent = "No stored design references yet.";
+    }
+    updateNextGenDesignSummary();
+    return;
   }
 
-  if (nextGenState.selectedFeatures.includes(featureId)) {
-    return false;
+  if (loading) {
+    loading.hidden = true;
   }
 
-  nextGenState.selectedFeatures.push(featureId);
-  renderNextGenSelectedFeatures();
-  return true;
+  const fragment = document.createDocumentFragment();
+  designs.forEach((design, index) => {
+    if (!design) return;
+    const optionId = `nextgen-design-${sanitizeNextGenId(design.id, String(index))}`;
+    const card = document.createElement("label");
+    card.className = "nextgen-form__feature-card";
+    card.setAttribute("for", optionId);
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = optionId;
+    checkbox.value = design.id;
+    checkbox.dataset.nextgenDesignCheckbox = "true";
+    checkbox.checked = nextGenState.selectedDesigns.includes(design.id);
+    card.appendChild(checkbox);
+
+    const title = document.createElement("span");
+    title.className = "nextgen-form__feature-card-title";
+    title.textContent = design.label;
+    card.appendChild(title);
+
+    if (design.description) {
+      const description = document.createElement("p");
+      description.className = "nextgen-form__feature-card-description";
+      description.textContent = design.description;
+      card.appendChild(description);
+    }
+
+    if (design.cssNotes) {
+      const meta = document.createElement("span");
+      meta.className = "nextgen-form__feature-meta";
+      meta.textContent = design.cssNotes;
+      card.appendChild(meta);
+    }
+
+    fragment.appendChild(card);
+  });
+
+  grid.hidden = false;
+  grid.appendChild(fragment);
+  syncNextGenDesignCheckboxes();
+  updateNextGenDesignSummary();
 }
 
-function removeNextGenFeature(featureId) {
-  const index = nextGenState.selectedFeatures.indexOf(featureId);
-  if (index === -1) return;
+function syncNextGenFeatureCheckboxes() {
+  const grid = nextGenState.elements.featureGrid;
+  if (!grid) return;
+  const selected = new Set(nextGenState.selectedFeatures);
+  grid.querySelectorAll("[data-nextgen-feature-checkbox]").forEach((input) => {
+    input.checked = selected.has(input.value);
+  });
+}
 
-  nextGenState.selectedFeatures.splice(index, 1);
-  renderNextGenSelectedFeatures();
+function syncNextGenDesignCheckboxes() {
+  const grid = nextGenState.elements.designGrid;
+  if (!grid) return;
+  const selected = new Set(nextGenState.selectedDesigns);
+  grid.querySelectorAll("[data-nextgen-design-checkbox]").forEach((input) => {
+    input.checked = selected.has(input.value);
+  });
+}
+
+function updateNextGenFeatureSummary() {
+  const empty = nextGenState.elements.featureEmpty;
+  if (!empty) return;
+  empty.hidden = nextGenState.selectedFeatures.length > 0;
+}
+
+function updateNextGenDesignSummary() {
+  const empty = nextGenState.elements.designEmpty;
+  if (!empty) return;
+  empty.hidden = nextGenState.selectedDesigns.length > 0;
+}
+
+function handleFeatureGridChange(event) {
+  const input = event.target.closest("[data-nextgen-feature-checkbox]");
+  if (!input) return;
+  toggleNextGenFeature(input.value, input.checked);
+}
+
+function handleDesignGridChange(event) {
+  const input = event.target.closest("[data-nextgen-design-checkbox]");
+  if (!input) return;
+  toggleNextGenDesign(input.value, input.checked);
+}
+
+function setNextGenFeatureSelection(featureIds) {
+  const valid = Array.isArray(featureIds) ? featureIds.filter((id) => nextGenState.featureMap.has(id)) : [];
+  nextGenState.selectedFeatures = [...new Set(valid)];
+  syncNextGenFeatureCheckboxes();
+  updateNextGenFeatureSummary();
+}
+
+function setNextGenDesignSelection(designIds) {
+  const valid = Array.isArray(designIds) ? designIds.filter((id) => nextGenState.designMap.has(id)) : [];
+  nextGenState.selectedDesigns = [...new Set(valid)];
+  syncNextGenDesignCheckboxes();
+  updateNextGenDesignSummary();
+}
+
+function toggleNextGenFeature(featureId, enabled) {
+  if (!featureId || !nextGenState.featureMap.has(featureId)) {
+    return;
+  }
+  const selected = new Set(nextGenState.selectedFeatures);
+  if (enabled) {
+    selected.add(featureId);
+  } else {
+    selected.delete(featureId);
+  }
+  nextGenState.selectedFeatures = Array.from(selected);
+  updateNextGenFeatureSummary();
+}
+
+function toggleNextGenDesign(designId, enabled) {
+  if (!designId || !nextGenState.designMap.has(designId)) {
+    return;
+  }
+  const selected = new Set(nextGenState.selectedDesigns);
+  if (enabled) {
+    selected.add(designId);
+  } else {
+    selected.delete(designId);
+  }
+  nextGenState.selectedDesigns = Array.from(selected);
+  updateNextGenDesignSummary();
+}
+
+function mergeFeatureIntoLibrary(feature) {
+  if (!feature || !feature.id) return;
+  const filtered = nextGenState.featureLibrary.filter((item) => item.id !== feature.id);
+  filtered.push(feature);
+  nextGenState.featureLibrary = sortLibraryByLabel(filtered);
+  nextGenState.featureMap.set(feature.id, feature);
+  pruneNextGenFeatureSelection();
+  renderNextGenFeatureLibrary();
+}
+
+function mergeDesignIntoLibrary(design) {
+  if (!design || !design.id) return;
+  const filtered = nextGenState.designLibrary.filter((item) => item.id !== design.id);
+  filtered.push(design);
+  nextGenState.designLibrary = sortLibraryByLabel(filtered);
+  nextGenState.designMap.set(design.id, design);
+  pruneNextGenDesignSelection();
+  renderNextGenDesignLibrary();
+}
+
+async function loadNextGenFeatureLibrary() {
+  if (nextGenState.featureLibraryLoaded || nextGenState.featureLibraryLoading) {
+    return;
+  }
+  nextGenState.featureLibraryLoading = true;
+
+  if (!supabaseClient) {
+    nextGenState.featureLibraryLoaded = true;
+    nextGenState.featureLibraryLoading = false;
+    renderNextGenFeatureLibrary();
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(NEXTGEN_FEATURE_LIBRARY_TABLE)
+      .select("id,label,description")
+      .order("label", { ascending: true });
+    if (error) {
+      throw error;
+    }
+    setFeatureLibrary(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error("[lovablesheet] Unable to load feature library", error);
+    setFeatureLibrary([]);
+  } finally {
+    nextGenState.featureLibraryLoaded = true;
+    nextGenState.featureLibraryLoading = false;
+    renderNextGenFeatureLibrary();
+  }
+}
+
+async function loadNextGenDesignLibrary() {
+  if (nextGenState.designLibraryLoaded || nextGenState.designLibraryLoading) {
+    return;
+  }
+  nextGenState.designLibraryLoading = true;
+
+  if (!supabaseClient) {
+    nextGenState.designLibraryLoaded = true;
+    nextGenState.designLibraryLoading = false;
+    renderNextGenDesignLibrary();
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(NEXTGEN_DESIGN_LIBRARY_TABLE)
+      .select("id,label,description,css_notes")
+      .order("label", { ascending: true });
+    if (error) {
+      throw error;
+    }
+    setDesignLibrary(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error("[lovablesheet] Unable to load design library", error);
+    setDesignLibrary([]);
+  } finally {
+    nextGenState.designLibraryLoaded = true;
+    nextGenState.designLibraryLoading = false;
+    renderNextGenDesignLibrary();
+  }
+}
+
+function resetFeatureDialogForm() {
+  const { featureDialogForm, featureDialogNameInput, featureDialogIdInput, featureDialogDescriptionInput } = nextGenState.elements;
+  featureDialogForm?.reset();
+  if (featureDialogNameInput) {
+    featureDialogNameInput.value = "";
+  }
+  if (featureDialogIdInput) {
+    featureDialogIdInput.value = "";
+  }
+  if (featureDialogDescriptionInput) {
+    featureDialogDescriptionInput.value = "";
+  }
+  nextGenState.featureDialogSlugDirty = false;
+}
+
+function setNextGenFeatureDialogStatus(message, tone = "") {
+  const statusEl = nextGenState.elements.featureDialogStatus;
+  if (!statusEl) return;
+  statusEl.textContent = message || "";
+  if (tone) {
+    statusEl.dataset.tone = tone;
+  } else {
+    delete statusEl.dataset.tone;
+  }
+}
+
+function setNextGenFeatureDialogSaving(isSaving) {
+  nextGenState.featureDialogSaving = Boolean(isSaving);
+  const { featureDialogSave, featureDialogCancel, featureDialogClose } = nextGenState.elements;
+  [featureDialogSave, featureDialogCancel, featureDialogClose].forEach((button) => {
+    if (button) {
+      button.disabled = nextGenState.featureDialogSaving;
+    }
+  });
+}
+
+function handleFeatureDialogKeydown(event) {
+  if (event.key !== "Escape") {
+    return;
+  }
+  event.preventDefault();
+  closeNextGenFeatureDialog({ focusTrigger: true });
+}
+
+function openNextGenFeatureDialog(trigger) {
+  const { featureDialog } = nextGenState.elements;
+  if (!featureDialog || nextGenState.featureDialogOpen) {
+    return;
+  }
+  if (!supabaseClient) {
+    setNextGenFormStatus("Supabase connection required to add new features.", "error");
+    return;
+  }
+  featureDialog.hidden = false;
+  featureDialog.setAttribute("aria-hidden", "false");
+  document.body.classList.add("lovablesheet-modal-open");
+  nextGenState.featureDialogOpen = true;
+  nextGenState.featureDialogTrigger = trigger || null;
+  setNextGenFeatureDialogStatus("");
+  setNextGenFeatureDialogSaving(false);
+  resetFeatureDialogForm();
+
+  if (!nextGenState.featureDialogKeydownHandler) {
+    nextGenState.featureDialogKeydownHandler = handleFeatureDialogKeydown;
+    document.addEventListener("keydown", nextGenState.featureDialogKeydownHandler);
+  }
+
+  window.setTimeout(() => {
+    try {
+      nextGenState.elements.featureDialogNameInput?.focus();
+    } catch (error) {
+      console.warn("[lovablesheet] Unable to focus feature dialog", error);
+    }
+  }, 0);
+}
+
+function closeNextGenFeatureDialog(options = {}) {
+  const { focusTrigger = true } = options;
+  const { featureDialog } = nextGenState.elements;
+  if (!featureDialog || !nextGenState.featureDialogOpen || nextGenState.featureDialogSaving) {
+    return;
+  }
+  featureDialog.hidden = true;
+  featureDialog.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("lovablesheet-modal-open");
+  if (nextGenState.featureDialogKeydownHandler) {
+    document.removeEventListener("keydown", nextGenState.featureDialogKeydownHandler);
+    nextGenState.featureDialogKeydownHandler = null;
+  }
+  nextGenState.featureDialogOpen = false;
+  const trigger = nextGenState.featureDialogTrigger;
+  nextGenState.featureDialogTrigger = null;
+  if (focusTrigger && trigger && typeof trigger.focus === "function") {
+    try {
+      trigger.focus();
+    } catch (_error) {
+      /* ignore */
+    }
+  }
+}
+
+async function handleNextGenFeatureDialogSubmit(event) {
+  event.preventDefault();
+  if (nextGenState.featureDialogSaving) return;
+  if (!supabaseClient) {
+    setNextGenFeatureDialogStatus("Supabase connection required to save features.", "error");
+    return;
+  }
+
+  const { featureDialogNameInput, featureDialogIdInput, featureDialogDescriptionInput } = nextGenState.elements;
+  const label = featureDialogNameInput?.value?.trim() ?? "";
+  if (!label) {
+    setNextGenFeatureDialogStatus("Name is required.", "error");
+    featureDialogNameInput?.focus();
+    return;
+  }
+
+  const slugSource = featureDialogIdInput?.value?.trim() || label;
+  const id = sanitizeNextGenId(slugSource, label).toLowerCase();
+  if (!id) {
+    setNextGenFeatureDialogStatus("Provide a valid feature slug.", "error");
+    featureDialogIdInput?.focus();
+    return;
+  }
+
+  const description = featureDialogDescriptionInput?.value?.trim() ?? "";
+  if (!description) {
+    setNextGenFeatureDialogStatus("Add the longer explanation.", "error");
+    featureDialogDescriptionInput?.focus();
+    return;
+  }
+
+  setNextGenFeatureDialogSaving(true);
+  setNextGenFeatureDialogStatus("Saving feature…");
+
+  try {
+    const payload = { id, label, description };
+    const { data, error } = await supabaseClient
+      .from(NEXTGEN_FEATURE_LIBRARY_TABLE)
+      .upsert(payload, { onConflict: "id" })
+      .select("id,label,description")
+      .single();
+    if (error) {
+      throw error;
+    }
+    const normalized = normalizeFeatureLibraryItem(data);
+    if (normalized) {
+      mergeFeatureIntoLibrary(normalized);
+      if (!nextGenState.selectedFeatures.includes(normalized.id)) {
+        nextGenState.selectedFeatures.push(normalized.id);
+      }
+      syncNextGenFeatureCheckboxes();
+      updateNextGenFeatureSummary();
+      setNextGenFormStatus(`Added “${normalized.label}” to the feature library.`, "success");
+    }
+    setNextGenFeatureDialogStatus("Feature saved.", "success");
+    closeNextGenFeatureDialog({ focusTrigger: true });
+  } catch (error) {
+    console.error("[lovablesheet] Unable to save Next Gen feature", error);
+    setNextGenFeatureDialogStatus("We couldn't save that feature. Try again.", "error");
+  } finally {
+    setNextGenFeatureDialogSaving(false);
+  }
+}
+
+function handleNextGenFeatureDialogLabelInput() {
+  const { featureDialogNameInput, featureDialogIdInput } = nextGenState.elements;
+  if (!featureDialogNameInput || !featureDialogIdInput) return;
+  if (nextGenState.featureDialogSlugDirty) {
+    return;
+  }
+  const generated = sanitizeNextGenId(featureDialogNameInput.value, "").toLowerCase();
+  featureDialogIdInput.value = generated;
+}
+
+function resetDesignDialogForm() {
+  const {
+    designDialogForm,
+    designDialogNameInput,
+    designDialogIdInput,
+    designDialogDescriptionInput,
+    designDialogCssInput
+  } = nextGenState.elements;
+  designDialogForm?.reset();
+  if (designDialogNameInput) designDialogNameInput.value = "";
+  if (designDialogIdInput) designDialogIdInput.value = "";
+  if (designDialogDescriptionInput) designDialogDescriptionInput.value = "";
+  if (designDialogCssInput) designDialogCssInput.value = "";
+  nextGenState.designDialogSlugDirty = false;
+}
+
+function setNextGenDesignDialogStatus(message, tone = "") {
+  const statusEl = nextGenState.elements.designDialogStatus;
+  if (!statusEl) return;
+  statusEl.textContent = message || "";
+  if (tone) {
+    statusEl.dataset.tone = tone;
+  } else {
+    delete statusEl.dataset.tone;
+  }
+}
+
+function setNextGenDesignDialogSaving(isSaving) {
+  nextGenState.designDialogSaving = Boolean(isSaving);
+  const { designDialogSave, designDialogCancel, designDialogClose } = nextGenState.elements;
+  [designDialogSave, designDialogCancel, designDialogClose].forEach((button) => {
+    if (button) {
+      button.disabled = nextGenState.designDialogSaving;
+    }
+  });
+}
+
+function handleDesignDialogKeydown(event) {
+  if (event.key !== "Escape") {
+    return;
+  }
+  event.preventDefault();
+  closeNextGenDesignDialog({ focusTrigger: true });
+}
+
+function openNextGenDesignDialog(trigger) {
+  const { designDialog } = nextGenState.elements;
+  if (!designDialog || nextGenState.designDialogOpen) {
+    return;
+  }
+  if (!supabaseClient) {
+    setNextGenFormStatus("Supabase connection required to add new designs.", "error");
+    return;
+  }
+  designDialog.hidden = false;
+  designDialog.setAttribute("aria-hidden", "false");
+  document.body.classList.add("lovablesheet-modal-open");
+  nextGenState.designDialogOpen = true;
+  nextGenState.designDialogTrigger = trigger || null;
+  setNextGenDesignDialogStatus("");
+  setNextGenDesignDialogSaving(false);
+  resetDesignDialogForm();
+
+  if (!nextGenState.designDialogKeydownHandler) {
+    nextGenState.designDialogKeydownHandler = handleDesignDialogKeydown;
+    document.addEventListener("keydown", nextGenState.designDialogKeydownHandler);
+  }
+
+  window.setTimeout(() => {
+    try {
+      nextGenState.elements.designDialogNameInput?.focus();
+    } catch (error) {
+      console.warn("[lovablesheet] Unable to focus design dialog", error);
+    }
+  }, 0);
+}
+
+function closeNextGenDesignDialog(options = {}) {
+  const { focusTrigger = true } = options;
+  const { designDialog } = nextGenState.elements;
+  if (!designDialog || !nextGenState.designDialogOpen || nextGenState.designDialogSaving) {
+    return;
+  }
+  designDialog.hidden = true;
+  designDialog.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("lovablesheet-modal-open");
+  if (nextGenState.designDialogKeydownHandler) {
+    document.removeEventListener("keydown", nextGenState.designDialogKeydownHandler);
+    nextGenState.designDialogKeydownHandler = null;
+  }
+  nextGenState.designDialogOpen = false;
+  const trigger = nextGenState.designDialogTrigger;
+  nextGenState.designDialogTrigger = null;
+  if (focusTrigger && trigger && typeof trigger.focus === "function") {
+    try {
+      trigger.focus();
+    } catch (_error) {
+      /* ignore */
+    }
+  }
+}
+
+async function handleNextGenDesignDialogSubmit(event) {
+  event.preventDefault();
+  if (nextGenState.designDialogSaving) return;
+  if (!supabaseClient) {
+    setNextGenDesignDialogStatus("Supabase connection required to save designs.", "error");
+    return;
+  }
+
+  const {
+    designDialogNameInput,
+    designDialogIdInput,
+    designDialogDescriptionInput,
+    designDialogCssInput
+  } = nextGenState.elements;
+  const label = designDialogNameInput?.value?.trim() ?? "";
+  if (!label) {
+    setNextGenDesignDialogStatus("Name is required.", "error");
+    designDialogNameInput?.focus();
+    return;
+  }
+
+  const slugSource = designDialogIdInput?.value?.trim() || label;
+  const id = sanitizeNextGenId(slugSource, label).toLowerCase();
+  if (!id) {
+    setNextGenDesignDialogStatus("Provide a valid design slug.", "error");
+    designDialogIdInput?.focus();
+    return;
+  }
+
+  const description = designDialogDescriptionInput?.value?.trim() ?? "";
+  if (!description) {
+    setNextGenDesignDialogStatus("Add the design description.", "error");
+    designDialogDescriptionInput?.focus();
+    return;
+  }
+
+  const cssNotes = designDialogCssInput?.value?.trim() ?? "";
+  if (!cssNotes) {
+    setNextGenDesignDialogStatus("Include the CSS notes.", "error");
+    designDialogCssInput?.focus();
+    return;
+  }
+
+  setNextGenDesignDialogSaving(true);
+  setNextGenDesignDialogStatus("Saving design…");
+
+  try {
+    const payload = { id, label, description, css_notes: cssNotes };
+    const { data, error } = await supabaseClient
+      .from(NEXTGEN_DESIGN_LIBRARY_TABLE)
+      .upsert(payload, { onConflict: "id" })
+      .select("id,label,description,css_notes")
+      .single();
+    if (error) {
+      throw error;
+    }
+    const normalized = normalizeDesignLibraryItem(data);
+    if (normalized) {
+      mergeDesignIntoLibrary(normalized);
+      if (!nextGenState.selectedDesigns.includes(normalized.id)) {
+        nextGenState.selectedDesigns.push(normalized.id);
+      }
+      syncNextGenDesignCheckboxes();
+      updateNextGenDesignSummary();
+      setNextGenFormStatus(`Added “${normalized.label}” to the design library.`, "success");
+    }
+    setNextGenDesignDialogStatus("Design saved.", "success");
+    closeNextGenDesignDialog({ focusTrigger: true });
+  } catch (error) {
+    console.error("[lovablesheet] Unable to save Next Gen design", error);
+    setNextGenDesignDialogStatus("We couldn't save that design. Try again.", "error");
+  } finally {
+    setNextGenDesignDialogSaving(false);
+  }
+}
+
+function handleNextGenDesignDialogLabelInput() {
+  const { designDialogNameInput, designDialogIdInput } = nextGenState.elements;
+  if (!designDialogNameInput || !designDialogIdInput) return;
+  if (nextGenState.designDialogSlugDirty) {
+    return;
+  }
+  const generated = sanitizeNextGenId(designDialogNameInput.value, "").toLowerCase();
+  designDialogIdInput.value = generated;
 }
 
 function syncNextGenProductSelections() {
@@ -1979,7 +2809,6 @@ function applyNextGenInspirationSelection() {
 function resetNextGenForm() {
   const {
     form,
-    featureSelect,
     descriptionInput,
     notesInput,
     productsContainer,
@@ -1987,18 +2816,14 @@ function resetNextGenForm() {
   } = nextGenState.elements;
 
   form?.reset();
-  if (featureSelect) {
-    featureSelect.value = "";
-  }
+  setNextGenFeatureSelection([]);
+  setNextGenDesignSelection([]);
   if (descriptionInput) {
     descriptionInput.value = "";
   }
   if (notesInput) {
     notesInput.value = "";
   }
-
-  nextGenState.selectedFeatures = [];
-  renderNextGenSelectedFeatures();
 
   nextGenState.selectedInspiration = [];
   renderNextGenSelectedInspiration();
@@ -2379,7 +3204,58 @@ function appendNextGenFeaturesSection(parent, features) {
     if (!label) return;
     const item = document.createElement("li");
     item.className = "lovablesheet-nextgen__feature";
-    item.textContent = label;
+    const title = document.createElement("p");
+    title.className = "lovablesheet-nextgen__feature-title";
+    title.textContent = label;
+    item.appendChild(title);
+    const detail = typeof feature.description === "string" && feature.description.trim() ? feature.description.trim() : "";
+    if (detail) {
+      const copy = document.createElement("p");
+      copy.className = "lovablesheet-nextgen__feature-copy";
+      copy.textContent = detail;
+      item.appendChild(copy);
+    }
+    list.appendChild(item);
+  });
+  section.appendChild(list);
+  parent.appendChild(section);
+}
+
+function appendNextGenDesignsSection(parent, designs) {
+  if (!parent || !Array.isArray(designs) || !designs.length) return;
+  const section = document.createElement("div");
+  section.className = "lovablesheet-nextgen__section";
+  const heading = document.createElement("p");
+  heading.className = "lovablesheet-nextgen__section-title";
+  heading.textContent = "Design references";
+  section.appendChild(heading);
+  const list = document.createElement("ul");
+  list.className = "lovablesheet-nextgen__designs";
+  designs.forEach((design) => {
+    if (!design) return;
+    const id = typeof design.id === "string" ? design.id : "";
+    const label = typeof design.label === "string" && design.label ? design.label : id;
+    if (!label) return;
+    const item = document.createElement("li");
+    item.className = "lovablesheet-nextgen__design";
+    const title = document.createElement("p");
+    title.className = "lovablesheet-nextgen__design-title";
+    title.textContent = label;
+    item.appendChild(title);
+    const description = typeof design.description === "string" && design.description.trim() ? design.description.trim() : "";
+    if (description) {
+      const notes = document.createElement("p");
+      notes.className = "lovablesheet-nextgen__design-notes";
+      notes.textContent = description;
+      item.appendChild(notes);
+    }
+    const cssNotes = typeof design.cssNotes === "string" && design.cssNotes.trim() ? design.cssNotes.trim() : "";
+    if (cssNotes) {
+      const css = document.createElement("p");
+      css.className = "lovablesheet-nextgen__design-css";
+      css.textContent = cssNotes;
+      item.appendChild(css);
+    }
     list.appendChild(item);
   });
   section.appendChild(list);
@@ -2477,6 +3353,7 @@ function renderNextGenSavedBriefs() {
     const content = document.createElement("div");
     content.className = "lovablesheet-nextgen__entry-content";
     appendNextGenFeaturesSection(content, brief.features);
+    appendNextGenDesignsSection(content, brief.designs);
     appendNextGenTextSection(content, "Free text field", brief.description);
     appendNextGenTextSection(content, "Additional notes", brief.notes);
     appendNextGenInspirationSection(content, brief.inspiration);
@@ -2518,6 +3395,70 @@ function handleNextGenDelete(briefId) {
   setNextGenStatus(`Deleted ${productName} from your Next Gen briefs.`, "success");
 }
 
+function normalizeBriefFeature(feature) {
+  if (!feature) return null;
+  if (typeof feature === "string") {
+    const libraryFeature = nextGenState.featureMap.get(feature);
+    if (libraryFeature) {
+      return { id: libraryFeature.id, label: libraryFeature.label, description: libraryFeature.description || "" };
+    }
+    return { id: feature, label: feature, description: "" };
+  }
+  if (typeof feature === "object") {
+    const rawId = typeof feature.id === "string" && feature.id ? feature.id : typeof feature.value === "string" ? feature.value : "";
+    if (!rawId) return null;
+    const libraryFeature = nextGenState.featureMap.get(rawId) || null;
+    const label = typeof feature.label === "string" && feature.label ? feature.label : libraryFeature?.label || rawId;
+    const description = typeof feature.description === "string" && feature.description
+      ? feature.description
+      : typeof feature.details === "string" && feature.details
+        ? feature.details
+        : libraryFeature?.description || "";
+    return { id: rawId, label, description };
+  }
+  return null;
+}
+
+function normalizeBriefDesign(design) {
+  if (!design) return null;
+  if (typeof design === "string") {
+    const libraryDesign = nextGenState.designMap.get(design);
+    if (libraryDesign) {
+      return {
+        id: libraryDesign.id,
+        label: libraryDesign.label,
+        description: libraryDesign.description || "",
+        cssNotes: libraryDesign.cssNotes || ""
+      };
+    }
+    return { id: design, label: design, description: "", cssNotes: "" };
+  }
+  if (typeof design === "object") {
+    const rawId = typeof design.id === "string" && design.id
+      ? design.id
+      : typeof design.value === "string" && design.value
+        ? design.value
+        : "";
+    if (!rawId) return null;
+    const libraryDesign = nextGenState.designMap.get(rawId) || null;
+    const label = typeof design.label === "string" && design.label ? design.label : libraryDesign?.label || rawId;
+    const description = typeof design.description === "string" && design.description
+      ? design.description
+      : libraryDesign?.description || "";
+    const cssNotes = typeof design.cssNotes === "string" && design.cssNotes
+      ? design.cssNotes
+      : typeof design.css_notes === "string" && design.css_notes
+        ? design.css_notes
+        : typeof design.css === "string" && design.css
+          ? design.css
+          : typeof design.styles === "string" && design.styles
+            ? design.styles
+            : libraryDesign?.cssNotes || "";
+    return { id: rawId, label, description, cssNotes };
+  }
+  return null;
+}
+
 function normalizeNextGenBrief(brief) {
   if (!brief || typeof brief !== "object") {
     return null;
@@ -2539,31 +3480,11 @@ function normalizeNextGenBrief(brief) {
     : new Date().toISOString();
 
   const features = Array.isArray(brief.features)
-    ? brief.features
-        .map((feature) => {
-          if (!feature) return null;
-          if (typeof feature === "string") {
-            const normalized = NEXTGEN_FEATURE_MAP.get(feature);
-            if (normalized) {
-              return { id: normalized.id, label: normalized.label };
-            }
-            return { id: feature, label: feature };
-          }
-          if (typeof feature === "object") {
-            const rawId = typeof feature.id === "string" && feature.id ? feature.id : typeof feature.value === "string" ? feature.value : "";
-            const normalized = NEXTGEN_FEATURE_MAP.get(rawId);
-            const label = typeof feature.label === "string" && feature.label
-              ? feature.label
-              : normalized?.label || rawId;
-            if (!label) return null;
-            return {
-              id: normalized?.id || rawId || label,
-              label
-            };
-          }
-          return null;
-        })
-        .filter((item) => item && item.label)
+    ? brief.features.map((item) => normalizeBriefFeature(item)).filter(Boolean)
+    : [];
+
+  const designs = Array.isArray(brief.designs)
+    ? brief.designs.map((item) => normalizeBriefDesign(item)).filter(Boolean)
     : [];
 
   const inspiration = Array.isArray(brief.inspiration)
@@ -2623,6 +3544,7 @@ function normalizeNextGenBrief(brief) {
     standardText,
     createdAt,
     features,
+    designs,
     inspiration
   };
 }
@@ -2639,8 +3561,18 @@ function handleNextGenFormSubmit(event) {
   }
 
   const features = nextGenState.selectedFeatures.map((featureId) => {
-    const feature = NEXTGEN_FEATURE_MAP.get(featureId) || { id: featureId, label: featureId };
-    return { id: feature.id, label: feature.label };
+    const feature = nextGenState.featureMap.get(featureId) || { id: featureId, label: featureId, description: "" };
+    return { id: feature.id, label: feature.label, description: feature.description || "" };
+  });
+
+  const designs = nextGenState.selectedDesigns.map((designId) => {
+    const design = nextGenState.designMap.get(designId) || { id: designId, label: designId, description: "", cssNotes: "" };
+    return {
+      id: design.id,
+      label: design.label,
+      description: design.description || "",
+      cssNotes: design.cssNotes || ""
+    };
   });
 
   const description = descriptionInput?.value?.trim() ?? "";
@@ -2675,6 +3607,7 @@ function handleNextGenFormSubmit(event) {
         ? standardValue
         : nextGenState.standardText || NEXTGEN_DEFAULT_STANDARD_TEXT,
     features,
+    designs,
     inspiration,
     createdAt: new Date().toISOString()
   });
@@ -2721,9 +3654,16 @@ function initNextGenEngineBriefs() {
   elements.empty = section.querySelector("[data-nextgen-empty]") ?? null;
   elements.form = document.querySelector("[data-nextgen-form]") ?? null;
   elements.nameInput = elements.form?.querySelector("[data-nextgen-name]") ?? null;
-  elements.featureSelect = elements.form?.querySelector("[data-nextgen-feature-select]") ?? null;
-  elements.featureList = elements.form?.querySelector("[data-nextgen-feature-list]") ?? null;
+  elements.featureMatrix = elements.form?.querySelector("[data-nextgen-feature-matrix]") ?? null;
+  elements.featureGrid = elements.form?.querySelector("[data-nextgen-feature-grid]") ?? null;
+  elements.featureLoading = elements.form?.querySelector("[data-nextgen-feature-loading]") ?? null;
   elements.featureEmpty = elements.form?.querySelector("[data-nextgen-feature-empty]") ?? null;
+  elements.featureAddButton = elements.form?.querySelector("[data-nextgen-feature-add]") ?? null;
+  elements.designAddButton = elements.form?.querySelector("[data-nextgen-design-add]") ?? null;
+  elements.designMatrix = elements.form?.querySelector("[data-nextgen-design-matrix]") ?? null;
+  elements.designGrid = elements.form?.querySelector("[data-nextgen-design-grid]") ?? null;
+  elements.designLoading = elements.form?.querySelector("[data-nextgen-design-loading]") ?? null;
+  elements.designEmpty = elements.form?.querySelector("[data-nextgen-design-empty]") ?? null;
   elements.descriptionInput = elements.form?.querySelector("[data-nextgen-description]") ?? null;
   elements.notesInput = elements.form?.querySelector("[data-nextgen-notes]") ?? null;
   elements.standardTextarea = elements.form?.querySelector("[data-nextgen-standard]") ?? null;
@@ -2754,13 +3694,36 @@ function initNextGenEngineBriefs() {
   elements.libraryOverlay = elements.libraryLayer?.querySelector("[data-module-library-overlay]") ?? null;
   elements.libraryDialog = elements.libraryLayer?.querySelector("[data-module-library-dialog]") ?? null;
   elements.libraryClose = elements.libraryLayer?.querySelector("[data-module-library-close]") ?? null;
+  elements.featureDialog = elements.form?.querySelector("[data-nextgen-feature-dialog]") ?? null;
+  elements.featureDialogOverlay = elements.featureDialog?.querySelector("[data-nextgen-feature-dialog-overlay]") ?? null;
+  elements.featureDialogClose = elements.featureDialog?.querySelector("[data-nextgen-feature-dialog-close]") ?? null;
+  elements.featureDialogCancel = elements.featureDialog?.querySelector("[data-nextgen-feature-dialog-cancel]") ?? null;
+  elements.featureDialogForm = elements.featureDialog?.querySelector("[data-nextgen-feature-form]") ?? null;
+  elements.featureDialogStatus = elements.featureDialog?.querySelector("[data-nextgen-feature-status]") ?? null;
+  elements.featureDialogNameInput = elements.featureDialog?.querySelector("[data-nextgen-feature-name]") ?? null;
+  elements.featureDialogIdInput = elements.featureDialog?.querySelector("[data-nextgen-feature-id]") ?? null;
+  elements.featureDialogDescriptionInput = elements.featureDialog?.querySelector("[data-nextgen-feature-description]") ?? null;
+  elements.featureDialogSave = elements.featureDialog?.querySelector("[data-nextgen-feature-dialog-save]") ?? null;
+  elements.designDialog = elements.form?.querySelector("[data-nextgen-design-dialog]") ?? null;
+  elements.designDialogOverlay = elements.designDialog?.querySelector("[data-nextgen-design-dialog-overlay]") ?? null;
+  elements.designDialogClose = elements.designDialog?.querySelector("[data-nextgen-design-dialog-close]") ?? null;
+  elements.designDialogCancel = elements.designDialog?.querySelector("[data-nextgen-design-dialog-cancel]") ?? null;
+  elements.designDialogForm = elements.designDialog?.querySelector("[data-nextgen-design-form]") ?? null;
+  elements.designDialogStatus = elements.designDialog?.querySelector("[data-nextgen-design-status]") ?? null;
+  elements.designDialogNameInput = elements.designDialog?.querySelector("[data-nextgen-design-name]") ?? null;
+  elements.designDialogIdInput = elements.designDialog?.querySelector("[data-nextgen-design-id]") ?? null;
+  elements.designDialogDescriptionInput = elements.designDialog?.querySelector("[data-nextgen-design-description]") ?? null;
+  elements.designDialogCssInput = elements.designDialog?.querySelector("[data-nextgen-design-css]") ?? null;
+  elements.designDialogSave = elements.designDialog?.querySelector("[data-nextgen-design-dialog-save]") ?? null;
 
   applyNextGenStandardText(nextGenState.standardText);
   setNextGenStandardEditing(false);
   setNextGenStandardStatus("");
 
-  populateNextGenFeatureOptions();
-  renderNextGenSelectedFeatures();
+  renderNextGenFeatureLibrary();
+  renderNextGenDesignLibrary();
+  updateNextGenFeatureSummary();
+  updateNextGenDesignSummary();
   renderNextGenSelectedInspiration();
 
   nextGenState.savedBriefs = getNextGenStoredBriefs();
@@ -2820,27 +3783,89 @@ function initNextGenEngineBriefs() {
     });
   }
 
-  if (elements.featureSelect) {
-    elements.featureSelect.addEventListener("change", (event) => {
-      const value = event.target.value;
-      if (!value) return;
-      const added = addNextGenFeature(value);
-      event.target.value = "";
-      if (!added) {
-        setNextGenFormStatus("That feature is already selected.", "error");
-      } else {
-        setNextGenFormStatus("");
-      }
+  if (elements.featureGrid) {
+    elements.featureGrid.addEventListener("change", handleFeatureGridChange);
+  }
+
+  if (elements.designGrid) {
+    elements.designGrid.addEventListener("change", handleDesignGridChange);
+  }
+
+  if (elements.featureAddButton) {
+    elements.featureAddButton.addEventListener("click", () => {
+      openNextGenFeatureDialog(elements.featureAddButton);
     });
   }
 
-  if (elements.featureList) {
-    elements.featureList.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-nextgen-feature-remove]");
-      if (!button) return;
-      const featureId = button.dataset.nextgenFeatureRemove;
-      if (!featureId) return;
-      removeNextGenFeature(featureId);
+  if (elements.designAddButton) {
+    elements.designAddButton.addEventListener("click", () => {
+      openNextGenDesignDialog(elements.designAddButton);
+    });
+  }
+
+  if (elements.featureDialogOverlay) {
+    elements.featureDialogOverlay.addEventListener("click", () => {
+      closeNextGenFeatureDialog({ focusTrigger: true });
+    });
+  }
+
+  if (elements.featureDialogClose) {
+    elements.featureDialogClose.addEventListener("click", () => {
+      closeNextGenFeatureDialog({ focusTrigger: true });
+    });
+  }
+
+  if (elements.featureDialogCancel) {
+    elements.featureDialogCancel.addEventListener("click", () => {
+      closeNextGenFeatureDialog({ focusTrigger: true });
+    });
+  }
+
+  if (elements.featureDialogForm) {
+    elements.featureDialogForm.addEventListener("submit", handleNextGenFeatureDialogSubmit);
+  }
+
+  if (elements.featureDialogNameInput) {
+    elements.featureDialogNameInput.addEventListener("input", handleNextGenFeatureDialogLabelInput);
+  }
+
+  if (elements.featureDialogIdInput) {
+    elements.featureDialogIdInput.addEventListener("input", (event) => {
+      const value = typeof event.target.value === "string" ? event.target.value : elements.featureDialogIdInput.value;
+      nextGenState.featureDialogSlugDirty = Boolean(value?.trim());
+    });
+  }
+
+  if (elements.designDialogOverlay) {
+    elements.designDialogOverlay.addEventListener("click", () => {
+      closeNextGenDesignDialog({ focusTrigger: true });
+    });
+  }
+
+  if (elements.designDialogClose) {
+    elements.designDialogClose.addEventListener("click", () => {
+      closeNextGenDesignDialog({ focusTrigger: true });
+    });
+  }
+
+  if (elements.designDialogCancel) {
+    elements.designDialogCancel.addEventListener("click", () => {
+      closeNextGenDesignDialog({ focusTrigger: true });
+    });
+  }
+
+  if (elements.designDialogForm) {
+    elements.designDialogForm.addEventListener("submit", handleNextGenDesignDialogSubmit);
+  }
+
+  if (elements.designDialogNameInput) {
+    elements.designDialogNameInput.addEventListener("input", handleNextGenDesignDialogLabelInput);
+  }
+
+  if (elements.designDialogIdInput) {
+    elements.designDialogIdInput.addEventListener("input", (event) => {
+      const value = typeof event.target.value === "string" ? event.target.value : elements.designDialogIdInput.value;
+      nextGenState.designDialogSlugDirty = Boolean(value?.trim());
     });
   }
 
@@ -2906,6 +3931,8 @@ function initNextGenEngineBriefs() {
   }
 
   fetchNextGenProducts();
+  loadNextGenFeatureLibrary();
+  loadNextGenDesignLibrary();
   loadNextGenStandardFromSupabase();
   updateNextGenSummaryCard(ideaStageState.selectedProduct.trim().length > 0);
 
