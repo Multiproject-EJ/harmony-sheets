@@ -354,6 +354,8 @@ const PROMPT_CHAT_INTRO = "You are building a Google Sheets product with Harmony
 const NEXTGEN_STORAGE_KEY = "lovablesheet.nextGenEngineBriefs";
 const NEXTGEN_STANDARD_TABLE = "lovablesheet_nextgen_standard";
 const NEXTGEN_STANDARD_ID = "default";
+const PROMPT_SYSTEM_INTRO_ID = "prompt_system_intro";
+const PROMPT_COMPANION_OVERRIDES_KEY = "lovablesheet.promptCompanionOverrides";
 const DEMO_LAB_DEFAULT_HTML = `<!doctype html>
 <html lang="en">
 <head>
@@ -1282,6 +1284,33 @@ const promptChatState = {
     closeButton: document.querySelector("[data-prompt-chat-close]")
   }
 };
+const promptCompanionEditorState = {
+  initialized: false,
+  dialogOpen: false,
+  dialogType: "",
+  dialogTrigger: null,
+  saving: false,
+  systemIntroLoaded: false,
+  systemIntro: PROMPT_CHAT_INTRO,
+  overrides: new Map(),
+  elements: {
+    layer: null,
+    overlay: null,
+    dialog: null,
+    closeButton: null,
+    cancelButton: null,
+    saveButton: null,
+    input: null,
+    label: null,
+    title: null,
+    description: null,
+    status: null,
+    scopeRadios: [],
+    productScopeLabel: null,
+    scopeLegend: null
+  },
+  keydownHandler: null
+};
 const quickActionElements = {
   container: document.querySelector("[data-quick-actions]"),
   toggle: document.querySelector("[data-quick-actions-toggle]"),
@@ -1303,6 +1332,123 @@ const boardModals = new Map();
 let activeBoardModalId = null;
 let activeBoardTrigger = null;
 let boardModalKeydownRegistered = false;
+
+function getPromptCompanionProductKey(value) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
+}
+
+function getPromptCompanionOverride(productKey) {
+  if (!productKey) return null;
+  return promptCompanionEditorState.overrides.get(productKey) || null;
+}
+
+function persistPromptCompanionOverrides() {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return;
+  }
+  const payload = {};
+  promptCompanionEditorState.overrides.forEach((value, key) => {
+    if (!value) return;
+    payload[key] = value;
+  });
+  const serialized = Object.keys(payload).length ? JSON.stringify(payload) : "";
+  if (serialized) {
+    window.localStorage.setItem(PROMPT_COMPANION_OVERRIDES_KEY, serialized);
+  } else {
+    window.localStorage.removeItem(PROMPT_COMPANION_OVERRIDES_KEY);
+  }
+}
+
+function loadPromptCompanionOverridesFromStorage() {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return;
+  }
+  try {
+    const raw = window.localStorage.getItem(PROMPT_COMPANION_OVERRIDES_KEY);
+    if (!raw) {
+      return;
+    }
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return;
+    }
+    Object.entries(parsed).forEach(([key, value]) => {
+      if (!key || typeof value !== "object" || value === null) {
+        return;
+      }
+      const normalizedKey = getPromptCompanionProductKey(key);
+      if (!normalizedKey) {
+        return;
+      }
+      const normalizedValue = {};
+      if (typeof value.systemIntro === "string" && value.systemIntro.trim()) {
+        normalizedValue.systemIntro = value.systemIntro.trim();
+      }
+      if (typeof value.standardText === "string" && value.standardText.trim()) {
+        normalizedValue.standardText = value.standardText.trim();
+      }
+      if (Object.keys(normalizedValue).length) {
+        promptCompanionEditorState.overrides.set(normalizedKey, normalizedValue);
+      }
+    });
+  } catch (error) {
+    console.warn("[lovablesheet] Unable to load prompt companion overrides", error);
+  }
+}
+
+function updatePromptCompanionOverride(productKey, updates) {
+  if (!productKey || !updates || typeof updates !== "object") {
+    return;
+  }
+  const current = promptCompanionEditorState.overrides.get(productKey) || {};
+  const next = { ...current };
+  Object.entries(updates).forEach(([key, value]) => {
+    if (typeof value === "string" && value.trim()) {
+      next[key] = value.trim();
+    } else {
+      delete next[key];
+    }
+  });
+  if (!next.systemIntro && !next.standardText) {
+    promptCompanionEditorState.overrides.delete(productKey);
+  } else {
+    promptCompanionEditorState.overrides.set(productKey, next);
+  }
+  persistPromptCompanionOverrides();
+}
+
+function clearPromptCompanionOverrideField(productKey, field) {
+  if (!productKey || !field) return;
+  const current = promptCompanionEditorState.overrides.get(productKey);
+  if (!current) return;
+  if (field in current) {
+    delete current[field];
+  }
+  if (!current.systemIntro && !current.standardText) {
+    promptCompanionEditorState.overrides.delete(productKey);
+  } else {
+    promptCompanionEditorState.overrides.set(productKey, current);
+  }
+  persistPromptCompanionOverrides();
+}
+
+function getActiveSystemIntro() {
+  const productKey = getPromptCompanionProductKey(ideaStageState.selectedProduct);
+  const override = getPromptCompanionOverride(productKey);
+  if (override?.systemIntro) {
+    return override.systemIntro;
+  }
+  return promptCompanionEditorState.systemIntro || PROMPT_CHAT_INTRO;
+}
+
+function getActiveStandardText() {
+  const productKey = getPromptCompanionProductKey(ideaStageState.selectedProduct);
+  const override = getPromptCompanionOverride(productKey);
+  if (override?.standardText) {
+    return override.standardText;
+  }
+  return nextGenState.standardText || NEXTGEN_DEFAULT_STANDARD_TEXT;
+}
 
 function showSection(target) {
   Object.entries(sections).forEach(([key, element]) => {
@@ -1815,17 +1961,248 @@ function updateStepThreeOptionStates(hasBriefsOverride) {
   }
 }
 
+function setPromptCompanionDialogStatus(message, tone = "") {
+  const statusEl = promptCompanionEditorState.elements.status;
+  if (!statusEl) return;
+  statusEl.textContent = message || "";
+  if (tone) {
+    statusEl.dataset.tone = tone;
+  } else {
+    statusEl.removeAttribute("data-tone");
+  }
+}
+
+function setPromptCompanionDialogSaving(isSaving) {
+  promptCompanionEditorState.saving = Boolean(isSaving);
+  const { saveButton, cancelButton, closeButton } = promptCompanionEditorState.elements;
+  [saveButton, cancelButton, closeButton].forEach((button) => {
+    if (button) {
+      button.disabled = promptCompanionEditorState.saving;
+    }
+  });
+}
+
+function getPromptCompanionDialogScope() {
+  const radios = promptCompanionEditorState.elements.scopeRadios || [];
+  const checked = radios.find((input) => input.checked && !input.disabled);
+  if (checked?.value === "global") {
+    return "global";
+  }
+  return "product";
+}
+
+function openPromptCompanionDialog(type, trigger) {
+  if (!type || (type !== "system" && type !== "standard")) {
+    return;
+  }
+  if (promptCompanionEditorState.dialogOpen) {
+    return;
+  }
+
+  if (!promptCompanionEditorState.initialized) {
+    initializePromptCompanionEditor();
+  }
+
+  const elements = promptCompanionEditorState.elements;
+  const { layer, dialog, input, label, title, description, productScopeLabel } = elements;
+  if (!layer || !dialog || !input) {
+    return;
+  }
+
+  promptCompanionEditorState.dialogOpen = true;
+  promptCompanionEditorState.dialogType = type;
+  promptCompanionEditorState.dialogTrigger = trigger || null;
+  setPromptCompanionDialogStatus("");
+  setPromptCompanionDialogSaving(false);
+
+  layer.hidden = false;
+  dialog.hidden = false;
+  dialog.setAttribute("aria-hidden", "false");
+  document.body.classList.add("lovablesheet-modal-open");
+
+  const productName = ideaStageState.selectedProduct.trim();
+  const productKey = getPromptCompanionProductKey(productName);
+  const override = getPromptCompanionOverride(productKey);
+  const fieldName = type === "standard" ? "standardText" : "systemIntro";
+  const overrideValue = override?.[fieldName];
+  const fallbackValue = type === "standard" ? getActiveStandardText() : getActiveSystemIntro();
+  const initialValue = overrideValue || fallbackValue || "";
+
+  input.value = initialValue;
+  if (label) {
+    label.textContent = type === "standard" ? "Fixed standard text" : "System instructions";
+  }
+  if (title) {
+    title.textContent = type === "standard" ? "Edit fixed standard text" : "Edit system instructions";
+  }
+  if (description) {
+    description.textContent = type === "standard"
+      ? "Update the instructions appended to every Codex prompt before it is generated."
+      : "Change the top-level system instructions used when briefing Codex.";
+  }
+
+  const radios = elements.scopeRadios || [];
+  const productRadio = radios.find((radio) => radio.dataset.promptEditorScope === "product");
+  const globalRadio = radios.find((radio) => radio.dataset.promptEditorScope === "global");
+  const hasProduct = Boolean(productKey);
+
+  if (productRadio) {
+    productRadio.disabled = !hasProduct;
+    productRadio.checked = hasProduct;
+  }
+  if (globalRadio) {
+    globalRadio.checked = !hasProduct;
+  }
+  if (!hasProduct && globalRadio) {
+    globalRadio.checked = true;
+  }
+  if (productScopeLabel) {
+    productScopeLabel.textContent = hasProduct ? `Only for “${productName}”` : "Select a product to enable";
+  }
+
+  if (!promptCompanionEditorState.keydownHandler) {
+    promptCompanionEditorState.keydownHandler = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closePromptCompanionDialog({ focusTrigger: true });
+      }
+    };
+  }
+
+  document.addEventListener("keydown", promptCompanionEditorState.keydownHandler);
+
+  window.setTimeout(() => {
+    try {
+      input.focus();
+      const length = input.value.length;
+      input.setSelectionRange(length, length);
+    } catch (_error) {
+      /* ignore focus issues */
+    }
+  }, 0);
+}
+
+function closePromptCompanionDialog(options = {}) {
+  const { focusTrigger = true } = options;
+  if (!promptCompanionEditorState.dialogOpen || promptCompanionEditorState.saving) {
+    return;
+  }
+
+  const elements = promptCompanionEditorState.elements;
+  const { layer, dialog } = elements;
+  if (dialog) {
+    dialog.hidden = true;
+    dialog.setAttribute("aria-hidden", "true");
+  }
+  if (layer) {
+    layer.hidden = true;
+  }
+  document.body.classList.remove("lovablesheet-modal-open");
+
+  if (promptCompanionEditorState.keydownHandler) {
+    document.removeEventListener("keydown", promptCompanionEditorState.keydownHandler);
+    promptCompanionEditorState.keydownHandler = null;
+  }
+
+  promptCompanionEditorState.dialogOpen = false;
+  promptCompanionEditorState.dialogType = "";
+  setPromptCompanionDialogStatus("");
+
+  const trigger = promptCompanionEditorState.dialogTrigger;
+  promptCompanionEditorState.dialogTrigger = null;
+  if (focusTrigger && trigger && typeof trigger.focus === "function") {
+    try {
+      trigger.focus();
+    } catch (_error) {
+      /* ignore focus */
+    }
+  }
+}
+
+async function handlePromptCompanionDialogSave() {
+  if (promptCompanionEditorState.saving) {
+    return;
+  }
+  const type = promptCompanionEditorState.dialogType;
+  if (!type) {
+    return;
+  }
+  const elements = promptCompanionEditorState.elements;
+  const { input } = elements;
+  if (!input) {
+    return;
+  }
+
+  const value = input.value?.trim() ?? "";
+  if (!value) {
+    setPromptCompanionDialogStatus("Instructions cannot be empty.", "error");
+    input.focus();
+    return;
+  }
+
+  const scope = getPromptCompanionDialogScope();
+  const productName = ideaStageState.selectedProduct.trim();
+  const productKey = getPromptCompanionProductKey(productName);
+  const fieldName = type === "standard" ? "standardText" : "systemIntro";
+
+  if (scope === "product") {
+    if (!productKey) {
+      setPromptCompanionDialogStatus("Select a product to save per-product instructions.", "error");
+      return;
+    }
+    updatePromptCompanionOverride(productKey, { [fieldName]: value });
+    renderPromptChatMessages();
+    closePromptCompanionDialog({ focusTrigger: true });
+    return;
+  }
+
+  if (!supabaseClient) {
+    setPromptCompanionDialogStatus("Supabase connection required to save globally.", "error");
+    return;
+  }
+
+  setPromptCompanionDialogSaving(true);
+  setPromptCompanionDialogStatus("Saving to Supabase…");
+
+  try {
+    if (type === "standard") {
+      const saved = await saveNextGenStandardToSupabase(value);
+      applyNextGenStandardText(saved);
+    } else {
+      const saved = await savePromptSystemIntroToSupabase(value);
+      applyPromptSystemIntro(saved);
+    }
+    if (productKey) {
+      clearPromptCompanionOverrideField(productKey, fieldName);
+    }
+    closePromptCompanionDialog({ focusTrigger: true });
+  } catch (error) {
+    console.error("[lovablesheet] Unable to save prompt companion instructions", error);
+    setPromptCompanionDialogStatus("We couldn't save those instructions. Try again.", "error");
+  } finally {
+    setPromptCompanionDialogSaving(false);
+  }
+}
+
 function buildPromptChatMessages() {
   const messages = [];
 
-  const systemText = [PROMPT_CHAT_INTRO, NEXTGEN_DEFAULT_STANDARD_TEXT].filter(Boolean).join("\n\n");
+  const systemIntro = getActiveSystemIntro();
   messages.push({
     id: "system",
     tone: "system",
     heading: "System",
-    text: systemText,
-    targetSelector: promptChatMessageTargets.system,
-    targetLabel: "Codex builder"
+    text: systemIntro,
+    editable: "system"
+  });
+
+  const standardText = getActiveStandardText();
+  messages.push({
+    id: "standard",
+    tone: "system",
+    heading: "Fixed standard text",
+    text: standardText,
+    editable: "standard"
   });
 
   const selectedProduct = ideaStageState.selectedProduct?.trim();
@@ -1894,7 +2271,34 @@ function handlePromptChatMessageNavigation(targetSelector) {
 }
 
 function applyPromptChatMessageTarget(element, message) {
-  if (!element || !message?.targetSelector) {
+  if (!element || !message) {
+    return;
+  }
+
+  if (message.editable) {
+    const heading = message.heading || "Prompt detail";
+    const actionLabel = message.editable === "standard"
+      ? "Edit fixed standard text"
+      : "Edit system instructions";
+    const activate = () => {
+      openPromptCompanionDialog(message.editable, element);
+    };
+    element.classList.add("prompt-chat-panel__message--interactive");
+    element.dataset.promptChatTarget = message.editable;
+    element.setAttribute("role", "button");
+    element.tabIndex = 0;
+    element.setAttribute("aria-label", `${heading} — ${actionLabel}`);
+    element.addEventListener("click", activate);
+    element.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate();
+      }
+    });
+    return;
+  }
+
+  if (!message.targetSelector) {
     return;
   }
 
@@ -2190,6 +2594,60 @@ function initializePromptChat() {
   if (!promptChatState.layout?.isDesktop && !promptChatState.layout?.isMobile) {
     setPromptChatOpen(false);
   }
+}
+
+function initializePromptCompanionEditor() {
+  if (promptCompanionEditorState.initialized) {
+    return;
+  }
+
+  promptCompanionEditorState.initialized = true;
+  loadPromptCompanionOverridesFromStorage();
+
+  const elements = promptCompanionEditorState.elements;
+  elements.layer = document.querySelector("[data-prompt-editor-layer]") ?? null;
+  if (!elements.layer) {
+    return;
+  }
+  elements.overlay = elements.layer.querySelector("[data-prompt-editor-overlay]") ?? null;
+  elements.dialog = elements.layer.querySelector("[data-prompt-editor-dialog]") ?? null;
+  elements.closeButton = elements.layer.querySelector("[data-prompt-editor-close]") ?? null;
+  elements.cancelButton = elements.layer.querySelector("[data-prompt-editor-cancel]") ?? null;
+  elements.saveButton = elements.layer.querySelector("[data-prompt-editor-save]") ?? null;
+  elements.input = elements.layer.querySelector("[data-prompt-editor-input]") ?? null;
+  elements.label = elements.layer.querySelector("[data-prompt-editor-label]") ?? null;
+  elements.title = elements.layer.querySelector("[data-prompt-editor-title]") ?? null;
+  elements.description = elements.layer.querySelector("[data-prompt-editor-description]") ?? null;
+  elements.status = elements.layer.querySelector("[data-prompt-editor-status]") ?? null;
+  elements.productScopeLabel = elements.layer.querySelector("[data-prompt-editor-product]") ?? null;
+  elements.scopeRadios = Array.from(elements.layer.querySelectorAll("[data-prompt-editor-scope]"));
+
+  if (elements.overlay) {
+    elements.overlay.addEventListener("click", () => {
+      closePromptCompanionDialog({ focusTrigger: false });
+    });
+  }
+  if (elements.closeButton) {
+    elements.closeButton.addEventListener("click", () => {
+      closePromptCompanionDialog({ focusTrigger: true });
+    });
+  }
+  if (elements.cancelButton) {
+    elements.cancelButton.addEventListener("click", () => {
+      closePromptCompanionDialog({ focusTrigger: true });
+    });
+  }
+  if (elements.saveButton) {
+    elements.saveButton.addEventListener("click", () => {
+      handlePromptCompanionDialogSave();
+    });
+  }
+
+  if (elements.dialog) {
+    elements.dialog.hidden = true;
+    elements.dialog.setAttribute("aria-hidden", "true");
+  }
+  elements.layer.hidden = true;
 }
 
 function updateStepThreeLatestBriefLabel(brief) {
@@ -2645,6 +3103,12 @@ function setNextGenStandardStatus(message, tone) {
   }
 }
 
+function applyPromptSystemIntro(value) {
+  const normalized = typeof value === "string" && value.trim() ? value.trim() : PROMPT_CHAT_INTRO;
+  promptCompanionEditorState.systemIntro = normalized;
+  renderPromptChatMessages();
+}
+
 function applyNextGenStandardText(value) {
   const normalized = typeof value === "string" && value ? value : NEXTGEN_DEFAULT_STANDARD_TEXT;
   nextGenState.standardText = normalized;
@@ -2656,6 +3120,7 @@ function applyNextGenStandardText(value) {
       textarea.classList.add("nextgen-form__textarea--readonly");
     }
   }
+  renderPromptChatMessages();
 }
 
 function setNextGenStandardEditing(enabled) {
@@ -2747,6 +3212,29 @@ async function saveNextGenStandardToSupabase(content) {
   return content;
 }
 
+async function savePromptSystemIntroToSupabase(content) {
+  if (!supabaseClient) {
+    throw new Error("Supabase client is not available.");
+  }
+
+  const payload = { id: PROMPT_SYSTEM_INTRO_ID, content };
+  const { data, error } = await supabaseClient
+    .from(NEXTGEN_STANDARD_TABLE)
+    .upsert(payload, { onConflict: "id" })
+    .select("content")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  if (data && typeof data.content === "string") {
+    return data.content;
+  }
+
+  return content;
+}
+
 async function handleNextGenStandardSave() {
   const textarea = nextGenState.elements.standardTextarea;
   if (!textarea) return;
@@ -2809,6 +3297,32 @@ async function loadNextGenStandardFromSupabase() {
     console.error("[lovablesheet] Unable to load Next Gen standard text", error);
     setNextGenStandardStatus("We couldn't load the saved standard text. Using the default copy.", "error");
     applyNextGenStandardText(NEXTGEN_DEFAULT_STANDARD_TEXT);
+  }
+}
+
+async function loadPromptSystemIntroFromSupabase() {
+  if (promptCompanionEditorState.systemIntroLoaded) return;
+  if (!supabaseClient) return;
+
+  promptCompanionEditorState.systemIntroLoaded = true;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(NEXTGEN_STANDARD_TABLE)
+      .select("content")
+      .eq("id", PROMPT_SYSTEM_INTRO_ID)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data && typeof data.content === "string" && data.content.trim()) {
+      applyPromptSystemIntro(data.content);
+      return;
+    }
+  } catch (error) {
+    console.error("[lovablesheet] Unable to load prompt system intro", error);
   }
 }
 
@@ -4682,15 +5196,21 @@ function handleNextGenFormSubmit(event) {
     : [];
 
   const standardValue = standardTextarea?.value;
+  const productOverride = getPromptCompanionOverride(getPromptCompanionProductKey(productName));
+  const overrideStandard = typeof productOverride?.standardText === "string" && productOverride.standardText.trim()
+    ? productOverride.standardText.trim()
+    : "";
+  const briefStandardText = overrideStandard
+    ? overrideStandard
+    : typeof standardValue === "string" && standardValue.trim()
+      ? standardValue
+      : nextGenState.standardText || NEXTGEN_DEFAULT_STANDARD_TEXT;
   const brief = normalizeNextGenBrief({
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     productName,
     description,
     notes,
-    standardText:
-      typeof standardValue === "string" && standardValue.trim()
-        ? standardValue
-        : nextGenState.standardText || NEXTGEN_DEFAULT_STANDARD_TEXT,
+    standardText: briefStandardText,
     features,
     designs,
     inspiration,
@@ -5027,6 +5547,7 @@ function initNextGenEngineBriefs() {
   loadNextGenFeatureLibrary();
   loadNextGenDesignLibrary();
   loadNextGenStandardFromSupabase();
+  loadPromptSystemIntroFromSupabase();
   updateNextGenSummaryCard(ideaStageState.selectedProduct.trim().length > 0);
 
   nextGenState.initialized = true;
@@ -8028,6 +8549,7 @@ function initializeBrainTools() {
 }
 
 initializeDemoLab();
+initializePromptCompanionEditor();
 initializePromptChat();
 initializeQuickActionsMenu();
 initializeBrainTools();

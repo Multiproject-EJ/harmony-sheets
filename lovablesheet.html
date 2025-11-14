@@ -225,6 +225,52 @@
       </div>
     </div>
 
+    <div class="prompt-editor-layer" data-prompt-editor-layer hidden>
+      <div class="prompt-editor-overlay" data-prompt-editor-overlay></div>
+      <article
+        class="prompt-editor"
+        data-prompt-editor-dialog
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="prompt-editor-title"
+        hidden
+      >
+        <button class="prompt-editor__close" type="button" data-prompt-editor-close aria-label="Close prompt editor">
+          <span aria-hidden="true">×</span>
+        </button>
+        <p class="prompt-editor__eyebrow">Prompt companion</p>
+        <h3 class="prompt-editor__title" id="prompt-editor-title" data-prompt-editor-title>Edit instructions</h3>
+        <p class="prompt-editor__description" data-prompt-editor-description>
+          Adjust the fixed chat instructions so the Codex prompt matches your current review session.
+        </p>
+        <label class="prompt-editor__field">
+          <span class="prompt-editor__label" data-prompt-editor-label>System instructions</span>
+          <textarea
+            class="prompt-editor__textarea"
+            rows="8"
+            data-prompt-editor-input
+            spellcheck="false"
+          ></textarea>
+        </label>
+        <fieldset class="prompt-editor__scope">
+          <legend class="prompt-editor__scope-legend" data-prompt-editor-scope-legend>Save scope</legend>
+          <label class="prompt-editor__scope-option">
+            <input type="radio" name="prompt-editor-scope" value="product" data-prompt-editor-scope="product">
+            <span data-prompt-editor-product>Only for this product</span>
+          </label>
+          <label class="prompt-editor__scope-option">
+            <input type="radio" name="prompt-editor-scope" value="global" data-prompt-editor-scope="global">
+            <span>Save globally to Supabase</span>
+          </label>
+        </fieldset>
+        <p class="prompt-editor__status" data-prompt-editor-status role="status" aria-live="polite"></p>
+        <div class="prompt-editor__actions">
+          <button class="btn ghost prompt-editor__button" type="button" data-prompt-editor-cancel>Cancel</button>
+          <button class="btn primary prompt-editor__button" type="button" data-prompt-editor-save>Save changes</button>
+        </div>
+      </article>
+    </div>
+
     <!-- Brain Tool Dialogs -->
     <div class="brain-tool-dialog-layer" data-brain-tool-dialog-layer hidden>
       <div class="brain-tool-dialog-overlay" data-brain-tool-dialog-overlay></div>
