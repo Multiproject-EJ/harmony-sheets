@@ -118,15 +118,6 @@
   </section>
   <section class="lovablesheet-content" data-lovablesheet-content hidden>
     <div class="brain-tools-container">
-      <button
-        class="brain-tools-toggle"
-        type="button"
-        data-brain-tools-toggle
-        aria-expanded="false"
-        aria-label="Toggle Brain Tools"
-      >
-        <span class="brain-tools-toggle__text">BRAIN<br>TOOLS</span>
-      </button>
       <div class="brain-tools-actions" data-brain-tools-actions hidden>
         <button
           class="brain-tool-button brain-tool-button--sticky"
@@ -145,6 +136,23 @@
           <span aria-hidden="true">➡️</span>
         </button>
       </div>
+      <button
+        class="ipad-preview-button"
+        type="button"
+        data-brain-tool-open="ipad"
+        aria-label="Open iPad preview builder"
+      >
+        <span class="ipad-preview-button__text">iPad Size Preview</span>
+      </button>
+      <button
+        class="brain-tools-toggle"
+        type="button"
+        data-brain-tools-toggle
+        aria-expanded="false"
+        aria-label="Toggle Brain Tools"
+      >
+        <span class="brain-tools-toggle__text">BRAIN<br>TOOLS</span>
+      </button>
     </div>
 
     <!-- Brain Tool Dialogs -->
@@ -268,75 +276,82 @@
           </div>
         </div>
       </div>
+      <div class="brain-tool-dialog brain-tool-dialog--wide" data-brain-tool-dialog="ipad" role="dialog" aria-modal="true" aria-labelledby="demo-lab-title" tabindex="-1" hidden>
+        <button class="brain-tool-dialog__close" type="button" data-brain-tool-dialog-close aria-label="Close dialog">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="brain-tool-dialog__content">
+          <section class="lovablesheet-demo-lab" aria-labelledby="demo-lab-title" data-demo-lab>
+            <div class="lovablesheet-demo-lab__content">
+              <p class="lovablesheet-demo-lab__eyebrow">Google Sheets demo lab</p>
+              <h1 class="lovablesheet-demo-lab__title" id="demo-lab-title">iPad preview builder</h1>
+              <p class="lovablesheet-demo-lab__description">
+                Craft the exact HTML + Apps Script interface that will live inside a Google Sheet sidebar or dialog. The live preview mimics
+                a 4:3 iPad viewport so you can pressure test interactions before publishing the files inside Google Workspace.
+              </p>
+              <div class="lovablesheet-demo-lab__actions">
+                <button class="btn primary" type="button" data-demo-run>Run preview</button>
+                <button class="btn secondary" type="button" data-demo-reset>Reset sample</button>
+                <button class="btn ghost" type="button" data-demo-docs-open>View build spec</button>
+              </div>
+              <div class="lovablesheet-demo-lab__status" data-demo-status role="status" aria-live="polite"></div>
+              <div class="lovablesheet-demo-lab__fields">
+                <div class="lovablesheet-demo-lab__field">
+                  <label class="lovablesheet-demo-lab__label" for="demo-html-input">Demo HTML</label>
+                  <textarea
+                    class="lovablesheet-demo-lab__textarea"
+                    id="demo-html-input"
+                    rows="8"
+                    data-demo-html
+                    spellcheck="false"
+                    placeholder="Paste the single HTML file that will live inside Apps Script."
+                  ></textarea>
+                </div>
+                <div class="lovablesheet-demo-lab__field">
+                  <label class="lovablesheet-demo-lab__label" for="demo-script-input">Apps Script (.gs)</label>
+                  <textarea
+                    class="lovablesheet-demo-lab__textarea"
+                    id="demo-script-input"
+                    rows="6"
+                    data-demo-script
+                    spellcheck="false"
+                    placeholder="Optional: paste the matching Apps Script that powers the Google Sheets database."
+                  ></textarea>
+                </div>
+                <div class="lovablesheet-demo-lab__field">
+                  <label class="lovablesheet-demo-lab__label" for="demo-url-input">Existing demo URL (optional)</label>
+                  <input
+                    class="lovablesheet-demo-lab__input"
+                    type="url"
+                    id="demo-url-input"
+                    data-demo-url
+                    placeholder="/Google sheets products/demo/pomodoro.html"
+                  />
+                  <p class="lovablesheet-demo-lab__hint">
+                    Point to any HTML file in the repo to preview it instantly, or leave the field empty to render the inline code above.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="lovablesheet-demo-lab__device">
+              <div class="demo-ipad-frame">
+                <div class="demo-ipad-frame__camera" aria-hidden="true"></div>
+                <iframe
+                  class="demo-ipad-frame__viewport"
+                  title="Google Sheets iPad preview"
+                  data-demo-preview
+                  sandbox="allow-scripts allow-same-origin allow-forms"
+                  loading="lazy"
+                ></iframe>
+              </div>
+              <p class="lovablesheet-demo-lab__device-hint">
+                1024×768 viewport anchored to an iPad body. Drop any Harmony Sheets prototype inside to stress-test layouts and flows.
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
-    <section class="lovablesheet-demo-lab" aria-labelledby="demo-lab-title" data-demo-lab>
-      <div class="lovablesheet-demo-lab__content">
-        <p class="lovablesheet-demo-lab__eyebrow">Google Sheets demo lab</p>
-        <h1 class="lovablesheet-demo-lab__title" id="demo-lab-title">iPad preview builder</h1>
-        <p class="lovablesheet-demo-lab__description">
-          Craft the exact HTML + Apps Script interface that will live inside a Google Sheet sidebar or dialog. The live preview mimics
-          a 4:3 iPad viewport so you can pressure test interactions before publishing the files inside Google Workspace.
-        </p>
-        <div class="lovablesheet-demo-lab__actions">
-          <button class="btn primary" type="button" data-demo-run>Run preview</button>
-          <button class="btn secondary" type="button" data-demo-reset>Reset sample</button>
-          <button class="btn ghost" type="button" data-demo-docs-open>View build spec</button>
-        </div>
-        <div class="lovablesheet-demo-lab__status" data-demo-status role="status" aria-live="polite"></div>
-        <div class="lovablesheet-demo-lab__fields">
-          <div class="lovablesheet-demo-lab__field">
-            <label class="lovablesheet-demo-lab__label" for="demo-html-input">Demo HTML</label>
-            <textarea
-              class="lovablesheet-demo-lab__textarea"
-              id="demo-html-input"
-              rows="8"
-              data-demo-html
-              spellcheck="false"
-              placeholder="Paste the single HTML file that will live inside Apps Script."
-            ></textarea>
-          </div>
-          <div class="lovablesheet-demo-lab__field">
-            <label class="lovablesheet-demo-lab__label" for="demo-script-input">Apps Script (.gs)</label>
-            <textarea
-              class="lovablesheet-demo-lab__textarea"
-              id="demo-script-input"
-              rows="6"
-              data-demo-script
-              spellcheck="false"
-              placeholder="Optional: paste the matching Apps Script that powers the Google Sheets database."
-            ></textarea>
-          </div>
-          <div class="lovablesheet-demo-lab__field">
-            <label class="lovablesheet-demo-lab__label" for="demo-url-input">Existing demo URL (optional)</label>
-            <input
-              class="lovablesheet-demo-lab__input"
-              type="url"
-              id="demo-url-input"
-              data-demo-url
-              placeholder="/Google sheets products/demo/pomodoro.html"
-            />
-            <p class="lovablesheet-demo-lab__hint">
-              Point to any HTML file in the repo to preview it instantly, or leave the field empty to render the inline code above.
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="lovablesheet-demo-lab__device">
-        <div class="demo-ipad-frame">
-          <div class="demo-ipad-frame__camera" aria-hidden="true"></div>
-          <iframe
-            class="demo-ipad-frame__viewport"
-            title="Google Sheets iPad preview"
-            data-demo-preview
-            sandbox="allow-scripts allow-same-origin allow-forms"
-            loading="lazy"
-          ></iframe>
-        </div>
-        <p class="lovablesheet-demo-lab__device-hint">
-          1024×768 viewport anchored to an iPad body. Drop any Harmony Sheets prototype inside to stress-test layouts and flows.
-        </p>
-      </div>
-    </section>
     <div class="lovablesheet-layout">
       <aside
         class="thinking-tools thinking-tools--floating"
