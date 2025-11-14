@@ -138,8 +138,6 @@ const nextGenState = {
   savedBriefs: [],
   products: [],
   productMap: new Map(),
-  activeTrigger: null,
-  keydownHandler: null,
   inspirationDialogOpen: false,
   inspirationKeydownHandler: null,
   libraryOpen: false,
@@ -152,9 +150,6 @@ const nextGenState = {
     status: null,
     list: null,
     empty: null,
-    layer: null,
-    overlay: null,
-    modal: null,
     form: null,
     nameInput: null,
     featureSelect: null,
@@ -181,7 +176,6 @@ const nextGenState = {
     inspirationDialogCancel: null,
     formStatus: null,
     cancelButton: null,
-    closeButton: null,
     summaryCard: null,
     summaryStatus: null,
     summaryState: null,
@@ -600,11 +594,6 @@ const ideaStageElements = {
   summaryState: document.querySelector("[data-idea-summary-state]"),
   summaryTitle: document.querySelector("[data-idea-summary-title]"),
   summaryDescription: document.querySelector("[data-idea-summary-description]"),
-  openModalButton: document.querySelector("[data-idea-open-modal]"),
-  modalLayer: document.querySelector("[data-idea-modal-layer]"),
-  modalDialog: document.querySelector("[data-idea-modal-dialog]"),
-  modalOverlay: document.querySelector("[data-idea-modal-overlay]"),
-  closeModalButton: document.querySelector("[data-idea-modal-close]"),
   successIndicator: document.querySelector("[data-idea-success]"),
   connector: document.querySelector("[data-idea-connector]"),
   stepTwo: document.querySelector("[data-step-two]"),
@@ -626,10 +615,7 @@ const stepThreeElements = {
 const ideaStageState = {
   selectedProduct: "",
   selectionSource: "empty",
-  initialized: false,
-  modalOpen: false,
-  modalTrigger: null,
-  modalKeydownHandler: null
+  initialized: false
 };
 const stepThreeState = {
   initialized: false,
@@ -662,6 +648,25 @@ function redirectTo(target) {
   window.setTimeout(() => {
     redirecting = false;
   }, 0);
+}
+
+function scrollElementIntoView(element) {
+  if (!element) {
+    return;
+  }
+
+  const prefersReducedMotion = prefersReducedMotionQuery?.matches;
+  const behavior = prefersReducedMotion ? "auto" : "smooth";
+
+  try {
+    element.scrollIntoView({ behavior, block: "start" });
+  } catch (_error) {
+    try {
+      element.scrollIntoView(true);
+    } catch (_innerError) {
+      /* Swallow scroll issues silently. */
+    }
+  }
 }
 
 function setThinkingPanelVisibility(panelId, visible) {
@@ -987,71 +992,6 @@ function updateIdeaSummary() {
   }
   if (summaryDescription) {
     summaryDescription.textContent = copy.description;
-  }
-}
-
-function handleIdeaModalKeydown(event) {
-  if (event.key !== "Escape") {
-    return;
-  }
-
-  event.preventDefault();
-  closeIdeaModal();
-}
-
-function openIdeaModal(trigger) {
-  const { modalLayer, modalDialog } = ideaStageElements;
-  if (!modalLayer || !modalDialog || ideaStageState.modalOpen) {
-    return;
-  }
-
-  ideaStageState.modalOpen = true;
-  ideaStageState.modalTrigger = trigger instanceof HTMLElement ? trigger : null;
-
-  modalLayer.hidden = false;
-  modalLayer.setAttribute("aria-hidden", "false");
-  modalDialog.removeAttribute("aria-hidden");
-
-  document.body.classList.add("lovablesheet-modal-open");
-
-  window.setTimeout(() => {
-    try {
-      modalDialog.focus();
-    } catch (_error) {
-      /* Some browsers might not support focus on generic containers. */
-    }
-  }, 0);
-
-  if (!ideaStageState.modalKeydownHandler) {
-    ideaStageState.modalKeydownHandler = handleIdeaModalKeydown;
-    document.addEventListener("keydown", ideaStageState.modalKeydownHandler);
-  }
-}
-
-function closeIdeaModal(options = {}) {
-  const { focusTrigger = true } = options;
-  const { modalLayer, modalDialog } = ideaStageElements;
-  if (!modalLayer || !modalDialog || !ideaStageState.modalOpen) {
-    return;
-  }
-
-  modalLayer.hidden = true;
-  modalLayer.setAttribute("aria-hidden", "true");
-  modalDialog.setAttribute("aria-hidden", "true");
-
-  document.body.classList.remove("lovablesheet-modal-open");
-
-  if (ideaStageState.modalKeydownHandler) {
-    document.removeEventListener("keydown", ideaStageState.modalKeydownHandler);
-    ideaStageState.modalKeydownHandler = null;
-  }
-
-  const { modalTrigger } = ideaStageState;
-  ideaStageState.modalTrigger = null;
-  ideaStageState.modalOpen = false;
-
-  if (focusTrigger && modalTrigger && typeof modalTrigger.focus === "function") {
-    modalTrigger.focus();
   }
 }
 
@@ -1390,15 +1330,7 @@ function initializeIdeaStage() {
   ideaStageState.initialized = true;
   setIdeaStageSelection("", { source: "reset" });
 
-  const {
-    clearButton,
-    draftTable,
-    draftEmpty,
-    openModalButton,
-    modalOverlay,
-    closeModalButton,
-    summaryCard
-  } = ideaStageElements;
+  const { clearButton, draftTable, draftEmpty } = ideaStageElements;
   if (draftTable) {
     draftTable.hidden = true;
   }
@@ -1409,35 +1341,6 @@ function initializeIdeaStage() {
   if (clearButton) {
     clearButton.addEventListener("click", () => {
       setIdeaStageSelection("", { source: "reset" });
-    });
-  }
-
-  if (openModalButton) {
-    openModalButton.addEventListener("click", (event) => {
-      event.preventDefault();
-      openIdeaModal(openModalButton);
-    });
-  }
-
-  if (summaryCard) {
-    summaryCard.addEventListener("click", (event) => {
-      const target = event.target instanceof HTMLElement ? event.target : null;
-      if (target?.closest("[data-idea-open-modal]")) {
-        return;
-      }
-      openIdeaModal(openModalButton || summaryCard);
-    });
-  }
-
-  if (modalOverlay) {
-    modalOverlay.addEventListener("click", () => {
-      closeIdeaModal();
-    });
-  }
-
-  if (closeModalButton) {
-    closeModalButton.addEventListener("click", () => {
-      closeIdeaModal();
     });
   }
 }
@@ -2117,60 +2020,36 @@ function resetNextGenForm() {
   setNextGenFormStatus("");
 }
 
-function handleNextGenModalKeydown(event) {
-  if (event.key === "Escape") {
-    event.preventDefault();
-    closeNextGenModal({ reset: false, focusTrigger: false });
+function focusNextGenForm(options = {}) {
+  const { focusField = false } = options;
+  const { form, nameInput } = nextGenState.elements;
+  if (!form) {
+    return;
   }
-}
 
-function openNextGenModal(trigger) {
-  const { layer, modal, nameInput } = nextGenState.elements;
-  if (!layer || !modal) return;
+  scrollElementIntoView(form);
 
-  nextGenState.activeTrigger = trigger || null;
-  layer.hidden = false;
-  modal.hidden = false;
-  layer.setAttribute("aria-hidden", "false");
-  modal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("lovablesheet-modal-open");
+  if (!focusField) {
+    return;
+  }
 
-  if (!nextGenState.keydownHandler) {
-    nextGenState.keydownHandler = handleNextGenModalKeydown;
-    document.addEventListener("keydown", nextGenState.keydownHandler);
+  const fallbackTarget = form.querySelector("input, textarea, select, button");
+  const focusTarget = nameInput || fallbackTarget;
+  if (!focusTarget) {
+    return;
   }
 
   window.setTimeout(() => {
-    nameInput?.focus?.();
-  }, 0);
-}
-
-function closeNextGenModal(options = {}) {
-  const { reset = false, focusTrigger = true } = options;
-  const { layer, modal } = nextGenState.elements;
-  if (!layer || !modal) return;
-
-  closeNextGenInspirationDialog({ focusButton: false });
-
-  modal.hidden = true;
-  layer.hidden = true;
-  layer.setAttribute("aria-hidden", "true");
-  modal.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("lovablesheet-modal-open");
-
-  if (nextGenState.keydownHandler) {
-    document.removeEventListener("keydown", nextGenState.keydownHandler);
-    nextGenState.keydownHandler = null;
-  }
-
-  if (reset) {
-    resetNextGenForm();
-  }
-
-  if (focusTrigger && nextGenState.activeTrigger && typeof nextGenState.activeTrigger.focus === "function") {
-    nextGenState.activeTrigger.focus();
-  }
-  nextGenState.activeTrigger = null;
+    try {
+      focusTarget.focus({ preventScroll: true });
+    } catch (_error) {
+      try {
+        focusTarget.focus();
+      } catch (_innerError) {
+        /* Ignore focus errors. */
+      }
+    }
+  }, 150);
 }
 
 function handleModuleLibraryKeydown(event) {
@@ -2288,8 +2167,7 @@ function launchNextGenBriefFromPipeline(trigger) {
     nameInput.value = productName;
   }
 
-  closeIdeaModal({ focusTrigger: false });
-  openNextGenModal(trigger);
+  focusNextGenForm({ focusField: true });
 
   if (nameInput) {
     window.requestAnimationFrame(() => {
@@ -2817,26 +2695,12 @@ function handleNextGenFormSubmit(event) {
 
   renderNextGenSavedBriefs();
   setNextGenStatus(`Saved “${brief.productName}” to your Next Gen briefs.`, "success");
-  closeNextGenModal({ reset: true, focusTrigger: true });
+  closeNextGenInspirationDialog({ focusButton: false });
+  resetNextGenForm();
+  setNextGenFormStatus("Next Gen brief saved.", "success");
+  focusNextGenForm();
 
-  if (typeof showStep === "function") {
-    showStep(2);
-  } else {
-    const stepOneStage = document.querySelector("[data-idea-stage]");
-    const stepTwoStage = document.querySelector("[data-step-two]");
-    if (stepOneStage) {
-      stepOneStage.setAttribute("data-step-visible", "false");
-    }
-    if (stepTwoStage) {
-      stepTwoStage.setAttribute("data-step-visible", "true");
-    }
-    if (typeof stepNavigationState !== "undefined" && stepNavigationState !== null) {
-      stepNavigationState.currentStep = 2;
-      if (typeof updateProgressDots === "function") {
-        updateProgressDots();
-      }
-    }
-  }
+  showStep(2);
 }
 
 function initNextGenEngineBriefs() {
@@ -2855,10 +2719,7 @@ function initNextGenEngineBriefs() {
   elements.status = section.querySelector("[data-nextgen-status]") ?? null;
   elements.list = section.querySelector("[data-nextgen-list]") ?? null;
   elements.empty = section.querySelector("[data-nextgen-empty]") ?? null;
-  elements.layer = document.querySelector("[data-nextgen-layer]") ?? null;
-  elements.overlay = elements.layer?.querySelector("[data-nextgen-overlay]") ?? null;
-  elements.modal = elements.layer?.querySelector("[data-nextgen-modal]") ?? null;
-  elements.form = elements.modal?.querySelector("[data-nextgen-form]") ?? null;
+  elements.form = document.querySelector("[data-nextgen-form]") ?? null;
   elements.nameInput = elements.form?.querySelector("[data-nextgen-name]") ?? null;
   elements.featureSelect = elements.form?.querySelector("[data-nextgen-feature-select]") ?? null;
   elements.featureList = elements.form?.querySelector("[data-nextgen-feature-list]") ?? null;
@@ -2884,7 +2745,6 @@ function initNextGenEngineBriefs() {
   elements.productsError = elements.inspirationDialog?.querySelector("[data-nextgen-products-error]") ?? null;
   elements.formStatus = elements.form?.querySelector("[data-nextgen-form-status]") ?? null;
   elements.cancelButton = elements.form?.querySelector("[data-nextgen-cancel]") ?? null;
-  elements.closeButton = elements.form?.querySelector("[data-nextgen-close]") ?? null;
   elements.summaryCard = section.querySelector("[data-nextgen-summary-card]") ?? null;
   elements.summaryStatus = section.querySelector("[data-nextgen-summary-status]") ?? null;
   elements.summaryState = section.querySelector("[data-nextgen-summary-state-text]") ?? null;
@@ -2911,26 +2771,16 @@ function initNextGenEngineBriefs() {
     elements.openButtons.forEach((button) => {
       button.addEventListener("click", () => {
         setNextGenFormStatus("");
-        openNextGenModal(button);
+        focusNextGenForm({ focusField: true });
       });
-    });
-  }
-
-  if (elements.overlay) {
-    elements.overlay.addEventListener("click", () => {
-      closeNextGenModal({ reset: true, focusTrigger: true });
-    });
-  }
-
-  if (elements.closeButton) {
-    elements.closeButton.addEventListener("click", () => {
-      closeNextGenModal({ reset: true, focusTrigger: true });
     });
   }
 
   if (elements.cancelButton) {
     elements.cancelButton.addEventListener("click", () => {
-      closeNextGenModal({ reset: true, focusTrigger: true });
+      resetNextGenForm();
+      setNextGenFormStatus("Form cleared.");
+      focusNextGenForm();
     });
   }
 
@@ -2947,7 +2797,7 @@ function initNextGenEngineBriefs() {
         return;
       }
       setNextGenFormStatus("");
-      openNextGenModal(elements.openButton || elements.summaryCard);
+      focusNextGenForm({ focusField: true });
     });
   }
 
@@ -5716,6 +5566,7 @@ const stepNavigationState = {
   celebrationShown: false,
   elements: {
     progressDots: Array.from(document.querySelectorAll('[data-progress-step]')),
+    progressFill: document.querySelector('[data-progress-fill]'),
     celebrationScreen: document.querySelector('[data-celebration-screen]'),
     celebrationMessage: document.querySelector('[data-celebration-message]'),
     celebrationNextButton: document.querySelector('[data-celebration-next]'),
@@ -5728,43 +5579,55 @@ const stepNavigationState = {
 };
 
 function updateProgressDots() {
-  const { progressDots } = stepNavigationState.elements;
-  const { currentStep } = stepNavigationState;
+  const { progressDots, progressFill } = stepNavigationState.elements;
+  const { currentStep, totalSteps } = stepNavigationState;
 
   progressDots.forEach((dot, index) => {
+    if (!dot) {
+      return;
+    }
     const stepNumber = index + 1;
     if (stepNumber < currentStep) {
       dot.setAttribute('data-status', 'completed');
     } else if (stepNumber === currentStep) {
       dot.setAttribute('data-status', 'active');
     } else {
-      dot.removeAttribute('data-status');
+      dot.setAttribute('data-status', 'upcoming');
+    }
+  });
+
+  if (progressFill) {
+    const ratio = totalSteps <= 1 ? 1 : (currentStep - 1) / (totalSteps - 1);
+    const clamped = Math.min(Math.max(ratio, 0), 1);
+    progressFill.style.width = `${clamped * 100}%`;
+  }
+}
+
+function updateStageStatuses(stepNumber) {
+  const { stages } = stepNavigationState.elements;
+  if (!Array.isArray(stages)) {
+    return;
+  }
+
+  stages.forEach((stage, index) => {
+    if (!stage) {
+      return;
+    }
+    const stageStepNumber = index + 1;
+    if (stageStepNumber < stepNumber) {
+      stage.dataset.stageStatus = 'completed';
+    } else if (stageStepNumber === stepNumber) {
+      stage.dataset.stageStatus = 'active';
+    } else {
+      stage.dataset.stageStatus = 'upcoming';
     }
   });
 }
 
-function showStep(stepNumber, withTransition = true) {
-  const { stages } = stepNavigationState.elements;
-
-  stages.forEach((stage, index) => {
-    if (!stage) return;
-
-    const stageStepNumber = index + 1;
-    if (stageStepNumber === stepNumber) {
-      if (withTransition) {
-        stage.setAttribute('data-step-visible', 'false');
-        setTimeout(() => {
-          stage.setAttribute('data-step-visible', 'true');
-        }, 50);
-      } else {
-        stage.setAttribute('data-step-visible', 'true');
-      }
-    } else {
-      stage.setAttribute('data-step-visible', 'false');
-    }
-  });
-
-  stepNavigationState.currentStep = stepNumber;
+function showStep(stepNumber) {
+  const normalizedStep = Math.min(Math.max(stepNumber, 1), stepNavigationState.totalSteps);
+  stepNavigationState.currentStep = normalizedStep;
+  updateStageStatuses(normalizedStep);
   updateProgressDots();
 }
 
@@ -5835,22 +5698,7 @@ function initializeStepNavigation() {
   const { celebrationNextButton, celebrationScreen, stages } = stepNavigationState.elements;
 
   stepNavigationState.currentStep = 1;
-
-  if (Array.isArray(stages)) {
-    stages.forEach((stage, index) => {
-      if (!stage) {
-        return;
-      }
-
-      const stepNumber = index + 1;
-      if (stepNumber === stepNavigationState.totalSteps) {
-        stage.setAttribute('data-step-visible', 'false');
-      } else if (!stage.hasAttribute('data-step-visible')) {
-        stage.setAttribute('data-step-visible', 'true');
-      }
-    });
-  }
-
+  updateStageStatuses(stepNavigationState.currentStep);
   updateProgressDots();
 
   // Set up celebration screen button
