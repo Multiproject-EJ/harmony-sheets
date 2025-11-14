@@ -107,7 +107,6 @@
       <h1>Loading LovableSheet</h1>
       <p>Verifying your admin access…</p>
     </div>
-
   </section>
   <section class="lovablesheet-state" data-lovablesheet-unauthorized hidden>
     <div class="account-card">
@@ -224,24 +223,6 @@
       >
         <span aria-hidden="true">⚡</span>
       </button>
-    </div>
-
-    <div
-      class="prompt-chat-panel"
-      data-prompt-chat-panel
-      aria-hidden="true"
-      hidden
-    >
-      <div class="prompt-chat-panel__header">
-        <div>
-          <p class="prompt-chat-panel__eyebrow">PromptChat</p>
-          <h2 class="prompt-chat-panel__title">Transcript</h2>
-        </div>
-        <button class="prompt-chat-panel__close" type="button" data-prompt-chat-close aria-label="Hide PromptChat">×</button>
-      </div>
-      <div class="prompt-chat-panel__messages" data-prompt-chat-messages>
-        <p class="prompt-chat-panel__placeholder">Toggle the PromptChat button to pin the latest prompt breakdown here.</p>
-      </div>
     </div>
 
     <div class="prompt-editor-layer" data-prompt-editor-layer hidden>
@@ -544,7 +525,26 @@
         </div>
       </div>
     </div>
-    <div class="lovablesheet-layout">
+    <div class="lovablesheet-columns">
+      <div
+        class="prompt-chat-panel"
+        data-prompt-chat-panel
+        aria-hidden="true"
+        hidden
+      >
+        <div class="prompt-chat-panel__header">
+          <div>
+            <p class="prompt-chat-panel__eyebrow">PromptChat</p>
+            <h2 class="prompt-chat-panel__title">Transcript</h2>
+          </div>
+          <button class="prompt-chat-panel__close" type="button" data-prompt-chat-close aria-label="Hide PromptChat">×</button>
+        </div>
+        <div class="prompt-chat-panel__messages" data-prompt-chat-messages>
+          <p class="prompt-chat-panel__placeholder">Toggle the PromptChat button to pin the latest prompt breakdown here.</p>
+        </div>
+      </div>
+
+      <div class="lovablesheet-layout">
       <aside
         class="thinking-tools thinking-tools--floating"
         aria-labelledby="thinking-tools-title"
@@ -700,8 +700,8 @@
       <div class="lovablesheet-main">
         <article class="lovablesheet-workflow" aria-labelledby="lovablesheet-workflow-title">
       <header class="lovablesheet-workflow__intro">
-        <p class="lovablesheet-eyebrow">Simple Workflow</p>
-        <h1 id="lovablesheet-workflow-title">Bring clarity to every planning sprint</h1>
+        <p class="lovablesheet-eyebrow">🧫 Petri dish Labratory</p>
+        <h1 id="lovablesheet-workflow-title">Google Sheets products maker</h1>
       </header>
 
       <div class="lovablesheet-progress" data-progress-indicator aria-label="Workflow progress">
@@ -2083,6 +2083,7 @@
         </section>
 
       </div>
+    </div>
     </div>
   </section>
 
