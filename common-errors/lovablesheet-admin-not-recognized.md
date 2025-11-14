@@ -1,5 +1,12 @@
 # Common error: LovableSheet page doesn't recognize logged-in admin
 
+**Occurrence counter:** 4 (last updated 2025-11-16)
+
+1. **2025-03-08 – Missing `updateIdeaStageUI` guard.** ReferenceError prevented `lovablesheet.js` from running, leaving the loading card on screen.
+2. **2025-11-14 – Auth listener short-circuit.** `lovablesheet.js` returned before subscribing to Supabase auth events whenever the initial `getSession()` call returned `null`, so admins who already had a valid session stayed stuck on the "Verifying your admin access…" card until they hard-refreshed.
+3. **2025-11-15 – Brain board template never closed.** The `<template id="brain-board-note-template">` tag swallowed the rest of the document (including all `<script>` tags), so none of the LovableSheet JavaScript ran and the loading card never advanced.
+4. **2025-11-16 – Cached copy of the broken template.** Even after the fix above landed, the CDN kept serving the old HTML for some editors, so the loading screen persisted until they hard-refreshed. Bust cache (Shift+Reload) or re-upload the corrected `lovablesheet.html` to clear the stale template.
+
 ## Symptom
 - Visiting lovablesheet.html shows the "Access restricted" or "You need an admin account" message even when the same browser is signed in as an admin and other admin pages (e.g., admin_dashboard.html) work.
 
@@ -49,6 +56,28 @@ if (existingUpdateIdeaStageUI) {
 ### 2. Prevent immediate redirect when session === null
 
 - Wait briefly for `onAuthStateChange` to deliver a session before redirecting non-admins (see `lovablesheet.js:init()` for the current pattern).
+
+### 3. Always subscribe to auth changes even when the first session check fails (Nov 2025)
+
+**Symptom:** Console is clean, but the LovableSheet card stays on "Loading LovableSheet / Verifying your admin access…" forever even though the user is already signed in elsewhere as an admin.
+
+**Root cause:** `lovablesheet.js` used to call `requireAdmin(user)` immediately after `getSession()`/`onAuthStateChange` resolved. If that initial call returned `null` (common when Supabase rehydration is slow), the function returned before registering the long-lived `onAuthStateChange` listener, so later session events were ignored.
+
+**Resolution (Nov 14, 2025):**
+
+- Added an optional `redirect` flag to `requireAdmin()` so the first check can show the unauthorized card without forcing a redirect.
+- Updated `init()` to call `requireAdmin(user, { redirect: false })` and, regardless of the outcome, always register the Supabase auth listener so a delayed session will still unlock the page.
+- The auth listener now relies on `requireAdmin()` for redirect logic and simply re-initializes the board tools when access is granted.
+
+Increment the counter above any time this checklist is needed again and add a short dated note describing the new root cause + fix.
+
+### 4. Close runaway `<template>` wrappers (Nov 2025)
+
+**Symptom:** The LovableSheet page source looks correct, but viewing it in a browser leaves the UI frozen on "Loading LovableSheet" and `document.scripts` is empty because every `<script>` tag lives inside an accidentally unclosed `<template>`.
+
+**Resolution (Nov 15, 2025):** Added the missing `</template>` after the note template so the rest of the DOM renders normally and `lovablesheet.js` executes again.
+
+**How to check next time:** View Source and verify all `<template>` tags (especially `brain-board-note-template`) have matching closing tags before the script bundle. If `document.scripts` is empty or the browser console never logs `LovableSheet: init - checking session`, inspect the template block before the footer for typos.
 
 ## Permanent recommendations
 - Centralize auth checks into a shared helper used by all admin pages.
