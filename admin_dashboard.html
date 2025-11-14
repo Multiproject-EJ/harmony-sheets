@@ -313,6 +313,48 @@
           <div>
             <h2 id="product-table-title">Product catalog</h2>
             <p class="admin__panel-sub">Click any row to edit. Changes are saved to your browser so you can export when ready.</p>
+            <div class="admin-progress-grid" role="region" aria-label="Catalog progress overview">
+              <article class="admin-progress-card">
+                <div class="admin-progress-card__content">
+                  <p class="admin-progress-card__eyebrow">Catalog completeness</p>
+                  <p class="admin-progress-card__title">62 products live</p>
+                  <p class="admin-progress-card__meta">Targeting 80 total releases</p>
+                </div>
+                <div class="admin-progress-graph" style="--progress:0.78; --progress-color:#6366f1;">
+                  <span class="admin-progress-graph__value">78%</span>
+                </div>
+              </article>
+              <article class="admin-progress-card">
+                <div class="admin-progress-card__content">
+                  <p class="admin-progress-card__eyebrow">Marketing QA</p>
+                  <p class="admin-progress-card__title">42 refreshes</p>
+                  <p class="admin-progress-card__meta">7 of 9 launch stories updated</p>
+                </div>
+                <div class="admin-progress-graph" style="--progress:0.64; --progress-color:#2563eb;">
+                  <span class="admin-progress-graph__value">64%</span>
+                </div>
+              </article>
+              <article class="admin-progress-card">
+                <div class="admin-progress-card__content">
+                  <p class="admin-progress-card__eyebrow">Pricing reviews</p>
+                  <p class="admin-progress-card__title">18/24 optimized</p>
+                  <p class="admin-progress-card__meta">Next audit scheduled Friday</p>
+                </div>
+                <div class="admin-progress-graph" style="--progress:0.5; --progress-color:#0ea5e9;">
+                  <span class="admin-progress-graph__value">50%</span>
+                </div>
+              </article>
+              <article class="admin-progress-card">
+                <div class="admin-progress-card__content">
+                  <p class="admin-progress-card__eyebrow">Asset refresh</p>
+                  <p class="admin-progress-card__title">31 visuals staged</p>
+                  <p class="admin-progress-card__meta">Need 40 final exports</p>
+                </div>
+                <div class="admin-progress-graph" style="--progress:0.88; --progress-color:#059669;">
+                  <span class="admin-progress-graph__value">88%</span>
+                </div>
+              </article>
+            </div>
             <button class="btn-ghost admin__btn" type="button" data-import-supabase>
               Fetch last data from Supabase
             </button>
