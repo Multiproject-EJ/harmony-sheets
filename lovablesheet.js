@@ -1453,15 +1453,21 @@ function handleUnauthorized(message, redirectTarget) {
   showSection("unauthorized");
 }
 
-function requireAdmin(user) {
+function requireAdmin(user, { redirect = true } = {}) {
   if (!user) {
     const redirectUrl = `login.html?redirect=${encodeURIComponent(PAGE_PATH)}`;
-    handleUnauthorized("You need to sign in with an admin account to view LovableSheet.", redirectUrl);
+    handleUnauthorized(
+      "You need to sign in with an admin account to view LovableSheet.",
+      redirect ? redirectUrl : undefined
+    );
     return false;
   }
 
   if (!isAdminUser(user)) {
-    handleUnauthorized("LovableSheet is only available to Harmony Sheets admins.", ACCOUNT_PAGE_PATH);
+    handleUnauthorized(
+      "LovableSheet is only available to Harmony Sheets admins.",
+      redirect ? ACCOUNT_PAGE_PATH : undefined
+    );
     return false;
   }
 
@@ -6114,29 +6120,19 @@ async function init() {
       console.log("LovableSheet: session found from getSession()", user);
     }
 
-    // requireAdmin will show content or handle unauthorized state.
-    // If the user is null we intentionally return so the page doesn't force a redirect
-    // before the onAuthStateChange handler below can act on later changes.
-    if (!requireAdmin(user)) {
-      return;
-    }
+    // Show the correct state without forcing a redirect on the initial check.
+    const hasAdminAccess = requireAdmin(user, { redirect: false });
 
-    // Initialize boards and load saved boards (admin-only features)
-    initializeStickyBoards();
-    await fetchBoards();
+    if (hasAdminAccess) {
+      initializeStickyBoards();
+      await fetchBoards();
+    }
 
     // Subscribe to auth state changes to handle sign-out or role changes.
     const { data: listener } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       const currentUser = session?.user;
 
-      // If requireAdmin fails for the current user, redirect appropriately.
       if (!requireAdmin(currentUser)) {
-        if (!currentUser) {
-          const redirectUrl = `login.html?redirect=${encodeURIComponent(PAGE_PATH)}`;
-          redirectTo(redirectUrl);
-        } else {
-          redirectTo(ACCOUNT_PAGE_PATH);
-        }
         return;
       }
 
