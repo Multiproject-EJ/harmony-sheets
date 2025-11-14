@@ -741,6 +741,7 @@ const ideaStageElements = {
   summaryTitle: document.querySelector("[data-idea-summary-title]"),
   summaryDescription: document.querySelector("[data-idea-summary-description]"),
   successIndicator: document.querySelector("[data-idea-success]"),
+  successIcon: document.querySelector("[data-idea-success-icon]"),
   connector: document.querySelector("[data-idea-connector]"),
   stepTwo: document.querySelector("[data-step-two]"),
   lock: document.querySelector("[data-step-two-lock]"),
@@ -1029,8 +1030,17 @@ function renderDraftModelsTable(products = []) {
     draftEmpty.hidden = true;
   }
 
+  const headingRow = document.createElement("tr");
+  headingRow.className = "admin-table__group-row";
+  const headingCell = document.createElement("td");
+  headingCell.colSpan = 2;
+  headingCell.textContent = "Draft models";
+  headingRow.appendChild(headingCell);
+  draftTableBody.appendChild(headingRow);
+
   drafts.forEach((product) => {
     const row = document.createElement("tr");
+    row.className = "admin-table__draft-row";
 
     const displayName = typeof product.displayName === "string" && product.displayName.trim()
       ? product.displayName.trim()
@@ -1048,23 +1058,6 @@ function renderDraftModelsTable(products = []) {
     nameEl.textContent = displayName;
 
     productCell.append(lifeArea, nameEl);
-
-    const typeCell = document.createElement("td");
-    typeCell.dataset.label = "Type";
-    typeCell.textContent = deriveDraftType(product);
-
-    const badgeCell = document.createElement("td");
-    badgeCell.dataset.label = "Badge";
-    const badge = document.createElement("span");
-    badge.className = "admin-pipeline__badge";
-    badge.dataset.badge = "draft";
-    badge.textContent = "Draft";
-    badgeCell.appendChild(badge);
-
-    const priceCell = document.createElement("td");
-    priceCell.dataset.label = "Price";
-    priceCell.className = "admin-table__price";
-    priceCell.textContent = typeof product.price === "string" && product.price.trim() ? product.price.trim() : "—";
 
     const briefCell = document.createElement("td");
     briefCell.dataset.label = "Use in Brief";
@@ -1088,7 +1081,7 @@ function renderDraftModelsTable(products = []) {
     briefButton.append(buttonIcon, buttonLabel);
     briefCell.appendChild(briefButton);
 
-    row.append(productCell, typeCell, badgeCell, priceCell, briefCell);
+    row.append(productCell, briefCell);
     draftTableBody.appendChild(row);
   });
 }
@@ -1152,7 +1145,7 @@ function updateIdeaSummary() {
 }
 
 function updateStepTwoAvailability() {
-  const { stepTwo, container, clearButton, lock, successIndicator, connector, hint } = ideaStageElements;
+  const { stepTwo, container, clearButton, lock, successIndicator, successIcon, connector, hint } = ideaStageElements;
   const hasSelection = ideaStageState.selectedProduct.trim().length > 0;
 
   if (stepTwo) {
@@ -1170,13 +1163,13 @@ function updateStepTwoAvailability() {
   }
 
   if (container) {
-    container.hidden = !hasSelection;
+    container.hidden = false;
     container.classList.toggle("lovablesheet-idea__selection--active", hasSelection);
     container.dataset.ideaSelected = hasSelection ? "true" : "false";
   }
 
   if (hint) {
-    hint.hidden = !hasSelection;
+    hint.hidden = false;
   }
 
   if (clearButton) {
@@ -1186,6 +1179,10 @@ function updateStepTwoAvailability() {
 
   if (successIndicator) {
     successIndicator.classList.toggle("lovablesheet-idea__success--active", hasSelection);
+  }
+
+  if (successIcon) {
+    successIcon.textContent = hasSelection ? "✓" : "○";
   }
 
   if (connector) {
@@ -1237,6 +1234,19 @@ function updateNextGenSummaryCard(hasSelection) {
         : "Open the Next Gen Engine brief to capture the plan for your selected product."
       : "Pick a product in Step 1 to compile the Google Sheet Next Gen Engine brief.";
   }
+
+  const quickButtons = document.querySelectorAll("[data-nextgen-quick-open]");
+  quickButtons.forEach((button) => {
+    if (!(button instanceof HTMLButtonElement)) {
+      return;
+    }
+    button.disabled = !hasSelection;
+    if (hasSelection) {
+      button.removeAttribute("aria-disabled");
+    } else {
+      button.setAttribute("aria-disabled", "true");
+    }
+  });
 }
 
 function setStepThreeHint(message) {
@@ -3803,7 +3813,7 @@ function initNextGenEngineBriefs() {
 
   const elements = nextGenState.elements;
   elements.section = section;
-  elements.openButtons = Array.from(section.querySelectorAll("[data-nextgen-open]"));
+  elements.openButtons = Array.from(document.querySelectorAll("[data-nextgen-open]"));
   elements.openButton = elements.openButtons[0] ?? null;
   elements.status = section.querySelector("[data-nextgen-status]") ?? null;
   elements.list = section.querySelector("[data-nextgen-list]") ?? null;
@@ -3841,11 +3851,11 @@ function initNextGenEngineBriefs() {
   elements.productsError = elements.inspirationDialog?.querySelector("[data-nextgen-products-error]") ?? null;
   elements.formStatus = elements.form?.querySelector("[data-nextgen-form-status]") ?? null;
   elements.cancelButton = elements.form?.querySelector("[data-nextgen-cancel]") ?? null;
-  elements.summaryCard = section.querySelector("[data-nextgen-summary-card]") ?? null;
-  elements.summaryStatus = section.querySelector("[data-nextgen-summary-status]") ?? null;
-  elements.summaryState = section.querySelector("[data-nextgen-summary-state-text]") ?? null;
-  elements.summaryDescription = section.querySelector("[data-nextgen-summary-description]") ?? null;
-  elements.libraryButton = section.querySelector("[data-module-library-open]") ?? null;
+  elements.summaryCard = document.querySelector("[data-nextgen-summary-card]") ?? null;
+  elements.summaryStatus = document.querySelector("[data-nextgen-summary-status]") ?? null;
+  elements.summaryState = document.querySelector("[data-nextgen-summary-state-text]") ?? null;
+  elements.summaryDescription = document.querySelector("[data-nextgen-summary-description]") ?? null;
+  elements.libraryButton = document.querySelector("[data-module-library-open]") ?? null;
   elements.libraryLayer = document.querySelector("[data-module-library-layer]") ?? null;
   elements.libraryOverlay = elements.libraryLayer?.querySelector("[data-module-library-overlay]") ?? null;
   elements.libraryDialog = elements.libraryLayer?.querySelector("[data-module-library-dialog]") ?? null;
