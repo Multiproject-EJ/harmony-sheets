@@ -942,7 +942,8 @@ App.normalizeVirtualDemoUrl = function(value) {
 };
 
 App.VIRTUAL_DEMO_OVERRIDES = {
-  pomodoro: "Google sheets products/demo/pomodoro.html"
+  pomodoro: "Google sheets products/demo/pomodoro.html",
+  "ultimate-subscription-tracker": "Google sheets products/Ultimate Subscription Tracker/dialog.html"
 };
 
 App.resolveVirtualDemoOverride = function(product) {
