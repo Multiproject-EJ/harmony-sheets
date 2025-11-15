@@ -117,42 +117,28 @@
   </section>
   <section class="lovablesheet-content" data-lovablesheet-content hidden>
     <div class="brain-tools-container">
-      <div class="brain-tools-actions" data-brain-tools-actions hidden>
-        <button
-          class="brain-tool-button brain-tool-button--sticky"
-          type="button"
-          data-brain-tool-open="sticky"
-          aria-label="Open Sticky Board"
-        >
-          <span aria-hidden="true">🗒️</span>
-        </button>
-        <button
-          class="brain-tool-button brain-tool-button--flowchart"
-          type="button"
-          data-brain-tool-open="flowchart"
-          aria-label="Open Flowchart"
-        >
-          <span aria-hidden="true">➡️</span>
-        </button>
-      </div>
       <div class="brain-tools-shortcuts" aria-label="Brain tool shortcuts">
-        <button
-          class="fixed-info-launcher"
-          type="button"
-          data-fixed-info-open
-          aria-haspopup="dialog"
-          aria-pressed="false"
-          aria-label="Open fixed prompt info"
-        >
-          <span class="fixed-info-launcher__eyebrow">Prompt data</span>
-          <span class="fixed-info-launcher__title">Fixed info</span>
-        </button>
-        <button class="brain-tool-placeholder" type="button" aria-label="Placeholder shortcut 2" disabled>
-          <span aria-hidden="true">◎</span>
-        </button>
-        <button class="brain-tool-placeholder" type="button" aria-label="Placeholder shortcut 3" disabled>
-          <span aria-hidden="true">◎</span>
-        </button>
+        <div class="brain-tools-stack">
+          <button
+            class="ipad-preview-button"
+            type="button"
+            data-brain-tool-open="ipad"
+            aria-label="Open iPad preview builder"
+          >
+            <span class="ipad-preview-button__text">iPad Size Preview</span>
+          </button>
+          <button
+            class="fixed-info-launcher fixed-info-launcher--overlay"
+            type="button"
+            data-fixed-info-open
+            aria-haspopup="dialog"
+            aria-pressed="false"
+            aria-label="Open fixed prompt info"
+          >
+            <span class="fixed-info-launcher__eyebrow">Prompt data</span>
+            <span class="fixed-info-launcher__title">Fixed info</span>
+          </button>
+        </div>
         <button
           class="prompt-chat-launcher"
           type="button"
@@ -164,23 +150,6 @@
           <span class="prompt-chat-launcher__title">Transcript</span>
         </button>
       </div>
-      <button
-        class="ipad-preview-button"
-        type="button"
-        data-brain-tool-open="ipad"
-        aria-label="Open iPad preview builder"
-      >
-        <span class="ipad-preview-button__text">iPad Size Preview</span>
-      </button>
-      <button
-        class="brain-tools-toggle"
-        type="button"
-        data-brain-tools-toggle
-        aria-expanded="false"
-        aria-label="Toggle Brain Tools"
-      >
-        <span class="brain-tools-toggle__text">BRAIN<br>TOOLS</span>
-      </button>
     </div>
 
     <div class="mobile-quick-actions" data-quick-actions>
