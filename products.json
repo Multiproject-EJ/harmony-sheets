@@ -314,6 +314,7 @@
     "id": "ultimate-subscription-tracker",
     "name": "Ultimate Subscription Tracker",
     "tagline": "See every recurring charge at a glance and cancel what you don't need.",
+    "draft": true,
     "price": "$17",
     "lifeAreas": ["finances", "career", "environment"],
     "badges": [
@@ -334,7 +335,7 @@
     ],
     "colorImage": "assets/imgSubscriptions1.webp",
     "colorCaption": "Minimal dashboard view with renewal alerts and spending totals.",
-    "virtualDemo": "Google sheets products/demo/pomodoro.html",
+    "virtualDemo": "Google sheets products/Ultimate Subscription Tracker/dialog.html",
     "included": [
       "Subscription Tracker Google Sheet",
       "Renewal reminder template",
