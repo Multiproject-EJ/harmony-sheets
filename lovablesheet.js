@@ -1269,8 +1269,6 @@ const promptChatMessageTargets = {
 };
 const promptChatState = {
   initialized: false,
-  isOpen: false,
-  hasOpenedOnMobile: false,
   layoutListenersRegistered: false,
   layout: {
     isDesktop: false,
@@ -1278,9 +1276,7 @@ const promptChatState = {
   },
   elements: {
     panel: document.querySelector("[data-prompt-chat-panel]"),
-    messages: document.querySelector("[data-prompt-chat-messages]"),
-    toggle: document.querySelector("[data-prompt-chat-toggle]"),
-    closeButton: document.querySelector("[data-prompt-chat-close]")
+    messages: document.querySelector("[data-prompt-chat-messages]")
   }
 };
 const promptCompanionEditorState = {
@@ -2413,11 +2409,6 @@ function handlePromptChatMessageNavigation(targetSelector) {
 
   scrollElementIntoView(target);
 
-  if (promptChatState.layout?.isMobile) {
-    window.requestAnimationFrame(() => {
-      setPromptChatOpen(false);
-    });
-  }
 }
 
 function applyPromptChatMessageTarget(element, message) {
@@ -2510,32 +2501,8 @@ function renderPromptChatMessages() {
   container.scrollTop = container.scrollHeight;
 }
 
-function updatePromptChatControls() {
-  const { toggle, closeButton } = promptChatState.elements;
-  const isDesktop = Boolean(promptChatState.layout?.isDesktop);
-
-  if (toggle) {
-    toggle.hidden = false;
-    toggle.removeAttribute("aria-hidden");
-  }
-
-  if (closeButton) {
-    closeButton.hidden = isDesktop;
-  }
-}
-
 function syncPromptChatVisibility() {
-  updatePromptChatControls();
-
-  if (promptChatState.layout?.isDesktop) {
-    setPromptChatOpen(true, { force: true });
-    return;
-  }
-
-  if (promptChatState.layout?.isMobile && !promptChatState.hasOpenedOnMobile) {
-    setPromptChatOpen(true);
-    promptChatState.hasOpenedOnMobile = true;
-  }
+  setPromptChatOpen();
 }
 
 function updatePromptChatLayoutState() {
@@ -2551,7 +2518,6 @@ function updatePromptChatLayoutState() {
   }
 
   if (!isMobile) {
-    promptChatState.hasOpenedOnMobile = false;
     setQuickActionsOpen(false);
   }
 
@@ -2623,7 +2589,7 @@ function handleQuickActionSelection(action) {
       break;
     }
     case "focus-chat": {
-      setPromptChatOpen(true);
+      setPromptChatOpen();
       if (!promptChatState.layout?.isDesktop && promptChatState.elements.panel) {
         scrollElementIntoView(promptChatState.elements.panel);
       }
@@ -2676,30 +2642,14 @@ function initializeQuickActionsMenu() {
   document.addEventListener("click", quickActionState.documentClickHandler);
 }
 
-function setPromptChatOpen(isOpen, options = {}) {
-  const shouldForceOpen = options.force || promptChatState.layout?.isDesktop;
-  const nextOpen = shouldForceOpen ? true : Boolean(isOpen);
-  promptChatState.isOpen = nextOpen;
-
-  const { panel, toggle } = promptChatState.elements;
-
-  if (panel) {
-    if (promptChatState.isOpen) {
-      panel.hidden = false;
-      panel.setAttribute("aria-hidden", "false");
-    } else {
-      panel.hidden = true;
-      panel.setAttribute("aria-hidden", "true");
-    }
+function setPromptChatOpen() {
+  const { panel } = promptChatState.elements;
+  if (!panel) {
+    return;
   }
 
-  if (toggle) {
-    toggle.setAttribute("aria-pressed", promptChatState.isOpen ? "true" : "false");
-  }
-}
-
-function togglePromptChat() {
-  setPromptChatOpen(!promptChatState.isOpen);
+  panel.hidden = false;
+  panel.setAttribute("aria-hidden", "false");
 }
 
 function initializePromptChat() {
@@ -2710,37 +2660,17 @@ function initializePromptChat() {
   promptChatState.initialized = true;
   renderPromptChatMessages();
 
-  const { toggle, closeButton, panel } = promptChatState.elements;
+  const { panel } = promptChatState.elements;
 
   if (panel) {
-    panel.hidden = true;
-    panel.setAttribute("aria-hidden", "true");
+    panel.hidden = false;
+    panel.setAttribute("aria-hidden", "false");
   }
-
-  if (toggle) {
-    toggle.addEventListener("click", () => {
-      togglePromptChat();
-    });
-  }
-
-  if (closeButton) {
-    closeButton.addEventListener("click", () => {
-      setPromptChatOpen(false);
-    });
-  }
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && promptChatState.isOpen) {
-      setPromptChatOpen(false);
-    }
-  });
 
   registerPromptChatLayoutListeners();
   updatePromptChatLayoutState();
 
-  if (!promptChatState.layout?.isDesktop && !promptChatState.layout?.isMobile) {
-    setPromptChatOpen(false);
-  }
+  setPromptChatOpen();
 }
 
 function initializePromptCompanionEditor() {
