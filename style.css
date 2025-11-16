@@ -609,6 +609,7 @@ body.page-lovablesheet .lovablesheet-modal [data-sticky-board]{scroll-snap-align
 .prompt-chat-panel__message--system{background:rgba(15,23,42,.85)}
 .prompt-chat-panel__message--product{border-color:rgba(236,72,153,.4)}
 .prompt-chat-panel__message--prompt{border-color:rgba(59,130,246,.4)}
+.nextgen-form__footer{display:none}
 .prompt-chat-panel__placeholder{margin:0;font-size:.9rem;color:rgba(226,232,240,.8)}
 .prompt-chat-panel__footer{display:flex;gap:8px;padding-top:12px;border-top:1px solid rgba(148,163,184,.2);margin-top:auto}
 .prompt-chat-panel__footer .btn{flex:1;font-size:.75rem;padding:8px 12px;white-space:nowrap}
